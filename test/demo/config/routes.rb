@@ -1,3 +1,3 @@
-Dummy::Application.routes.draw do
+Demo::Application.routes.draw do
   mount Gemgento::Engine => "/"
 end
