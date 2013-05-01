@@ -13,7 +13,7 @@ if response.success?
   #puts 'response.body=' + response.body[:catalog_product_list_response].inspect
   response.body[:catalog_product_list_response][:store_view][:item].each_with_index do |product, i|
     if i == 100      
-      info_response = client.call(:catalog_product_info, message: {:sessionId => session, :product_id => product[:product_id]+ ' ', :productIdentifierType => 'id'})
+      info_response = client.call(:catalog_product_info, message: {:sessionId => session, :product => product[:product_id]+ ' ', :productIdentifierType => 'id'})
       puts info_response.inspect          
 
     end
