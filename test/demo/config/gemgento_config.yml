@@ -4,7 +4,7 @@ site:
 
 magento:
   url:  mw.local
-  username: maui
+  username: philip.vasilevski
   api_key:  857123FHDShfd
   api_type:	soap
   api_version:	2
