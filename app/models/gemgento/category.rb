@@ -9,41 +9,24 @@ module Gemgento
       Category.find(:all)
     end
 
+    # Synchronize local database with Magento database
     def self.fetch_all
-      client = Gemgento::Magento.api_login
-      response = client.call(:catalog_product_list, message: {:sessionId => @session})
-      if response.success?
-        #puts 'response.body=' + response.body[:catalog_product_list_response].inspect
-        response.body[:catalog_product_list_response][:store_view][:item].each_with_index do |product, i|
-          info_response = client.call(:catalog_product_info, message: {:sessionId => @session, :product => product[:product_id], :productIdentifierType => 'id'})
-          #puts info_response.inspect
-          p = Product.create
-          p.magento_id = info_response.body[:catalog_product_info_response][:info][:product_id]
-          p.magento_type = info_response.body[:catalog_product_info_response][:info][:type]
-          p.name = info_response.body[:catalog_product_info_response][:info][:name]
-          p.url_key = info_response.body[:catalog_product_info_response][:info][:url_key]
-          p.price = info_response.body[:catalog_product_info_response][:info][:price]
-          p.save
+      category_response = Gemgento::Magento.create_call(:catalog_category_tree)
 
-          image_response = client.call(:catalog_product_attribute_media_list, message: {:sessionId => @session, :product => product[:product_id], :productIdentifierType => 'id'})
-          #puts image_response.body.inspect
-          if image_response.body[:catalog_product_attribute_media_list_response][:result][:item] != nil &&
-
-              if image_response.body[:catalog_product_attribute_media_list_response][:result][:item].size > 1
-
-                image_response.body[:catalog_product_attribute_media_list_response][:result][:item].each_with_index do |img, i|
-                  create_asset(img, p)
-                end
-
-              else
-                img = image_response.body[:catalog_product_attribute_media_list_response][:result][:item]
-                create_asset(img, p)
-              end
-
-          end
-        end
-      end
+      # Root Category is the first thing always returned, so no need to cycle through the response
+      traverse_tree_and_create(category_response.body[:catalog_category_tree_response][:tree])
     end
 
+    # Create the category and traverse it's children
+    #
+    # @param [Hash] category  The returned item of Magento API call
+    def self.traverse_tree_and_create(category)
+        # TODO: create/update the category
+        if category[:children][:item]
+          category[:children][:item].each do |child|
+            traverse_tree_and_create(child)
+          end
+        end
+    end
   end
 end
