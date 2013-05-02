@@ -15,10 +15,10 @@ attribute_set_id = 4
 store_view_id = 1
 
 # API call to get a category level
-def catalogCategoryLevel(parent_id = 0)
+def catalogCategoryLevel(parent_id = 1)
   level = Hash.new
 
-  category_response = @client.call(:catalog_category_level, message:{ sessionId: @session, parentId: parent_id })
+  category_response = @client.call(:catalog_category_level, message:{ sessionId: @session, parentCategory: parent_id })
   category_response.body[:catalog_category_level_response][:tree][:item].each do |category|
     level["#{category[:name]}"] = category
   end
@@ -44,15 +44,18 @@ end
 # Return the category if found or nil
 def searchLevelForName(category_level, name)
   category_level.each do |category|
-    if category[:name] == name
-      category
-      break;
+    puts category
+    if category[1][:name].casecmp(name) == 0
+      return category[1]
     end
   end
+
+  return nil
 end
 
 # API call to create a new category
 def catalog_category_create(name, parent_id = 1)
+  # TODO: test catalog_category_create method
     response = @client.call(:catalog_category_create, message: {sessionId: @session, parentId: parent_id, categoryData: {
       name: name,
       is_active: 1
@@ -67,16 +70,17 @@ response = @client.call(:login, message: { :username => username, :apiKey => api
 if response.success? == false
   puts "login failed"
   System.exit(0)
+else
+  @session = response.body[:login_response][:login_return];
 end
-@session = response.body[:login_response][:login_return]; # api session
 
-# load the top level categories
+# set the top level categories ['Default Category', 'Collection']
 @top_level_categories = catalogCategoryLevel
 
 # load the spreadsheet and run through each row.
 @worksheet = Spreadsheet.open(path_to_spreadsheet).worksheet(0)
 @worksheet.each 5 do |row|
-  collection_category_id = getCategoryIdByName('Collection', row[6], top_level_categories[:collection][:category_id])
+  collection_category_id = getCategoryIdByName('Default Category', row[6], row[7])
   sku = "#{row[0]} "
 
   begin # update existing product
@@ -84,9 +88,10 @@ end
     product = info_response.body[:catalog_product_info_response][:info]
     update_response = @client.call(:catalog_product_update, message: { sessionId: @session, product: product[:product_id], productIdentifierType: 'id', productData: { categories: product[:categories] << collection_category_id } })
     product_groupings[row[9]] << product[:product_id]
+      # TODO: validate that product was updated category was updated successfully for existing product
   rescue # create new product
-    default_category_id = getCategoryIdByName('Default Category', row[7], 'default')
-    response = @client.call(:catalog_product_create, message: { sessionId: @session,  type: 'simple', set: attribute_set_id, sku: sku, storeView: store_view_id, productData: {
+    default_category_id = getCategoryIdByName('Default Category', row[6], row[7])
+    create_response = @client.call(:catalog_product_create, message: { sessionId: @session,  type: 'simple', set: attribute_set_id, sku: sku, storeView: store_view_id, productData: {
       name: row[2],
       status: 'Enabled',
       url_key: row[2].downcase.gsub(' ', '-'),
@@ -99,6 +104,7 @@ end
          size: row[5]
       }
     }})
-    product_groupings[row[9]] << info_response.body[:catalog_product_info_response][:info][:product_id]
+    product_groupings[row[9]] << create_response.body[:catalog_product_create_response][:info][:product_id]
+    # TODO: validate that product was created and categories applied effectively for new products.
   end
 end
