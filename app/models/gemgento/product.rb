@@ -10,27 +10,12 @@ module Gemgento
     end
 
     def self.fetch_all
-      api_url = 'http://'+Gemgento::Config[:magento][:url]+'/api/v2_soap/index?wsdl'
-      client = Savon.client(wsdl: api_url, log: true)
-      if Gemgento::Session.last.nil?        
-        response = client.call(:login, message: { :username => 'maui', :apiKey => '432sdhfaFDHSDF' })
-        if response.success? == false
-          puts "login failed"
-          System.exit(0)
-        end
-        session = response.body[:login_response][:login_return];
-        s = Gemgento::Session.new
-        s.session_id = session
-        s.save
-      else
-        session = Gemgento::Session.last.session_id
-      end
-
-      response = client.call(:catalog_product_list, message: {:sessionId => session})
+      client = Gemgento::Magento.api_login
+      response = client.call(:catalog_product_list, message: {:sessionId => @session})
       if response.success?
         #puts 'response.body=' + response.body[:catalog_product_list_response].inspect
         response.body[:catalog_product_list_response][:store_view][:item].each_with_index do |product, i|
-          info_response = client.call(:catalog_product_info, message: {:sessionId => session, :product => product[:product_id], :productIdentifierType => 'id'})
+          info_response = client.call(:catalog_product_info, message: {:sessionId => @session, :product => product[:product_id], :productIdentifierType => 'id'})
           #puts info_response.inspect          
           p = Product.create
           p.magento_id = info_response.body[:catalog_product_info_response][:info][:product_id]
@@ -40,7 +25,7 @@ module Gemgento
           p.price = info_response.body[:catalog_product_info_response][:info][:price]
           p.save
 
-          image_response = client.call(:catalog_product_attribute_media_list, message: {:sessionId => session, :product => product[:product_id], :productIdentifierType => 'id'})
+          image_response = client.call(:catalog_product_attribute_media_list, message: {:sessionId => @session, :product => product[:product_id], :productIdentifierType => 'id'})
           #puts image_response.body.inspect 
           if image_response.body[:catalog_product_attribute_media_list_response][:result][:item] != nil && 
 

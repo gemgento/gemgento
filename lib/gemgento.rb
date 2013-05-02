@@ -4,7 +4,6 @@ require 'exception_notifier'
 require 'savon'
 
 module Gemgento
-
   class Magento
     def self.api_login
       @api_url = 'http://'+Gemgento::Config[:magento][:url]+'/api/v2_soap/index?wsdl'
