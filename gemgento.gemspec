@@ -8,9 +8,9 @@ Gem::Specification.new do |gem|
   gem.version       = Gemgento::VERSION
   gem.authors       = ["Philip Vasilevski"]
   gem.email         = ["phil@mauinewyork.com"]
-  gem.description   = %q{rails based ecommerce for fashion and luxury}
-  gem.summary       = %q{first version of sellect ecommerce platform}
-  gem.homepage      = "http://sellect.co"
+  gem.description   = %q{rails based magento bridge for ecommerce}
+  gem.summary       = %q{gemgento rails magento integration ecommerce platform}
+  gem.homepage      = "http://mauinewyork.com"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
