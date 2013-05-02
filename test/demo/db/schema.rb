@@ -11,13 +11,24 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130501192533) do
+ActiveRecord::Schema.define(:version => 20130502181914) do
 
   create_table "gemgento_assets", :force => true do |t|
     t.integer  "product_id"
     t.string   "type"
     t.string   "url"
     t.integer  "position"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  create_table "gemgento_categories", :force => true do |t|
+    t.integer  "magento_id"
+    t.string   "name"
+    t.string   "url_key"
+    t.integer  "parent_id"
+    t.integer  "position"
+    t.boolean  "is_active"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
   end

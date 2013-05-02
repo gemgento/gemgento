@@ -20,7 +20,7 @@ def catalogCategoryLevel(parent_id = 1)
 
   category_response = @client.call(:catalog_category_level, message:{ sessionId: @session, parentCategory: parent_id })
   category_response.body[:catalog_category_level_response][:tree][:item].each do |category|
-    level["#{category[:name]}"] = category
+    le vel["#{category[:name]}"] = category
   end
 
   level
