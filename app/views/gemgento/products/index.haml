@@ -1,3 +1,7 @@
 #products
   - @products.each_with_index do |p, i|
-    = p.id
+    - if p.assets.first
+      %a{:href => '/shop/'+p.url_key}
+        .grid-product
+          %img{:src => p.assets.first.url}
+          = p.name + " $" + p.price.to_i.to_s
