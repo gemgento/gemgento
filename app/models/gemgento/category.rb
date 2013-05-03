@@ -1,7 +1,11 @@
 module Gemgento
   class Category < ActiveRecord::Base
     has_many :assets
-    before_save :sync_local_to_magento
+    after_save :sync_local_to_magento
+
+    def initialize
+      self.sync_needed = true
+    end
 
     def self.index
       if Category.find(:all).size == 0
@@ -38,7 +42,6 @@ module Gemgento
     #
     # @param [Hash] subject The returned item of Magento API call
     def self.sync_magento_to_local(subject)
-      @sync_needed = false;
       category = Category.find_or_initialize_by_magento_id(subject[:category_id])
       category.magento_id = subject[:category_id]
       category.name = subject[:name]
@@ -56,18 +59,23 @@ module Gemgento
         category.children = ''
       end
 
+      category.sync_needed = false
       category.save
-      @sync_needed = true;
     end
 
     # Synchronize the category with Magento
     def sync_local_to_magento
-      if @sync_needed
+      if self.sync_needed
         if !self.magento_id
+         puts here
+         exit
           create_magento
         else
           update_magento
         end
+
+        self.sync_needed = false
+        self.save
       end
     end
 
