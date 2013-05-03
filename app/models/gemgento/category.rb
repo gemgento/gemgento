@@ -45,6 +45,7 @@ module Gemgento
       category.parent_id = subject[:parent_id]
       category.position = subject[:position]
       category.is_active = subject[:is_active]
+      category.include_in_menu = subject[:include_in_menu ]
       category.children_count = subject[:children_count]
 
       if category.children_count > 0
@@ -63,8 +64,6 @@ module Gemgento
     def sync_local_to_magento
       if self.sync_needed
         if !self.magento_id
-         puts here
-         exit
           create_magento
         else
           update_magento
@@ -75,22 +74,33 @@ module Gemgento
       end
     end
 
-    # Create a new Magento Category
+    # Create a new Category with magento and set our magento_id
     def create_magento
       category_data = {
           name: self.name,
-          is_active: self.is_active,
-          available_sort_by: %w[name],
-          default_sort_by: %w[name]
+          'is_active' => self.is_active ? 1 : 0,
+          'include_in_menu' => self.include_in_menu ? 1 : 0,
+          'available_sort_by' =>  { 'arr:string' => %w[name] },
+          'default_sort_by' => 'name',
+          'url_key' => self.url_key,
+          'position' => self.position
       }
       message = {parentId: self.parent_id, categoryData: category_data}
       create_response = Gemgento::Magento.create_call(:catalog_category_create, message)
-      puts create_response.body
-      exit
+      self.magento_id = create_response.body[:catalog_category_create_response][:attribute_id]
     end
 
     # Update existing Magento Category
     def update_magento
+      category_data = {
+          name: self.name,
+          'is_active' => self.is_active ? 1 : 0,
+          'include_in_menu' => self.include_in_menu ? 1 : 0,
+          'url_key' => self.url_key,
+          'position' => self.position
+      }
+      message = {categoryId: self.magento_id, categoryData: category_data}
+      create_response = Gemgento::Magento.create_call(:catalog_category_update, message)
     end
   end
 end
