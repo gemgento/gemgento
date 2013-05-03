@@ -10,7 +10,9 @@ module Gemgento
     end
 
     def self.fetch_all
-      response = Gemgento::Magento.create_call(:catalog_product_list, { sessionId: @session })
+      response = @magento.create_call(:catalog_product_list, { sessionId: @session })
+      puts response
+      exit
       #puts 'response.body=' + response.body[:catalog_product_list_response].inspect
       response.body[:catalog_product_list_response][:store_view][:item].each_with_index do |product, i|
         info_response = Gemgento::Magento.create_call(:catalog_product_info, { product: product[:product_id], productIdentifierType: 'id' })

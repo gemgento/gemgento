@@ -6,8 +6,13 @@ require 'savon'
 module Gemgento
   class Magento
 
+    # Initialize the object by logging in
+    def initialize
+      api_login
+    end
+
     # Log into the Magento API and setup the session and client
-    def self.api_login
+    def api_login
       @api_url = "http://#{Gemgento::Config[:magento][:url]}/index.php/api/v#{Gemgento::Config[:magento][:api_version]}_#{Gemgento::Config[:magento][:api_type]}/?wsdl=1"
       @client = Savon.client(wsdl: @api_url, log: true)
       if Gemgento::Session.last.nil?
@@ -26,9 +31,7 @@ module Gemgento
     # @param [Symbol] function  The API call to make
     # @param [Hash]   message   Call parameters (does not need session)
     # @return [Hash]
-    def self.create_call(function, message = {})
-      api_login if !defined? @client
-
+    def create_call(function, message = {})
       message[:sessionId] = @session
 
       begin
