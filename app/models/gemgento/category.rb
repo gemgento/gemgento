@@ -3,10 +3,6 @@ module Gemgento
     has_many :assets
     after_save :sync_local_to_magento
 
-    def initialize
-      self.sync_needed = true
-    end
-
     def self.index
       if Category.find(:all).size == 0
         fetch_all

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130503202517) do
+ActiveRecord::Schema.define(:version => 20130503205628) do
 
   create_table "gemgento_assets", :force => true do |t|
     t.integer  "product_id"
@@ -29,12 +29,12 @@ ActiveRecord::Schema.define(:version => 20130503202517) do
     t.integer  "parent_id"
     t.integer  "position"
     t.boolean  "is_active"
-    t.datetime "created_at",     :null => false
-    t.datetime "updated_at",     :null => false
+    t.datetime "created_at",                       :null => false
+    t.datetime "updated_at",                       :null => false
     t.text     "all_children"
     t.string   "children"
     t.integer  "children_count"
-    t.boolean  "sync_needed"
+    t.boolean  "sync_needed",    :default => true, :null => false
   end
 
   add_index "gemgento_categories", ["magento_id"], :name => "index_gemgento_categories_on_magento_id", :unique => true
