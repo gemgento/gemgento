@@ -35,10 +35,9 @@ module Gemgento
         response = @client.call(function, message: message)
           # TODO: return the body
       rescue
-        # destroy the old session and login again
-        Gemgento::Session.last.session_id.destroy
-        api_login
-        create_call(function, message)
+        # TODO: come back from a failed call
+        puts "Call failed - #{function}"
+        exit
       end
 
       return response
