@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130503213539) do
+ActiveRecord::Schema.define(:version => 20130503235957) do
 
   create_table "gemgento_assets", :force => true do |t|
     t.integer  "product_id"
@@ -40,14 +40,29 @@ ActiveRecord::Schema.define(:version => 20130503213539) do
 
   add_index "gemgento_categories", ["magento_id"], :name => "index_gemgento_categories_on_magento_id", :unique => true
 
+  create_table "gemgento_categories_products", :force => true do |t|
+    t.integer  "product_id"
+    t.integer  "category_id"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
+  end
+
   create_table "gemgento_products", :force => true do |t|
     t.integer  "magento_id"
     t.string   "name"
     t.string   "magento_type"
     t.string   "url_key"
-    t.datetime "created_at",                                  :null => false
-    t.datetime "updated_at",                                  :null => false
+    t.datetime "created_at",                                                    :null => false
+    t.datetime "updated_at",                                                    :null => false
     t.decimal  "price",        :precision => 10, :scale => 0
+    t.string   "sku"
+    t.string   "set"
+    t.string   "store_view"
+    t.boolean  "sync_needed",                                 :default => true, :null => false
+    t.string   "quality"
+    t.string   "design"
+    t.string   "color"
+    t.string   "size"
   end
 
   create_table "gemgento_sessions", :force => true do |t|

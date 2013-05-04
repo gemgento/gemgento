@@ -1,6 +1,6 @@
 module Gemgento
   class Category < ActiveRecord::Base
-    has_many :assets
+    has_and_belongs_to_many :products, :join_table => 'gemgento_categories_products'
     after_save :sync_local_to_magento
 
     def self.index
@@ -45,7 +45,7 @@ module Gemgento
       category.parent_id = subject[:parent_id]
       category.position = subject[:position]
       category.is_active = subject[:is_active]
-      category.include_in_menu = subject[:include_in_menu ]
+      category.include_in_menu = subject[:include_in_menu] == 1 ? true : false
       category.children_count = subject[:children_count]
 
       if category.children_count > 0
