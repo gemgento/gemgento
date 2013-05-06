@@ -19,17 +19,17 @@ module Gemgento
 
     def self.fetch_all
       response = Gemgento::Magento.create_call(:catalog_product_list)
-      response.body[:catalog_product_list_response][:store_view][:item].each_with_index do |product, i|
+      response[:store_view][:item].each_with_index do |product, i|
         info_response = Gemgento::Magento.create_call(:catalog_product_info, { product: product[:product_id], productIdentifierType: 'id' })
         # save/update the product
-        sync_magento_to_local(info_response.body[:catalog_product_info_response][:info])
+        sync_magento_to_local(info_response[:info])
 
         image_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_list, { product: product[:product_id], productIdentifierType: 'id' })
-        if image_response.body[:catalog_product_attribute_media_list_response][:result][:item] != nil &&
+        if image_response[:result][:item] != nil &&
 
-          if image_response.body[:catalog_product_attribute_media_list_response][:result][:item].size > 1
+          if image_response[:result][:item].size > 1
 
-            image_response.body[:catalog_product_attribute_media_list_response][:result][:item].each_with_index do |img, i|
+            image_response[:result][:item].each_with_index do |img, i|
               create_asset(img, p)
             end
 
@@ -44,7 +44,7 @@ module Gemgento
 
     def self.test_attribute_call
       response = Gemgento::Magento.create_call(:catalog_product_list_of_additional_attributes, {productType: 'simple', attributeSetId: '1'})
-      puts response.body[:catalog_product_list_of_additional_attributes_response]
+      puts response
     end
 
     private
@@ -120,7 +120,7 @@ module Gemgento
       }
       message = { type: self.magento_type, set: self.set, sku: self.sku, productData: product_data, storeView: self.store_view  }
       create_response = Gemgento::Magento.create_call(:catalog_product_create, message)
-      self.magento_id = create_response.body[:catalog_product_create_response][:attribute_id]
+      self.magento_id = create_response[:attribute_id]
     end
 
     # Update existing Magento Product

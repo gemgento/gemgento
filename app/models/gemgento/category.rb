@@ -15,7 +15,7 @@ module Gemgento
       category_response = Gemgento::Magento.create_call(:catalog_category_tree)
 
       # Root node is the response
-      sync_magento_tree_to_local(category_response.body[:catalog_category_tree_response][:tree])
+      sync_magento_tree_to_local(category_response[:tree])
     end
 
     private
@@ -25,7 +25,7 @@ module Gemgento
     # @param [Hash] category  The returned item of Magento API call
     def self.sync_magento_tree_to_local(category)
       category_response = Gemgento::Magento.create_call(:catalog_category_info, { categoryId: category[:category_id] })
-      sync_magento_to_local(category_response.body[:catalog_category_info_response][:info])
+      sync_magento_to_local(category_response[:info])
 
         if category[:children][:item]
           category[:children][:item].each do |child|
@@ -87,7 +87,7 @@ module Gemgento
       }
       message = {parentId: self.parent_id, categoryData: category_data}
       create_response = Gemgento::Magento.create_call(:catalog_category_create, message)
-      self.magento_id = create_response.body[:catalog_category_create_response][:attribute_id]
+      self.magento_id = create_response[:attribute_id]
     end
 
     # Update existing Magento Category

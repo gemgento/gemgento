@@ -33,7 +33,7 @@ module Gemgento
 
       begin
         response = @client.call(function, message: message)
-          # TODO: return the body
+        response = response.body[:"#{function}_response"]
       rescue
         # TODO: come back from a failed call
         puts "Call failed - #{function}"

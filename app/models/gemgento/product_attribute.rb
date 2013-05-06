@@ -15,19 +15,19 @@ module Gemgento
       Gemgento::ProductAttributeSet.all.each do |product_attribute_set|
         attribute_list_response = Gemgento::Magento.create_call(:catalog_product_attribute_list, {setId: product_attribute_set.magento_id})
 
-        if attribute_list_response.body[:catalog_product_attribute_list_response][:result][:item].is_a? Array
-          attribute_list_response.body[:catalog_product_attribute_list_response][:result][:item].each do |product_attribute|
+        if attribute_list_response[:result][:item].is_a? Array
+          attribute_list_response[:result][:item].each do |product_attribute|
              fetch(product_attribute[:attribute_id], product_attribute_set.magento_id)
           end
         else
-          fetch(attribute_list_response.body[:catalog_product_attribute_List_response][:result][:item][:attribute_id], product_attribute_set.magento_id)
+          fetch(attribute_list_response[:result][:item][:attribute_id], product_attribute_set.magento_id)
         end
       end
     end
 
     def self.fetch(id, product_attribute_set_id)
       info_response = Gemgento::Magento.create_call(:catalog_product_attribute_info, {attribute: id})
-      sync_magento_to_local(info_response.body[:catalog_product_attribute_info_response][:result], product_attribute_set_id)
+      sync_magento_to_local(info_response[:result], product_attribute_set_id)
     end
 
     private

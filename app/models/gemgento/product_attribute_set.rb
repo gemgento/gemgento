@@ -14,12 +14,12 @@ module Gemgento
     def self.fetch_all
       response = Gemgento::Magento.create_call(:catalog_product_attribute_set_list)
 
-      if response.body[:catalog_product_attribute_set_list_response][:result][:item].is_a? Array
-        response.body[:catalog_product_attribute_set_list_response][:result][:item].each do |product_attribute_set|
+      if response[:result][:item].is_a? Array
+        response[:result][:item].each do |product_attribute_set|
           sync_magento_to_local(product_attribute_set)
         end
       else
-        sync_magento_to_local(response.body[:catalog_product_attribute_set_list_response][:result][:item])
+        sync_magento_to_local(response[:result][:item])
       end
 
     end
