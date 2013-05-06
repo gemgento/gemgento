@@ -1,6 +1,7 @@
 module Gemgento
   class ProductAttribute < ActiveRecord::Base
-    belongs_to :productAttributeSet
+    belongs_to :product_attribute_set
+    has_many :product_attribute_values
     after_save :sync_local_to_magento
 
     def self.index

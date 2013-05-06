@@ -7,8 +7,11 @@ module Gemgento
     # TODO: undo temporary migration for additional product attributes Product.quality/design/color/size
     # TODO: need a way to update product type via Gemgento (look into has_options)
 
-    has_many :assets
+    belongs_to :product_attribute_set
+    has_many :product_attribute_values
+    #has_many :product_attributes, :through => :product_attribute_values
     has_and_belongs_to_many :categories, :join_table => 'gemgento_categories_products'
+    has_many :assets
 
     def self.index
       if Product.find(:all).size == 0
@@ -23,22 +26,6 @@ module Gemgento
         info_response = Gemgento::Magento.create_call(:catalog_product_info, { product: product[:product_id], productIdentifierType: 'id' })
         # save/update the product
         sync_magento_to_local(info_response[:info])
-
-        image_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_list, { product: product[:product_id], productIdentifierType: 'id' })
-        if image_response[:result][:item] != nil &&
-
-          if image_response[:result][:item].size > 1
-
-            image_response[:result][:item].each_with_index do |img, i|
-              create_asset(img, p)
-            end
-
-          else
-            img = image_response.body[:catalog_product_attribute_media_list_response][:result][:item]
-            create_asset(img, p)
-          end
-
-        end
       end
     end
 
@@ -59,14 +46,30 @@ module Gemgento
       product.sku = subject[:sku]
       product.sync_needed = false
       product.categories << Category.find_by_magento_id(subject[:categories][:item])
-      product.set = subject[:set]
+      product.productAttributeSet << Gemgento::ProductAttributeSet.find_by_magento_id(subject[:set])
 
       # additional attributes
       additional_attributes = parse_additional_attributes(subject[:additional_attributes][:item])
       product.quality = additional_attributes[:quality]
       product.color = additional_attributes[:color]
       product.design = additional_attributes[:pattern]
-      # TODO: size is never returned ( check additional attributes call or attribute set calls )
+
+      # media assets
+      image_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_list, { product: product.magento_id, productIdentifierType: 'id' })
+      if image_response[:result][:item] != nil &&
+
+          if image_response[:result][:item].size > 1
+
+            image_response[:result][:item].each_with_index do |img, i|
+              create_asset(img, p)
+            end
+
+          else
+            img = image_response.body[:catalog_product_attribute_media_list_response][:result][:item]
+            create_asset(img, p)
+          end
+
+      end
 
       product.save
     end

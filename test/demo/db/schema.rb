@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130506154646) do
+ActiveRecord::Schema.define(:version => 20130506183031) do
 
   create_table "gemgento_assets", :force => true do |t|
     t.integer  "product_id"
@@ -45,6 +45,12 @@ ActiveRecord::Schema.define(:version => 20130506154646) do
     t.integer "category_id"
   end
 
+  create_table "gemgento_product_addtional_attributes", :force => true do |t|
+    t.integer "product_id"
+    t.integer "product_attribute_id"
+    t.string  "value"
+  end
+
   create_table "gemgento_product_attribute_sets", :force => true do |t|
     t.integer  "magento_id"
     t.string   "name"
@@ -55,9 +61,10 @@ ActiveRecord::Schema.define(:version => 20130506154646) do
 
   create_table "gemgento_product_attributes", :force => true do |t|
     t.integer  "magento_id"
+    t.integer  "product_attribute_set_id",                        :null => false
     t.string   "code"
     t.string   "frontend_input"
-    t.string   "store"
+    t.string   "scope"
     t.boolean  "is_unique"
     t.boolean  "is_required"
     t.boolean  "is_configurable"
@@ -77,17 +84,13 @@ ActiveRecord::Schema.define(:version => 20130506154646) do
     t.string   "name"
     t.string   "magento_type"
     t.string   "url_key"
-    t.datetime "created_at",                                                    :null => false
-    t.datetime "updated_at",                                                    :null => false
-    t.decimal  "price",        :precision => 10, :scale => 0
+    t.datetime "created_at",                                                                :null => false
+    t.datetime "updated_at",                                                                :null => false
+    t.decimal  "price",                    :precision => 10, :scale => 0
     t.string   "sku"
-    t.string   "set"
+    t.string   "product_attribute_set_id"
     t.string   "store_view"
-    t.boolean  "sync_needed",                                 :default => true, :null => false
-    t.string   "quality"
-    t.string   "design"
-    t.string   "color"
-    t.string   "size"
+    t.boolean  "sync_needed",                                             :default => true, :null => false
   end
 
   create_table "gemgento_sessions", :force => true do |t|
