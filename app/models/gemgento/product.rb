@@ -42,6 +42,11 @@ module Gemgento
       end
     end
 
+    def self.test_attribute_call
+      response = Gemgento::Magento.create_call(:catalog_product_list_of_additional_attributes, {productType: 'simple', attributeSetId: '1'})
+      puts response.body[:catalog_product_list_of_additional_attributes_response]
+    end
+
     private
 
     def self.sync_magento_to_local(subject)
@@ -107,7 +112,7 @@ module Gemgento
           'price' => self.price,
           'additional_attributes' => {
             quality: self.quality,
-            design: self.design,
+            pattern: self.design,
             color: self.color,
             size: self.size,
             'style_code' => self.style_code
@@ -126,7 +131,7 @@ module Gemgento
           'price' => self.price,
           'additional_attributes' => {
               quality: self.quality,
-              design: self.design,
+              pattern: self.design,
               color: self.color,
               size: self.size,
               'style_code' => self.style_code

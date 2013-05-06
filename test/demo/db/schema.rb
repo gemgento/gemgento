@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130503235957) do
+ActiveRecord::Schema.define(:version => 20130506154646) do
 
   create_table "gemgento_assets", :force => true do |t|
     t.integer  "product_id"
@@ -41,10 +41,35 @@ ActiveRecord::Schema.define(:version => 20130503235957) do
   add_index "gemgento_categories", ["magento_id"], :name => "index_gemgento_categories_on_magento_id", :unique => true
 
   create_table "gemgento_categories_products", :force => true do |t|
-    t.integer  "product_id"
-    t.integer  "category_id"
-    t.datetime "created_at",  :null => false
-    t.datetime "updated_at",  :null => false
+    t.integer "product_id"
+    t.integer "category_id"
+  end
+
+  create_table "gemgento_product_attribute_sets", :force => true do |t|
+    t.integer  "magento_id"
+    t.string   "name"
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
+    t.boolean  "sync_needed", :default => true, :null => false
+  end
+
+  create_table "gemgento_product_attributes", :force => true do |t|
+    t.integer  "magento_id"
+    t.string   "code"
+    t.string   "frontend_input"
+    t.string   "store"
+    t.boolean  "is_unique"
+    t.boolean  "is_required"
+    t.boolean  "is_configurable"
+    t.boolean  "is_searchable"
+    t.boolean  "is_visible_in_advanced_search"
+    t.boolean  "is_comparable"
+    t.boolean  "is_used_for_promo_rules"
+    t.boolean  "is_visible_on_front"
+    t.boolean  "used_in_product_listing"
+    t.boolean  "sync_needed",                   :default => true, :null => false
+    t.datetime "created_at",                                      :null => false
+    t.datetime "updated_at",                                      :null => false
   end
 
   create_table "gemgento_products", :force => true do |t|
