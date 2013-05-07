@@ -1,16 +1,12 @@
 module Gemgento
   class Product < ActiveRecord::Base
 
-    # TODO: handle 'set type' the Gemgento way
     # TODO: handle 'store view' the Gemgento way
-    # TODO: handle dynamic size of additional attributes the Gemgento way
-    # TODO: undo temporary migration for additional product attributes Product.quality/design/color/size
-    # TODO: need a way to update product type via Gemgento (look into has_options)
+    # TODO: need a way to update product type via Gemgento
 
     belongs_to :product_attribute_set
     has_many :product_attribute_values
-    #has_many :product_attributes, :through => :product_attribute_values
-    has_and_belongs_to_many :categories, :join_table => 'gemgento_categories_products'
+    has_and_belongs_to_many :categories, :join_table => 'gemgento_categories_products', :uniq => true
     has_many :assets
 
     def self.index
@@ -23,21 +19,41 @@ module Gemgento
     def self.fetch_all
       response = Gemgento::Magento.create_call(:catalog_product_list)
       response[:store_view][:item].each_with_index do |product, i|
-        info_response = Gemgento::Magento.create_call(:catalog_product_info, { product: product[:product_id], productIdentifierType: 'id' })
-        # save/update the product
-        sync_magento_to_local(info_response[:info])
+        attribute_set = Gemgento::ProductAttributeSet.find_by_magento_id(product[:set])
+
+        additional_attributes = []
+        attribute_set.product_attributes.each do |attribute|
+          additional_attributes << attribute.code
+        end
+
+        message = {
+            product: product[:product_id],
+            productIdentifierType: 'id',
+            attributes: {
+                'additional_attributes' => { 'arr:string' => additional_attributes }
+            }
+        }
+
+        sync_magento_to_local(Gemgento::Magento.create_call(:catalog_product_info, message)[:info])
       end
     end
 
-    def self.test_attribute_call
-      response = Gemgento::Magento.create_call(:catalog_product_list_of_additional_attributes, {productType: 'simple', attributeSetId: '1'})
-      puts response
+    def set_attribute_value(attribute, value)
+      product_attribute_value = Gemgento::ProductAttributeValue.find_or_initialize_by_product_id_and_product_attribute_id(self.id, attribute.id)
+      product_attribute_value.product_id = self.id
+      product_attribute_value.product_attribute_id = attribute.id
+      product_attribute_value.value = value
+      product_attribute_value.save
+
+      self.product_attribute_values << product_attribute_value unless self.product_attribute_values.include?(product_attribute_value)
     end
 
     private
 
     def self.sync_magento_to_local(subject)
-      product = Product.find_or_initialize_by_magento_id(subject[:product_id])
+      category = Category.find_by_magento_id(subject[:categories][:item])
+
+      product = self.find_or_initialize_by_magento_id(subject[:product_id])
       product.magento_id = subject[:product_id]
       product.magento_type = subject[:type]
       product.name = subject[:name]
@@ -45,52 +61,18 @@ module Gemgento
       product.price = subject[:price]
       product.sku = subject[:sku]
       product.sync_needed = false
-      product.categories << Category.find_by_magento_id(subject[:categories][:item])
-      product.productAttributeSet << Gemgento::ProductAttributeSet.find_by_magento_id(subject[:set])
-
-      # additional attributes
-      additional_attributes = parse_additional_attributes(subject[:additional_attributes][:item])
-      product.quality = additional_attributes[:quality]
-      product.color = additional_attributes[:color]
-      product.design = additional_attributes[:pattern]
-
-      # media assets
-      image_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_list, { product: product.magento_id, productIdentifierType: 'id' })
-      if image_response[:result][:item] != nil &&
-
-          if image_response[:result][:item].size > 1
-
-            image_response[:result][:item].each_with_index do |img, i|
-              create_asset(img, p)
-            end
-
-          else
-            img = image_response.body[:catalog_product_attribute_media_list_response][:result][:item]
-            create_asset(img, p)
-          end
-
-      end
-
+      product.categories << category unless product.categories.include?(category) # don't duplicate the categories
+      product.product_attribute_set = Gemgento::ProductAttributeSet.find_by_magento_id(subject[:set])
       product.save
-    end
 
-    def self.create_asset(img, p)
-      puts 'IMG?: '+img.inspect
-      a = Gemgento::Asset.new
-      a.url = img[:url]
-      a.position = img[:position]
-      a.product_id = p.id
-      a.save
-    end
-
-    def self.parse_additional_attributes(additional_attributes)
-      attributes = Hash.new
-
-      additional_attributes.each do |attribute|
-        attributes[attribute[:key]] = attribute[:value]
+      # set attribute values
+      subject[:additional_attributes][:item].each do |attribute_value|
+        product_attribute = Gemgento::ProductAttribute.find_by_code(attribute_value[:key])
+        product.set_attribute_value(product_attribute, attribute_value[:value])
       end
 
-      attributes
+      # set media assets
+      Gemgento::Asset.fetch_all(product)
     end
 
     # Push local product changes to magento

@@ -1,6 +1,6 @@
 module Gemgento
   class Category < ActiveRecord::Base
-    has_and_belongs_to_many :products, :join_table => 'gemgento_categories_products'
+    has_and_belongs_to_many :products, :join_table => 'gemgento_categories_products', :uniq => true
     after_save :sync_local_to_magento
 
     def self.index

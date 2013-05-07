@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130506204723) do
+ActiveRecord::Schema.define(:version => 20130507214109) do
 
   create_table "gemgento_assets", :force => true do |t|
     t.integer  "product_id"
@@ -20,6 +20,8 @@ ActiveRecord::Schema.define(:version => 20130506204723) do
     t.integer  "position"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
+    t.string   "file"
+    t.string   "label"
   end
 
   create_table "gemgento_categories", :force => true do |t|
@@ -40,17 +42,18 @@ ActiveRecord::Schema.define(:version => 20130506204723) do
 
   add_index "gemgento_categories", ["magento_id"], :name => "index_gemgento_categories_on_magento_id", :unique => true
 
-  create_table "gemgento_categories_products", :force => true do |t|
-    t.integer "product_id"
-    t.integer "category_id"
+  create_table "gemgento_categories_products", :id => false, :force => true do |t|
+    t.integer "product_id",  :default => 0, :null => false
+    t.integer "category_id", :default => 0, :null => false
   end
 
   create_table "gemgento_product_attribute_options", :force => true do |t|
     t.integer  "product_attribute_id"
     t.string   "label"
     t.string   "value"
-    t.datetime "created_at",           :null => false
-    t.datetime "updated_at",           :null => false
+    t.integer  "sync_needed",          :limit => 1, :default => 1, :null => false
+    t.datetime "created_at",                                       :null => false
+    t.datetime "updated_at",                                       :null => false
   end
 
   create_table "gemgento_product_attribute_sets", :force => true do |t|
@@ -64,7 +67,7 @@ ActiveRecord::Schema.define(:version => 20130506204723) do
   create_table "gemgento_product_attribute_values", :force => true do |t|
     t.integer  "product_id"
     t.integer  "product_attribute_id"
-    t.string   "value"
+    t.text     "value"
     t.datetime "created_at",           :null => false
     t.datetime "updated_at",           :null => false
   end

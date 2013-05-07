@@ -1,5 +1,6 @@
 module Gemgento
   class ProductAttributeOption < ActiveRecord::Base
+    include Gemgento::BaseHelper
 
     # TODO: add a unique index for [parent_attribute_id, value]
 
@@ -35,8 +36,8 @@ module Gemgento
 
     # Save Magento product attribute set to local
     def self.sync_magento_to_local(source, parent)
-      label = getString(source[:label])
-      value = getString(source[:value])
+      label = ensure_string(source[:label])
+      value = ensure_string(source[:value])
 
       product_attribute_option = Gemgento::ProductAttributeOption.find_or_initialize_by_product_attribute_id_and_value(parent.id, value)
       product_attribute_option.label = label
@@ -44,14 +45,6 @@ module Gemgento
       product_attribute_option.product_attribute = parent
       product_attribute_option.sync_needed = false
       product_attribute_option.save
-    end
-
-    def self.getString(subject)
-      if subject.is_a? String
-        subject
-      else
-        ''
-      end
     end
 
     # Push local product attribute set changes to Magento
