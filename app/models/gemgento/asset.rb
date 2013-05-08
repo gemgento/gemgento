@@ -1,7 +1,5 @@
 module Gemgento
   class Asset < ActiveRecord::Base
-    include Gemgento::BaseHelper
-
     belongs_to :product
 
     def self.fetch_all(product)
@@ -26,8 +24,8 @@ module Gemgento
       asset = Gemgento::Asset.find_or_initialize_by_product_id_and_url(product_id, source[:url])
       asset.url = source[:url]
       asset.position = source[:position]
-      asset.label = source[:label]
-      asset.file = ensure_string(source[:file])
+      asset.label = Gemgento::Magento.enforce_savon_string(source[:label])
+      asset.file = source[:file]
       asset.product_id = product_id
       asset.save
     end

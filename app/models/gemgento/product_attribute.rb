@@ -53,6 +53,8 @@ module Gemgento
       product_attribute.used_in_product_listing = source[:used_in_product_listing]
       product_attribute.sync_needed = false
       product_attribute.save
+
+      Gemgento::ProductAttributeOption.fetch_all(product_attribute)
     end
 
     # Push local product attribute set changes to Magento

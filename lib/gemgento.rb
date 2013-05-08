@@ -8,7 +8,7 @@ module Gemgento
 
     # Log into the Magento API and setup the session and client
     def self.api_login
-      @api_url = "http://#{Gemgento::Config[:magento][:url]}/index.php/api/v#{Gemgento::Config[:magento][:api_version]}_#{Gemgento::Config[:magento][:api_type]}/?wsdl=1"
+      @api_url = "http://#{Gemgento::Config[:magento][:url]}/index.php/api/v#{Gemgento::Config[:magento][:api_version]}_#{Gemgento::Config[:magento][:api_type]}/index/wsdl/1"
       @client = Savon.client(wsdl: @api_url, log: true)
       if Gemgento::Session.last.nil?
         response = @client.call(:login, message: { :username => Gemgento::Config[:magento][:username], :apiKey => Gemgento::Config[:magento][:api_key] })
@@ -42,6 +42,15 @@ module Gemgento
 
       return response
     end
+
+    def self.enforce_savon_string(subject)
+      if subject.is_a? String
+        subject
+      else
+        ''
+      end
+    end
+
   end
 
 end
