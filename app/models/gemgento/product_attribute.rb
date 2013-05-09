@@ -5,16 +5,7 @@ module Gemgento
     has_many :product_attribute_options
     after_save :sync_local_to_magento
 
-    def self.index
-      if ProductAttribute.find(:all).size == 0
-        fetch_all
-      end
-
-      ProductAttribute.find(:all)
-    end
-
-    def self.fetch_all
-      Gemgento::ProductAttributeSet.all.each do |product_attribute_set|
+    def self.fetch_all(product_attribute_set)
         attribute_list_response = Gemgento::Magento.create_call(:catalog_product_attribute_list, {setId: product_attribute_set.magento_id})
 
         if attribute_list_response[:result][:item].is_a? Array
@@ -24,7 +15,6 @@ module Gemgento
         else
           fetch(attribute_list_response[:result][:item][:attribute_id], product_attribute_set.magento_id)
         end
-      end
     end
 
     def self.fetch(id, product_attribute_set_id)

@@ -34,6 +34,9 @@ module Gemgento
       product_attribute_set.name = source[:name]
       product_attribute_set.sync_needed = false
       product_attribute_set.save
+
+      Gemgento::ProductAttribute.fetch_all(product_attribute_set)
+      Gemgento::AssetType.fetch_all(product_attribute_set)
     end
 
     # Push local product attribute set changes to Magento

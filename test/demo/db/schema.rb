@@ -11,17 +11,31 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130507214428) do
+ActiveRecord::Schema.define(:version => 20130509150853) do
+
+  create_table "gemgento_asset_types", :force => true do |t|
+    t.integer  "product_attribute_set_id"
+    t.string   "code"
+    t.string   "scope"
+    t.datetime "created_at",               :null => false
+    t.datetime "updated_at",               :null => false
+  end
 
   create_table "gemgento_assets", :force => true do |t|
     t.integer  "product_id"
     t.string   "type"
     t.string   "url"
     t.integer  "position"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
     t.string   "file"
     t.string   "label"
+    t.boolean  "sync_needed", :default => true, :null => false
+  end
+
+  create_table "gemgento_assets_asset_types", :id => false, :force => true do |t|
+    t.integer "asset_id",      :default => 0, :null => false
+    t.integer "asset_type_id", :default => 0, :null => false
   end
 
   create_table "gemgento_categories", :force => true do |t|
