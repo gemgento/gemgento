@@ -15,6 +15,7 @@ Assumptions
     - suffix = '.jpg'
   2 - types(thumbnail)
     - suffix = '_thumbnail.jpg'
+-Products are grouped by SKU
 =end
 
     def initialize(file)
@@ -141,9 +142,32 @@ Assumptions
     def create_configurable_products
       @associated_simple_products.each do |attribute_value, product_count|
         if product_count > 1
+          # grab all the simple products that are associagted
           simple_products = fetch_associated_products(attribute_value.to_s!)
-          #TODO: create a ConfigurableProduct
 
+          # set the default configurable product attributes
+          configurable_product = Gemgento::Product.new
+          configurable_product.type = 'configurable'
+          configurable_product.sku = 'GROUP_' + simple_products[0].get_attribute_value('name') #TODO: figure out a better configurable product SKU or set one of the simple products as a configurable product
+          configurable_product.product_attribute_set = @attribute_set
+          configurable_product.sync_needed = false
+          configurable_product.save
+
+          # associate all simple products with the new configurable product
+          simple_products.each do |simple_product|
+            configurable_product.simple_products << simple_product
+          end
+
+          # add the configurable attributes
+          # TODO: set configurable attributes array before importing spreadsheet
+          configurable_product.configurable_attributes << Gemgento::ProductAttribute.find_by_code('color')
+          configurable_product.configurable_attributes << Gemgento::ProductAttribute.find_by_code('pattern')
+          configurable_product.configurable_attributes << Gemgento::ProductAttribute.find_by_code('measurement')
+          configurable_product.configurable_attributes << Gemgento::ProductAttribute.find_by_code('quality')
+
+          # push to magento
+          configurable_product.sync_needed = true
+          configurable_product.save
         end
       end
     end
