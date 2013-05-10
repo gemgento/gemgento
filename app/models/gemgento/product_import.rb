@@ -112,7 +112,7 @@ Assumptions
     end
 
     def set_image(product)
-      Gemgento::Asset.where(product_id: product.id).delete_all # remove the existing images
+      product.assets.destroy_all
 
       image = create_asset('.jpg')
       image.asset_types << Gemgento::AssetType.find_by_code('image')
@@ -142,7 +142,7 @@ Assumptions
       @associated_simple_products.each do |attribute_value, product_count|
         if product_count > 1
           simple_products = fetch_associated_products(attribute_value.to_s!)
-
+          #TODO: create a ConfigurableProduct
 
         end
       end
