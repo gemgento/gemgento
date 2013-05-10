@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130509150853) do
+ActiveRecord::Schema.define(:version => 20130510195309) do
 
   create_table "gemgento_asset_types", :force => true do |t|
     t.integer  "product_attribute_set_id"
@@ -115,6 +115,7 @@ ActiveRecord::Schema.define(:version => 20130509150853) do
     t.string   "product_attribute_set_id"
     t.string   "store_view"
     t.boolean  "sync_needed",              :default => true, :null => false
+    t.integer  "parent_id"
   end
 
   create_table "gemgento_sessions", :force => true do |t|

@@ -8,6 +8,8 @@ module Gemgento
     has_many :product_attribute_values
     has_and_belongs_to_many :categories, :join_table => 'gemgento_categories_products', :uniq => true
     has_many :assets
+    has_many :simple_products, foreign_key: 'parent_id', class_name: 'Product'
+    belongs_to :configurable_product, foreign_key: 'parent_id', class_name: 'Product'
     after_save :sync_local_to_magento
 
     def initialize
