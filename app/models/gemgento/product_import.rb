@@ -112,6 +112,8 @@ Assumptions
     end
 
     def set_image(product)
+      Gemgento::Asset.where(product_id: product.id).delete_all # remove the existing images
+
       image = create_asset('.jpg')
       image.asset_types << Gemgento::AssetType.find_by_code('image')
       image.asset_types << Gemgento::AssetType.find_by_code('small_image')
