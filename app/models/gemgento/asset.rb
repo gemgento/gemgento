@@ -98,7 +98,7 @@ module Gemgento
       types = []
 
       self.asset_types.each do |asset_type|
-        types << "#{asset_type.code}"
+        types << asset_type.code
       end
 
       types

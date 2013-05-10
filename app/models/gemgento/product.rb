@@ -43,9 +43,6 @@ module Gemgento
           }
       }
 
-      puts Gemgento::Magento.create_call(:catalog_product_info, message)[:info].inspect
-      exit
-
       sync_magento_to_local(Gemgento::Magento.create_call(:catalog_product_info, message)[:info])
     end
 
@@ -95,6 +92,30 @@ module Gemgento
       attribute_value
     end
 
+    def check_magento(identifier, identifier_type, attribute_set)
+      additional_attributes = []
+      attribute_set.product_attributes.each do |attribute|
+        additional_attributes << attribute.code
+      end
+
+      message = {
+          product: identifier,
+          productIdentifierType: identifier_type,
+          attributes: {
+              'additional_attributes' => { 'arr:string' => additional_attributes }
+          }
+      }
+
+      begin
+        product_info_response = Gemgento::Magento.create_call(:catalog_product_info, message)
+        product = sync_magento_to_local(product_info_response[:info])
+      rescue
+        product = Gemgento::Product.new
+      end
+
+      product
+    end
+
     private
 
     def self.sync_magento_to_local(subject)
@@ -111,6 +132,8 @@ module Gemgento
 
       # set media assets
       Gemgento::Asset.fetch_all(product)
+
+      product
     end
 
     # Push local product changes to magento
