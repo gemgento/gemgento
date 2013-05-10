@@ -140,7 +140,8 @@ Assumptions
       @associated_simple_products.each do |attribute_value, product_count|
         if product_count > 1
           simple_products = fetch_associated_products(attribute_value.to_s!)
-          #TODO: Create the configurable product and add the simple products
+
+
         end
       end
     end

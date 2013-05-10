@@ -152,7 +152,12 @@ module Gemgento
 
     # Create a new Product in Magento and set out magento_id
     def create_magento
-      message = { type: self.magento_type, set: self.set, sku: self.sku, productData: compose_product_data, storeView: self.store_view  }
+      message = {
+          type: self.magento_type,
+          set: self.set, sku: self.sku,
+          productData: compose_product_data,
+          storeView: self.store_view
+      }
       create_response = Gemgento::Magento.create_call(:catalog_product_create, message)
       self.magento_id = create_response[:attribute_id]
     end
@@ -176,7 +181,20 @@ module Gemgento
           'additional_attributes' => { 'single_data' => { items: compose_attribute_values }}
       }
 
+      if self.type == 'configurable'
+        product_data[:configurable_products_data] = compose_configurable_products
+        product_data[:configurable_attributes_data] = compose_configurable_attributes
+      end
+
       product_data
+    end
+
+    def compose_configurable_products
+      #TODO: find the associated simple products and compose their configurable attributes for API push to Magento
+    end
+
+    def compose_configurable_attributes
+      #TODO: determine the configurable attributes and compose the data for API push to Magento
     end
 
     def product_data_attributes
