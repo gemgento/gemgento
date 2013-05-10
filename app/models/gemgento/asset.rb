@@ -3,6 +3,7 @@ module Gemgento
     belongs_to :product
     has_and_belongs_to_many :asset_types, :join_table => 'gemgento_assets_asset_types', :uniq => true
     after_save :sync_local_to_magento
+    before_destroy :delete_magento
 
     def self.fetch_all(product)
       asset_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_list, { product: product.magento_id, productIdentifierType: 'id' })
@@ -71,6 +72,11 @@ module Gemgento
     def update_magento
       message = { product: self.product.id, data: compose_asset_entity_data, identifier_type: 'id'  }
       update_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_create, message)
+    end
+
+    def delete_magento
+      message = { product: self.product.id, file: self.file, identifier_type: 'id' }
+      remove_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_remove, message)
     end
 
     def compose_asset_entity_data
