@@ -184,20 +184,24 @@ module Gemgento
           'additional_attributes' => { 'single_data' => { items: compose_attribute_values }}
       }
 
-      if self.type == 'configurable'
-        product_data[:configurable_products_data] = compose_configurable_products
+      unless self.simple_products.nil?
         product_data[:configurable_attributes_data] = compose_configurable_attributes
       end
 
       product_data
     end
 
-    def compose_configurable_products
-      #TODO: find the associated simple products and compose their configurable attributes for API push to Magento
-    end
-
     def compose_configurable_attributes
-      #TODO: determine the configurable attributes and compose the data for API push to Magento
+      configurable_attributes = []
+
+      self.configurable_attributes.each do |configurable_attribute|
+        configurable_attributes << {
+            'attribute_id' => configurable_attribute.magento_id,
+            'attribute_code' => configurable_attribute.code
+        }
+      end
+
+      configurable_attributes
     end
 
     def product_data_attributes
