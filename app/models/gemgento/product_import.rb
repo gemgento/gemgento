@@ -62,7 +62,7 @@ Assumptions
 
       set_attribute_values(product)
       set_categories(product)
-      set_image(product) if product.assets.nil?
+      set_image(product)
 
       product
     end
