@@ -148,14 +148,14 @@ Assumptions
     def set_image(product)
       product.assets.destroy_all
 
-      # For testing purposes the large images have been removed
-      #image = Gemgento::Asset.new
-      #image.product = product
-      #image.url = @image_prefix + @row[@headers.index('image')] + @image_suffix
-      #image.asset_types << Gemgento::AssetType.find_by_code('image')
-      #image.asset_types << Gemgento::AssetType.find_by_code('small_image')
-      #image.save
-      #product.assets << image
+      # For testing purposes the large this image can be commented out
+      image = Gemgento::Asset.new
+      image.product = product
+      image.url = @image_prefix + @row[@headers.index('image')] + @image_suffix
+      image.asset_types << Gemgento::AssetType.find_by_code('image')
+      image.asset_types << Gemgento::AssetType.find_by_code('small_image')
+      image.save
+      product.assets << image
 
       thumbnail = Gemgento::Asset.new
       thumbnail.product = product
