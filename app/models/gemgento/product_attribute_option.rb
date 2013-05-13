@@ -47,7 +47,12 @@ module Gemgento
 
     # Create a new product attribute set in Magento
     def create_magento
-      # TODO: create a new product attribute set on Magento
+      message = { attribute: self.product_attribute.magento_id, data: {
+          label: {
+            value: self.label
+          }
+      }}
+      create_response = Gemgento::Magento.create_call(:catalog_product_attribute_add_option, message)
     end
 
     # Update existing Magento product attribute set

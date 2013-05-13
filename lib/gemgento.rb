@@ -12,6 +12,12 @@ module Gemgento
       @client = Savon.client(wsdl: @api_url, log: true)
       if Gemgento::Session.last.nil?
         response = @client.call(:login, message: { :username => Gemgento::Config[:magento][:username], :apiKey => Gemgento::Config[:magento][:api_key] })
+
+        unless response
+          puts 'Login Failed - Check Session'
+          exit
+        end
+
         @session = response.body[:login_response][:login_return];
         s = Gemgento::Session.new
         s.session_id = @session
@@ -35,9 +41,7 @@ module Gemgento
         response = @client.call(function, message: message)
         response = response.body[:"#{function}_response"]
       rescue
-        # TODO: come back from a failed call
-        puts "Call failed - #{function}"
-        exit
+        response = nil
       end
 
       return response

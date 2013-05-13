@@ -13,10 +13,6 @@ module Gemgento
     has_and_belongs_to_many :configurable_attributes, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute', uniq: true
     after_save :sync_local_to_magento
 
-    def initialize
-      self.sync_needed = true
-    end
-
     def self.index
       if Product.find(:all).size == 0
         fetch_all
@@ -50,8 +46,6 @@ module Gemgento
     end
 
     def set_categories(magento_categories)
-      self.categories.delete
-
       # if there is only one category, the returned value is not interpreted array
       unless magento_categories.is_a? Array
         magento_categories = [magento_categories]
@@ -59,7 +53,7 @@ module Gemgento
 
       # loop through each return category and add it to the product if needed
       magento_categories.each do |magento_category|
-        category = Category.find_by_magento_id(magento_categories)
+        category = Gemgento::Category.find_by_magento_id(magento_category)
         self.categories << category unless self.categories.include?(category) # don't duplicate the categories
       end
     end
@@ -86,16 +80,18 @@ module Gemgento
       product_attribute = Gemgento::ProductAttribute.find_by_code(code)
       product_attribute_value = Gemgento::ProductAttributeValue.find_by_product_id_and_product_attribute_id(self.id, product_attribute.id)
 
-      if product_attribute.product_attribute_options
-        attribute_value = product_attribute_option = Gemgento::ProductAttributeOption.find_by_value(product_attribute_value.value).label
-      else
-        attribute_value = product_attribute_value.value
+      if product_attribute_value.nil?
+        return nil
       end
 
-      attribute_value
+      if product_attribute.product_attribute_options.empty?
+        return product_attribute_value.value
+      else
+        return Gemgento::ProductAttributeOption.find_by_value(product_attribute_value.value).label
+      end
     end
 
-    def check_magento(identifier, identifier_type, attribute_set)
+    def self.check_magento(identifier, identifier_type, attribute_set)
       additional_attributes = []
       attribute_set.product_attributes.each do |attribute|
         additional_attributes << attribute.code
@@ -109,14 +105,13 @@ module Gemgento
           }
       }
 
-      begin
-        product_info_response = Gemgento::Magento.create_call(:catalog_product_info, message)
-        product = sync_magento_to_local(product_info_response[:info])
-      rescue
-        product = Gemgento::Product.new
-      end
+      product_info_response = Gemgento::Magento.create_call(:catalog_product_info, message)
 
-      product
+      if product_info_response.nil?
+        Gemgento::Product.new
+      else
+        sync_magento_to_local(product_info_response[:info])
+      end
     end
 
     private
@@ -130,8 +125,8 @@ module Gemgento
       product.product_attribute_set = Gemgento::ProductAttributeSet.find_by_magento_id(subject[:set])
       product.save
 
-      product.set_categories(subject[:categories][:item])
-      product.set_attribute_values_from_magento(subject[:additional_attributes][:item])
+      product.set_categories(subject[:categories][:item]) if subject[:categories][:item]
+      product.set_attribute_values_from_magento(subject[:additional_attributes][:item]) if subject[:additional_attributes][:item]
 
       # set media assets
       Gemgento::Asset.fetch_all(product)
@@ -157,12 +152,13 @@ module Gemgento
     def create_magento
       message = {
           type: self.magento_type,
-          set: self.set, sku: self.sku,
+          set: self.product_attribute_set.magento_id,
+          sku: self.sku,
           productData: compose_product_data,
           storeView: self.store_view
       }
       create_response = Gemgento::Magento.create_call(:catalog_product_create, message)
-      self.magento_id = create_response[:attribute_id]
+      self.magento_id = create_response[:result]
     end
 
     # Update existing Magento Product
@@ -173,18 +169,18 @@ module Gemgento
 
     def compose_product_data
       product_data = {
-          'name' => self.get_attribute_value('name'),
-          'description' => self.get_attribute_value('description'),
-          'short_description' => self.get_attribute_value('short_description'),
-          'weight' => self.get_attribute_value('weight'),
-          'status' => self.get_attribute_value('status'),
-          'categories' => compose_categories,
-          'url_key' => self.get_attribute_value('url_key'),
-          'price' => self.get_attribute_value('price'),
+          'name' => self.attribute_value('name'),
+          'description' => self.attribute_value('description'),
+          'short_description' => self.attribute_value('short_description'),
+          'weight' => self.attribute_value('weight'),
+          'status' => self.attribute_value('status'),
+          'categories' => { item: compose_categories },
+          'url_key' => self.attribute_value('url_key'),
+          'price' => self.attribute_value('price'),
           'additional_attributes' => { 'single_data' => { items: compose_attribute_values }}
       }
 
-      unless self.simple_products.nil?
+      unless self.simple_products.empty?
         product_data[:configurable_attributes_data] = compose_configurable_attributes
       end
 
@@ -211,8 +207,10 @@ module Gemgento
     def compose_attribute_values
       attributes = []
 
-      unless product_attribute_value.value.nil?
-        attributes << { key: product_attribute_value.product_attribute.code, value: product_attribute_value.value }
+      self.product_attribute_values.each do |product_attribute_value|
+        unless product_attribute_value.value.nil?
+          attributes << { key: product_attribute_value.product_attribute.code, value: product_attribute_value.value }
+        end
       end
 
       attributes
@@ -222,7 +220,7 @@ module Gemgento
       categories = []
 
       self.categories.each do |category|
-        categories << "#{category.id}"
+        categories << "#{category.magento_id}"
       end
 
       categories

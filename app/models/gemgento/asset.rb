@@ -22,7 +22,7 @@ module Gemgento
     end
 
     def set_types(asset_type_codes)
-      self.asset_types.delete
+      self.asset_types.destroy_all
 
       # if there is only one category, the returned value is not interpreted array
       unless asset_type_codes.is_a? Array
@@ -31,8 +31,10 @@ module Gemgento
 
       # loop through each return category and add it to the product if needed
       asset_type_codes.each do |asset_type_code|
-        asset_type = Gemgento::AssetType.find_by_product_attribute_set_id_and_code(self.product.product_attribute_set_id, asset_type_code)
-        self.asset_types << asset_type unless self.asset_types.include?(asset_type) # don't duplicate the asset types
+        unless(asset_type_code.empty?)
+          asset_type = Gemgento::AssetType.find_by_product_attribute_set_id_and_code(self.product.product_attribute_set_id, asset_type_code)
+          self.asset_types << asset_type unless self.asset_types.include?(asset_type) # don't duplicate the asset types
+        end
       end
     end
 
@@ -40,12 +42,7 @@ module Gemgento
 
     def sync_local_to_magento
       if self.sync_needed
-        if !self.magento_id
-          create_magento
-        else
-          update_magento
-        end
-
+        create_magento
         self.sync_needed = false
         self.save
       end
@@ -58,24 +55,21 @@ module Gemgento
       asset.label = Gemgento::Magento.enforce_savon_string(source[:label])
       asset.file = source[:file]
       asset.product = product
+      asset.sync_needed = false
       asset.save
 
       asset.set_types(source[:types][:item])
     end
 
     def create_magento
-      message = { product: self.product.id, data: compose_asset_entity_data, identifier_type: 'id' }
+      puts self.product.inspect
+      message = { product: self.product.magento_id, data: compose_asset_entity_data, identifier_type: 'id' }
       create_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_create, message)
-      self.file = create_response[:response]
-    end
-
-    def update_magento
-      message = { product: self.product.id, data: compose_asset_entity_data, identifier_type: 'id'  }
-      update_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_create, message)
+      self.file = create_response[:result]
     end
 
     def delete_magento
-      message = { product: self.product.id, file: self.file, identifier_type: 'id' }
+      message = { product: self.product.magento_id, file: self.file, identifier_type: 'id' }
       remove_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_remove, message)
     end
 
@@ -92,6 +86,7 @@ module Gemgento
 
     def compose_file_entity
       file_name = self.url.split('/')[-1]
+
       file_entity = {
         content: Base64.encode64(File.open(self.url).read),
         mime: MIME::Types.type_for(file_name).first.content_type
