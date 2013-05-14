@@ -78,7 +78,7 @@ module Gemgento
         file: compose_file_entity,
         label: self.label,
         position: self.position,
-        types: compose_types
+        types: { item: compose_types }
       }
 
       asset_entity
