@@ -110,9 +110,7 @@ Assumptions
         end
       end
 
-      product.set_attribute_value('url_key', product.attribute_value('name').sub(' ', '-').downcase)
-      product.set_attribute_value('status', '1')
-      product.set_attribute_value('visibility', '4')
+      set_default_attribute_values(product)
     end
 
     def create_attribute_option(product_attribute, option_label)
@@ -122,6 +120,12 @@ Assumptions
       attribute_option.save
 
       attribute_option
+    end
+
+    def set_default_attribute_values(product)
+      product.set_attribute_value('url_key', product.attribute_value('name').sub(' ', '-').downcase) unless product.attribute_value('url_key').empty?
+      product.set_attribute_value('status', '1') unless product.attribute_value('status').empty?
+      product.set_attribute_value('visibility', '4') unless product.attribute_value('visibility').empty?
     end
 
     def set_categories(product)
@@ -155,20 +159,29 @@ Assumptions
       product.assets.destroy
 
       # For testing purposes the large images have been removed
+      # set the main product image
+      url = @image_prefix + @row[@headers.index('image')] + @image_suffix
+      types = [Gemgento::AssetType.find_by_code('image'), Gemgento::AssetType.find_by_code('small_image')]
+      product.assets << create_image(product, url, types)
+
+      # set the thumbnail image
+      url = @image_prefix + @row[@headers.index('image')] + @thumbnail_suffix
+      types = [Gemgento::AssetType.find_by_code('thumbnail')]
+      product.assets << create_image(product, url, types)
+    end
+
+    def create_image(product, url, types)
       image = Gemgento::Asset.new
       image.product = product
-      image.url = @image_prefix + @row[@headers.index('image')] + @image_suffix
-      image.asset_types << Gemgento::AssetType.find_by_code('image')
-      image.asset_types << Gemgento::AssetType.find_by_code('small_image')
-      image.save
-      product.assets << image
+      image.url = url
 
-      thumbnail = Gemgento::Asset.new
-      thumbnail.product = product
-      thumbnail.url = @image_prefix + @row[@headers.index('image')] + @thumbnail_suffix
-      thumbnail.asset_types << Gemgento::AssetType.find_by_code('thumbnail')
-      thumbnail.save
-      product.assets << thumbnail
+      types.each do |type|
+        image.asset_types << type
+      end
+
+      image.save
+
+      image
     end
 
     def track_associated_simple_products(product)
@@ -213,6 +226,8 @@ Assumptions
         # push to magento
         configurable_product.sync_needed = true
         configurable_product.save
+
+        set_configurable_product_images(configurable_product)
       end
     end
 
@@ -228,6 +243,17 @@ Assumptions
       end
 
       associated_products
+    end
+
+    def set_configurable_product_images(configurable_product)
+      default_product = configurable_product.simple_products.first
+
+      default_product.assets.each do |asset|
+        asset_copy = asset.dup
+        asset_copy.product = configurable_product
+        asset_copy.sync_needed = true
+        asset_copy.save
+      end
     end
 
   end
