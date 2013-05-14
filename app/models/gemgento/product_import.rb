@@ -28,6 +28,12 @@ Assumptions
       @attribute_set = Gemgento::ProductAttributeSet.first # assuming there is only one product attribute set
       @root_category = Gemgento::Category.find(root_category_id)
       @store_view = store_view
+      @configurable_attributes = [
+          Gemgento::ProductAttribute.find_by_code('color'),
+          Gemgento::ProductAttribute.find_by_code('pattern'),
+          Gemgento::ProductAttribute.find_by_code('measurement'),
+          Gemgento::ProductAttribute.find_by_code('quality')
+      ]
     end
 
     def process
@@ -57,26 +63,27 @@ Assumptions
     def create_simple_product
       product = Gemgento::Product.find_by_sku(@row[@headers.index('sku')])
 
-      if product.nil? # If product isn't known locally, check with Magento
-        product = Gemgento::Product.check_magento(@row[@headers.index('sku')], 'sku', @attribute_set)
-      end
-
-      product.magento_type = 'simple'
-      product.sku = @row[@headers.index('sku')]
-      product.product_attribute_set = @attribute_set
-
-      unless product.magento_id
-        product.sync_needed = false
-        product.save
-      end
-
-      set_attribute_values(product)
-      set_categories(product)
-
-      product.sync_needed = true
-      product.save
-
-      set_image(product)
+      #TODO: uncomment this method before pushing to production
+      #if product.nil? # If product isn't known locally, check with Magento
+      #  product = Gemgento::Product.check_magento(@row[@headers.index('sku')], 'sku', @attribute_set)
+      #end
+      #
+      #product.magento_type = 'simple'
+      #product.sku = @row[@headers.index('sku')]
+      #product.product_attribute_set = @attribute_set
+      #
+      #unless product.magento_id
+      #  product.sync_needed = false
+      #  product.save
+      #end
+      #
+      #set_attribute_values(product)
+      #set_categories(product)
+      #
+      #product.sync_needed = true
+      #product.save
+      #
+      #set_image(product)
 
       product
     end
@@ -146,16 +153,16 @@ Assumptions
     end
 
     def set_image(product)
-      product.assets.destroy_all
+      product.assets.destroy
 
-      # For testing purposes the large this image can be commented out
-      image = Gemgento::Asset.new
-      image.product = product
-      image.url = @image_prefix + @row[@headers.index('image')] + @image_suffix
-      image.asset_types << Gemgento::AssetType.find_by_code('image')
-      image.asset_types << Gemgento::AssetType.find_by_code('small_image')
-      image.save
-      product.assets << image
+      # For testing purposes the large images have been removed
+      #image = Gemgento::Asset.new
+      #image.product = product
+      #image.url = @image_prefix + @row[@headers.index('image')] + @image_suffix
+      #image.asset_types << Gemgento::AssetType.find_by_code('image')
+      #image.asset_types << Gemgento::AssetType.find_by_code('small_image')
+      #image.save
+      #product.assets << image
 
       thumbnail = Gemgento::Asset.new
       thumbnail.product = product
@@ -174,45 +181,54 @@ Assumptions
     end
 
     def create_configurable_products
-      @associated_simple_products.each do |attribute_value, product_count|
-        if product_count > 1
-          # grab all the simple products that are associated
-          simple_products = fetch_associated_products(attribute_value)
+      @associated_simple_products.each do |attribute_value, count|
+        # grab all the simple products that are associated
+        simple_products = fetch_associated_products(attribute_value)
 
-          # set the default configurable product attributes
-          configurable_product = Gemgento::Product.new
-          configurable_product.type = 'configurable'
-          configurable_product.sku = 'GROUP_' + simple_products[0].attribute_value('name') #TODO: figure out a better configurable product SKU or set one of the simple products as a configurable product
-          configurable_product.product_attribute_set = @attribute_set
-          configurable_product.sync_needed = false
-          configurable_product.save
+        # set the default configurable product attributes
+        configurable_product = Gemgento::Product.find_or_initialize_by_sku("#{attribute_value}-CO")
+        configurable_product.magento_type = 'configurable'
+        configurable_product.sku = "#{attribute_value}-CO"
+        configurable_product.product_attribute_set = @attribute_set
+        configurable_product.sync_needed = false
+        configurable_product.save
 
-          # associate all simple products with the new configurable product
-          simple_products.each do |simple_product|
-            configurable_product.simple_products << simple_product
-          end
-
-          # add the configurable attributes
-          # TODO: set configurable attributes array before importing spreadsheet
-          configurable_product.configurable_attributes << Gemgento::ProductAttribute.find_by_code('color')
-          configurable_product.configurable_attributes << Gemgento::ProductAttribute.find_by_code('pattern')
-          configurable_product.configurable_attributes << Gemgento::ProductAttribute.find_by_code('measurement')
-          configurable_product.configurable_attributes << Gemgento::ProductAttribute.find_by_code('quality')
-
-          # push to magento
-          configurable_product.sync_needed = true
-          configurable_product.save
+        # associate all simple products with the new configurable product
+        simple_products.each do |simple_product|
+          configurable_product.simple_products << simple_product
         end
+
+        # add the configurable attributes
+        # TODO: set configurable attributes array before importing spreadsheet
+        @configurable_attributes.each do |configurable_attribute|
+          configurable_product.configurable_attributes << configurable_attribute unless configurable_product.configurable_attributes.include?(configurable_attribute)
+        end
+
+        configurable_product.set_attribute_value('name', simple_products.first.attribute_value('name'))
+        configurable_product.set_attribute_value('status', '1')
+        configurable_product.set_attribute_value('visibility', '4')
+        configurable_product.set_attribute_value('url_key', configurable_product.attribute_value('name').sub(' ', '-').downcase)
+
+        configurable_product.categories = simple_products.first.categories
+
+        # push to magento
+        configurable_product.sync_needed = true
+        configurable_product.save
       end
     end
 
     def fetch_associated_products(attribute_value)
       product_attribute = Gemgento::ProductAttribute.find_by_code(@attribute_of_association)
+      product_attribute_values = Gemgento::ProductAttributeValue.where(product_attribute_id: product_attribute.id, value: attribute_value)
       associated_products = []
 
-      Gemgento::ProductAttributeValue.find_by_product_attribute_and_value(product_attribute, attribute_value).each do |product_attribute_value|
-        associated_products << product_attribute_value.product
+      product_attribute_values.each do |product_attribute_value|
+        if product_attribute_value.product
+          associated_products << product_attribute_value.product
+        end
       end
+
+      associated_products
     end
 
   end

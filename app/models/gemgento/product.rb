@@ -177,27 +177,40 @@ module Gemgento
           'categories' => { item: compose_categories },
           'url_key' => self.attribute_value('url_key'),
           'price' => self.attribute_value('price'),
-          'additional_attributes' => { 'single_data' => { items: compose_attribute_values }}
+          'additional_attributes' => { 'single_data' => { item: compose_attribute_values }}
       }
 
       unless self.simple_products.empty?
-        product_data[:configurable_attributes_data] = compose_configurable_attributes
+        product_data.merge!({ 'associated_skus' => { item: compose_associated_skus }, 'price_changes' => compose_price_changes })
       end
 
       product_data
     end
 
-    def compose_configurable_attributes
-      configurable_attributes = []
+    def compose_associated_skus
+      associated_skus = []
 
-      self.configurable_attributes.each do |configurable_attribute|
-        configurable_attributes << {
-            'attribute_id' => configurable_attribute.magento_id,
-            'attribute_code' => configurable_attribute.code
-        }
+      self.simple_products.each do |simple_product|
+        associated_skus << simple_product.sku
       end
 
-      configurable_attributes
+      associated_skus
+    end
+
+    def compose_price_changes
+      price_changes = []
+
+      self.configurable_attributes.each do |configurable_attribute|
+        options = []
+
+        configurable_attribute.product_attribute_options.each do |attribute_option|
+          options << { key: attribute_option.label, value: ''}
+        end
+
+        price_changes << { key: configurable_attribute.code, value: options }
+      end
+
+      price_changes
     end
 
     def product_data_attributes
