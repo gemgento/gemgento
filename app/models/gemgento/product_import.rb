@@ -63,27 +63,26 @@ Assumptions
     def create_simple_product
       product = Gemgento::Product.find_by_sku(@row[@headers.index('sku')])
 
-      #TODO: uncomment this method before pushing to production
-      #if product.nil? # If product isn't known locally, check with Magento
-      #  product = Gemgento::Product.check_magento(@row[@headers.index('sku')], 'sku', @attribute_set)
-      #end
-      #
-      #product.magento_type = 'simple'
-      #product.sku = @row[@headers.index('sku')]
-      #product.product_attribute_set = @attribute_set
-      #
-      #unless product.magento_id
-      #  product.sync_needed = false
-      #  product.save
-      #end
-      #
-      #set_attribute_values(product)
-      #set_categories(product)
-      #
-      #product.sync_needed = true
-      #product.save
-      #
-      #set_image(product)
+      if product.nil? # If product isn't known locally, check with Magento
+        product = Gemgento::Product.check_magento(@row[@headers.index('sku')], 'sku', @attribute_set)
+      end
+
+      product.magento_type = 'simple'
+      product.sku = @row[@headers.index('sku')]
+      product.product_attribute_set = @attribute_set
+
+      unless product.magento_id
+        product.sync_needed = false
+        product.save
+      end
+
+      set_attribute_values(product)
+      set_categories(product)
+
+      product.sync_needed = true
+      product.save
+
+      set_image(product)
 
       product
     end
@@ -156,13 +155,13 @@ Assumptions
       product.assets.destroy
 
       # For testing purposes the large images have been removed
-      #image = Gemgento::Asset.new
-      #image.product = product
-      #image.url = @image_prefix + @row[@headers.index('image')] + @image_suffix
-      #image.asset_types << Gemgento::AssetType.find_by_code('image')
-      #image.asset_types << Gemgento::AssetType.find_by_code('small_image')
-      #image.save
-      #product.assets << image
+      image = Gemgento::Asset.new
+      image.product = product
+      image.url = @image_prefix + @row[@headers.index('image')] + @image_suffix
+      image.asset_types << Gemgento::AssetType.find_by_code('image')
+      image.asset_types << Gemgento::AssetType.find_by_code('small_image')
+      image.save
+      product.assets << image
 
       thumbnail = Gemgento::Asset.new
       thumbnail.product = product
