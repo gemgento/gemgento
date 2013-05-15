@@ -30,9 +30,7 @@ Assumptions
       @store_view = store_view
       @configurable_attributes = [
           Gemgento::ProductAttribute.find_by_code('color'),
-          Gemgento::ProductAttribute.find_by_code('pattern'),
-          Gemgento::ProductAttribute.find_by_code('measurement'),
-          Gemgento::ProductAttribute.find_by_code('quality')
+          Gemgento::ProductAttribute.find_by_code('measurement')
       ]
     end
 
@@ -61,14 +59,15 @@ Assumptions
     end
 
     def create_simple_product
-      product = Gemgento::Product.find_by_sku(@row[@headers.index('sku')])
+      sku = @row[@headers.index('sku')] + '-CO'
+      product = Gemgento::Product.find_by_sku(sku)
 
       if product.nil? # If product isn't known locally, check with Magento
-        product = Gemgento::Product.check_magento(@row[@headers.index('sku')], 'sku', @attribute_set)
+        product = Gemgento::Product.check_magento(sku, 'sku', @attribute_set)
       end
 
       product.magento_type = 'simple'
-      product.sku = @row[@headers.index('sku')]
+      product.sku = sku
       product.product_attribute_set = @attribute_set
 
       unless product.magento_id
@@ -90,9 +89,9 @@ Assumptions
     def set_attribute_values(product)
       @headers.each do |attribute_code|
         product_attribute = Gemgento::ProductAttribute.find_by_code(attribute_code) # try to load attribute associated with column header
-        # apply the attribute value if the attribute exists and is part of the attribute set
 
-        if !product_attribute.nil? && @attribute_set.product_attributes.include?(product_attribute)
+        # apply the attribute value if the attribute exists and is part of the attribute set
+        if !product_attribute.nil? && @attribute_set.product_attributes.include?(product_attribute) && product_attribute.code != 'sku'
 
           if product_attribute.product_attribute_options.empty?
             value = @row[@headers.index(attribute_code)]
@@ -119,13 +118,15 @@ Assumptions
       attribute_option.label = option_label
       attribute_option.save
 
+      attribute_option.sync_local_to_magento
+
       attribute_option
     end
 
     def set_default_attribute_values(product)
-      product.set_attribute_value('url_key', product.attribute_value('name').sub(' ', '-').downcase) unless product.attribute_value('url_key').empty?
-      product.set_attribute_value('status', '1') unless product.attribute_value('status').empty?
-      product.set_attribute_value('visibility', '4') unless product.attribute_value('visibility').empty?
+      product.set_attribute_value('url_key', product.attribute_value('name').sub(' ', '-').downcase) if product.attribute_value('url_key').blank?
+      product.set_attribute_value('status', '1') if product.attribute_value('status').blank?
+      product.set_attribute_value('visibility', '4') if product.attribute_value('visibility').blank?
     end
 
     def set_categories(product)
@@ -156,13 +157,13 @@ Assumptions
     end
 
     def set_image(product)
-      product.assets.destroy
+      product.assets.destroy_all
 
       # For testing purposes the large images have been removed
       # set the main product image
-      url = @image_prefix + @row[@headers.index('image')] + @image_suffix
-      types = [Gemgento::AssetType.find_by_code('image'), Gemgento::AssetType.find_by_code('small_image')]
-      product.assets << create_image(product, url, types)
+     url = @image_prefix + @row[@headers.index('image')] + @image_suffix
+     types = [Gemgento::AssetType.find_by_code('image'), Gemgento::AssetType.find_by_code('small_image')]
+     product.assets << create_image(product, url, types)
 
       # set the thumbnail image
       url = @image_prefix + @row[@headers.index('image')] + @thumbnail_suffix
@@ -227,7 +228,7 @@ Assumptions
         configurable_product.sync_needed = true
         configurable_product.save
 
-        set_configurable_product_images(configurable_product)
+       set_configurable_product_images(configurable_product)
       end
     end
 
@@ -246,11 +247,13 @@ Assumptions
     end
 
     def set_configurable_product_images(configurable_product)
+      configurable_product.assets.destroy_all
       default_product = configurable_product.simple_products.first
 
       default_product.assets.each do |asset|
         asset_copy = asset.dup
         asset_copy.product = configurable_product
+        asset_copy.asset_types = asset.asset_types
         asset_copy.sync_needed = true
         asset_copy.save
       end
