@@ -17,16 +17,24 @@ module Gemgento
         end
     end
 
+    # Push local product attribute set changes to Magento
+    def sync_local_to_magento
+        create_magento
+        self.sync_needed = false
+        self.save
+
+        # Fetch all the options for the attribute again, because we need the new id
+        Gemgento::ProductAttributeOption.fetch_all(self.product_attribute)
+    end
+
     private
 
     # Save Magento product attribute set to local
     def self.sync_magento_to_local(source, parent)
-      puts source.inspect
-      exit
       label = Gemgento::Magento.enforce_savon_string(source[:label])
       value = Gemgento::Magento.enforce_savon_string(source[:value])
 
-      product_attribute_option = Gemgento::ProductAttributeOption.find_or_initialize_by_product_attribute_id_and_value(parent.id, value)
+      product_attribute_option = Gemgento::ProductAttributeOption.find_or_initialize_by_product_attribute_id_and_label(parent.id, label)
       product_attribute_option.label = label
       product_attribute_option.value = value
       product_attribute_option.product_attribute = parent
@@ -34,23 +42,16 @@ module Gemgento
       product_attribute_option.save
     end
 
-    # Push local product attribute set changes to Magento
-    def sync_local_to_magento
-      if self.sync_needed
-        delete_magento
-        create_magento
-
-        self.sync_needed = false
-        self.save
-      end
-    end
-
     # Create a new product attribute set in Magento
     def create_magento
+      label = []
+      label << { 'store_id' => { item: [0,1] }, value: self.label }
+      puts label.inspect
+
       message = { attribute: self.product_attribute.magento_id, data: {
-          label: {
-            value: self.label
-          }
+          label: { item: label },
+          order: '0',
+          'is_default' => '0'
       }}
       create_response = Gemgento::Magento.create_call(:catalog_product_attribute_add_option, message)
     end
