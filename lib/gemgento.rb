@@ -9,7 +9,7 @@ module Gemgento
     # Log into the Magento API and setup the session and client
     def self.api_login
       @api_url = "http://#{Gemgento::Config[:magento][:url]}/index.php/api/v#{Gemgento::Config[:magento][:api_version]}_#{Gemgento::Config[:magento][:api_type]}/index/wsdl/1"
-      @client = Savon.client(wsdl: @api_url, log: true)
+      @client = Savon.client(wsdl: @api_url, log: false)
       if Gemgento::Session.last.nil?
         response = @client.call(:login, message: { :username => Gemgento::Config[:magento][:username], :apiKey => Gemgento::Config[:magento][:api_key] })
 
@@ -36,13 +36,17 @@ module Gemgento
       api_login if !defined? @client
 
       message[:sessionId] = @session
-
+      puts "Making Call - #{function}"
       begin
         response = @client.call(function, message: message)
         response = response.body[:"#{function}_response"]
+        puts '^^^ Success ^^^'
       rescue
         response = nil
+        puts '^^^ Failure ^^^'
       end
+
+      puts '-------------------'
 
       return response
     end
