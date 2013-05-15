@@ -4,7 +4,7 @@ development:
     url:  demo.gemgento.com
 
   magento:
-    url:          mw.local
+    url:          madelineweinrib.mauinewyork.com
     username:     philip.vasilevski
     api_key:      857123FHDShfd
     api_type:	  soap

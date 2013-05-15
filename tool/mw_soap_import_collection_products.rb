@@ -1,4 +1,4 @@
-file = '/Users/Kevin/Sites/gemgento/tool/xls/collection_upload_test.xls'
+file = '/Users/Kevin/Sites/gemgento/tool/xls/mw_collections_04122013.xls'
 image_prefix = '/Users/Kevin/Downloads/finished/'
 image_suffix = '.png'
 thumbnail_suffix = '_thumb.jpg'
