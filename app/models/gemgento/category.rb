@@ -83,7 +83,8 @@ module Gemgento
           'available_sort_by' =>  { 'arr:string' => %w[name] },
           'default_sort_by' => 'name',
           'url_key' => self.url_key,
-          'position' => self.position
+          'position' => self.position,
+          'is_anchor' => 1
       }
       message = {parentId: self.parent_id, categoryData: category_data}
       create_response = Gemgento::Magento.create_call(:catalog_category_create, message)
