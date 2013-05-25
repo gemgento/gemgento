@@ -69,9 +69,9 @@ ActiveRecord::Schema.define(:version => 20130513205312) do
     t.integer  "product_attribute_id"
     t.string   "label"
     t.string   "value"
-    t.integer  "sync_needed",          :limit => 1, :default => 1, :null => false
-    t.datetime "created_at",                                       :null => false
-    t.datetime "updated_at",                                       :null => false
+    t.boolean  "sync_needed",          :default => true, :null => false
+    t.datetime "created_at",                             :null => false
+    t.datetime "updated_at",                             :null => false
   end
 
   create_table "gemgento_product_attribute_sets", :force => true do |t|

@@ -2,6 +2,7 @@ require "gemgento/version"
 require "gemgento/engine"
 require 'exception_notifier'
 require 'savon'
+require 'builder'
 
 module Gemgento
   class Magento
@@ -9,7 +10,11 @@ module Gemgento
     # Log into the Magento API and setup the session and client
     def self.api_login
       @api_url = "http://#{Gemgento::Config[:magento][:url]}/index.php/api/v#{Gemgento::Config[:magento][:api_version]}_#{Gemgento::Config[:magento][:api_type]}/index/wsdl/1"
-      @client = Savon.client(wsdl: @api_url, log: false)
+      @client = Savon.client(
+          wsdl: @api_url,
+          log: false,
+          basic_auth: [Gemgento::Config[:magento][:auth_username], Gemgento::Config[:magento][:auth_password]]
+      )
       if Gemgento::Session.last.nil?
         response = @client.call(:login, message: { :username => Gemgento::Config[:magento][:username], :apiKey => Gemgento::Config[:magento][:api_key] })
 
@@ -58,7 +63,6 @@ module Gemgento
         ''
       end
     end
-
   end
 
 end
