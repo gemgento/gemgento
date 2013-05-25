@@ -174,14 +174,14 @@ module Gemgento
           'short_description' => self.attribute_value('short_description'),
           'weight' => self.attribute_value('weight'),
           'status' => self.attribute_value('status'),
-          'categories' => { item: compose_categories },
+          'categories' => { 'item' => compose_categories },
           'url_key' => self.attribute_value('url_key'),
           'price' => self.attribute_value('price'),
-          'additional_attributes' => { 'single_data' => { item: compose_attribute_values }}
+          'additional_attributes' => { 'single_data' => { 'item' => compose_attribute_values }}
       }
 
       unless self.simple_products.empty?
-        product_data.merge!({ 'associated_skus' => { item: compose_associated_skus }, 'price_changes' => compose_price_changes })
+        product_data.merge!({ 'associated_skus' => { 'item' => compose_associated_skus }, 'price_changes' => compose_price_changes })
       end
 
       product_data
@@ -222,7 +222,10 @@ module Gemgento
 
       self.product_attribute_values.each do |product_attribute_value|
         unless product_attribute_value.value.nil?
-          attributes << { key: product_attribute_value.product_attribute.code, value: product_attribute_value.value }
+          attributes << {
+              'key' => product_attribute_value.product_attribute.code,
+              'value' => product_attribute_value.value
+          }
         end
       end
 
