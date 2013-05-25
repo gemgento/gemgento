@@ -26,8 +26,8 @@ module Gemgento
     def self.sync_magento_tree_to_local(category)
       category_response = Gemgento::Magento.create_call(:catalog_category_info, { categoryId: category[:category_id] })
       sync_magento_to_local(category_response[:info])
-
         if category[:children][:item]
+          category[:children][:item] = [category[:children][:item]] unless category[:children][:item].is_a? Array
           category[:children][:item].each do |child|
             sync_magento_tree_to_local(child)
           end
