@@ -12,7 +12,7 @@ module Gemgento
       @api_url = "http://#{Gemgento::Config[:magento][:url]}/index.php/api/v#{Gemgento::Config[:magento][:api_version]}_#{Gemgento::Config[:magento][:api_type]}/index/wsdl/1"
       @client = Savon.client(
           wsdl: @api_url,
-          log: Gemgento::Config[:magento][:auth_username] == 1 ? true : false,
+          log: Gemgento::Config[:magento][:debug],
           basic_auth: [Gemgento::Config[:magento][:auth_username], Gemgento::Config[:magento][:auth_password]]
       )
       if Gemgento::Session.last.nil?
