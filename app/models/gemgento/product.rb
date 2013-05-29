@@ -59,7 +59,6 @@ module Gemgento
     end
 
     def set_attribute_values_from_magento(magento_attribute_values)
-      # TODO: remove existing attribute values before adding new ones to account for removed attributes in Magento
       magento_attribute_values.each do |attribute_value|
         self.set_attribute_value(attribute_value[:key], attribute_value[:value])
       end
@@ -124,6 +123,30 @@ module Gemgento
       product.sync_needed = false
       product.product_attribute_set = Gemgento::ProductAttributeSet.find_by(magento_id: subject[:set])
       product.save
+
+      product.set_attribute_value('name', subject[:name])
+      product.set_attribute_value('description', subject[:description])
+      product.set_attribute_value('short_description', subject[:short_description])
+      product.set_attribute_value('weight', subject[:weight])
+      product.set_attribute_value('status', subject[:status])
+      product.set_attribute_value('url_key', subject[:url_key])
+      product.set_attribute_value('url_path', subject[:url_path])
+      product.set_attribute_value('visibility', subject[:visibility])
+      product.set_attribute_value('has_options', subject[:has_options])
+      product.set_attribute_value('gift_message_available', subject[:gift_message_available])
+      product.set_attribute_value('price', subject[:price])
+      product.set_attribute_value('special_price', subject[:special_price])
+      product.set_attribute_value('special_from_date', subject[:special_from_date])
+      product.set_attribute_value('special_to_date', subject[:special_to_date])
+      product.set_attribute_value('tax_class_id', subject[:tax_class_id])
+      product.set_attribute_value('tier_price', subject[:tier_price])
+      product.set_attribute_value('meta_title', subject[:meta_title])
+      product.set_attribute_value('meta_keyword', subject[:meta_keyword])
+      product.set_attribute_value('meta_description', subject[:meta_description])
+      product.set_attribute_value('custom_design', subject[:custom_design])
+      product.set_attribute_value('custom_layout_update', subject[:custom_layout_update])
+      product.set_attribute_value('options_container', subject[:options_container])
+      product.set_attribute_value('enable_googlecheckout', subject[:enable_googlecheckout])
 
       product.set_categories(subject[:categories][:item]) if subject[:categories][:item]
       product.set_attribute_values_from_magento(subject[:additional_attributes][:item]) if (subject[:additional_attributes] and subject[:additional_attributes][:item])
