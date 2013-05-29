@@ -1,5 +1,5 @@
 #product
-  %img{:src => @product.assets.first.url}
-  = @product.name + " $" + @product.price.to_i.to_s
+  %img{ src: @product.assets.first.url }
+  = @product.attribute_value('name') + ' $' + @product.attribute_value('price')
   - form_for(@cart) do |f|
     = f.button :submit 
