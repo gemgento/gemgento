@@ -126,7 +126,7 @@ module Gemgento
       product.save
 
       product.set_categories(subject[:categories][:item]) if subject[:categories][:item]
-      product.set_attribute_values_from_magento(subject[:additional_attributes][:item]) if subject[:additional_attributes][:item]
+      product.set_attribute_values_from_magento(subject[:additional_attributes][:item]) if (subject[:additional_attributes] and subject[:additional_attributes][:item])
 
       # set media assets
       Gemgento::Asset.fetch_all(product)
