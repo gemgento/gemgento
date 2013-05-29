@@ -22,7 +22,7 @@ module Gemgento
     private
 
     def self.sync_magento_to_local(source, product_attribute_set)
-      asset_type = Gemgento::AssetType.find_or_initialize_by_product_attribute_set_id_and_code(product_attribute_set.id, source[:url])
+      asset_type = Gemgento::AssetType.find_or_initialize_by(product_attribute_set_id: product_attribute_set.id, code: source[:url])
       asset_type.code = source[:code]
       asset_type.scope = source[:scope]
       asset_type.product_attribute_set = product_attribute_set

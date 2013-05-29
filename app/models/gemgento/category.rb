@@ -37,7 +37,7 @@ module Gemgento
     #
     # @param [Hash] subject The returned item of Magento API call
     def self.sync_magento_to_local(subject)
-      category = Category.find_or_initialize_by_magento_id(subject[:category_id])
+      category = Category.find_or_initialize_by(magento_id: subject[:category_id])
       category.magento_id = subject[:category_id]
       category.name = subject[:name]
       category.url_key = subject[:url_key]

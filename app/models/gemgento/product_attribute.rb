@@ -27,7 +27,7 @@ module Gemgento
 
     # Save Magento product attribute set to local
     def self.sync_magento_to_local(source, product_attribute_set)
-      product_attribute = ProductAttribute.find_or_initialize_by_magento_id(source[:attribute_id])
+      product_attribute = ProductAttribute.find_or_initialize_by(magento_id: source[:attribute_id])
       product_attribute.magento_id = source[:attribute_id]
       product_attribute.product_attribute_set = product_attribute_set
       product_attribute.code = source[:attribute_code]

@@ -23,7 +23,7 @@ module Gemgento
     def self.fetch_all
       response = Gemgento::Magento.create_call(:catalog_product_list)
       response[:store_view][:item].each_with_index do |product, i|
-        attribute_set = Gemgento::ProductAttributeSet.find_by_magento_id(product[:set])
+        attribute_set = Gemgento::ProductAttributeSet.find_by(magento_id: product[:set])
          fetch(product[:product_id], attribute_set)
       end
     end
@@ -53,7 +53,7 @@ module Gemgento
 
       # loop through each return category and add it to the product if needed
       magento_categories.each do |magento_category|
-        category = Gemgento::Category.find_by_magento_id(magento_category)
+        category = Gemgento::Category.find_by(magento_id: magento_category)
         self.categories << category unless self.categories.include?(category) # don't duplicate the categories
       end
     end
@@ -66,8 +66,8 @@ module Gemgento
     end
 
     def set_attribute_value(code, value)
-      product_attribute = Gemgento::ProductAttribute.find_by_code(code)
-      product_attribute_value = Gemgento::ProductAttributeValue.find_or_initialize_by_product_id_and_product_attribute_id(self.id, product_attribute.id)
+      product_attribute = Gemgento::ProductAttribute.find_by(code: code)
+      product_attribute_value = Gemgento::ProductAttributeValue.find_or_initialize_by(product_id: self.id, product_attribute_id: product_attribute.id)
       product_attribute_value.product = self
       product_attribute_value.product_attribute = product_attribute
       product_attribute_value.value = value
@@ -77,8 +77,8 @@ module Gemgento
     end
 
     def attribute_value(code)
-      product_attribute = Gemgento::ProductAttribute.find_by_code(code)
-      product_attribute_value = Gemgento::ProductAttributeValue.find_by_product_id_and_product_attribute_id(self.id, product_attribute.id)
+      product_attribute = Gemgento::ProductAttribute.find_by(code: code)
+      product_attribute_value = Gemgento::ProductAttributeValue.find_by(product_id: self.id, product_attribute_id: product_attribute.id)
 
       if product_attribute_value.nil?
         return nil
@@ -87,7 +87,7 @@ module Gemgento
       if product_attribute.product_attribute_options.empty?
         return product_attribute_value.value
       else
-        return Gemgento::ProductAttributeOption.find_by_value(product_attribute_value.value).label
+        return Gemgento::ProductAttributeOption.find_by(value: product_attribute_value.value).label
       end
     end
 
@@ -117,12 +117,12 @@ module Gemgento
     private
 
     def self.sync_magento_to_local(subject)
-      product = self.find_or_initialize_by_magento_id(subject[:product_id])
+      product = self.find_or_initialize_by(magento_id: subject[:product_id])
       product.magento_id = subject[:product_id]
       product.magento_type = subject[:type]
       product.sku = subject[:sku]
       product.sync_needed = false
-      product.product_attribute_set = Gemgento::ProductAttributeSet.find_by_magento_id(subject[:set])
+      product.product_attribute_set = Gemgento::ProductAttributeSet.find_by(magento_id: subject[:set])
       product.save
 
       product.set_categories(subject[:categories][:item]) if subject[:categories][:item]

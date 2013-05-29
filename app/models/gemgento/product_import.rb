@@ -29,8 +29,8 @@ Assumptions
       @root_category = Gemgento::Category.find(root_category_id)
       @store_view = store_view
       @configurable_attributes = [
-          Gemgento::ProductAttribute.find_by_code('color'),
-          Gemgento::ProductAttribute.find_by_code('measurement')
+          Gemgento::ProductAttribute.find_by(code: 'color'),
+          Gemgento::ProductAttribute.find_by(code: 'measurement')
       ]
     end
 
@@ -66,7 +66,7 @@ Assumptions
 
     def create_simple_product
       sku = @row[@headers.index('sku')].to_s + '-CO'
-      product = Gemgento::Product.find_by_sku(sku)
+      product = Gemgento::Product.find_by(sku: sku)
 
       if product.nil? # If product isn't known locally, check with Magento
         product = Gemgento::Product.check_magento(sku, 'sku', @attribute_set)
@@ -94,7 +94,7 @@ Assumptions
 
     def set_attribute_values(product)
       @headers.each do |attribute_code|
-        product_attribute = Gemgento::ProductAttribute.find_by_code(attribute_code) # try to load attribute associated with column header
+        product_attribute = Gemgento::ProductAttribute.find_by(code: attribute_code) # try to load attribute associated with column header
 
         # apply the attribute value if the attribute exists and is part of the attribute set
         if !product_attribute.nil? && @attribute_set.product_attributes.include?(product_attribute) && product_attribute.code != 'sku'
@@ -102,7 +102,7 @@ Assumptions
           if product_attribute.product_attribute_options.empty?
             value = @row[@headers.index(attribute_code)]
           else # attribute value may have to be associated with an attribute option id  '
-            attribute_option = Gemgento::ProductAttributeOption.find_by_product_attribute_id_and_label(product_attribute.id, @row[@headers.index(attribute_code)])
+            attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: @row[@headers.index(attribute_code)])
 
             if attribute_option.nil?
               attribute_option = create_attribute_option(product_attribute, @row[@headers.index(attribute_code)])
@@ -136,13 +136,13 @@ Assumptions
     end
 
     def set_categories(product)
-      parent_category = Gemgento::Category.find_by_parent_id_and_name(@root_category.magento_id, @row[@headers.index('category_parent')])
+      parent_category = Gemgento::Category.find_by(parent_id: @root_category.magento_id, name: @row[@headers.index('category_parent')])
 
       if parent_category.nil?
         parent_category = create_category(@row[@headers.index('category_parent')], @root_category)
       end
 
-      child_category = Gemgento::Category.find_by_parent_id_and_name(parent_category.magento_id, @row[@headers.index('category_child')])
+      child_category = Gemgento::Category.find_by(parent_id: parent_category.magento_id, name: @row[@headers.index('category_child')])
 
       if child_category.nil?
         child_category = create_category(@row[@headers.index('category_child')], parent_category)
@@ -169,7 +169,7 @@ Assumptions
       # set the main product image
       url = @image_prefix + @row[@headers.index('image')] + @image_suffix
       if File.file?(url)
-       types = [Gemgento::AssetType.find_by_code('image'), Gemgento::AssetType.find_by_code('small_image')]
+       types = [Gemgento::AssetType.find_by(code: 'image'), Gemgento::AssetType.find_by(code: 'small_image')]
        product.assets << create_image(product, url, types)
       else
         @messages << "File Missing - #{url}"
@@ -178,7 +178,7 @@ Assumptions
       # set the thumbnail image
       url = @image_prefix + @row[@headers.index('image')] + @thumbnail_suffix
       if File.file?(url)
-        types = [Gemgento::AssetType.find_by_code('thumbnail')]
+        types = [Gemgento::AssetType.find_by(code: 'thumbnail')]
         product.assets << create_image(product, url, types)
       else
         @messages << "File Missing - #{url}"
@@ -213,7 +213,7 @@ Assumptions
         simple_products = fetch_associated_products(attribute_value)
 
         # set the default configurable product attributes
-        configurable_product = Gemgento::Product.find_or_initialize_by_sku("#{attribute_value}-CO")
+        configurable_product = Gemgento::Product.find_or_initialize_by(sku: "#{attribute_value}-CO")
         next if configurable_product.magento_id
         configurable_product.magento_type = 'configurable'
         configurable_product.sku = "#{attribute_value}-CO"
@@ -248,7 +248,7 @@ Assumptions
     end
 
     def fetch_associated_products(attribute_value)
-      product_attribute = Gemgento::ProductAttribute.find_by_code(@attribute_of_association)
+      product_attribute = Gemgento::ProductAttribute.find_by(code: @attribute_of_association)
       product_attribute_values = Gemgento::ProductAttributeValue.where(product_attribute_id: product_attribute.id, value: attribute_value)
       associated_products = []
 

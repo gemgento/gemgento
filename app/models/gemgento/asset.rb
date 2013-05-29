@@ -32,7 +32,7 @@ module Gemgento
       # loop through each return category and add it to the product if needed
       asset_type_codes.each do |asset_type_code|
         unless(asset_type_code.empty?)
-          asset_type = Gemgento::AssetType.find_by_product_attribute_set_id_and_code(self.product.product_attribute_set_id, asset_type_code)
+          asset_type = Gemgento::AssetType.find_by(product_attribute_set_id: self.product.product_attribute_set_id, code: asset_type_code)
           self.asset_types << asset_type unless self.asset_types.include?(asset_type) # don't duplicate the asset types
         end
       end
@@ -49,7 +49,7 @@ module Gemgento
     end
 
     def self.sync_magento_to_local(source, product)
-      asset = Gemgento::Asset.find_or_initialize_by_product_id_and_url(product.id, source[:url])
+      asset = Gemgento::Asset.find_or_initialize_by(product_id: product.id, url: source[:url])
       asset.url = source[:url]
       asset.position = source[:position]
       asset.label = Gemgento::Magento.enforce_savon_string(source[:label])

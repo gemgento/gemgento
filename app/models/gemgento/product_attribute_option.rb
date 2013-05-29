@@ -34,7 +34,7 @@ module Gemgento
       label = Gemgento::Magento.enforce_savon_string(source[:label])
       value = Gemgento::Magento.enforce_savon_string(source[:value])
 
-      product_attribute_option = Gemgento::ProductAttributeOption.find_or_initialize_by_product_attribute_id_and_label(parent.id, label)
+      product_attribute_option = Gemgento::ProductAttributeOption.find_or_initialize_by(product_attribute_id: parent.id, label: label)
       product_attribute_option.label = label
       product_attribute_option.value = value
       product_attribute_option.product_attribute = parent
