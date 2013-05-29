@@ -3,7 +3,7 @@ PATH
   specs:
     gemgento (0.0.1)
       exception_notification_rails3 (= 1.2.0)
-      savon
+      savon (~> 2.2.0)
       spreadsheet
 
 GEM

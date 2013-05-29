@@ -37,13 +37,19 @@ Assumptions
     def process
       1.upto @worksheet.last_row_index do |index|
         puts "Working on row #{index}"
-        next if @worksheet.row(index)[0].nil? && @worksheet.row(index)[1].nil?
+        if @worksheet.row(index)[0].nil? || @worksheet.row(index)[1].nil?
+          @messages << "Row ##{index} missing sku or name"
+          next
+        end
         @row = @worksheet.row(index)
         product = create_simple_product
         track_associated_simple_products(product)
+        puts @messages
       end
 
       create_configurable_products
+
+      puts @messages
     end
 
     private
@@ -59,7 +65,7 @@ Assumptions
     end
 
     def create_simple_product
-      sku = @row[@headers.index('sku')] + '-CO'
+      sku = @row[@headers.index('sku')].to_s + '-CO'
       product = Gemgento::Product.find_by_sku(sku)
 
       if product.nil? # If product isn't known locally, check with Magento
@@ -126,7 +132,7 @@ Assumptions
     def set_default_attribute_values(product)
       product.set_attribute_value('url_key', product.attribute_value('name').sub(' ', '-').downcase) if product.attribute_value('url_key').blank?
       product.set_attribute_value('status', '1') if product.attribute_value('status').blank?
-      product.set_attribute_value('visibility', '4') if product.attribute_value('visibility').blank?
+      product.set_attribute_value('visibility', '1') if product.attribute_value('visibility').blank?
     end
 
     def set_categories(product)
@@ -142,6 +148,7 @@ Assumptions
         child_category = create_category(@row[@headers.index('category_child')], parent_category)
       end
 
+      product.categories << parent_category unless product.categories.include?(parent_category)
       product.categories << child_category unless product.categories.include?(child_category)
     end
 
@@ -159,16 +166,23 @@ Assumptions
     def set_image(product)
       product.assets.destroy_all
 
-      # For testing purposes the large images have been removed
       # set the main product image
-     url = @image_prefix + @row[@headers.index('image')] + @image_suffix
-     types = [Gemgento::AssetType.find_by_code('image'), Gemgento::AssetType.find_by_code('small_image')]
-     product.assets << create_image(product, url, types)
+      url = @image_prefix + @row[@headers.index('image')] + @image_suffix
+      if File.file?(url)
+       types = [Gemgento::AssetType.find_by_code('image'), Gemgento::AssetType.find_by_code('small_image')]
+       product.assets << create_image(product, url, types)
+      else
+        @messages << "File Missing - #{url}"
+      end
 
       # set the thumbnail image
       url = @image_prefix + @row[@headers.index('image')] + @thumbnail_suffix
-      types = [Gemgento::AssetType.find_by_code('thumbnail')]
-      product.assets << create_image(product, url, types)
+      if File.file?(url)
+        types = [Gemgento::AssetType.find_by_code('thumbnail')]
+        product.assets << create_image(product, url, types)
+      else
+        @messages << "File Missing - #{url}"
+      end
     end
 
     def create_image(product, url, types)
@@ -200,6 +214,7 @@ Assumptions
 
         # set the default configurable product attributes
         configurable_product = Gemgento::Product.find_or_initialize_by_sku("#{attribute_value}-CO")
+        next if configurable_product.magento_id
         configurable_product.magento_type = 'configurable'
         configurable_product.sku = "#{attribute_value}-CO"
         configurable_product.product_attribute_set = @attribute_set
@@ -219,7 +234,7 @@ Assumptions
 
         configurable_product.set_attribute_value('name', simple_products.first.attribute_value('name'))
         configurable_product.set_attribute_value('status', '1')
-        configurable_product.set_attribute_value('visibility', '4')
+        configurable_product.set_attribute_value('visibility', '2')
         configurable_product.set_attribute_value('url_key', configurable_product.attribute_value('name').sub(' ', '-').downcase)
 
         configurable_product.categories = simple_products.first.categories

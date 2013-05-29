@@ -17,6 +17,6 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
   gem.add_dependency 'exception_notification_rails3', '=1.2.0'
-  gem.add_dependency 'savon'
+  gem.add_dependency 'savon', '~> 2.2.0'
   gem.add_dependency 'spreadsheet'
 end
