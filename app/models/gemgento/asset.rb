@@ -62,7 +62,6 @@ module Gemgento
     end
 
     def create_magento
-      puts self.product.inspect
       message = { product: self.product.magento_id, data: compose_asset_entity_data, identifier_type: 'id' }
       create_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_create, message)
       self.file = create_response[:result]

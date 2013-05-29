@@ -46,7 +46,6 @@ module Gemgento
     def create_magento
       label = []
       label << { 'store_id' => { item: [0,1] }, value: self.label }
-      puts label.inspect
 
       message = { attribute: self.product_attribute.magento_id, data: {
           label: { item: label },
