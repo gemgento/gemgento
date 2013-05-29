@@ -13,7 +13,7 @@ module Gemgento
       @client = Savon.client(
           wsdl: @api_url,
           log: Gemgento::Config[:magento][:debug],
-          basic_auth: [Gemgento::Config[:magento][:auth_username], Gemgento::Config[:magento][:auth_password]]
+          basic_auth: [Gemgento::Config[:magento][:auth_username].to_s, Gemgento::Config[:magento][:auth_password].to_s]
       )
       if Gemgento::Session.last.nil?
         response = @client.call(:login, message: { :username => Gemgento::Config[:magento][:username], :apiKey => Gemgento::Config[:magento][:api_key] })
