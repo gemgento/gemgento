@@ -6,11 +6,11 @@ module Gemgento
 
     belongs_to :product_attribute_set
     has_many :product_attribute_values
-    has_and_belongs_to_many :categories, join_table: 'gemgento_categories_products', uniq: true
+    has_and_belongs_to_many :categories, -> { uniq } , join_table: 'gemgento_categories_products'
     has_many :assets
     has_many :simple_products, foreign_key: 'parent_id', class_name: 'Product'
     belongs_to :configurable_product, foreign_key: 'parent_id', class_name: 'Product'
-    has_and_belongs_to_many :configurable_attributes, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute', uniq: true
+    has_and_belongs_to_many :configurable_attributes, -> { uniq } , join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
     after_save :sync_local_to_magento
 
     def self.index

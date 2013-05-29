@@ -1,7 +1,7 @@
 module Gemgento
   class AssetType < ActiveRecord::Base
     belongs_to :product_attribute_set
-    has_and_belongs_to_many :assets, :join_table => 'gemgento_assets_asset_types', :uniq => true
+    has_and_belongs_to_many :assets, -> { uniq } , :join_table => 'gemgento_assets_asset_types'
 
     def self.fetch_all(product_attribute_set)
       asset_type_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_types, { set_id: product_attribute_set.magento_id })
