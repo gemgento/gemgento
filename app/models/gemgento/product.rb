@@ -139,7 +139,6 @@ module Gemgento
       product.set_attribute_value('special_from_date', subject[:special_from_date])
       product.set_attribute_value('special_to_date', subject[:special_to_date])
       product.set_attribute_value('tax_class_id', subject[:tax_class_id])
-      product.set_attribute_value('tier_price', subject[:tier_price])
       product.set_attribute_value('meta_title', subject[:meta_title])
       product.set_attribute_value('meta_keyword', subject[:meta_keyword])
       product.set_attribute_value('meta_description', subject[:meta_description])
