@@ -11,3 +11,4 @@ development:
     api_key:          857123FHDShfd
     api_type:	      soap
     api_version:      2
+    debug:            0
