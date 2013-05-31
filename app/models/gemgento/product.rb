@@ -113,6 +113,14 @@ module Gemgento
       end
     end
 
+    def self.associate_simple_products_to_configurable_products
+      Gemgento::Product.where(magento_type: 'configurable').each do |configurable_product|
+        MagentoDB.associated_simple_products(configurable_product).each do |simple_product|
+          configurable_product.simple_products << simple_product
+        end
+      end
+    end
+
     private
 
     def self.sync_magento_to_local(subject)

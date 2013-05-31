@@ -2,9 +2,15 @@ module Gemgento
   class MagentoDB < ActiveRecord::Base
     establish_connection(:magento)
 
-    def self.product_links(parent_id)
+    def self.associated_simple_products(configurable_product)
       self.table_name = 'catalog_product_super_link'
-      puts self.where('parent_id = ?', parent_id)
+      simple_products = []
+
+      self.where('parent_id = ?', configurable_product.magento_id).each do |association|
+        simple_products << Gemgento::Product.find_by(magento_id: association.product_id)
+      end
+
+      simple_products
     end
   end
 end
