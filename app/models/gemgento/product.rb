@@ -157,6 +157,7 @@ module Gemgento
       product.set_attribute_values_from_magento(subject[:additional_attributes][:item]) if (subject[:additional_attributes] and subject[:additional_attributes][:item])
 
       # set media assets
+      Gemgento::Asset.skip_callback(:destroy, :before, :delete_magento)
       product.assets.destroy_all
       Gemgento::Asset.fetch_all(product)
 
