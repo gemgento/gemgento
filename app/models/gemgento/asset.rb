@@ -3,6 +3,7 @@ module Gemgento
     belongs_to :product
     has_and_belongs_to_many :asset_types, -> { uniq } , :join_table => 'gemgento_assets_asset_types'
     after_save :sync_local_to_magento
+    before_destroy :delete_magento
 
     def self.fetch_all(product)
       asset_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_list, { product: product.magento_id, productIdentifierType: 'id' })
