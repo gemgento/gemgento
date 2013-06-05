@@ -1,5 +1,4 @@
 #product
+  = @product.attribute_value('name')
   %img{ src: @product.assets.first.url }
   = @product.attribute_value('name') + ' $' + @product.attribute_value('price')
-  - form_for(@cart) do |f|
-    = f.button :submit 

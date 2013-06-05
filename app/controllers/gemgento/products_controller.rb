@@ -7,7 +7,10 @@ module Gemgento
   	end
 
     def show
-      @product = Product.find_by(url_key: params[:permalink])
+      @product = Gemgento::Product.joins(:product_attribute_values => :product_attribute).where(
+          gemgento_product_attributes: { code: 'url_key' },
+          gemgento_product_attribute_values: { value: params[:url_key] }
+      ).first
     end
 
   end
