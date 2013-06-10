@@ -1,10 +1,10 @@
 Gemgento::Engine.routes.draw do
   root :to => "products#index"
 
-  resources :products, :categories, :users, :orders
+  resources :products, :categories, :users, :orders, :addresses
 
   namespace 'user' do
-    resources :orders
+    resources :orders, :addresses
   end
 
   match '/shop/:permalink' => 'products#show', via: :get, as: 'shop_permalink'
