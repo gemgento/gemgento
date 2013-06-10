@@ -1,8 +1,12 @@
-module Gemgento::User
+module Gemgento
   class AddressesController < BaseController
     layout 'application'
 
     def index
+
+    end
+
+    def show
 
     end
 

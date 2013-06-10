@@ -1,4 +1,4 @@
-module Gemgento::User
+module Gemgento
   class OrdersController < BaseController
     layout 'application'
 
