@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130611220714) do
+ActiveRecord::Schema.define(version: 20130611222017) do
 
   create_table "gemgento_asset_types", force: true do |t|
     t.integer  "product_attribute_set_id"
@@ -66,7 +66,7 @@ ActiveRecord::Schema.define(version: 20130611220714) do
   end
 
   create_table "gemgento_countries", force: true do |t|
-    t.integer  "magento_id", null: false
+    t.string   "magento_id", null: false
     t.string   "iso2_code"
     t.string   "iso3_code"
     t.string   "name"
@@ -129,6 +129,15 @@ ActiveRecord::Schema.define(version: 20130611220714) do
     t.string   "store_id"
     t.boolean  "sync_needed",              default: true, null: false
     t.integer  "parent_id"
+  end
+
+  create_table "gemgento_regions", force: true do |t|
+    t.integer  "magento_id", null: false
+    t.string   "code"
+    t.string   "name"
+    t.integer  "country_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "gemgento_sessions", force: true do |t|
