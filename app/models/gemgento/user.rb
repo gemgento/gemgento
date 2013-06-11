@@ -15,20 +15,22 @@ module Gemgento
     def self.fetch_all
       response = Gemgento::Magento.create_call(:customer_customer_list)
 
+      # enforce array
       unless response[:store_view].is_a? Array
         response[:store_view] = [response[:store_view]]
       end
 
       response[:store_view].each do |store_view|
-        unless response[:store_view][:item].is_a? Array
-          response[:store_view][:item] = [response[:store_view][:item]]
+
+        # enforce array
+        unless store_view[:item].is_a? Array
+          store_view[:item] = [store_view][:item]
         end
 
-        response[:store_view][:item].each do |user|
-          sync_magento_to_local(user)
+        store_view[:item].each do |customer|
+          sync_magento_to_local(customer)
         end
       end
-
     end
 
     private
@@ -44,7 +46,7 @@ module Gemgento
       user.fname = source[:firstname]
       user.mname = source[:middlename]
       user.lname = source[:lastname]
-      use.group = Group.find_by(magento_id: source[:group_id])
+      user.user_group = UserGroup.find_by(magento_id: source[:group_id])
       user.prefix = source[:prefix]
       user.suffix = source[:suffix]
       user.dob = source[:dob]
