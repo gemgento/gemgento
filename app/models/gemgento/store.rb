@@ -12,13 +12,13 @@ module Gemgento
     end
 
     def self.fetch_all
-      response = Gemgento::Magento.create_call(:customer_group_list)
+      response = Gemgento::Magento.create_call(:store_list)
 
-      unless response[:result][:item].is_a? Array
-        response[:result][:item] = [response[:result][:item]]
+      unless response[:stores][:item].is_a? Array
+        response[:stores][:item] = [response[:stores][:item]]
       end
 
-      response[:result][:item].each do |store|
+      response[:stores][:item].each do |store|
         sync_magento_to_local(store)
       end
 
@@ -33,8 +33,8 @@ module Gemgento
       store.code = source[:code]
       store.group_id = source[:group_id]
       store.name = source[:name]
-      source.sort_order = source[:sort_order]
-      source.is_active = is_active
+      store.sort_order = source[:sort_order]
+      store.is_active = source[:is_active]
       store.save
     end
   end
