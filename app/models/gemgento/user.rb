@@ -2,6 +2,7 @@ module Gemgento
   class User < ActiveRecord::Base
     belongs_to :user_group
     belongs_to :store
+    after_save :sync_local_to_magento
 
     def self.index
       if User.find(:all).size == 0
@@ -52,6 +53,60 @@ module Gemgento
       user.password = source[:password_hash]
       user.sync_needed = false
       user.save
+    end
+
+    # Push local user changes to magento
+    def sync_local_to_magento
+      if self.sync_needed
+        if !self.magento_id
+          create_magento
+        else
+          update_magento
+        end
+
+        self.sync_needed = false
+        self.save
+      end
+    end
+
+    # Create a new Product in Magento and set out magento_id
+    def create_magento
+      message = {
+          customer_data: compose_customer_data
+      }
+      create_response = Gemgento::Magento.create_call(:customer_customer_create, message)
+      self.magento_id = create_response[:result]
+    end
+
+    # Update existing Magento Product
+    def update_magento
+      message = {
+          customer_id:  self.magento_id,
+          customer_data: compose_customer_data
+      }
+      update_response = Gemgento::Magento.create_call(:customer_customer_update, message)
+    end
+
+    def compose_customer_data
+      customer_data = {
+        email: self.email,
+        firstname: self.fname,
+        middlename: self.mname,
+        lastname: self.lname,
+        password: self.password,
+        'store_id' => self.store.magento_id,
+        'group_id' => self.user_group.magento_id,
+        prefix: self.prefix,
+        suffix: self.suffix,
+        dob: self.dob,
+        taxvat: self.taxvat
+      }
+
+      unless self.gender.null?
+        customer_data.merge!({ gender: self.gender == male ? 1 : 2 })
+      end
+
+      customer_data
     end
   end
 end
