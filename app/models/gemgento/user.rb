@@ -1,6 +1,7 @@
 module Gemgento
   class User < ActiveRecord::Base
     belongs_to :user_group
+    belongs_to :store
 
     def self.index
       if User.find(:all).size == 0

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130611181415) do
+ActiveRecord::Schema.define(version: 20130611182627) do
 
   create_table "gemgento_asset_types", force: true do |t|
     t.integer  "product_attribute_set_id"
@@ -127,6 +127,19 @@ ActiveRecord::Schema.define(version: 20130611181415) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
+  create_table "gemgento_stores", force: true do |t|
+    t.integer  "magento_id",                null: false
+    t.string   "code"
+    t.integer  "group_id"
+    t.string   "name"
+    t.integer  "sort_order"
+    t.boolean  "is_active",  default: true, null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true
 
   create_table "gemgento_user_groups", force: true do |t|
     t.integer  "magento_id"
