@@ -1,5 +1,5 @@
 module Gemgento
-  class User < MagentoObject
-    has_many :orders
+  class User < ActiveRecord::Base
+
   end
 end
