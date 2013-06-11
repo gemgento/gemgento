@@ -142,6 +142,7 @@ module Gemgento
       product.sku = subject[:sku]
       product.sync_needed = false
       product.product_attribute_set = Gemgento::ProductAttributeSet.find_by(magento_id: subject[:set])
+      product.store = Gemgento::Store.first
       product.save
 
       product.set_attribute_value('name', subject[:name])
@@ -199,7 +200,7 @@ module Gemgento
           set: self.product_attribute_set.magento_id,
           sku: self.sku,
           productData: compose_product_data,
-          storeView: self.store
+          storeView: self.store.magento_id
       }
       create_response = Gemgento::Magento.create_call(:catalog_product_create, message)
       self.magento_id = create_response[:result]
