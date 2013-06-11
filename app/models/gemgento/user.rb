@@ -108,5 +108,12 @@ module Gemgento
 
       customer_data
     end
+
+    def delete_magento
+      message = {
+          customer_id: self.magento_id
+      }
+      delete_response = Gemgento::Magento.create_call(:customer_customer_delete, message)
+    end
   end
 end
