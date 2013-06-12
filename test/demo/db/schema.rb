@@ -11,7 +11,32 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130611222017) do
+ActiveRecord::Schema.define(version: 20130612143929) do
+
+  create_table "gemgento_addresses", force: true do |t|
+    t.integer  "magento_id",                          null: false
+    t.integer  "user_id",                             null: false
+    t.string   "increment_id"
+    t.string   "city"
+    t.string   "company"
+    t.integer  "country_id"
+    t.string   "fax"
+    t.string   "fname"
+    t.string   "mname"
+    t.string   "lname"
+    t.string   "postcode"
+    t.string   "prefix"
+    t.string   "suffix"
+    t.string   "region_name"
+    t.integer  "region_id"
+    t.string   "street"
+    t.string   "telephone"
+    t.boolean  "is_default_billing",  default: false, null: false
+    t.boolean  "is_default_shipping", default: false, null: false
+    t.boolean  "sync_needed",         default: true,  null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "gemgento_asset_types", force: true do |t|
     t.integer  "product_attribute_set_id"
