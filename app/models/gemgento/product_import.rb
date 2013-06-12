@@ -29,8 +29,7 @@ Assumptions
       @root_category = Gemgento::Category.find(root_category_id)
       @store_view = store_view
       @configurable_attributes = [
-          Gemgento::ProductAttribute.find_by(code: 'color'),
-          Gemgento::ProductAttribute.find_by(code: 'measurement')
+          Gemgento::ProductAttribute.find_by(code: 'size')
       ]
     end
 
@@ -65,7 +64,7 @@ Assumptions
     end
 
     def create_simple_product
-      sku = @row[@headers.index('sku')].to_s + '-CO'
+      sku = @row[@headers.index('sku')].to_s + '_' + @row[@headers.index('size')]
       product = Gemgento::Product.find_by(sku: sku)
 
       if product.nil? # If product isn't known locally, check with Magento
@@ -87,7 +86,7 @@ Assumptions
       product.sync_needed = true
       product.save
 
-      set_image(product)
+      #set_image(product)
 
       product
     end
@@ -213,10 +212,10 @@ Assumptions
         simple_products = fetch_associated_products(attribute_value)
 
         # set the default configurable product attributes
-        configurable_product = Gemgento::Product.find_or_initialize_by(sku: "#{attribute_value}-CO")
+        configurable_product = Gemgento::Product.find_or_initialize_by(sku: "#{attribute_value}")
         next if configurable_product.magento_id
         configurable_product.magento_type = 'configurable'
-        configurable_product.sku = "#{attribute_value}-CO"
+        configurable_product.sku = "#{attribute_value}"
         configurable_product.product_attribute_set = @attribute_set
         configurable_product.sync_needed = false
         configurable_product.save
