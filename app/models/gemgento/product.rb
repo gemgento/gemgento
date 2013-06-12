@@ -12,6 +12,7 @@ module Gemgento
     has_and_belongs_to_many :configurable_attributes, -> { uniq } , join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
     after_save :sync_local_to_magento
     belongs_to :store
+    has_one :inventory
 
     def self.index
       if Product.find(:all).size == 0

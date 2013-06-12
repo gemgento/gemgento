@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130612143929) do
+ActiveRecord::Schema.define(version: 20130612171525) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer  "magento_id",                          null: false
@@ -95,6 +95,15 @@ ActiveRecord::Schema.define(version: 20130612143929) do
     t.string   "iso2_code"
     t.string   "iso3_code"
     t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "gemgento_inventories", force: true do |t|
+    t.integer  "product_id",                  null: false
+    t.integer  "quantity",    default: 0,     null: false
+    t.boolean  "is_in_stock", default: false, null: false
+    t.boolean  "sync_needed", default: true,  null: false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
