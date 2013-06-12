@@ -3,8 +3,8 @@ module Gemgento
     belongs_to :store
     belongs_to :user
     belongs_to :user_group
-    belongs_to :shipping_address, foreign_key: 'shipping_address_id', class_name: 'Address'
-    belongs_to :billing_address, foreign_key: 'billing_address_id', class_name: 'Address'
+    belongs_to :shipping_address, foreign_key: 'shipping_address_id', class_name: 'OrderAddress'
+    belongs_to :billing_address, foreign_key: 'billing_address_id', class_name: 'OrderAddress'
 
     def self.index
       if Order.find(:all).size == 0
