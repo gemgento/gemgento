@@ -1,7 +1,6 @@
 module Gemgento
   class Product < ActiveRecord::Base
 
-    # TODO: handle 'store view' the Gemgento way
     # TODO: need a way to update product type via Gemgento
 
     belongs_to :product_attribute_set
@@ -12,6 +11,7 @@ module Gemgento
     belongs_to :configurable_product, foreign_key: 'parent_id', class_name: 'Product'
     has_and_belongs_to_many :configurable_attributes, -> { uniq } , join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
     after_save :sync_local_to_magento
+    belongs_to :store
 
     def self.index
       if Product.find(:all).size == 0
@@ -22,9 +22,23 @@ module Gemgento
 
     def self.fetch_all
       response = Gemgento::Magento.create_call(:catalog_product_list)
-      response[:store_view][:item].each_with_index do |product, i|
-        attribute_set = Gemgento::ProductAttributeSet.find_by(magento_id: product[:set])
-         fetch(product[:product_id], attribute_set)
+
+      # enforce array
+      unless response[:store_view].is_a? Array
+        response[:store_view] = [response[:store_view]]
+      end
+
+      response[:store_view].each do |store_view|
+
+        # enforce array
+        unless store_view[:item].is_a? Array
+          store_view[:item] = [store_view][:item]
+        end
+
+        store_view[:item].each do |product|
+          attribute_set = Gemgento::ProductAttributeSet.find_by(magento_id: product[:set])
+          fetch(product[:product_id], attribute_set)
+        end
       end
     end
 
@@ -128,6 +142,7 @@ module Gemgento
       product.sku = subject[:sku]
       product.sync_needed = false
       product.product_attribute_set = Gemgento::ProductAttributeSet.find_by(magento_id: subject[:set])
+      product.store = Gemgento::Store.first
       product.save
 
       product.set_attribute_value('name', subject[:name])
@@ -185,7 +200,7 @@ module Gemgento
           set: self.product_attribute_set.magento_id,
           sku: self.sku,
           productData: compose_product_data,
-          storeView: self.store_view
+          storeView: self.store.magento_id
       }
       create_response = Gemgento::Magento.create_call(:catalog_product_create, message)
       self.magento_id = create_response[:result]

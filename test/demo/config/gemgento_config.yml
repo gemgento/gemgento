@@ -1,14 +1,15 @@
 development:
   site:
-    name: Gemgento Demo
-    url:  demo.gemgento.com
+    name: Oliver Peoples
+    url:  op.mny.mx
 
-  magento:
-    url:         madelineweinrib.mauinewyork.com
-    auth_username:    mw
-    auth_password:    mw000
-    username:         philip.vasilevski
+  magento: 
+    url:              dev.oliverpeoples.com
+    auth_username:    ''
+    auth_password:    ''
+    username:         maui
     api_key:          857123FHDShfd
     api_type:	      soap
     api_version:      2
-    debug:            0
+    debug:            false
+    encryption:       b476516d0acc86dbc0148cdb68eec8f9

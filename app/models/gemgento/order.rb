@@ -1,5 +1,5 @@
 module Gemgento
-  class Order < MagentoObject
+  class Order < ActiveRecord::Base
     has_many :products
     belongs_to :user
   end
