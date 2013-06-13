@@ -99,6 +99,13 @@ ActiveRecord::Schema.define(version: 20130612211410) do
     t.datetime "updated_at"
   end
 
+  create_table "gemgento_gift_messages", force: true do |t|
+    t.integer "magento_id"
+    t.string  "to"
+    t.string  "from"
+    t.text    "message"
+  end
+
   create_table "gemgento_inventories", force: true do |t|
     t.integer  "product_id",                  null: false
     t.integer  "quantity",    default: 0,     null: false
@@ -109,9 +116,10 @@ ActiveRecord::Schema.define(version: 20130612211410) do
   end
 
   create_table "gemgento_order_addresses", force: true do |t|
-    t.integer  "order_id",                    null: false
+    t.integer  "magento_id"
+    t.integer  "order_id",     null: false
     t.integer  "increment_id"
-    t.boolean  "is_active",    default: true, null: false
+    t.boolean  "is_active"
     t.string   "address_type"
     t.string   "fname"
     t.string   "lname"
@@ -124,7 +132,6 @@ ActiveRecord::Schema.define(version: 20130612211410) do
     t.integer  "country_id"
     t.string   "telephone"
     t.string   "fax"
-    t.integer  "address_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -172,8 +179,6 @@ ActiveRecord::Schema.define(version: 20130612211410) do
     t.decimal  "base_row_invoiced",                precision: 12, scale: 4
     t.decimal  "row_weight",                       precision: 12, scale: 4
     t.string   "gift_message_id"
-    t.string   "gift_message"
-    t.string   "gift_message_available"
     t.decimal  "base_tax_before_discount",         precision: 12, scale: 4
     t.decimal  "tax_before_discount",              precision: 12, scale: 4
     t.decimal  "weee_tax_applied",                 precision: 12, scale: 4
@@ -190,10 +195,10 @@ ActiveRecord::Schema.define(version: 20130612211410) do
   end
 
   create_table "gemgento_order_payments", force: true do |t|
-    t.integer  "payment_id"
-    t.integer  "order_id",                                                     null: false
+    t.integer  "magento_id"
+    t.integer  "order_id",                                      null: false
     t.integer  "increment_id"
-    t.boolean  "is_active",                                     default: true, null: false
+    t.boolean  "is_active"
     t.decimal  "amount_ordered",       precision: 12, scale: 4
     t.decimal  "shipping_amount",      precision: 12, scale: 4
     t.decimal  "base_amount_ordered",  precision: 12, scale: 4
@@ -213,10 +218,10 @@ ActiveRecord::Schema.define(version: 20130612211410) do
   end
 
   create_table "gemgento_order_status_histories", force: true do |t|
-    t.integer  "order_id",                            null: false
+    t.integer  "order_id",             null: false
     t.integer  "increment_id"
-    t.boolean  "is_active",            default: true, null: false
-    t.boolean  "is_customer_notified", default: true, null: false
+    t.boolean  "is_active"
+    t.string   "is_customer_notified"
     t.string   "status"
     t.string   "comment"
     t.datetime "created_at"
@@ -287,7 +292,6 @@ ActiveRecord::Schema.define(version: 20130612211410) do
     t.boolean  "email_sent"
     t.integer  "increment_id"
     t.string   "gift_message_id"
-    t.string   "gift_message"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

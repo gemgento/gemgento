@@ -1,10 +1,13 @@
 module Gemgento
   class Order < ActiveRecord::Base
-    belongs_to :store
-    belongs_to :user
-    belongs_to :user_group
-    belongs_to :shipping_address, foreign_key: 'shipping_address_id', class_name: 'OrderAddress'
-    belongs_to :billing_address, foreign_key: 'billing_address_id', class_name: 'OrderAddress'
+    belongs_to  :store
+    belongs_to  :user
+    belongs_to  :user_group
+    has_one     :shipping_address, foreign_key: 'shipping_address_id', class_name: 'OrderAddress'
+    has_one     :billing_address, foreign_key: 'billing_address_id', class_name: 'OrderAddress'
+    has_one     :order_payment
+    has_one     :gift_message
+    has_many    :order_items
 
     def self.index
       if Order.find(:all).size == 0
@@ -22,14 +25,21 @@ module Gemgento
       end
 
       response[:result][:item].each do |order|
-        sync_magento_to_local(order)
+        fetch(order[:increment_id])
       end
+    end
+
+    def self.fetch(increment_id)
+      message = { order_increment_id: increment_id }
+      response = Gemgento::Magento.create_call(:sales_order_info, message)
+      sync_magento_to_local(response[:result])
     end
 
     private
 
     # Save Magento order to local
     def self.sync_magento_to_local(source)
+      puts source
       order = Order.find_or_initialize_by(magento_id: source[:order_id])
       order.magento_id = source[:order_id]
       order.store = Store.find_by(magento_id: source[:store_id])
@@ -59,14 +69,6 @@ module Gemgento
       order.base_total_invoiced = source[:base_total_invoiced]
       order.base_total_online_refunded = source[:base_total_online_refunded]
       order.base_total_offline_refunded = source[:base_total_offline_refunded]
-      order.billing_address = Address.find_by(magento_id: source[:billing_address_id])
-      order.billing_fname = source[:billing_firstname]
-      order.billing_lname = source[:billing_lastname]
-      order.shipping_address = Address.find_by(source[:shipping_address_id])
-      order.shipping_fname = source[:shipping_firstname]
-      order.shipping_lname = source[:shipping_lastname]
-      order.billing_name = source[:billing_name]
-      order.shipping_name = source[:shipping_name]
       order.store_to_base_rate = source[:store_to_base_rate]
       order.store_to_order_rate = source[:store_to_order_rate]
       order.base_to_global_rate = source[:base_to_global_rate]
@@ -93,8 +95,27 @@ module Gemgento
       order.customer_is_guest = source[:customer_is_guest]
       order.email_sent = source[:email_sent]
       order.increment_id = source[:increment_id]
-      order.gift_message_id = source[:gift_message_id]
-      order.gift_message = source[:gift_message]
+      order.save
+
+      unless source[:gift_message_id].nil?
+        gift_message = GiftMessage.sync_magento_to_local(source[:gift_message])
+        order.gift_message = gift_message
+        order.save
+      end
+
+      shipping_address = OrderAddress.sync_magento_to_local(source[:shipping_address])
+      order.shipping_address = shipping_address
+
+      billing_address = OrderAddress.sync_magento_to_local(source[:billing_address])
+      order.billing_address = billing_address
+
+      source[:items[:item]].each do |item|
+        OrderItem.sync_magento_to_local(item, order)
+      end
+
+      payment = OrderPayment.sync_magento_to_local(source[:payment])
+      order.payment = payment
+
       order.save
     end
   end

@@ -1,9 +1,10 @@
 class CreateTablesForOrderDependentModels < ActiveRecord::Migration
   def change
     create_table :gemgento_order_addresses do |t|
+      t.integer     :magento_id
       t.integer     :order_id, null: false
       t.integer     :increment_id
-      t.boolean     :is_active, null: false, default: true
+      t.boolean     :is_active
       t.string      :address_type
       t.string      :fname
       t.string      :lname
@@ -16,7 +17,6 @@ class CreateTablesForOrderDependentModels < ActiveRecord::Migration
       t.integer     :country_id
       t.string      :telephone
       t.string      :fax
-      t.integer     :address_id
       t.timestamps
     end
 
@@ -63,8 +63,6 @@ class CreateTablesForOrderDependentModels < ActiveRecord::Migration
       t.decimal     :base_row_invoiced, precision: 12, scale: 4
       t.decimal     :row_weight, precision: 12, scale: 4
       t.string      :gift_message_id
-      t.string      :gift_message
-      t.string      :gift_message_available
       t.decimal     :base_tax_before_discount, precision: 12, scale: 4
       t.decimal     :tax_before_discount, precision: 12, scale: 4
       t.decimal     :weee_tax_applied, precision: 12, scale: 4
@@ -80,10 +78,10 @@ class CreateTablesForOrderDependentModels < ActiveRecord::Migration
     end
 
     create_table :gemgento_order_payments do |t|
-      t.integer     :payment_id
+      t.integer     :magento_id
       t.integer     :order_id, null: false
       t.integer     :increment_id
-      t.boolean     :is_active, null: false, default: true
+      t.boolean     :is_active
       t.decimal     :amount_ordered, precision: 12, scale: 4
       t.decimal     :shipping_amount, precision: 12, scale: 4
       t.decimal     :base_amount_ordered, precision: 12, scale: 4
@@ -104,11 +102,18 @@ class CreateTablesForOrderDependentModels < ActiveRecord::Migration
     create_table :gemgento_order_status_histories do |t|
       t.integer     :order_id, null: false
       t.integer     :increment_id
-      t.boolean     :is_active, null: false, default: true
-      t.boolean     :is_customer_notified, null: false, default: true
+      t.boolean     :is_active
+      t.string      :is_customer_notified
       t.string      :status
       t.string      :comment
       t.timestamps
+    end
+
+    create_table :gemgento_gift_messages do |t|
+      t.integer     :magento_id
+      t.string      :to
+      t.string      :from
+      t.text        :message
     end
   end
 end

@@ -64,7 +64,6 @@ class CreateTableGemgentoOrders < ActiveRecord::Migration
       t.boolean   :email_sent
       t.integer   :increment_id
       t.string    :gift_message_id
-      t.string    :gift_message
       t.timestamps
     end
   end
