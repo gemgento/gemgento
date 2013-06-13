@@ -64,7 +64,9 @@ Assumptions
     end
 
     def create_simple_product
+      # Decide how to format skus - for now use suffix of size column
       sku = @row[@headers.index('sku')].to_s + '_' + @row[@headers.index('size')]
+
       product = Gemgento::Product.find_by(sku: sku)
 
       if product.nil? # If product isn't known locally, check with Magento
@@ -82,7 +84,7 @@ Assumptions
 
       set_attribute_values(product)
       set_categories(product)
-
+      product.store = Gemgento::Store.first
       product.sync_needed = true
       product.save
 
