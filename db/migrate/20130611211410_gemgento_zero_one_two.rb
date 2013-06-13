@@ -1,9 +1,9 @@
 class GemgentoZeroOneTwo < ActiveRecord::Migration
   def change
- 
+
     create_table "gemgento_addresses", force: true do |t|
-      t.integer  "magento_id",                          null: false
-      t.integer  "user_id",                             null: false
+      t.integer  "user_address_id"
+      t.integer  "user_id"
       t.string   "increment_id"
       t.string   "city"
       t.string   "company"
@@ -19,11 +19,14 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
       t.integer  "region_id"
       t.string   "street"
       t.string   "telephone"
-      t.boolean  "is_default_billing",  default: false, null: false
-      t.boolean  "is_default_shipping", default: false, null: false
+      t.string   "address_type"
+      t.boolean  "is_default_billing",  default: false
+      t.boolean  "is_default_shipping", default: false
       t.boolean  "sync_needed",         default: true,  null: false
       t.datetime "created_at"
       t.datetime "updated_at"
+      t.integer  "order_address_id"
+      t.integer  "order_id"
     end
 
     create_table "gemgento_asset_types", force: true do |t|
@@ -87,6 +90,13 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
       t.datetime "updated_at"
     end
 
+    create_table "gemgento_gift_messages", force: true do |t|
+      t.integer "magento_id"
+      t.string  "to"
+      t.string  "from"
+      t.text    "message"
+    end
+
     create_table "gemgento_inventories", force: true do |t|
       t.integer  "product_id",                  null: false
       t.integer  "quantity",    default: 0,     null: false
@@ -123,7 +133,7 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
       t.integer  "quote_item_id"
       t.integer  "product_id"
       t.string   "product_type"
-      t.string   "product_options"
+      t.text     "product_options"
       t.decimal  "weight",                           precision: 12, scale: 4
       t.boolean  "is_virtual"
       t.string   "sku"
@@ -178,7 +188,7 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
     end
 
     create_table "gemgento_order_payments", force: true do |t|
-      t.integer  "payment_id"
+      t.integer  "magento_id"
       t.integer  "order_id",                                                     null: false
       t.integer  "increment_id"
       t.boolean  "is_active",                                     default: true, null: false
@@ -200,11 +210,11 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
       t.datetime "updated_at"
     end
 
-    create_table "gemgento_order_status_histories", force: true do |t|
+    create_table "gemgento_order_statuses", force: true do |t|
       t.integer  "order_id",                            null: false
       t.integer  "increment_id"
-      t.boolean  "is_active",            default: true, null: false
-      t.boolean  "is_customer_notified", default: true, null: false
+      t.boolean  "is_active",            default: true
+      t.integer  "is_customer_notified", default: 1
       t.string   "status"
       t.string   "comment"
       t.datetime "created_at"
@@ -390,8 +400,11 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
       t.boolean  "sync_needed",   default: true, null: false
       t.datetime "created_at"
       t.datetime "updated_at"
+      t.integer  "increment_id"
     end
 
     add_index "gemgento_users", ["magento_id"], name: "index_gemgento_users_on_magento_id", unique: true
+
   end
 end
+

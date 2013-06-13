@@ -2,8 +2,9 @@ module Gemgento
   class OrderPayment < ActiveRecord::Base
     belongs_to :order
 
-    def sync_magento_to_local(source)
-      payment = OrderPayment.find_by(magento_id: source[:payment_id])
+    def self.sync_magento_to_local(source, order)
+      payment = OrderPayment.find_or_initialize_by(magento_id: source[:payment_id])
+      payment.order = order
       payment.magento_id = source[:payment_id]
       #payment.increment_id = source[:increment_id]
       #payment.is_active = source[:is_active]

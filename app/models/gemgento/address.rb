@@ -3,6 +3,7 @@ module Gemgento
     belongs_to :user
     belongs_to :country
     belongs_to :region
+    belongs_to :order
 
     def self.index
       if Address.find(:all).size == 0
@@ -31,13 +32,21 @@ module Gemgento
       end
     end
 
-    private
-
     # Save Magento user address to local
-    def self.sync_magento_to_local(source, user)
-      address = Address.find_or_initialize_by(magento_id: source[:customer_address_id])
-      address.magento_id = source[:customer_address_id]
-      address.user = user
+    def self.sync_magento_to_local(source, related_model)
+
+      if related_model.class.name == User.new.class.name
+        address = Address.find_or_initialize_by(customer_address_id: source[:customer_address_id])
+        address.user_address_id = source[:customer_address_id]
+        address.user = related_model
+      elsif related_model.class.name == Order.new.class.name
+        address = Address.find_or_initialize_by(order_address_id: source[:address_id])
+        address.order_address_id = source[:address_id]
+        address.order = related_model
+      else
+        address = Address.new
+      end
+
       address.increment_id = source[:increment_id]
       address.city = source[:city]
       address.company = source[:company]
@@ -55,8 +64,11 @@ module Gemgento
       address.telephone = source[:telephone]
       address.is_default_billing = source[:is_default_billing]
       address.is_default_shipping = source[:is_default_shipping]
+      address.address_type = source[:address_type]
       address.sync_needed = false
       address.save
+
+      address
     end
   end
 end
