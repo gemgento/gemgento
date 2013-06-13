@@ -4,8 +4,8 @@ module Gemgento
     belongs_to  :product
     has_one     :gift_message
 
-    def sync_magento_to_local(source, order)
-      order_item = OrderItem.find_by(magento_id: source[:item_id], order: order)
+    def self.sync_magento_to_local(source, order)
+      order_item = OrderItem.find_or_initialize_by(magento_id: source[:item_id])
       order_item.order = order
       order_item.magento_id = source[:item_id]
       order_item.quote_item_id = source[:quote_item_id]

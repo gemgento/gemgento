@@ -3,11 +3,12 @@ module Gemgento
     belongs_to  :store
     belongs_to  :user
     belongs_to  :user_group
-    has_one     :shipping_address, foreign_key: 'shipping_address_id', class_name: 'OrderAddress'
-    has_one     :billing_address, foreign_key: 'billing_address_id', class_name: 'OrderAddress'
+    has_one     :shipping_address, -> { "address_type = 'shipping'" }, class_name: 'Address'
+    has_one     :billing_address, -> { "address_type = 'billing'" }, class_name: 'Address'
     has_one     :order_payment
     has_one     :gift_message
     has_many    :order_items
+    has_many    :order_statuses
 
     def self.index
       if Order.find(:all).size == 0
@@ -39,7 +40,6 @@ module Gemgento
 
     # Save Magento order to local
     def self.sync_magento_to_local(source)
-      puts source
       order = Order.find_or_initialize_by(magento_id: source[:order_id])
       order.magento_id = source[:order_id]
       order.store = Store.find_by(magento_id: source[:store_id])
@@ -97,26 +97,27 @@ module Gemgento
       order.increment_id = source[:increment_id]
       order.save
 
+      Address.sync_magento_to_local(source[:shipping_address], order)
+      Address.sync_magento_to_local(source[:billing_address], order)
+      OrderPayment.sync_magento_to_local(source[:payment], order)
+
       unless source[:gift_message_id].nil?
         gift_message = GiftMessage.sync_magento_to_local(source[:gift_message])
         order.gift_message = gift_message
         order.save
       end
 
-      shipping_address = OrderAddress.sync_magento_to_local(source[:shipping_address])
-      order.shipping_address = shipping_address
-
-      billing_address = OrderAddress.sync_magento_to_local(source[:billing_address])
-      order.billing_address = billing_address
-
-      source[:items[:item]].each do |item|
-        OrderItem.sync_magento_to_local(item, order)
+      if !source[:items][:item].nil?
+        source[:items][:item].each do |item|
+          OrderItem.sync_magento_to_local(item, order)
+        end
       end
 
-      payment = OrderPayment.sync_magento_to_local(source[:payment])
-      order.payment = payment
-
-      order.save
+      if !source[:status_history][:item].nil?
+        source[:status_history][:item].each do |status|
+          OrderStatus.sync_magento_to_local(status, order)
+        end
+      end
     end
   end
 end
