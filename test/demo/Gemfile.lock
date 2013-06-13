@@ -1,7 +1,7 @@
 PATH
   remote: ../../
   specs:
-    gemgento (0.0.1)
+    gemgento (0.0.2)
       exception_notification_rails3 (= 1.2.0)
       savon (~> 2.2.0)
       spreadsheet
