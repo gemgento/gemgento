@@ -227,7 +227,7 @@ module Gemgento
       }
 
       unless self.simple_products.empty?
-        product_data.merge!({ 'associated_skus' => { 'item' => compose_associated_skus }, 'price_changes' => compose_price_changes })
+        product_data.merge!({ 'associated_skus' => { 'item' => compose_associated_skus }, 'price_changes' => { 'item' => compose_price_changes }})
       end
 
       product_data
