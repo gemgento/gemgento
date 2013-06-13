@@ -13,6 +13,7 @@ module Gemgento
     after_save :sync_local_to_magento
     belongs_to :store
     has_one :inventory
+    scope :configurable, where(magento_type: 'configurable')
 
     def self.index
       if Product.find(:all).size == 0

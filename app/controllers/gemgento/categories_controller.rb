@@ -17,7 +17,7 @@ module Gemgento
       respond_to do |format|      
         format.js {
           @category = Gemgento::Category.find(params[:id])
-          render :json => @category.products
+          render :json => @category.products.configurable
         }
         format.html {
           @category = Gemgento::Category.find_by(url_key: params[:url_key])
