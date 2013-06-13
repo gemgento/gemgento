@@ -69,26 +69,26 @@ Assumptions
 
       product = Gemgento::Product.find_by(sku: sku)
 
-      if product.nil? # If product isn't known locally, check with Magento
-        product = Gemgento::Product.check_magento(sku, 'sku', @attribute_set)
-      end
+      # if product.nil? # If product isn't known locally, check with Magento
+      #   product = Gemgento::Product.check_magento(sku, 'sku', @attribute_set)
+      # end
 
-      product.magento_type = 'simple'
-      product.sku = sku
-      product.product_attribute_set = @attribute_set
+      # product.magento_type = 'simple'
+      # product.sku = sku
+      # product.product_attribute_set = @attribute_set
 
-      unless product.magento_id
-        product.sync_needed = false
-        product.save
-      end
+      # unless product.magento_id
+      #   product.sync_needed = false
+      #   product.save
+      # end
 
-      set_attribute_values(product)
-      set_categories(product)
-      product.store = Gemgento::Store.first
-      product.sync_needed = true
-      product.save
+      # set_attribute_values(product)
+      # set_categories(product)
+      # product.store = Gemgento::Store.first
+      # product.sync_needed = false
+      # product.save
 
-      #set_image(product)
+      # #set_image(product)
 
       product
     end
@@ -220,6 +220,7 @@ Assumptions
         configurable_product.sku = "#{attribute_value}"
         configurable_product.product_attribute_set = @attribute_set
         configurable_product.sync_needed = false
+        configurable_product.store = Gemgento::Store.first
         configurable_product.save
 
         # associate all simple products with the new configurable product
