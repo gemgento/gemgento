@@ -19,4 +19,5 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'exception_notification_rails3', '=1.2.0'
   gem.add_dependency 'savon', '~> 2.2.0'
   gem.add_dependency 'spreadsheet'
+  gem.add_dependency 'state_machine', '=1.2.0'
 end
