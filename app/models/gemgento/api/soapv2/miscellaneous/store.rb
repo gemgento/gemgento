@@ -20,6 +20,11 @@ module Gemgento
             response[:stores][:item]
           end
 
+          def self.info
+            response = Gemgento::Magento.create_call(:store_list)
+            response[:result]
+          end
+
           private
 
           # Save Magento product attribute set to local

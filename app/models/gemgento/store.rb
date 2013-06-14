@@ -5,15 +5,10 @@ module Gemgento
 
     def self.index
       if Store.find(:all).size == 0
-        fetch_all
+        API::SOAPv2::Miscellaneous::Store.fetch_all
       end
 
       Store.find(:all)
-    end
-
-    def self.fetch_all
-
-
     end
   end
 end
