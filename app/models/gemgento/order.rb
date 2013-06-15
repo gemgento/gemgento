@@ -40,8 +40,8 @@ module Gemgento
 
     # Save Magento order to local
     def self.sync_magento_to_local(source)
-      order = Order.find_or_initialize_by(magento_id: source[:order_id])
-      order.magento_id = source[:order_id]
+      order = Order.find_or_initialize_by(magento_order_id: source[:order_id])
+      order.magento_order_id = source[:order_id]
       order.store = Store.find_by(magento_id: source[:store_id])
       order.is_active = source[:is_active]
       order.user = User.find_by(magento_id: source[:customer_id])
@@ -88,7 +88,7 @@ module Gemgento
       order.customer_email = source[:customer_email]
       order.customer_firstname = source[:customer_firstname]
       order.customer_lastname = source[:customer_lastname]
-      order.quote_id = source[:quote_id]
+      order.magento_quote_id = source[:quote_id]
       order.is_virtual = source[:is_virtual]
       order.user_group = UserGroup.find_by(magento_id: source[:customer_group_id])
       order.customer_note_notify = source[:customer_note_notify]
@@ -119,5 +119,40 @@ module Gemgento
         end
       end
     end
+
+    def cart_create_magento
+      self.magento_quote_id = Gemgento::Magento.create_call(:shopping_cart_create)
+      self.save
+    end
+
+    def cart_totals_magento
+      response = Gemgento::Magento.create_call(:shopping_cart_totals, { quote_id: self.magento_quote_id })
+      response[:result][:item]
+    end
+
+    def cart_order_magento
+      Gemgento::Magento.create_call(:shopping_cart_order, { quote_id: self.magento_quote_id })
+    end
+
+    def cart_customer_set_magento
+      message = {
+          quote_id: self.magento_quote_id
+      }
+    end
+
+    def cart_shipping_list_magento
+      response = Gemgento::Magento.create_call(:shopping_cart_shipping_list, { quote_id: self.magento_quote_id })
+      response[:result][:item]
+    end
+
+    def cart_shipping_method_magento
+      Gemgento::Magento.create_call(:shopping_cart_shipping_method, { quote_id: self.magento_quote_id, shipping_method: self.shipping_method })
+    end
+
+    def cart_payment_list_magento
+      response = Gemgento::Magento.create_call(:shopping_cart_payment_list, { quote_id: self.magento_quote_id })
+      response[:result]
+    end
+
   end
 end

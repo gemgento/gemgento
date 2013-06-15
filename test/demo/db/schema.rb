@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130613212556) do
+ActiveRecord::Schema.define(version: 20130614230605) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer  "user_address_id"
@@ -234,7 +234,7 @@ ActiveRecord::Schema.define(version: 20130613212556) do
   end
 
   create_table "gemgento_orders", force: true do |t|
-    t.integer  "magento_id",                                           null: false
+    t.integer  "magento_order_id"
     t.integer  "store_id",                                             null: false
     t.boolean  "is_active"
     t.integer  "user_id"
@@ -289,7 +289,7 @@ ActiveRecord::Schema.define(version: 20130613212556) do
     t.string   "customer_email"
     t.string   "customer_firstname"
     t.string   "customer_lastname"
-    t.string   "quote_id"
+    t.string   "magento_quote_id"
     t.boolean  "is_virtual"
     t.integer  "user_group_id"
     t.string   "customer_note_notify"
