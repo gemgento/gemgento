@@ -29,7 +29,7 @@ Assumptions
       @root_category = Gemgento::Category.find(root_category_id)
       @store_view = store_view
       @configurable_attributes = [
-          Gemgento::ProductAttribute.find_by(code: 'size')
+        Gemgento::ProductAttribute.find_by(code: 'size')
       ]
     end
 
@@ -234,8 +234,10 @@ Assumptions
           configurable_product.configurable_attributes << configurable_attribute unless configurable_product.configurable_attributes.include?(configurable_attribute)
         end
 
+        configurable_product.set_attribute_value('price', simple_products.first.attribute_value('price'))
         configurable_product.set_attribute_value('name', simple_products.first.attribute_value('name'))
         configurable_product.set_attribute_value('status', '1')
+        configurable_product.set_attribute_value('visibility', '2')
         configurable_product.set_attribute_value('visibility', '2')
         configurable_product.set_attribute_value('url_key', configurable_product.attribute_value('name').sub(' ', '-').downcase)
 

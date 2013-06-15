@@ -51,11 +51,11 @@ module Gemgento
       end
 
       message = {
-          product: magento_id,
-          productIdentifierType: 'id',
-          attributes: {
-              'additional_attributes' => { 'arr:string' => additional_attributes }
-          }
+        product: magento_id,
+        productIdentifierType: 'id',
+        attributes: {
+          'additional_attributes' => { 'arr:string' => additional_attributes }
+        }
       }
 
       sync_magento_to_local(Gemgento::Magento.create_call(:catalog_product_info, message)[:info])

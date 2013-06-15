@@ -5,19 +5,21 @@ module Gemgento
     def index
       @categories = Gemgento::Category.all
       respond_to do |format|      
-        format.js {
-          render :json => @categories
+        format.json {
+          render :json => @categories.to_json
         }
       end    
-
     end
-
 
     def show
       respond_to do |format|      
         format.js {
           @category = Gemgento::Category.find(params[:id])
-          render :json => @category.products.configurable
+          @c = []
+          @category.products.configurable.each do |p|
+            @c << {id: p.id, price: p.simple_products.first.attribute_value('price'), url_key: p.attribute_value('url_key'), name: p.attribute_value('name')}
+          end
+          render :json => @c.to_json
         }
         format.html {
           @category = Gemgento::Category.find_by(url_key: params[:url_key])
