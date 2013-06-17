@@ -11,18 +11,11 @@ module Gemgento
 
           def self.tree
             response = Gemgento::Magento.create_call(:catalog_category_tree)
-
-            unless response[:tree].is_a? Array
-              response[:tree] = [response[:tree]]
-            end
-
             response[:tree]
           end
 
           def self.info(category_id)
-            response = Gemgento::Magento.create_call(:catalog_category_info, {
-                category_id: category_id
-            })
+            response = Gemgento::Magento.create_call(:catalog_category_info, { category_id: category_id })
             response[:info]
           end
 
@@ -62,7 +55,7 @@ module Gemgento
           #
           # @param [Hash] category  The returned item of Magento API call
           def self.sync_magento_tree_to_local(category)
-            sync_magento_to_local(info([:category_id]))
+            sync_magento_to_local(info(category[:category_id]))
 
             if category[:children][:item]
               category[:children][:item] = [category[:children][:item]] unless category[:children][:item].is_a? Array
@@ -97,18 +90,6 @@ module Gemgento
             category.sync_needed = false
             category.save
           end
-
-          # Synchronize the category with Magento
-          def self.sync_local_to_magento(category)
-            if self.sync_needed
-              if !category.magento_id
-                self.create(category)
-              else
-                self.update(category)
-              end
-            end
-          end
-
         end
       end
     end

@@ -10,5 +10,18 @@ module Gemgento
       Category.find(:all)
     end
 
+    private
+
+    # Synchronize the category with Magento
+    def sync_local_to_magento
+      if self.sync_needed
+        if !self.magento_id
+          API::SOAP::Catalog::Category.create(self)
+        else
+          API::SOAP::Catalog::Category.update(self)
+        end
+      end
+    end
+
   end
 end
