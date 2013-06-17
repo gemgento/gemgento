@@ -5,7 +5,7 @@ module Gemgento
         class ProductAttributeSet
 
           def self.fetch_all
-            response[:result][:item].each do |product_attribute_set|
+            list.each do |product_attribute_set|
               sync_magento_to_local(product_attribute_set)
             end
           end
@@ -59,9 +59,6 @@ module Gemgento
             product_attribute_set.name = source[:name]
             product_attribute_set.sync_needed = false
             product_attribute_set.save
-
-            Gemgento::ProductAttribute.fetch_all(product_attribute_set)
-            Gemgento::AssetType.fetch_all(product_attribute_set)
           end
 
         end

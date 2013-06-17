@@ -6,7 +6,7 @@ module Gemgento
 
           # Synchronize local database with Magento database
           def self.fetch_all
-            self.list.each do |store_view|
+            list.each do |store_view|
 
               # enforce array
               unless store_view[:item].is_a? Array
@@ -15,8 +15,8 @@ module Gemgento
 
               store_view[:item].each do |product|
                 attribute_set = Gemgento::ProductAttributeSet.find_by(magento_id: product[:set])
-                product_info = self.info(product[:product_id], attribute_set)
-                self.sync_magento_to_local(product_info)
+                product_info = info(product[:product_id], attribute_set)
+                sync_magento_to_local(product_info)
               end
             end
           end

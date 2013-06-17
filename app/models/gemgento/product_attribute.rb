@@ -6,8 +6,20 @@ module Gemgento
     has_and_belongs_to_many :configurable_products, -> { uniq } , join_table: 'gemgento_configurable_attributes', class_name: 'Product'
     after_save :sync_local_to_magento
 
-    def self.index
+    private
 
+    # Push local product attribute set changes to Magento
+    def sync_local_to_magento
+      if self.sync_needed
+        if !self.magento_id
+          API::SOAP::Catalog::ProductAttribute.create(self)
+        else
+          API::SOAP::Catalog::ProductAttribute.update(self)
+        end
+
+        self.sync_needed = false
+        self.save
+      end
     end
 
   end

@@ -2,7 +2,6 @@ module Gemgento
   class ProductAttributeSet < ActiveRecord::Base
     has_many :product_attributes
     has_many :products
-    after_save :sync_local_to_magento
 
     def self.index
       if ProductAttributeSet.find(:all).size == 0
