@@ -6,7 +6,7 @@ module Gemgento
 
     def self.index
       if ProductAttributeSet.find(:all).size == 0
-        API::SOAPv2::Catalog::ProductAttributeSet.fetch_all
+        API::SOAP::Catalog::ProductAttributeSet.fetch_all
       end
 
       ProductAttributeSet.find(:all)

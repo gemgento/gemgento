@@ -1,6 +1,6 @@
 module Gemgento
   module API
-    module SOAPv2
+    module SOAP
       module Catalog
         class ProductAttribute
 

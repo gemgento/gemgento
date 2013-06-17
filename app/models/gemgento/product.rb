@@ -17,7 +17,7 @@ module Gemgento
 
     def self.index
       if Product.find(:all).size == 0
-        API::SOAPv2::Catalog::Product.fetch_all
+        API::SOAP::Catalog::Product.fetch_all
       end
       Product.find(:all)
     end
