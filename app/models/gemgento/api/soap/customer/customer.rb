@@ -12,6 +12,12 @@ module Gemgento
             end
           end
 
+          def self.fetch_all_customer_groups
+            group.each do |customer_group|
+              sync_magento_customer_group_to_local(customer_group)
+            end
+          end
+
           def self.list
             response = Gemgento::Magento.create_call(:customer_customer_list)
 
@@ -50,6 +56,16 @@ module Gemgento
                 customer_id: customer.magento_id
             }
             delete_response = Gemgento::Magento.create_call(:customer_customer_delete, message)
+          end
+
+          def self.group
+            response = Gemgento::Magento.create_call(:customer_group_list)
+
+            unless response[:result][:item].is_a? Array
+              response[:result][:item] = [response[:result][:item]]
+            end
+
+            response[:result][:item]
           end
 
           # Push local user changes to magento
@@ -110,6 +126,13 @@ module Gemgento
             end
 
             customer_data
+          end
+
+          def self.sync_magento_customer_group_to_local(source)
+            customer_group = Gemgento::UserGroup.find_or_initialize_by(magento_id: source[:customer_group_id])
+            customer_group.magento_id = source[:customer_group_id]
+            customer_group.code = source[:customer_group_code]
+            customer_group.save
           end
 
         end
