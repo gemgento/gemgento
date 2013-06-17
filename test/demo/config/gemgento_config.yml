@@ -1,15 +1,15 @@
 development:
   site:
-    name: Oliver Peoples
-    url:  op.mny.mx
+    name: MW
+    url:  mw.local
 
   magento: 
-    url:              dev.oliverpeoples.com
+    url:              mw.local
     auth_username:    ''
     auth_password:    ''
-    username:         maui
+    username:         philip.vasilevski
     api_key:          857123FHDShfd
     api_type:	      soap
     api_version:      2
     debug:            false
-    encryption:       b476516d0acc86dbc0148cdb68eec8f9
+    encryption:       0f25bb1f1f9e5c3769660baa12d2a34c

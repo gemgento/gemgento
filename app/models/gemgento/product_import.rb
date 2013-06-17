@@ -41,12 +41,19 @@ Assumptions
           next
         end
         @row = @worksheet.row(index)
-        product = create_simple_product
-        track_associated_simple_products(product)
+        puts @row.inspect
+        #product = create_simple_product
+        
+        # only set product attribute values
+        product = Product.find_by(sku: @row[@headers.index('sku')].to_s)
+        puts product.inspect
+        #set_attribute_values(product)
+
+        #track_associated_simple_products(product)
         puts @messages
       end
 
-      create_configurable_products
+      #create_configurable_products
 
       puts @messages
     end

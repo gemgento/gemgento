@@ -222,6 +222,17 @@ ActiveRecord::Schema.define(version: 20130614230605) do
     t.datetime "updated_at"
   end
 
+  create_table "gemgento_order_status_histories", force: true do |t|
+    t.integer  "order_id",                            null: false
+    t.integer  "increment_id"
+    t.boolean  "is_active",            default: true, null: false
+    t.boolean  "is_customer_notified", default: true, null: false
+    t.string   "status"
+    t.string   "comment"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "gemgento_order_statuses", force: true do |t|
     t.integer  "order_id",                            null: false
     t.integer  "increment_id"
