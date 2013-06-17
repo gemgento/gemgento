@@ -43,7 +43,7 @@ module Gemgento
             customer.save
           end
 
-          def self.update
+          def self.update(customer)
             message = {
                 customer_id:  customer.magento_id,
                 customer_data: compose_customer_data(customer)
@@ -68,25 +68,11 @@ module Gemgento
             response[:result][:item]
           end
 
-          # Push local user changes to magento
-          def sync_local_to_magento(customer)
-            if customer.sync_needed
-              if !customer.magento_id
-                create_magento
-              else
-                update_magento
-              end
-
-              customer.sync_needed = false
-              customer.save
-            end
-          end
-
           private
 
           # Save a Magento customer as local user
           def self.sync_magento_to_local(source)
-            user = GemgentoUser.find_or_initialize_by(magento_id: source[:customer_id])
+            user = Gemgento::User.find_or_initialize_by(magento_id: source[:customer_id])
             user.magento_id = source[:customer_id]
             user.increment_id = source[:increment_id]
             user.store = Store.find_by(magento_id: source[:store_id])

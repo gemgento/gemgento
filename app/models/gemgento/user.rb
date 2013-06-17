@@ -11,5 +11,22 @@ module Gemgento
 
       User.find(:all)
     end
+
+    private
+
+
+    # Push local user changes to magento
+    def sync_local_to_magento
+      if self.sync_needed
+        if !self.magento_id
+          API::SOAP::Customer::Customer.create(self)
+        else
+          API::SOAP::Customer::Customer.update(self)
+        end
+
+        self.sync_needed = false
+        self.save
+      end
+    end
   end
 end
