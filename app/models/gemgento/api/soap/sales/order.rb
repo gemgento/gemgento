@@ -102,15 +102,16 @@ module Gemgento
             order.increment_id = source[:increment_id]
             order.save
 
-            Address.sync_magento_to_local(source[:shipping_address], order)
-            Address.sync_magento_to_local(source[:billing_address], order)
+            sync_magento_address_to_local(source[:shipping_address], order)
+            sync_magento_address_to_local(source[:billing_address], order)
             OrderPayment.sync_magento_to_local(source[:payment], order)
 
             unless source[:gift_message_id].nil?
-              gift_message = GiftMessage.sync_magento_to_local(source[:gift_message])
+              gift_message = Gemgento::API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
               order.gift_message = gift_message
               order.save
             end
+
 
             if !source[:items][:item].nil?
               source[:items][:item].each do |item|
@@ -125,6 +126,136 @@ module Gemgento
             end
           end
 
+          def self.sync_magento_address_to_local(source, order)
+            address = Gemgento::Address.find_or_initialize_by(order_address_id: source[:address_id])
+            address.order_address_id = source[:address_id]
+            address.order = order
+            address.increment_id = source[:increment_id]
+            address.city = source[:city]
+            address.company = source[:company]
+            address.country = Country.find_by(magento_id: source[:country_id])
+            address.fax = source[:fax]
+            address.fname = source[:firstname]
+            address.mname = source[:middlename]
+            address.lname = source[:lastname]
+            address.postcode = source[:postcode]
+            address.prefix = source[:prefix]
+            address.region_name = source[:region]
+            address.region = Region.find_by(magento_id: source[:region_id])
+            address.street = source[:street]
+            address.suffix = source[:suffix]
+            address.telephone = source[:telephone]
+            address.is_default_billing = source[:is_default_billing]
+            address.is_default_shipping = source[:is_default_shipping]
+            address.address_type = source[:address_type]
+            address.sync_needed = false
+            address.save
+
+            address
+          end
+
+          def self.sync_magento_payment_to_local(source, order)
+            payment = Gemgento::OrderPayment.find_or_initialize_by(magento_id: source[:payment_id])
+            payment.order = order
+            payment.magento_id = source[:payment_id]
+            payment.increment_id = source[:increment_id]
+            payment.is_active = source[:is_active]
+            payment.amount_ordered = source[:amount_ordered]
+            payment.shipping_amount = source[:shipping_amount]
+            payment.base_amount_ordered = source[:base_amount_ordered]
+            payment.base_shipping_amount = source[:base_shipping_amount]
+            payment.method = source[:method]
+            payment.po_number = source[:po_number]
+            payment.cc_type = source[:cc_type]
+            payment.cc_number_enc = source[:cc_number_enc]
+            payment.cc_last4 = source[:cc_last4]
+            payment.cc_owner = source[:cc_owner]
+            payment.cc_exp_month = source[:cc_exp_month]
+            payment.cc_exp_year = source[:cc_exp_year]
+            payment.cc_ss_start_month = source[:cc_ss_start_month]
+            payment.cc_ss_start_year = source[:cc_ss_start_year]
+            payment.save
+
+            payment
+          end
+
+          def self.sync_magento_order_status_to_local(source, order)
+            order_status = Gemgento::OrderStatus.find_or_initialize_by(order: order, status: source[:status], comment: source[:comment])
+            order_status.order = order
+            order_status.status = source[:status]
+            order_status.is_active = source[:is_active]
+            order_status.is_customer_notified = source[:is_customer_notified]
+            order_status.comment = source[:comment]
+            order_status.created_at = source[:created_at]
+            order_status.save
+
+            order_status
+          end
+
+          def self.sync_magento_order_item_to_local(source, order)
+            order_item = Gemgento::OrderItem.find_or_initialize_by(magento_id: source[:item_id])
+            order_item.order = order
+            order_item.magento_id = source[:item_id]
+            order_item.quote_item_id = source[:quote_item_id]
+            order_item.product = Product.find_by(magento_id: source[:product_id])
+            order_item.product_type = source[:product_type]
+            order_item.product_options = source[:product_options]
+            order_item.weight = source[:weight]
+            order_item.is_virtual = source[:is_virtual]
+            order_item.sku = source[:sku]
+            order_item.name = source[:name]
+            order_item.applied_rule_ids = source[:applied_rule_ids]
+            order_item.free_shipping = source[:free_shipping]
+            order_item.is_qty_decimal = source[:is_qty_decimal]
+            order_item.no_discount = source[:no_discount]
+            order_item.qty_canceled = source[:qty_canceled]
+            order_item.qty_invoiced = source[:qty_invoiced]
+            order_item.qty_ordered = source[:qty_ordered]
+            order_item.qty_refunded = source[:qty_refunded]
+            order_item.qty_shipped = source[:qty_shipped]
+            order_item.cost = source[:cost]
+            order_item.price = source[:price]
+            order_item.base_price = source[:base_price]
+            order_item.original_price = source[:original_price]
+            order_item.base_original_price = source[:base_original_price]
+            order_item.tax_percent = source[:tax_percent]
+            order_item.tax_amount = source[:tax_amount]
+            order_item.base_tax_amount = source[:base_tax_amount]
+            order_item.tax_invoiced = source[:tax_invoiced]
+            order_item.base_tax_invoiced = source[:base_tax_invoiced]
+            order_item.discount_percent = source[:discount_percent]
+            order_item.discount_amount = source[:discount_amount]
+            order_item.base_discount_amount = source[:base_discount_amount]
+            order_item.discount_invoiced = source[:discount_invoiced]
+            order_item.base_discount_invoiced = source[:base_discount_invoiced]
+            order_item.amount_refunded = source[:amount_refunded]
+            order_item.base_amount_refunded = source[:base_amount_refunded]
+            order_item.row_total = source[:row_total]
+            order_item.base_row_total = source[:base_row_total]
+            order_item.row_invoiced = source[:row_invoiced]
+            order_item.base_row_invoiced = source[:base_row_invoiced]
+            order_item.row_weight = source[:row_weight]
+            order_item.base_tax_before_discount = source[:base_tax_before_discount]
+            order_item.tax_before_discount = source[:tax_before_discount]
+            order_item.weee_tax_applied = source[:weee_tax_applied]
+            order_item.weee_tax_applied_amount = source[:weee_tax_applied_amount]
+            order_item.weee_tax_applied_row_amount = source[:weee_tax_applied_row_amount]
+            order_item.base_weee_tax_applied_amount = source[:base_weee_tax_applied_amount]
+            order_item.base_weee_tax_applied_row_amount = source[:base_weee_tax_applied_row_amount]
+            order_item.weee_tax_disposition = source[:weee_tax_disposition]
+            order_item.weee_tax_row_disposition = source[:weee_tax_row_disposition]
+            order_item.base_weee_tax_disposition = source[:base_weee_tax_disposition]
+            order_item.base_weee_tax_row_disposition = source[:base_weee_tax_row_disposition]
+            order_item.save
+
+            unless source[:gift_message_id].nil?
+              gift_message = Gemgento::API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
+              order_item.gift_message = gift_message
+              order_item.save
+            end
+
+            order_item
+          end
         end
       end
     end
