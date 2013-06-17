@@ -104,7 +104,7 @@ module Gemgento
 
             sync_magento_address_to_local(source[:shipping_address], order)
             sync_magento_address_to_local(source[:billing_address], order)
-            OrderPayment.sync_magento_to_local(source[:payment], order)
+            sync_magento_payment_to_local(source[:payment], order)
 
             unless source[:gift_message_id].nil?
               gift_message = Gemgento::API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
@@ -115,13 +115,15 @@ module Gemgento
 
             if !source[:items][:item].nil?
               source[:items][:item].each do |item|
-                OrderItem.sync_magento_to_local(item, order)
+                sync_magento_order_item_to_local(item, order)
               end
             end
 
             if !source[:status_history][:item].nil?
               source[:status_history][:item].each do |status|
-                OrderStatus.sync_magento_to_local(status, order)
+                unless status[:status].nil?
+                  sync_magento_order_status_to_local(status, order)
+                end
               end
             end
           end
@@ -180,6 +182,7 @@ module Gemgento
           end
 
           def self.sync_magento_order_status_to_local(source, order)
+            puts source.inspect
             order_status = Gemgento::OrderStatus.find_or_initialize_by(order: order, status: source[:status], comment: source[:comment])
             order_status.order = order
             order_status.status = source[:status]
