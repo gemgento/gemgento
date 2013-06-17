@@ -63,9 +63,9 @@ module Gemgento
           end
 
           # Update existing Magento Product
-          def self.update
-            message = { product: self.magento_id, product_identifier_type: 'id', product_data: compose_product_data}
-            create_response = Gemgento::Magento.create_call(:catalog_product_update, message)
+          def self.update(product)
+            message = { product: product.magento_id, product_identifier_type: 'id', product_data: compose_product_data(product) }
+            Gemgento::Magento.create_call(:catalog_product_update, message)
           end
 
           def self.check_magento(identifier, identifier_type, attribute_set)
@@ -129,11 +129,6 @@ module Gemgento
             set_categories(subject[:categories][:item], product) if subject[:categories][:item]
             set_attribute_values_from_magento(subject[:additional_attributes][:item], product) if (subject[:additional_attributes] and subject[:additional_attributes][:item])
 
-            # set media assets
-            Gemgento::Asset.skip_callback(:destroy, :before, :delete_magento)
-            product.assets.destroy_all
-            Gemgento::Asset.fetch_all(product)
-
             product
           end
 
@@ -154,27 +149,13 @@ module Gemgento
 
           def self.set_attribute_values_from_magento(magento_attribute_values, product)
             magento_attribute_values.each do |attribute_value|
-              self.set_attribute_value(attribute_value[:key], attribute_value[:value])
-            end
-          end
-
-          # Push local product changes to magento
-          def sync_local_to_magento
-            if self.sync_needed
-              if !self.magento_id
-                create_magento
-              else
-                update_magento
-              end
-
-              self.sync_needed = false
-              self.save
+              product.set_attribute_value(attribute_value[:key], attribute_value[:value])
             end
           end
 
           def self.associate_simple_products_to_configurable_products
             Gemgento::Product.where(magento_type: 'configurable').each do |configurable_product|
-              configurable_product.simple_products = MagentoDB.associated_simple_products(configurable_product)
+              configurable_product.simple_products = Gemgento::MagentoDB.associated_simple_products(configurable_product)
             end
           end
 
@@ -185,13 +166,13 @@ module Gemgento
                 'short_description' => product.attribute_value('short_description'),
                 'weight' => product.attribute_value('weight'),
                 'status' => product.attribute_value('status'),
-                'categories' => { 'item' => self.compose_categories(product) },
+                'categories' => { 'item' => compose_categories(product) },
                 'url_key' => product.attribute_value('url_key'),
                 'price' => product.attribute_value('price'),
                 'additional_attributes' => { 'single_data' => { 'item' => compose_attribute_values(product) }}
             }
 
-            unless self.simple_products.empty?
+            unless product.simple_products.empty?
               product_data.merge!({ 'associated_skus' => { 'item' => compose_associated_skus(product) }, 'price_changes' => compose_price_changes(product) })
             end
 

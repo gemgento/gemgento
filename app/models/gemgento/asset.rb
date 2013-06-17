@@ -5,22 +5,6 @@ module Gemgento
     after_save :sync_local_to_magento
     before_destroy :delete_magento
 
-    def self.fetch_all(product)
-      asset_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_list, { product: product.magento_id, productIdentifierType: 'id' })
-
-      unless asset_response[:result][:item].nil? # check if there are any options returned
-
-        if asset_response[:result][:item].is_a? Array # multiple options returned
-
-          asset_response[:result][:item].each do |asset|
-            sync_magento_to_local(asset, product)
-          end
-        else # one option returned
-          sync_magento_to_local(asset_response[:result][:item], product)
-        end
-      end
-    end
-
     def set_types(asset_type_codes)
       self.asset_types.destroy_all
 
