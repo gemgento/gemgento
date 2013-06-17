@@ -10,7 +10,7 @@ module Gemgento
               product.assets.destroy_all
 
               list(product.magento_id).each do |product_attribute_media|
-                sync_magento_to_local(product_attribute_media)
+                sync_magento_to_local(product_attribute_media, product)
               end
             end
           end
@@ -24,7 +24,15 @@ module Gemgento
           end
 
           def self.list(product_id)
-            response = Gemgento::Magento.create_call(:catalog_product_attribute_set_list)
+            message = {
+              product: product_id,
+              identifier_type: 'id'
+            }
+            response = Gemgento::Magento.create_call(:catalog_product_attribute_media_list, message)
+
+            if response[:result][:item].nil?
+              response[:result][:item] = []
+            end
 
             unless response[:result][:item].is_a? Array
               response[:result][:item] = [response[:result][:item]]
@@ -69,7 +77,7 @@ module Gemgento
           private
 
           # Save Magento product attribute set to local
-          def self.sync_magento_to_local(source)
+          def self.sync_magento_to_local(source, product)
             asset = Gemgento::Asset.find_or_initialize_by(product_id: product.id, url: source[:url])
             asset.url = source[:url]
             asset.position = source[:position]
@@ -79,7 +87,24 @@ module Gemgento
             asset.sync_needed = false
             asset.save
 
-            asset.set_types(source[:types][:item])
+            set_types(source[:types][:item], asset)
+          end
+
+          def self.set_types(asset_type_codes, asset)
+            asset.asset_types.destroy_all
+
+            # if there is only one category, the returned value is not interpreted array
+            unless asset_type_codes.is_a? Array
+              asset_type_codes = [Gemgento::Magento.enforce_savon_string(asset_type_codes)]
+            end
+
+            # loop through each return category and add it to the product if needed
+            asset_type_codes.each do |asset_type_code|
+              unless(asset_type_code.empty?)
+                asset_type = Gemgento::AssetType.find_by(product_attribute_set_id: asset.product.product_attribute_set_id, code: asset_type_code)
+                asset.asset_types << asset_type unless asset.asset_types.include?(asset_type) # don't duplicate the asset types
+              end
+            end
           end
 
           def self.sync_magento_media_type_to_local(source, product_attribute_set)
