@@ -4,10 +4,10 @@ module Gemgento
       module Checkout
         class Product
 
-          def self.add(cart, products)
+          def self.add(cart, order_items)
             message = {
                 quote_id: cart.magento_quote_id,
-                products_data: { item: compose_products_data(products) }
+                products_data: { item: compose_products_data(order_items) }
             }
             Gemgento::Magento.create_call(:shopping_cart_product_add, message)
           end
@@ -44,14 +44,14 @@ module Gemgento
 
           private
 
-          def self.compose_products_data(products)
+          def self.compose_products_data(order_items)
             products_data = []
 
-            products.each do |product|
+            order_items.each do |order_item|
               products_data << {
-                'product_id' => product.magento_id,
-                sku: product.sku,
-                qty: product.qty
+                'product_id' => order_item.product.magento_id,
+                sku: order_item.product.sku,
+                qty: order_item.qty_ordered
               }
             end
 

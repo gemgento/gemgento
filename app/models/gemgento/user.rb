@@ -1,3 +1,5 @@
+# TODO: add a validation to make sure a user doesn't add ':' to their password
+
 module Gemgento
   class User < ActiveRecord::Base
     belongs_to :user_group
