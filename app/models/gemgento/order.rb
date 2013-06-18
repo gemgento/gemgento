@@ -18,12 +18,5 @@ module Gemgento
       Order.find(:all)
     end
 
-
-    private
-
-    def cart_payment_list_magento
-
-    end
-
   end
 end

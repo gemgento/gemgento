@@ -98,7 +98,7 @@ module Gemgento
                 firstname: customer.fname,
                 middlename: customer.mname,
                 lastname: customer.lname,
-                password: customer.password,
+                password: customer.password, # this should be a plain text password (stupid magento!)
                 'store_id' => customer.store.magento_id,
                 'group_id' => customer.user_group.magento_id,
                 prefix: customer.prefix,

@@ -12,8 +12,17 @@ module Gemgento
       User.find(:all)
     end
 
-    private
+    def sign_in(password)
+      # NOTE: this method is untested, but should replicate the Magento encrypted password
+      salt = self.password.split(':')[1]
+      encrypted_password = OpenSSL::HMAC.hexdigest('sha256', salt + password, Gemgento::Config[:magento][:encryption])
+      encrypted_password += ':' + salt
+      puts encrypted_password
 
+      self.password == encrypted_password
+    end
+
+    private
 
     # Push local user changes to magento
     def sync_local_to_magento
