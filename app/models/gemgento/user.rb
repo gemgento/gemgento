@@ -5,6 +5,7 @@ module Gemgento
     belongs_to :user_group
     belongs_to :store
     after_save :sync_local_to_magento
+    has_many   :addresses
 
     def self.index
       if User.find(:all).size == 0
