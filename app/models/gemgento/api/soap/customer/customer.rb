@@ -34,21 +34,29 @@ module Gemgento
             response[:customer_info]
           end
 
-          def self.create(customer)
+          def self.create(customer, password = nil)
             message = {
-                customer_data: compose_customer_data(customer)
+                customer_data: compose_customer_data(customer, password)
             }
             response = Gemgento::Magento.create_call(:customer_customer_create, message)
-            customer.magento_id = responsea[:result]
+            customer.magento_id = response[:result]
             customer.save
+
+            # pull customer information to get the password
+            sync_magento_to_local(info(customer.magento_id))
           end
 
-          def self.update(customer)
+          def self.update(customer, password = nil)
             message = {
                 customer_id:  customer.magento_id,
-                customer_data: compose_customer_data(customer)
+                customer_data: compose_customer_data(customer, password)
             }
             update_response = Gemgento::Magento.create_call(:customer_customer_update, message)
+
+            unless passworw.nil?
+              # pull customer information to get the password
+              sync_magento_to_local(info(customer.magento_id))
+            end
           end
 
           def self.delete
@@ -92,13 +100,12 @@ module Gemgento
             user.save
           end
 
-          def compose_customer_data(customer)
+          def compose_customer_data(customer, password)
             customer_data = {
                 email: customer.email,
                 firstname: customer.fname,
                 middlename: customer.mname,
                 lastname: customer.lname,
-                password: customer.password, # this should be a plain text password (stupid magento!)
                 'store_id' => customer.store.magento_id,
                 'group_id' => customer.user_group.magento_id,
                 prefix: customer.prefix,
@@ -107,8 +114,12 @@ module Gemgento
                 taxvat: customer.taxvat
             }
 
-            unless customer.gender.null?
-              customer_data.merge!({ gender: customer.gender == male ? 1 : 2 })
+            unless password.nil?
+             customer_data[:password] = password # pass plain text password, magento needs to encrypt it (stupid magento)
+            end
+
+            unless customer.gender.nil?
+              customer_data.merge!({ gender: customer.gender == 'male' ? 1 : 2 })
             end
 
             customer_data

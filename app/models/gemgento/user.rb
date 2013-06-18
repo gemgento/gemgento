@@ -26,6 +26,7 @@ module Gemgento
 
     # Push local user changes to magento
     def sync_local_to_magento
+      # Password needs to be past as plain text.  It will be encrypted by Magento and updated.
       if self.sync_needed
         if !self.magento_id
           API::SOAP::Customer::Customer.create(self)
