@@ -84,15 +84,9 @@ module Gemgento
       API::SOAP::Checkout::Cart.totals(self)
     end
 
-    # ORDER specific functions
+    # functions related to processing cart into order
 
-    def set_address(address)
-      if address.type == 'shipping'
-        self.shipping_address = address
-      else
-        self.billing_address = address
-      end
-
+    def push_address(address)
       API::SOAP::Checkout::Customer.address(self, address)
     end
 
@@ -100,11 +94,11 @@ module Gemgento
       API::SOAP::Checkout::Payment.list(self)
     end
 
-    def set_payment_method(payment)
+    def push_payment_method(payment)
       API::SOAP::Checkout::Payment.method(self, payment)
     end
 
-    def set_customer(user)
+    def push_customer(user)
       API::SOAP::Checkout::Customer.set(self, user)
     end
 
@@ -112,11 +106,19 @@ module Gemgento
       API::SOAP::Checkout::Shipping.list(self)
     end
 
-    def set_shipping_method(shipping_method)
+    def push_shipping_method(shipping_method)
       API::SOAP::Checkout::Shipping.method(self, shipping_method)
     end
 
     def process
+      # ensure all essential cart data has been added
+      self.push_customer(self.user)
+      self.push_address(self.shipping_address)
+      self.push_address(self.billing_address)
+      self.push_shipping_method(self.shipping_method)
+      self.push_payment_method(self.order_payment)
+
+      # process cart to order
       API::SOAP::Checkout::Cart.order(self)
     end
   end
