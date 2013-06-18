@@ -10,7 +10,9 @@ module Gemgento
           end
 
           def self.order(cart)
-            Gemgento::Magento.create_call(:shopping_cart_order, { quote_id: cart.magento_quote_id })
+            response = Gemgento::Magento.create_call(:shopping_cart_order, { quote_id: cart.magento_quote_id })
+            puts response.inspect
+            ext
           end
 
           def self.info(cart)
