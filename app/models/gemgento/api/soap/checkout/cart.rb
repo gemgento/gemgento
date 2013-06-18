@@ -5,7 +5,8 @@ module Gemgento
         class Cart
 
           def self.create(cart)
-            cart.magento_quote_id = Gemgento::Magento.create_call(:shopping_cart_create)
+            response = Gemgento::Magento.create_call(:shopping_cart_create)
+            cart.magento_quote_id = response[:quote_id]
             cart.save
           end
 
