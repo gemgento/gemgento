@@ -121,9 +121,8 @@ module Gemgento
 
             if !source[:status_history][:item].nil?
               source[:status_history][:item].each do |status|
-                unless status[:status].nil?
-                  sync_magento_order_status_to_local(status, order)
-                end
+                puts status.inspect
+                sync_magento_order_status_to_local(status, order)
               end
             end
           end
@@ -182,7 +181,6 @@ module Gemgento
           end
 
           def self.sync_magento_order_status_to_local(source, order)
-            puts source.inspect
             order_status = Gemgento::OrderStatus.find_or_initialize_by(order: order, status: source[:status], comment: source[:comment])
             order_status.order = order
             order_status.status = source[:status]
