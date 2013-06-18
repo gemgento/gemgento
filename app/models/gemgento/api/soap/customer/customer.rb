@@ -34,7 +34,7 @@ module Gemgento
             response[:customer_info]
           end
 
-          def self.create(customer, password = nil)
+          def self.create(customer)
             message = {
                 customer_data: compose_customer_data(customer, password)
             }
@@ -46,14 +46,14 @@ module Gemgento
             sync_magento_to_local(info(customer.magento_id))
           end
 
-          def self.update(customer, password = nil)
+          def self.update(customer)
             message = {
                 customer_id:  customer.magento_id,
                 customer_data: compose_customer_data(customer, password)
             }
             update_response = Gemgento::Magento.create_call(:customer_customer_update, message)
 
-            unless passworw.nil?
+            unless customer.password.include? ':'
               # pull customer information to get the password
               sync_magento_to_local(info(customer.magento_id))
             end
@@ -100,7 +100,7 @@ module Gemgento
             user.save
           end
 
-          def compose_customer_data(customer, password)
+          def compose_customer_data(customer)
             customer_data = {
                 email: customer.email,
                 firstname: customer.fname,
@@ -114,7 +114,7 @@ module Gemgento
                 taxvat: customer.taxvat
             }
 
-            unless password.nil?
+            unless customer.password.include? ':'
              customer_data[:password] = password # pass plain text password, magento needs to encrypt it (stupid magento)
             end
 
