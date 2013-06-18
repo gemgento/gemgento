@@ -27,6 +27,7 @@ module Gemgento
         cart = Order.new
         cart.state = 'cart'
         cart.user = user
+        cart.store = Store.first
         cart.save
       end
 
