@@ -34,21 +34,25 @@ module Gemgento
     end
 
     def add_item(product, quantity = 1)
-       if self.order_items.finy_by(product: product).nil?
-         order_item = OrderItem.new
-         order_item.product = product
-         order_item.qty_ordered = quantity
-         order_item.save
+      raise 'Order not in cart state' if self.state != 'cart'
 
-         unless self.magento_quote_id.nil?
-           API::SOAP::Checkout::Product.add(self, [order_item])
-         end
-       else
-         self.update_item(product, quantity)
+     if self.order_items.finy_by(product: product).nil?
+       order_item = OrderItem.new
+       order_item.product = product
+       order_item.qty_ordered = quantity
+       order_item.save
+
+       unless self.magento_quote_id.nil?
+         API::SOAP::Checkout::Product.add(self, [order_item])
+       end
+     else
+       self.update_item(product, quantity)
        end
     end
 
     def update_item(product, quantity = 1)
+      raise 'Order not in cart state' if self.state != 'cart'
+
       order_item = self.order_items.find_by(product: product)
 
       unless order_item.nil?
@@ -64,6 +68,8 @@ module Gemgento
     end
 
     def remove_item(product)
+      raise 'Order not in cart state' if self.state != 'cart'
+
       order_item = self.order_items.find_by(product: product)
 
       unless order_item.nil?
@@ -78,5 +84,40 @@ module Gemgento
       API::SOAP::Checkout::Cart.totals(self)
     end
 
+    # ORDER specific functions
+
+    def set_address(address)
+      if address.type == 'shipping'
+        self.shipping_address = address
+      else
+        self.billing_address = address
+      end
+
+      API::SOAP::Checkout::Customer.address(self, address)
+    end
+
+    def get_payment_methods
+      API::SOAP::Checkout::Payment.list(self)
+    end
+
+    def set_payment_method(payment)
+      API::SOAP::Checkout::Payment.method(self, payment)
+    end
+
+    def set_customer(user)
+      API::SOAP::Checkout::Customer.set(self, user)
+    end
+
+    def get_shipping_methods
+      API::SOAP::Checkout::Shipping.list(self)
+    end
+
+    def set_shipping_method(shipping_method)
+      API::SOAP::Checkout::Shipping.method(self, shipping_method)
+    end
+
+    def process
+      API::SOAP::Checkout::Cart.order(self)
+    end
   end
 end

@@ -8,7 +8,7 @@ module Gemgento
             message = {
                 quote_id: cart.magento_quote_id,
                 customer_data: {
-                    mode: customer.mode,
+                    mode: customer.magento_id.nil? ? 'guest' : 'customer',
                     'customer_id' => customer.magento_id,
                     email: customer.email,
                     firstname: customer.fname,

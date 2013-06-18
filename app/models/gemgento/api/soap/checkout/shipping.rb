@@ -9,8 +9,8 @@ module Gemgento
             response[:result][:item]
           end
 
-          def self.method(cart)
-            Gemgento::Magento.create_call(:shopping_cart_shipping_method, { quote_id: self.magento_quote_id, shipping_method: cart.shipping_method })
+          def self.method(cart, shipping_method)
+            Gemgento::Magento.create_call(:shopping_cart_shipping_method, { quote_id: self.magento_quote_id, shipping_method: shipping_method })
           end
 
         end
