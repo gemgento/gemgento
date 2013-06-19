@@ -7,25 +7,28 @@ module Gemgento
           def self.add(cart, order_items)
             message = {
                 quote_id: cart.magento_quote_id,
-                products_data: { items: compose_products_data(order_items) }
+                products: { item: compose_products_data(order_items) }
             }
-            Gemgento::Magento.create_call(:shopping_cart_product_add, message)
+            response = Gemgento::Magento.create_call(:shopping_cart_product_add, message)
+            response[:result]
           end
 
           def self.update(cart, products)
             message = {
                 quote_id: cart.magento_quote_id,
-                products_data: { item: compose_products_data(products) }
+                products: { item: compose_products_data(products) }
             }
-            Gemgento::Magento.create_call(:shopping_cart_product_update, message)
+            response = Gemgento::Magento.create_call(:shopping_cart_product_update, message)
+            response[:result]
           end
 
           def self.remove(cart, products)
             message = {
                 quote_id: cart.magento_quote_id,
-                products_data: { item: compose_products_data(products) }
+                products: { item: compose_products_data(products) }
             }
-            Gemgento::Magento.create_call(:shopping_cart_product_remove, message)
+            response = Gemgento::Magento.create_call(:shopping_cart_product_remove, message)
+            response[:result]
           end
 
           def self.list(cart)
@@ -50,7 +53,12 @@ module Gemgento
             order_items.each do |order_item|
               products_data << {
                 'product_id' => order_item.product.magento_id,
+                sku: order_item.product.sku,
                 qty: order_item.qty_ordered,
+                options: nil,
+                'bundle_option' => nil,
+                'bundle_option_qty' => nil,
+                links: nil
               }
             end
 
