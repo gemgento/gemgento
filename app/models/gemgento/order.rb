@@ -81,7 +81,7 @@ module Gemgento
     end
 
     def push_cart
-      #raise 'Cart already pushed, creating a new cart' unless self.magento_quote_id.nil?
+      raise 'Cart already pushed, creating a new cart' unless self.magento_quote_id.nil?
       API::SOAP::Checkout::Cart.create(self)
       API::SOAP::Checkout::Product.add(self, self.order_items)
       API::SOAP::Checkout::Cart.totals(self)
@@ -89,8 +89,8 @@ module Gemgento
 
     # functions related to processing cart into order
 
-    def push_address(address)
-      API::SOAP::Checkout::Customer.address(self, address)
+    def push_addresses
+      API::SOAP::Checkout::Customer.addresses(self, [self.shipping_address, self.billing_address])
     end
 
     def get_payment_methods
@@ -106,6 +106,7 @@ module Gemgento
     end
 
     def get_shipping_methods
+      raise 'Order shipping address not set' if self.shipping_address.nil?
       API::SOAP::Checkout::Shipping.list(self)
     end
 

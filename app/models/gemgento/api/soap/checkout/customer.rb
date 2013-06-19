@@ -22,29 +22,41 @@ module Gemgento
             Gemgento::Magento.create_call(:shopping_cart_customer_set, message)
           end
 
-          def self.addresses(cart, address)
+          def self.addresses(cart, addresses)
             message = {
                 quote_id: cart.magento_quote_id,
-                customer_address_data: {
-                    mode: address.type,
-                    'address_id' => address.user_address_id,
-                    firstname: address.fname,
-                    lastname: address.lname,
-                    company: address.company,
-                    street: address.street,
-                    city: address.city,
-                    region: address.region_name,
-                    'region_id' => address.region.magento_id,
-                    postcode: address.postcode,
-                    'country_id' => address.country.magento_id,
-                    telephone: address.telephone,
-                    fax: address.fax,
-                    'is_default_billing' => address.is_default_billing ? 1 : 0,
-                    'is_default_shipping' => address.is_default_shipping ? 1 : 0
-                }
+                customer_address_data: { item: compose_address_data(addresses) }
             }
 
-            Gemgento::Magento.create_call(:shopping_cart_customer_set, message)
+            Gemgento::Magento.create_call(:shopping_cart_customer_addresses, message)
+          end
+
+          private
+
+          def self.compose_address_data(addresses)
+            address_data = []
+
+            addresses.each do |address|
+              address_data << {
+                  mode: address.address_type,
+                  'address_id' => address.user_address_id,
+                  firstname: address.fname,
+                  lastname: address.lname,
+                  company: address.company,
+                  street: address.street,
+                  city: address.city,
+                  region: address.region_name,
+                  'region_id' => address.region.magento_id,
+                  postcode: address.postcode,
+                  'country_id' => address.country.magento_id,
+                  telephone: address.telephone,
+                  fax: address.fax,
+                  'is_default_billing' => address.is_default_billing ? 1 : 0,
+                  'is_default_shipping' => address.is_default_shipping ? 1 : 0
+              }
+            end
+
+            address_data
           end
 
         end
