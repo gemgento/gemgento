@@ -8,6 +8,8 @@ cart.push_cart
 cart.shipping_address = user.addresses.first
 cart.billing_address = user.addresses.first
 
+cart.push_addresses
+
 order_payment = Gemgento::OrderPayment.new
 order_payment.method = 'checkmo'
 order_payment.order = cart
