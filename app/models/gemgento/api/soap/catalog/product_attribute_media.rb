@@ -79,6 +79,7 @@ module Gemgento
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source, product)
             asset = Gemgento::Asset.find_or_initialize_by(product_id: product.id, url: source[:url])
+            asset.attachment = File.open(source[:url])
             asset.url = source[:url]
             asset.position = source[:position]
             asset.label = Gemgento::Magento.enforce_savon_string(source[:label])
@@ -127,10 +128,10 @@ module Gemgento
           end
 
           def self.compose_file_entity(asset)
-            file_name = asset.url.split('/')[-1]
+            file_name = asset.attachment.path.split('/')[-1]
 
             file_entity = {
-                content: Base64.encode64(File.open(asset.url).read),
+                content: Base64.encode64(File.open(asset.attachment.path).read),
                 mime: MIME::Types.type_for(file_name).first.content_type
             }
 
