@@ -1,7 +1,7 @@
 module Gemgento
   class OrderMailer < ActionMailer::Base
     layout 'email'
-
+    default css: 'email'
     default :from => Gemgento::Config[:email][:orders_from] || Gemgento::Config[:email][:default_from]
 
     def confirm_email(order, resend = false)

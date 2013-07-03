@@ -2,6 +2,7 @@ Gemgento::Engine.routes.draw do
   root :to => "products#index"
 
   resources :products, :categories, :users, :orders, :addresses
+  get '/error/:action', :controller => "errors"
 
   namespace 'user' do
     resources :orders, :addresses
