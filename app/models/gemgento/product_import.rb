@@ -16,14 +16,14 @@ Assumptions
 -Products are grouped by SKU
 =end
 
-    def initialize(file, store_view = 1, root_category_id = 2, configurable_attributes = [], image_prefix = '', image_suffix = '')
+    def initialize(file, store_view = 1, root_category_id = 2, configurable_attributes = [], image_prefix = '', image_suffix = '', attribute_set_id)
       @worksheet = Spreadsheet.open(file).worksheet(0)
       @headers = get_headers
       @messages = []
       @associated_simple_products = []
       @image_prefix = image_prefix
       @image_suffix = image_suffix
-      @attribute_set = Gemgento::ProductAttributeSet.first # assuming there is only one product attribute set
+      @attribute_set = Gemgento::ProductAttributeSet.find(attribute_set_id) # assuming there is only one product attribute set
       @root_category = Gemgento::Category.find(root_category_id)
       @store_view = store_view
       @configurable_attributes = configurable_attributes
@@ -34,7 +34,7 @@ Assumptions
         puts "Working on row #{index}"
         @row = @worksheet.row(index)
 
-        if @headers.index('magento_type') == 'simple'
+        if @headers.index('magento_type').to_s.casecmp('simple') == 0
           product = create_simple_product
           @associated_simple_products << product
         elsif
@@ -92,8 +92,7 @@ Assumptions
         product_attribute = Gemgento::ProductAttribute.find_by(code: attribute_code) # try to load attribute associated with column header
 
         # apply the attribute value if the attribute exists and is part of the attribute set
-        if !product_attribute.nil? && @attribute_set.product_attributes.include?(product_attribute) && product_attribute.code != 'sku'
-
+        if !product_attribute.nil? && product_attribute.code != 'sku'
           if product_attribute.product_attribute_options.empty?
             value = @row[@headers.index(attribute_code)]
           else # attribute value may have to be associated with an attribute option id
@@ -125,6 +124,7 @@ Assumptions
     end
 
     def set_default_attribute_values(product)
+      puts product
       product.set_attribute_value('url_key', product.attribute_value('name').sub(' ', '-').downcase) if product.attribute_value('url_key').blank?
       product.set_attribute_value('status', '1') if product.attribute_value('status').blank?
       product.set_attribute_value('visibility', '4') if product.attribute_value('visibility').blank?
@@ -137,7 +137,7 @@ Assumptions
         subcategories = category_string.split('>')
         subcategories.each do |category_url_key|
           category = Gemgento::Category.find_by(url_key: category_url_key)
-          product.categories << category unless product.categories.include(category)
+          product.categories << category unless product.categories.include?(category)
         end
       end
     end
@@ -172,6 +172,7 @@ Assumptions
         image.asset_types << type
       end
 
+      image.sync_needed = false
       image.save
 
       image
