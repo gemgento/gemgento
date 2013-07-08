@@ -11,12 +11,19 @@ module Gemgento
       :url => "/system/assets/products/:id/:style/:basename.:extension",
       :path => ":rails_root/public/system/assets/products/:id/:style/:basename.:extension"
 
+    private
 
     def sync_local_to_magento
       if self.sync_needed
         API::SOAP::Catalog::ProductAttributeMedia.create(self)
         self.sync_needed = false
         self.save
+      end
+    end
+
+    def delete_magento
+      unless url.nil?
+        API::SOAP::Catalog::ProductAttributeMedia.remove(self)
       end
     end
 

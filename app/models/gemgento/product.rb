@@ -48,6 +48,10 @@ module Gemgento
       end
     end
 
+    def self.check_magento(identifier, identifier_type, attribute_set)
+      API::SOAP::Catalog::Product.check_magento(identifier, identifier_type, attribute_set)
+    end
+
     private
 
     # Push local product changes to magento

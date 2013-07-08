@@ -59,7 +59,7 @@ module Gemgento
                 storeView: product.store.magento_id
             }
             create_response = Gemgento::Magento.create_call(:catalog_product_create, message)
-            self.magento_id = create_response[:result]
+            product.magento_id = create_response[:result]
           end
 
           # Update existing Magento Product

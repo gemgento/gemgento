@@ -34,7 +34,7 @@ Assumptions
         puts "Working on row #{index}"
         @row = @worksheet.row(index)
 
-        if @headers.index('magento_type').to_s.casecmp('simple') == 0
+        if @row[@headers.index('magento_type')].to_s.casecmp('simple') == 0
           product = create_simple_product
           @associated_simple_products << product
         elsif
@@ -83,6 +83,9 @@ Assumptions
       product.save
 
       set_image(product)
+
+      product.sync_needed = true
+      product.save
 
       product
     end
@@ -134,10 +137,16 @@ Assumptions
       categories = @row[@headers.index('category')].split('&')
 
       categories.each do |category_string|
+        puts category_string.inspect
         subcategories = category_string.split('>')
         subcategories.each do |category_url_key|
+          puts category_url_key.inspect
           category = Gemgento::Category.find_by(url_key: category_url_key)
-          product.categories << category unless product.categories.include?(category)
+          unless category.nil?
+            product.categories << category unless product.categories.include?(category)
+          else
+            @messages << "ERROR - row #{@row.index} - Unknown category url key '#{category_url_key}' - skipped"
+          end
         end
       end
     end
@@ -148,16 +157,18 @@ Assumptions
 
       # find the correct image file name and path
       %w[A B F S].each_with_index do |angle, position|
-        file_name = @image_prefix + @row[@headers.index('image')] + '_' + angle + @image_suffix
+        file_name = @image_prefix + product.sku + '_' + angle + @image_suffix
         unless File.file?(file_name)
-          file_name = @image_prefix + @row[@headers.index('image')] + ' ' + angle + @image_suffix
+          file_name = @image_prefix + product.sku + ' ' + angle + @image_suffix
           unless File.file?(file_name)
             next
           end
         end
 
-        types = Gemgento::AssetType.find_all
-        product.assets << create_image(product, file_name, types, position, labels[position])
+        #types = Gemgento::AssetType.find_all
+        types = []
+        product.
+            assets << create_image(product, file_name, types, position, labels[position])
       end
     end
 
@@ -223,7 +234,7 @@ Assumptions
         asset_copy = asset.dup
         asset_copy.product = configurable_product
         asset_copy.asset_types = asset.asset_types
-        asset_copy.sync_needed = true
+        asset_copy.sync_needed = false
         asset_copy.save
       end
     end
