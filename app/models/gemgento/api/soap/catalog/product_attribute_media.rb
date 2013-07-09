@@ -118,7 +118,7 @@ module Gemgento
 
           def self.compose_asset_entity_data(asset)
             asset_entity = {
-                file: compose_file_entity(product_attribute_media),
+                file: compose_file_entity(asset.attachment.path),
                 label: asset.label,
                 position: asset.position,
                 types: { item: compose_types(asset) }
@@ -127,11 +127,11 @@ module Gemgento
             asset_entity
           end
 
-          def self.compose_file_entity(asset)
-            file_name = asset.attachment.path.split('/')[-1]
+          def self.compose_file_entity(file_path)
+            file_name = file_path.split('/')[-1]
 
             file_entity = {
-                content: Base64.encode64(File.open(asset.attachment.path).read),
+                content: Base64.encode64(File.open(file_path).read),
                 mime: MIME::Types.type_for(file_name).first.content_type
             }
 

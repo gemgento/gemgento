@@ -186,6 +186,9 @@ Assumptions
       image.sync_needed = false
       image.save
 
+      image.sync_needed = false
+      image.save
+
       image
     end
 
@@ -233,6 +236,7 @@ Assumptions
       default_product.assets.each do |asset|
         asset_copy = asset.dup
         asset_copy.product = configurable_product
+        asset_copy.attachment = File.open(asset.attachment.path)
         asset_copy.asset_types = asset.asset_types
         asset_copy.sync_needed = false
         asset_copy.save
