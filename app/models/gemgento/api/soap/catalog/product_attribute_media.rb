@@ -86,6 +86,7 @@ module Gemgento
             asset.file = source[:file]
             asset.product = product
             asset.sync_needed = false
+            asset.attachment = source[:url]
             asset.save
 
             set_types(source[:types][:item], asset)
