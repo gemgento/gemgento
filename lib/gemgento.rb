@@ -1,6 +1,7 @@
-require "gemgento/version"
-require "gemgento/engine"
+require 'gemgento/version'
+require 'gemgento/engine'
 require 'exception_notifier'
+require 'gemgento/controller_helpers/order.rb'
 require 'savon'
 require 'builder'
 

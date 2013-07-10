@@ -20,14 +20,14 @@ module Gemgento
 
     # CART specific functions
 
-    def self.get_cart(user = nil, cookie = nil)
+    def self.get_cart(user = nil, order_id = nil)
       if user.nil?
-        if cookie.nil?
+        if order_id.nil?
           cart = Order.new
           cart.state = 'cart'
           cart.store = Store.first
         else
-          cart = Order.find(cookie)
+          cart = Order.find(order_id)
         end
       else
         cart = Order.find_by(user: user, state: 'cart')
