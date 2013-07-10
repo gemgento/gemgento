@@ -58,7 +58,7 @@ module Gemgento
          API::SOAP::Checkout::Product.add(self, [order_item])
        end
       else
-       self.update_item(product, quantity)
+       self.update_item(product, order_item.qty_ordered + quantity.to_i)
       end
     end
 
@@ -68,7 +68,7 @@ module Gemgento
       order_item = self.order_items.find_by(product: product)
 
       unless order_item.nil?
-        order_item.qty_ordered += quantity.to_i
+        order_item.qty_ordered = quantity.to_i
         order_item.save
 
         unless self.magento_quote_id.nil?
