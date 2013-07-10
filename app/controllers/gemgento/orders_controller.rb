@@ -9,11 +9,13 @@ module Gemgento
     def create
       @errors = []
       add_item_to_order
+      render nothing: true
     end
 
     def update
       @errors = []
       add_item_to_order
+      render nothing: true
     end
 
     private
@@ -30,6 +32,7 @@ module Gemgento
           @current_order.add_item(product, params[:quantity])
 
           cookies[:cart] = @current_order.id
+          puts cookies.inspect
         else
           @errors << { add_to_cart: 'Product Id and Quantity are required' }
         end

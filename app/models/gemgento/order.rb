@@ -47,7 +47,7 @@ module Gemgento
     def add_item(product, quantity = 1)
       raise 'Order not in cart state' if self.state != 'cart'
 
-     if self.order_items.find_by(product: product).nil?
+      if self.order_items.find_by(product: product).nil?
        order_item = OrderItem.new
        order_item.product = product
        order_item.qty_ordered = quantity
@@ -57,9 +57,9 @@ module Gemgento
        unless self.magento_quote_id.nil?
          API::SOAP::Checkout::Product.add(self, [order_item])
        end
-     else
+      else
        self.update_item(product, quantity)
-       end
+      end
     end
 
     def update_item(product, quantity = 1)
@@ -68,7 +68,7 @@ module Gemgento
       order_item = self.order_items.find_by(product: product)
 
       unless order_item.nil?
-        order_item.qty_ordered = quantity
+        order_item.qty_ordered += quantity.to_i
         order_item.save
 
         unless self.magento_quote_id.nil?
