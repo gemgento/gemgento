@@ -19,6 +19,8 @@ module Gemgento
                 sync_magento_to_local(product_info)
               end
             end
+
+            associate_simple_products_to_configurable_products
           end
 
           def self.list

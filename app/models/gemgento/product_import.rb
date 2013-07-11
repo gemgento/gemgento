@@ -35,10 +35,9 @@ Assumptions
         @row = @worksheet.row(index)
 
         if @row[@headers.index('magento_type')].to_s.casecmp('simple') == 0
-          product = create_simple_product
-          @associated_simple_products << product
-        elsif
-          product = create_configurable_product
+          @associated_simple_products << create_simple_product
+        else
+          create_configurable_product
         end
       end
 
@@ -124,7 +123,6 @@ Assumptions
     end
 
     def set_default_attribute_values(product)
-      puts product
       product.set_attribute_value('url_key', product.attribute_value('name').sub(' ', '-').downcase) if product.attribute_value('url_key').blank?
       product.set_attribute_value('status', '1') if product.attribute_value('status').blank?
       product.set_attribute_value('visibility', '4') if product.attribute_value('visibility').blank?
@@ -134,10 +132,9 @@ Assumptions
       categories = @row[@headers.index('category')].split('&')
 
       categories.each do |category_string|
-        puts category_string.inspect
         subcategories = category_string.split('>')
+
         subcategories.each do |category_url_key|
-          puts category_url_key.inspect
           category = Gemgento::Category.find_by(url_key: category_url_key)
           unless category.nil?
             product.categories << category unless product.categories.include?(category)
@@ -226,7 +223,7 @@ Assumptions
       set_configurable_product_images(configurable_product)
 
       # clear the simple products
-      @associated_simple_products = []
+      @associated_simple_products.clear
     end
 
     def set_configurable_product_images(configurable_product)
