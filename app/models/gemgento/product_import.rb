@@ -79,13 +79,10 @@ Assumptions
       set_attribute_values(product)
       set_categories(product)
       product.store = Gemgento::Store.first
-      product.sync_needed = false
+      product.sync_needed = true
       product.save
 
       set_image(product)
-
-      product.sync_needed = true
-      product.save
 
       product
     end
@@ -158,17 +155,20 @@ Assumptions
       # find the correct image file name and path
       %w[A B F S].each_with_index do |angle, position|
         file_name = @image_prefix + product.sku + '_' + angle + @image_suffix
-        unless File.file?(file_name)
+        unless File.exist?(file_name)
           file_name = @image_prefix + product.sku + ' ' + angle + @image_suffix
-          unless File.file?(file_name)
+          unless File.exist?(file_name)
             next
           end
         end
 
-        #types = Gemgento::AssetType.find_all
-        types = []
-        product.
-            assets << create_image(product, file_name, types, position, labels[position])
+        types = Gemgento::AssetType.find_by(product_attribute_set: @attribute_set)
+
+        unless types.is_a? Array
+          types = [types]
+        end
+
+        product.assets << create_image(product, file_name, types, position, labels[position])
       end
     end
 
@@ -186,7 +186,7 @@ Assumptions
       image.sync_needed = false
       image.save
 
-      image.sync_needed = false
+      image.sync_needed = true
       image.save
 
       image
@@ -218,12 +218,12 @@ Assumptions
       set_attribute_values(configurable_product)
       set_categories(configurable_product)
 
-      # add the images
-      set_configurable_product_images(configurable_product)
-
       # push to magento
       configurable_product.sync_needed = true
       configurable_product.save
+
+      # add the images
+      set_configurable_product_images(configurable_product)
 
       # clear the simple products
       @associated_simple_products = []
@@ -234,11 +234,17 @@ Assumptions
       default_product = configurable_product.simple_products.first
 
       default_product.assets.each do |asset|
-        asset_copy = asset.dup
+        asset_copy = Gemgento::Asset.new
         asset_copy.product = configurable_product
-        asset_copy.attachment = File.open(asset.attachment.path)
+        asset_copy.attachment = File.open(asset.attachment.path(:original))
+        asset_copy.label = asset.label
+        asset_copy.position = asset.position
         asset_copy.asset_types = asset.asset_types
+
         asset_copy.sync_needed = false
+        asset_copy.save
+
+        asset_copy.sync_needed = true
         asset_copy.save
       end
     end

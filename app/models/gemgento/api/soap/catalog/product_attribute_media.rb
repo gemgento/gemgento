@@ -119,7 +119,7 @@ module Gemgento
 
           def self.compose_asset_entity_data(asset)
             asset_entity = {
-                file: compose_file_entity(asset.attachment.path),
+                file: compose_file_entity(asset.attachment.path(:original)),
                 label: asset.label,
                 position: asset.position,
                 types: { item: compose_types(asset) }

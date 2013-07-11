@@ -45,8 +45,8 @@ module Gemgento
 
           # Save Magento order to local
           def self.sync_magento_to_local(source)
-            order = Gemgento::Order.find_or_initialize_by(magento_id: source[:order_id])
-            order.magento_id = source[:order_id]
+            order = Gemgento::Order.find_or_initialize_by(order_id: source[:order_id])
+            order.order_id = source[:order_id]
             order.store = Store.find_by(magento_id: source[:store_id])
             order.is_active = source[:is_active]
             order.user = User.find_by(magento_id: source[:customer_id])

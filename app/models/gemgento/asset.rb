@@ -21,7 +21,7 @@ module Gemgento
     end
 
     def delete_magento
-      unless url.nil?
+      unless self.file.nil?
         API::SOAP::Catalog::ProductAttributeMedia.remove(self)
       end
     end
