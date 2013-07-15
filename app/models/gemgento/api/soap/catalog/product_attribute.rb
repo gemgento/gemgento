@@ -13,6 +13,21 @@ module Gemgento
             end
           end
 
+          def self.fetch_all_options(product_attribute)
+            # add attribute options if there are any
+            options(product_attribute.magento_id).each do |attribute_option|
+              label = Gemgento::Magento.enforce_savon_string(attribute_option[:label])
+              value = Gemgento::Magento.enforce_savon_string(attribute_option[:value])
+
+              product_attribute_option = Gemgento::ProductAttributeOption.find_or_initialize_by(product_attribute: product_attribute, label: label)
+              product_attribute_option.label = label
+              product_attribute_option.value = value
+              product_attribute_option.product_attribute = product_attribute
+              product_attribute_option.sync_needed = false
+              product_attribute_option.save
+            end
+          end
+
           def self.list(product_attribute_set)
             response = Gemgento::Magento.create_call(:catalog_product_attribute_list, { set_id: product_attribute_set.magento_id })
 
@@ -61,6 +76,7 @@ module Gemgento
                 'is_default' => '0'
             }}
             Gemgento::Magento.create_call(:catalog_product_attribute_add_option, message)
+            fetch_all_options(product_attribute_option)
           end
 
           def self.remove_option
@@ -89,18 +105,7 @@ module Gemgento
             product_attribute.sync_needed = false
             product_attribute.save
 
-            # add attribute options if there are any
-            options(product_attribute.magento_id).each do |attribute_option|
-              label = Gemgento::Magento.enforce_savon_string(attribute_option[:label])
-              value = Gemgento::Magento.enforce_savon_string(attribute_option[:value])
-
-              product_attribute_option = Gemgento::ProductAttributeOption.find_or_initialize_by(product_attribute: product_attribute, label: label)
-              product_attribute_option.label = label
-              product_attribute_option.value = value
-              product_attribute_option.product_attribute = product_attribute
-              product_attribute_option.sync_needed = false
-              product_attribute_option.save
-            end
+            fetch_all_options(product_attribute)
           end
 
         end

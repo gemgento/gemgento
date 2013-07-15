@@ -119,6 +119,7 @@ Assumptions
 
       attribute_option.sync_local_to_magento
 
+
       attribute_option
     end
 
