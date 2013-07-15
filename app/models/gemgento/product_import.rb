@@ -88,7 +88,7 @@ Assumptions
 
     def set_attribute_values(product)
       @headers.each do |attribute_code|
-        product_attribute = Gemgento::ProductAttribute.find_by(code: attribute_code) # try to load attribute associated with column header
+        product_attribute = Gemgento::ProductAttribute.find_by(code: attribute_code, product_attribute_set: @attribute_set) # try to load attribute associated with column header
 
         # apply the attribute value if the attribute exists and is part of the attribute set
         if !product_attribute.nil? && product_attribute.code != 'sku'
@@ -118,7 +118,6 @@ Assumptions
       attribute_option.save
 
       attribute_option.sync_local_to_magento
-
 
       attribute_option
     end
