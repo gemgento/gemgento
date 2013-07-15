@@ -195,6 +195,7 @@ Assumptions
 
       # set the default configurable product attributes
       configurable_product = Gemgento::Product.find_or_initialize_by(sku: sku)
+
       configurable_product.magento_type = 'configurable'
       configurable_product.sku = sku
       configurable_product.product_attribute_set = @attribute_set
