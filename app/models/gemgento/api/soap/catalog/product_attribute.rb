@@ -76,7 +76,7 @@ module Gemgento
                 'is_default' => '0'
             }}
             Gemgento::Magento.create_call(:catalog_product_attribute_add_option, message)
-            fetch_all_options(product_attribute_option)
+            fetch_all_options(product_attribute)
           end
 
           def self.remove_option
