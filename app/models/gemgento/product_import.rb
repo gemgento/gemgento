@@ -156,6 +156,7 @@ Assumptions
         unless File.exist?(file_name)
           file_name = @image_prefix + product.sku + ' ' + angle + @image_suffix
           unless File.exist?(file_name)
+            @messages << "ERROR: Missing Images - SKU: #{product.sku}"
             next
           end
         end
