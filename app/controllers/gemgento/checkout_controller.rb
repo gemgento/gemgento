@@ -3,7 +3,7 @@ module Gemgento
     layout 'application'
 
     def shopping_bag
-      render current_order
+
     end
 
     def login
