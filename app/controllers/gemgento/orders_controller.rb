@@ -7,7 +7,7 @@ module Gemgento
     end
 
     def show
-      case @current_order.state
+      case current_order.state
         when 'cart'
           render 'cart'
       end
@@ -17,8 +17,8 @@ module Gemgento
       @errors = []
 
       # save the order and mark is as the current cart
-      @current_order.save
-      cookies[:cart] = @current_order.id
+      current_order.save
+      cookies[:cart] = current_order.id
 
       add_item_to_order
 
@@ -26,24 +26,24 @@ module Gemgento
     end
 
     def update
-      raise 'Missing action parameter' if params[:action].nil?
+      raise 'Missing action parameter' if params[:activity].nil?
 
       @errors = []
 
-      case params[:action]
+      case params[:activity]
         when 'add_item'
           add_item
         when 'update_item'
           update_item
         else
-          raise 'Unknown action'
+          raise "Unknown action - #{params[:activity]}"
       end
 
       render nothing: true
     end
 
     private
-      def add_item_to_order
+      def add_item
         # validate the parameters
         raise 'Product not specified' if params[:product].nil?
         raise 'Quantity not specified' if params[:quantity].nil?
@@ -53,7 +53,7 @@ module Gemgento
         raise 'Product does not exist' if product.nil?
 
         # add the item to the order
-        @current_order.add_item(product, params[:quantity])
+        current_order.add_item(product, params[:quantity])
       end
 
       def update_item
@@ -65,7 +65,7 @@ module Gemgento
         raise 'Product does not exist' if product.nil?
 
         # update the item
-        @current_order.update_item(product, params[:quantity])
+        current_order.update_item(product, params[:quantity])
       end
   end
 end
