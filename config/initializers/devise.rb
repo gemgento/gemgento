@@ -8,7 +8,7 @@ Devise.setup do |config|
 
   # Configure the class responsible to send e-mails.
   # config.mailer = "Devise::Mailer"
-  config.mailer = 'Sellect::UserMailer'
+  config.mailer = 'Gemgento::UserMailer'
 
   config.scoped_views = true
 

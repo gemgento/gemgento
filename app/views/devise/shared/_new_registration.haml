@@ -1,0 +1,23 @@
+#newaccount-form.clearfix
+	#login-header-2
+		Create a new account.
+	#registration_errors
+		= devise_error_messages!
+	
+	= form_for(resource, :as => resource_name, :html => {:class => 'new_registration', :id => 'new_registration', :autocomplete => 'off'}, :remote => true, :url => registration_path(resource_name)) do |f|	
+
+		= f.label :email 
+		= f.email_field :email
+
+		= f.label :name
+		= f.text_field :name
+
+		= f.label :password
+		= f.password_field :password
+
+		= f.label :password_confirmation
+		= f.password_field :password_confirmation
+
+		%span
+			= link_to "go back", '/', :id => 'return'
+			= f.submit "", :id => 'mynylonsignup'

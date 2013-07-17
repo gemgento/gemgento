@@ -1,0 +1,25 @@
+#signin-wrapper
+#overlay
+  = link_to 'close', '/', :id => 'close'
+  #mynlyon-header
+  #signin-form
+    #login-header-1
+      Log into your account.
+
+    = form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f|
+      = devise_error_messages!
+      = f.label 'username or email'
+      = f.email_field :email, :class => 'user-form', :autofocus => true 
+
+      = f.label :password
+      = f.password_field :password, :class => 'user-form'
+
+      -# if devise_mapping.rememberable?     
+        =# f.check_box :remember_me 
+        =# f.label :remember_me 
+
+      %br
+      = link_to "forgot password?", new_password_path(resource_name), :id => 'password_field'
+
+      = f.submit "", :id => 'mynylonsubmit'
+  = render 'devise/shared/new_registration'
