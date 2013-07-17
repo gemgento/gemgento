@@ -3,7 +3,7 @@ Gemgento::Engine.routes.draw do
 
   devise_for :users, :class_name => 'Gemgento::User'
 
-  resources :products, :categories, :users, :orders, :addresses
+  resources :products, :categories, :orders, :addresses
   get '/error/:action', :controller => "errors"
 
   namespace 'user' do

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130618202733) do
+ActiveRecord::Schema.define(version: 20130717210921) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer  "user_address_id"
@@ -395,10 +395,10 @@ ActiveRecord::Schema.define(version: 20130618202733) do
   end
 
   create_table "gemgento_users", force: true do |t|
-    t.integer  "magento_id",                   null: false
-    t.integer  "store_id",                     null: false
+    t.integer  "magento_id"
+    t.integer  "store_id"
     t.string   "created_in"
-    t.string   "email"
+    t.string   "email",                  default: "",   null: false
     t.string   "fname"
     t.string   "lname"
     t.string   "mname"
@@ -408,13 +408,25 @@ ActiveRecord::Schema.define(version: 20130618202733) do
     t.date     "dob"
     t.string   "taxvat"
     t.boolean  "confirmation"
-    t.string   "password"
-    t.boolean  "sync_needed",   default: true, null: false
+    t.string   "magento_password"
+    t.boolean  "sync_needed",            default: true, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "increment_id"
+    t.string   "encrypted_password",     default: "",   null: false
+    t.string   "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.integer  "sign_in_count",          default: 0
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string   "current_sign_in_ip"
+    t.string   "last_sign_in_ip"
+    t.string   "unencrypted_password"
   end
 
+  add_index "gemgento_users", ["email"], name: "index_gemgento_users_on_email", unique: true
   add_index "gemgento_users", ["magento_id"], name: "index_gemgento_users_on_magento_id", unique: true
+  add_index "gemgento_users", ["reset_password_token"], name: "index_gemgento_users_on_reset_password_token", unique: true
 
 end
