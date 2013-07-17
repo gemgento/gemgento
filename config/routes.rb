@@ -1,6 +1,8 @@
 Gemgento::Engine.routes.draw do
   root :to => "products#index"
 
+  devise_for :users, :class_name => 'Gemgento::User'
+
   resources :products, :categories, :users, :orders, :addresses
   get '/error/:action', :controller => "errors"
 

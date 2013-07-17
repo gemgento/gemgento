@@ -4,6 +4,7 @@ require 'exception_notifier'
 require 'gemgento/controller_helpers/order.rb'
 require 'savon'
 require 'builder'
+require 'devise'
 
 module Gemgento
   class Magento

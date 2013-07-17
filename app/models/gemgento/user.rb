@@ -2,10 +2,14 @@
 
 module Gemgento
   class User < ActiveRecord::Base
+    devise :database_authenticatable, :registerable,
+           :recoverable, :rememberable, :trackable, :validatable
+
     belongs_to :user_group
     belongs_to :store
-    after_save :sync_local_to_magento
     has_many   :addresses
+
+    after_save :sync_local_to_magento
 
     def self.index
       if User.find(:all).size == 0
