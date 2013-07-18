@@ -43,7 +43,7 @@ module Gemgento
     end
 
     private
-      def self.add_item
+      def add_item
         # validate the parameters
         raise 'Product not specified' if params[:product].nil?
         raise 'Quantity not specified' if params[:quantity].nil?
@@ -56,7 +56,7 @@ module Gemgento
         current_order.add_item(product, params[:quantity])
       end
 
-      def self.update_item
+      def update_item
         raise 'Product not specified' if params[:product].nil?
         raise 'Quantity not specified' if params[:quantity].nil?
         raise 'Quantity must be greater than 0'  if params[:quantity].to_i <= 0
