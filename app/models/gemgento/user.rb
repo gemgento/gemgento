@@ -29,6 +29,15 @@ module Gemgento
       self.password == encrypted_password
     end
 
+    def get_default_address(type)
+      type =
+      address = self.addresses.find_by("is_default_#{type}" => true)
+
+      address = Address.new if address.nil?
+
+      address
+    end
+
     private
 
     # Push local user changes to magento
