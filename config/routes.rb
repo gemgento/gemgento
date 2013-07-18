@@ -2,11 +2,12 @@ Gemgento::Engine.routes.draw do
   root :to => "products#index"
 
   devise_for :users, :class_name => 'Gemgento::User'
+  devise_for :checkout, :class_name => 'Gemgento::User'
 
   resources :products, :categories, :orders, :addresses
   get '/error/:action', :controller => "errors"
 
-  namespace 'user' do
+  namespace 'users' do
     resources :orders, :addresses
   end
 

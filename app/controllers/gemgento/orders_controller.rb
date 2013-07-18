@@ -20,7 +20,7 @@ module Gemgento
       current_order.save
       cookies[:cart] = current_order.id
 
-      add_item_to_order
+      add_item
 
       render nothing: true
     end
@@ -43,7 +43,7 @@ module Gemgento
     end
 
     private
-      def add_item
+      def self.add_item
         # validate the parameters
         raise 'Product not specified' if params[:product].nil?
         raise 'Quantity not specified' if params[:quantity].nil?
@@ -56,7 +56,7 @@ module Gemgento
         current_order.add_item(product, params[:quantity])
       end
 
-      def update_item
+      def self.update_item
         raise 'Product not specified' if params[:product].nil?
         raise 'Quantity not specified' if params[:quantity].nil?
         raise 'Quantity must be greater than 0'  if params[:quantity].to_i <= 0
