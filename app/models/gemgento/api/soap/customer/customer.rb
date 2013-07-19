@@ -99,7 +99,7 @@ module Gemgento
             user.confirmation = source[:confirmation]
             user.magento_password = source[:password_hash]
             user.sync_needed = false
-            user.save
+            user.save(validate: false)
           end
 
           def self.compose_customer_data(customer)
