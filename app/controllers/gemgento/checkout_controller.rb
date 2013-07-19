@@ -16,7 +16,7 @@ module Gemgento
 
         respond_to do |format|
           unless user.nil?
-            sign_in(:user, user)
+            sign_in(:users, user)
 
             format.html { render 'gemgento/checkout/address' }
             format.js { render '/gemgento/checkout/sessions/successful_session', :layout => false }
@@ -41,7 +41,7 @@ module Gemgento
 
       respond_to do |format|
         if @user.save
-          sign_in(:user, @user)
+          sign_in(:users, @user)
           format.html { render 'gemgento/checkout/address' }
           format.js { render 'gemgento/checkout/registrations/successful_registration', :layout => false }
         else

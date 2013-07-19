@@ -1,5 +1,5 @@
 module Gemgento
-  class User::AddressesController < BaseController
+  class Users::AddressesController < BaseController
     layout 'application'
 
     def index

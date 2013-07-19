@@ -1,5 +1,5 @@
 module Gemgento
-  class User::OrdersController < BaseController
+  class Users::OrdersController < BaseController
     layout 'application'
 
     def index
