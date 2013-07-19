@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130717210921) do
+ActiveRecord::Schema.define(version: 20130719140248) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer  "user_address_id"
@@ -32,13 +32,13 @@ ActiveRecord::Schema.define(version: 20130717210921) do
     t.string   "street"
     t.string   "telephone"
     t.string   "address_type"
-    t.boolean  "is_default_billing",  default: false
-    t.boolean  "is_default_shipping", default: false
-    t.boolean  "sync_needed",         default: true,  null: false
+    t.boolean  "sync_needed",      default: true,  null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "order_address_id"
     t.integer  "order_id"
+    t.string   "type"
+    t.boolean  "is_default",       default: false
   end
 
   create_table "gemgento_asset_types", force: true do |t|
@@ -423,6 +423,7 @@ ActiveRecord::Schema.define(version: 20130717210921) do
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
     t.string   "unencrypted_password"
+    t.string   "type"
   end
 
   add_index "gemgento_users", ["email"], name: "index_gemgento_users_on_email", unique: true
