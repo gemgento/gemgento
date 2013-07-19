@@ -3,29 +3,26 @@ module Gemgento
     layout 'application'
 
     def create
-      key = params[key].nil? ? :checkout : :user
-
       @user = User.new
-      @user.fname = params[key][:fname]
-      @user.lname = params[key][:lname]
-      @user.email = params[key][:email]
+      @user.fname = params[:user][:fname]
+      @user.lname = params[:user][:lname]
+      @user.email = params[:user][:email]
       @user.store = Gemgento::Store.first
       @user.user_group = Gemgento::UserGroup.find_by(code: 'General')
-      @user.magento_password = params[key][:password]
-      @user.password = params[key][:password]
-      @user.password_confirmation = params[key][:password_confirmation]
+      @user.magento_password = params[:user][:password]
+      @user.password = params[:user][:password]
+      @user.password_confirmation = params[:user][:password_confirmation]
 
       respond_to do |format|
         if @user.save
-          format.html { respond_with resource, :location => after_sign_in_path_for(resource) }
-          format.js { render 'successful_registration', :layout => false }
+          sign_in(:user, @user)
+          format.html { render 'gemgento/users/info' }
+          format.js { render 'gemgento/users/registrations/successful_registration', :layout => false }
         else
-          format.html { respond_with resource, :location => after_sign_in_path_for(resource) }
-          format.js { render 'errors', :layout => false }
+          format.html { 'gemgento/users/registrations/new' }
+          format.js { render 'gemgento/users/registrations/errors', :layout => false }
         end
       end
-
-      @registration_resource = resource
     end
 
   end

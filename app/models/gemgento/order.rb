@@ -1,7 +1,7 @@
 module Gemgento
   class Order < ActiveRecord::Base
     belongs_to  :store
-    belongs_to  :user
+    belongs_to  :users
     belongs_to  :user_group
     belongs_to  :shipping_address, foreign_key: 'shipping_address_id', class_name: 'Address'
     belongs_to  :billing_address, foreign_key: 'billing_address_id', class_name: 'Address'
@@ -30,7 +30,7 @@ module Gemgento
           cart = Order.find(order_id)
         end
       else
-        cart = Order.find_by(user: user, state: 'cart')
+        cart = Order.find_by(users: user, state: 'cart')
 
         if cart.nil?
           cart = Order.new

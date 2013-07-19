@@ -45,7 +45,7 @@ module Gemgento
 
           private
 
-          # Save Magento user address to local
+          # Save Magento users address to local
           def self.sync_magento_to_local(source, user)
             address = Gemgento::Address.find_or_initialize_by(user_address_id: source[:customer_address_id])
             address.user_address_id = source[:customer_address_id]

@@ -1,6 +1,6 @@
 module Gemgento
   class Address < ActiveRecord::Base
-    belongs_to :user
+    belongs_to :users
     belongs_to :country
     belongs_to :region
     belongs_to :order

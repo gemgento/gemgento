@@ -1,8 +1,7 @@
 Gemgento::Engine.routes.draw do
   root :to => "products#index"
 
-  devise_for :users, :class_name => 'Gemgento::User'
-  devise_for :checkout, :class_name => 'Gemgento::User'
+  devise_for :users, class_name: 'Gemgento::User'
 
   resources :products, :categories, :orders, :addresses
   get '/error/:action', :controller => "errors"
@@ -18,6 +17,8 @@ Gemgento::Engine.routes.draw do
 
   get '/checkout/shopping_bag',       to: 'checkout#shopping_bag'
   get '/checkout/login',              to: 'checkout#login'
+  post '/checkout/login',             to: 'checkout#login'
+  post '/checkout/register',          to: 'checkout#register'
   get '/checkout/address',            to: 'checkout#address'
   get '/checkout/shipping',           to: 'checkout#shipping'
   get '/checkout/payment',            to: 'checkout#payment'

@@ -6,36 +6,32 @@ module Gemgento
     def new
       self.resource = resource_class.new(sign_in_params)
       clean_up_passwords(resource)
-      logger.info
 
       respond_to do |format|
         if user_signed_in?
-          format.html { respond_with(resource, serialize_options(resource)) }
-          format.js { render 'successful_session', :layout => false }
+          format.html { render 'gemgento/users/info' }
+          format.js { render 'gemgento/users/sessions/successful_session', :layout => false }
         else
-          format.html { respond_with(resource, serialize_options(resource)) }
-          format.js { render 'errors', :layout => false }
+          format.html { render 'gemgento/users/sessions/new' }
+          format.js { render 'gemgento/users/sessions/errors', :layout => false }
         end
       end
     end
 
     # POST /resource/sign_in
     def create
-      key = params[:user].nil? ? :checkout : :user
-      user = User.find_by(email: params[key][:email])
+      user = User::is_valid_login(params[:user][:email], params[:user][:password])
 
       respond_to do |format|
-        if !user.nil? && user.valid_password?(params[key][:password])
+        unless user.nil?
           sign_in(:user, user)
-          format.html { respond_with resource, :location => after_sign_in_path_for(resource) }
-          format.js { render 'successful_session', :layout => false }
+          format.html { render 'gemgento/users/info' }
+          format.js { render '/gemgento/users/sessions/successful_session', :layout => false }
         else
-          format.html { respond_with resource, :location => after_sign_in_path_for(resource) }
-          format.js { render 'errors', :layout => false }
+          format.html { render 'gemgento/users/sessions/new' }
+          format.js { render 'gemgento/users/sessions/errors', :layout => false }
         end
       end
-
-      @login_resource = resource
     end
   end
 end

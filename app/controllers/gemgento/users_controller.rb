@@ -1,12 +1,8 @@
 module Gemgento
   class UsersController < BaseController
-    before_filter :auth_user, :except => :login
+    before_filter :auth_user
 
     layout 'application'
-
-    def login
-      redirect_to '/user/info' unless current_user.nil?
-    end
 
     def account
 

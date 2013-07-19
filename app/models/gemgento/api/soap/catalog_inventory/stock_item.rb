@@ -35,7 +35,7 @@ module Gemgento
 
           private
 
-          # Save Magento user inventory to local
+          # Save Magento users inventory to local
           def self.sync_magento_to_local(source)
             product = Gemgento::Product.find_or_initialize_by(magento_id: source[:product_id])
             inventory = Gemgento::Inventory.find_or_initialize_by(product: product)

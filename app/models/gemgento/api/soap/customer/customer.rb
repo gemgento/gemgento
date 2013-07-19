@@ -80,7 +80,7 @@ module Gemgento
 
           private
 
-          # Save a Magento customer as local user
+          # Save a Magento customer as local users
           def self.sync_magento_to_local(source)
             user = Gemgento::User.find_or_initialize_by(magento_id: source[:customer_id])
             user.magento_id = source[:customer_id]
