@@ -31,16 +31,28 @@ module Gemgento
             response[:result][:info]
           end
 
-          def self.create
-            # TODO: Create create API call
+          def self.create(address)
+            message = {
+                customer_id: address.user.magento_id,
+                address_data: compose_address_data(address)
+            }
+            response = Gemgento::Magento.create_call(:customer_address_create, message)
+
+            address.user_address_id = response[:result]
+            address.sync_needed = false
+            address.save
           end
 
-          def self.update
-            # TODO: Create update API call
+          def self.update(address)
+            message = {
+                address_id: address.user_address_id,
+                address_data: compose_address_data(address)
+            }
+            Gemgento::Magento.create_call(:customer_address_update, message)
           end
 
-          def self.delete
-            # TODO: Create delete API call
+          def self.delete(address_id)
+            Gemgento::Magento.create_call(:customer_address_update, { address_id: address_id })
           end
 
           private
@@ -71,6 +83,29 @@ module Gemgento
             address.save
 
             address
+          end
+
+          def self.compose_address_data(address)
+            address_data = {
+              city: address.city,
+              company: address.company,
+              'country_id' => address.country.magento_id,
+              fax: address.fax,
+              firstname: address.fname,
+              lastname: address.lname,
+              middlename: address.mname,
+              postcode: address.postcode,
+              prefix: address.prefix,
+              region: address.region_name,
+              'region_id' => address.region.magento_id,
+              street: { 'arr:string' => [address.street] },
+              suffix: address.suffix,
+              telephone: address.telephone,
+              'is_default_billing' => (address.type == 'billing' && address.is_default) ? true : false,
+              'is_default_shipping' => (address.type == 'shipping' && address.is_default) ? true : false
+            }
+
+            address_data
           end
 
         end
