@@ -54,7 +54,10 @@ module Gemgento
     def address
       if user_signed_in?
         @shipping_address = current_user.get_default_address('shipping')
+        @shipping_address = Address.new if @shipping_address.nil?
+
         @billing_address = current_user.get_default_address('billing')
+        @billing_address = Address.new if @billing_address.nil?
       else
         @shipping_address = Address.new
         @billing_address = Address.new

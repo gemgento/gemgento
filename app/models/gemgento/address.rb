@@ -1,9 +1,11 @@
 module Gemgento
   class Address < ActiveRecord::Base
-    belongs_to :users
+    belongs_to :user
     belongs_to :country
     belongs_to :region
     belongs_to :order
+
+    attr_accessor :address1, :address2, :address3
 
     def self.index
       if Address.find(:all).size == 0

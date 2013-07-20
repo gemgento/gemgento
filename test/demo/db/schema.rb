@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130719140248) do
+ActiveRecord::Schema.define(version: 20130719222519) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer  "user_address_id"
@@ -37,7 +37,6 @@ ActiveRecord::Schema.define(version: 20130719140248) do
     t.datetime "updated_at"
     t.integer  "order_address_id"
     t.integer  "order_id"
-    t.string   "type"
     t.boolean  "is_default",       default: false
   end
 

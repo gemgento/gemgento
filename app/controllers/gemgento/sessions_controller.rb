@@ -20,11 +20,11 @@ module Gemgento
 
     # POST /resource/sign_in
     def create
-      user = User::is_valid_login(params[:users][:email], params[:users][:password])
+      user = User::is_valid_login(params[:user][:email], params[:user][:password])
 
       respond_to do |format|
         unless user.nil?
-          sign_in(:users, user)
+          sign_in(:user, user)
           format.html { render 'gemgento/users/info' }
           format.js { render '/gemgento/users/sessions/successful_session', :layout => false }
         else

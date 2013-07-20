@@ -78,7 +78,7 @@ module Gemgento
             address.suffix = source[:suffix]
             address.telephone = source[:telephone]
             address.is_default = (source[:is_default_billing] || source[:is_default_shipping]) ? true : false
-            address.type = source[:address_type]
+            address.address_type = source[:is_default_billing] ? 'billing' : 'shipping'
             address.sync_needed = false
             address.save
 
@@ -101,8 +101,8 @@ module Gemgento
               street: { 'arr:string' => [address.street] },
               suffix: address.suffix,
               telephone: address.telephone,
-              'is_default_billing' => (address.type == 'billing' && address.is_default) ? true : false,
-              'is_default_shipping' => (address.type == 'shipping' && address.is_default) ? true : false
+              'is_default_billing' => (address.address_type == 'billing' && address.is_default) ? true : false,
+              'is_default_shipping' => (address.address_type == 'shipping' && address.is_default) ? true : false
             }
 
             address_data
