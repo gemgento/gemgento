@@ -10,6 +10,8 @@ Gemgento::Engine.routes.draw do
     resources :orders, :addresses
   end
 
+  get '/addresses/region_options',    to: 'addresses#region_options'
+
   match '/shop/:permalink' => 'products#show', via: :get, as: 'shop_permalink'
   get '/shop/product/:url_key',       to: 'products#show'
   get '/shop/category/:url_key',      to: 'categories#show'

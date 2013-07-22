@@ -5,12 +5,12 @@ module Gemgento
     belongs_to :region
     belongs_to :order
 
-    validates :fname, presence: true, message: 'First name is required'
-    validates :lname, presence: true, message: 'Last name is required'
-    validates :street, presence: true, message: 'Address is required'
+    validates :fname, presence: { message: 'First name is required' }
+    validates :lname, presence: { message: 'Last name is required' }
+    validates :street, presence: { message: 'Address is required' }
     validates :country, presence: true
-    validates :postcode, presence: true, message: 'Postal code is required'
-    validates :telephone, presence: true, message: 'Phone number is required'
+    validates :postcode, presence: { message: 'Postal code is required' }
+    validates :telephone, presence: { message: 'Phone number is required' }
 
     attr_accessor :address1, :address2, :address3
 
