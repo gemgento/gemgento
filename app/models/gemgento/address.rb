@@ -5,6 +5,11 @@ module Gemgento
     belongs_to :region
     belongs_to :order
 
+    validates :fname, length: { minimum: 2 }
+    validates :lname, length: { minimum: 2 }
+    validates :street, length: { minimum: 2 }
+    validates :country, presence: true
+
     attr_accessor :address1, :address2, :address3
 
     def self.index
