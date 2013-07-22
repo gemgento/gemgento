@@ -48,7 +48,7 @@ module Gemgento
     private
 
     def address_params
-      params.require(:address).permit(:fname, :lname, :country, :city, :region, :postcode, :telephone)
+      params.require(:address).permit(:fname, :lname, :country_id, :city, :region_id, :postcode, :telephone)
     end
   end
 end
