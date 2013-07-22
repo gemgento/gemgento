@@ -1,0 +1,1 @@
+$('#errors').html('<%=current_order.shipping_address.errors.first.join(' ') unless current_order.shipping_address.nil? %>' + '<%=current_order.billing_address.errors.first.join(' ') unless current_order.billing_address.nil? %>').show();

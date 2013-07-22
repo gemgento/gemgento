@@ -8,6 +8,21 @@ module Gemgento
 
     end
 
+    def update
+      raise 'Missing activity parameter' if params[:activity].nil?
+
+      @errors = []
+
+      case params[:activity]
+        when 'set_addresses'
+          set_addresses
+        else
+          raise "Unknown action - #{params[:activity]}"
+      end
+
+      render nothing: true
+    end
+
     def login
       if params[:email].nil? || params[:password].nil?
         render 'gemgento/checkout/login'
@@ -53,23 +68,19 @@ module Gemgento
 
     def address
       if user_signed_in?
-        @shipping_address = current_user.get_default_address('shipping')
-        @shipping_address = Address.new if @shipping_address.nil?
+        if current_order.shipping_address.nil?
+          current_order.shipping_address = current_user.addresses.find_by(address_type: 'shipping', is_default: true)
+          current_order.shipping_address = Address.new if current_order.shipping_address.nil?
+        end
 
-        @billing_address = current_user.get_default_address('billing')
-        @billing_address = Address.new if @billing_address.nil?
+        if current_order.billing_address.nil?
+          current_order.billing_address = current_user.addresses.find_by(address_type: 'billing', is_default: true)
+          current_order.billing_address = Address.new if current_order.billing_address.nil?
+        end
       else
-        @shipping_address = Address.new
-        @billing_address = Address.new
+        current_order.shipping_address = Address.new
+        current_order.billing_address = Address.new
       end
-    end
-
-    def shipping
-
-    end
-
-    def payment
-
     end
 
     def confirm
@@ -78,13 +89,48 @@ module Gemgento
 
     private
 
-    def auth_order_user
-      logger.info 'here'
-      unless user_signed_in? || current_order.customer_is_guest
+      def auth_order_user
         logger.info 'here'
-        redirect_to '/checkout/login'
+        unless user_signed_in? || current_order.customer_is_guest
+          logger.info 'here'
+          redirect_to '/checkout/login'
+        end
       end
-    end
+
+      def set_addresses
+        current_order.shipping_address = Address.new(shipping_address_params)
+
+        respond_to do |format|
+
+          if current_order.shipping_address.save # try to set the shipping address attributes
+            if params[:same_as_billing]
+              current_order.billing_address = Address.new(shipping_address_params) # set the billing address attributes the same as shipping
+            else
+              current_order.billing_address = Address.new(billing_address_params)
+            end
+
+            if current_order.billing_address.save
+              current_order.save
+              format.html { render 'gemgento/checkout/addresses/shipping' }
+              format.js { rennder 'gemgento/checkout/addresses/success '}
+            else
+              format.html { render 'gemgento/checkout/address' }
+              format.js { rennder 'gemgento/checkout/addresses/error '}
+            end
+          else
+            format.html { render 'gemgento/checkout/address' }
+            format.js { rennder 'gemgento/checkout/addresses/error '}
+          end
+        end
+      end
+
+      def shipping_address_params
+        params.require(:order).require(:shipping_address_attributes).permit(:fname, :lname, :country_id, :city, :region_id, :postcode, :telephone)
+      end
+
+      def billing_address_params
+        params.require(:order).require(:billing_address_attributes).permit(:fname, :lname, :country_id, :city, :region_id, :postcode, :telephone)
+      end
 
   end
 end

@@ -67,5 +67,9 @@ module Gemgento
         # update the item
         current_order.update_item(product, params[:quantity])
       end
+
+    def set_addresses
+
+    end
   end
 end

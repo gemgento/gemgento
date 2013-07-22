@@ -3,8 +3,13 @@ module Gemgento
     belongs_to  :store
     belongs_to  :users
     belongs_to  :user_group
+
     belongs_to  :shipping_address, foreign_key: 'shipping_address_id', class_name: 'Address'
+    accepts_nested_attributes_for :shipping_address
+
     belongs_to  :billing_address, foreign_key: 'billing_address_id', class_name: 'Address'
+    accepts_nested_attributes_for :billing_address
+
     has_one     :order_payment
     has_one     :gift_message
     has_many    :order_items
@@ -101,8 +106,8 @@ module Gemgento
 
     # functions related to processing cart into order
 
-    def push_addresses
-      API::SOAP::Checkout::Customer.addresses(self, [self.shipping_address, self.billing_address])
+    def push_addresses(address)
+      API::SOAP::Checkout::Customer.addresses(self, address)
     end
 
     def get_payment_methods

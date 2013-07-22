@@ -3,7 +3,6 @@ Gemgento::Engine.routes.draw do
 
   devise_for :users, class_name: 'Gemgento::User'
 
-  resources :products, :categories, :orders
   get '/error/:action', :controller => "errors"
 
   namespace 'users' do
@@ -25,5 +24,7 @@ Gemgento::Engine.routes.draw do
   get '/checkout/shipping',           to: 'checkout#shipping'
   get '/checkout/payment',            to: 'checkout#payment'
   get '/checkout/confirm',            to: 'checkout#confirm'
+
+  resources :products, :categories, :orders, :checkout
 
 end
