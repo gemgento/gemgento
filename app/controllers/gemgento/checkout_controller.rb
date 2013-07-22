@@ -111,15 +111,18 @@ module Gemgento
 
             if current_order.billing_address.save
               current_order.save
-              format.html { render 'gemgento/checkout/addresses/shipping' }
-              format.js { rennder 'gemgento/checkout/addresses/success '}
+              format.html { redirect_to '/gemgento/checkout/addresses/shipping' }
+              format.js { render '/gemgento/checkout/addresses/success' }
+              return
             else
-              format.html { render 'gemgento/checkout/address' }
-              format.js { rennder 'gemgento/checkout/addresses/error '}
+              format.html { redirect_to '/gemgento/checkout/address' }
+              format.js { render '/gemgento/checkout/addresses/error' }
+              return
             end
           else
-            format.html { render 'gemgento/checkout/address' }
-            format.js { rennder 'gemgento/checkout/addresses/error '}
+            format.html { redirect_to '/gemgento/checkout/address' }
+            format.js { render '/gemgento/checkout/addresses/error' }
+            return
           end
         end
       end
