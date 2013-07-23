@@ -11,6 +11,8 @@ module Gemgento
     accepts_nested_attributes_for :billing_address
 
     has_one     :order_payment
+    accepts_nested_attributes_for :order_payment
+
     has_one     :gift_message
     has_many    :order_items
     has_many    :order_statuses

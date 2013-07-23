@@ -80,8 +80,9 @@ module Gemgento
     end
 
     def payment
-      @payment_methods = current_order.get_payment_methods
-      logger.info
+      #@payment_methods = current_order.get_payment_methods
+      @exp_years = Time.now.year.upto(Time.now.year + 10)
+      @exp_months = 1.upto(12)
     end
 
     def confirm
@@ -98,6 +99,8 @@ module Gemgento
           set_addresses
         when 'set_shipping_method'
           set_shipping_method
+        when 'set_payment_method'
+          set_payment_method
         else
           raise "Unknown action - #{params[:activity]}"
       end
@@ -179,6 +182,16 @@ module Gemgento
           format.js { render '/gemgento/checkout/shipping/success' }
         end
       end
+
+      def set_payment_method
+        payment = OrderPayment.new(order_payment_params)
+        payment.order = current_order
+        payment.cc_owner = "#{current_order.billing_address.fname} #{current_order.billing_address.lname}"
+      end
+
+    def order_payment_params
+      params.require(:order).require(:order_payment_attributes).permit(:method, :cc_id, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month)
+    end
 
   end
 end
