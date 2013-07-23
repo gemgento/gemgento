@@ -10,7 +10,7 @@ module Gemgento
           end
 
           def self.method(cart, shipping_method)
-            Gemgento::Magento.create_call(:shopping_cart_shipping_method, { quote_id: self.magento_quote_id, shipping_method: shipping_method })
+            Gemgento::Magento.create_call(:shopping_cart_shipping_method, { quote_id: cart.magento_quote_id, method: shipping_method })
           end
 
         end

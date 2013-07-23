@@ -7,7 +7,7 @@ module Gemgento
           def self.set(cart, customer)
             message = {
                 quote_id: cart.magento_quote_id,
-                customer_data: {
+                customer: {
                     mode: customer.magento_id.nil? ? 'guest' : 'customer',
                     'customer_id' => customer.magento_id,
                     email: customer.email,
@@ -22,10 +22,10 @@ module Gemgento
             Gemgento::Magento.create_call(:shopping_cart_customer_set, message)
           end
 
-          def self.addresses(cart, address)
+          def self.address(cart, address)
             message = {
                 quote_id: cart.magento_quote_id,
-                customer_address_data: { item: compose_address_data(address) }
+                customer: { item: compose_address_data(address) }
             }
 
             Gemgento::Magento.create_call(:shopping_cart_customer_addresses, message)
@@ -50,8 +50,8 @@ module Gemgento
                 'country_id' => address.country.magento_id,
                 telephone: address.telephone,
                 fax: address.fax,
-                'is_default_billing' => address.is_default_billing ? 1 : 0,
-                'is_default_shipping' => address.is_default_shipping ? 1 : 0
+                'is_default_billing' => (address.is_default and address.address_type = 'billing') ? 1 : 0,
+                'is_default_shipping' => (address.is_default and address.address_type = 'shipping') ? 1 : 0
             }
 
             address_data

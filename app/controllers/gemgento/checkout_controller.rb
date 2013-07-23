@@ -8,19 +8,6 @@ module Gemgento
 
     end
 
-    def update
-      raise 'Missing activity parameter' if params[:activity].nil?
-
-      @errors = []
-
-      case params[:activity]
-        when 'set_addresses'
-          set_addresses
-        else
-          raise "Unknown action - #{params[:activity]}"
-      end
-    end
-
     def login
       if params[:email].nil? || params[:password].nil?
         render 'gemgento/checkout/login'
@@ -70,6 +57,8 @@ module Gemgento
     end
 
     def address
+      current_order.push_cart if current_order.magento_quote_id.nil?
+
       if user_signed_in?
         if current_order.shipping_address.nil?
           current_order.shipping_address = current_user.addresses.find_by(address_type: 'shipping', is_default: true)
@@ -86,8 +75,32 @@ module Gemgento
       end
     end
 
-    def confirm
+    def shipping
+      @shipping_methods = current_order.get_shipping_methods
+    end
 
+    def payment
+      @payment_methods = current_order.get_payment_methods
+      logger.info
+    end
+
+    def confirm
+      @totals = current_order.get_totals
+    end
+
+    def update
+      raise 'Missing activity parameter' if params[:activity].nil?
+
+      @errors = []
+
+      case params[:activity]
+        when 'set_addresses'
+          set_addresses
+        when 'set_shipping_method'
+          set_shipping_method
+        else
+          raise "Unknown action - #{params[:activity]}"
+      end
     end
 
     private
@@ -129,7 +142,11 @@ module Gemgento
             if current_order.billing_address.save
               logger.info 'Great Success'
               current_order.save
-              format.html { redirect_to '/gemgento/checkout/addresses/shipping' }
+
+              current_order.push_address(current_order.shipping_address)
+              current_order.push_address(current_order.billing_address)
+
+              format.html { redirect_to '/gemgento/checkout/shipping' }
               format.js { render '/gemgento/checkout/addresses/success' }
             else
               current_order.shipping_address.destroy
@@ -151,6 +168,16 @@ module Gemgento
 
       def billing_address_params
         params.require(:order).require(:billing_address_attributes).permit(:fname, :lname, :address1, :address2, :country_id, :city, :region_id, :postcode, :telephone, :address_type)
+      end
+
+      def set_shipping_method
+        current_order.shipping_method = params[:shipping_method]
+        current_order.push_shipping_method
+
+        respond_to do |format|
+          format.html { redirect_to '/gemgento/checkout/payment' }
+          format.js { render '/gemgento/checkout/shipping/success' }
+        end
       end
 
   end

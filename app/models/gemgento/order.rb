@@ -88,14 +88,18 @@ module Gemgento
     def push_cart
       raise 'Cart already pushed, creating a new cart' unless self.magento_quote_id.nil?
       API::SOAP::Checkout::Cart.create(self)
+      API::SOAP::Checkout::Customer.set(self, self.user)
       API::SOAP::Checkout::Product.add(self, self.order_items)
+    end
+
+    def get_totals
       API::SOAP::Checkout::Cart.totals(self)
     end
 
     # functions related to processing cart into order
 
-    def push_addresses(address)
-      API::SOAP::Checkout::Customer.addresses(self, address)
+    def push_address(address)
+      API::SOAP::Checkout::Customer.address(self, address)
     end
 
     def get_payment_methods
@@ -106,8 +110,8 @@ module Gemgento
       API::SOAP::Checkout::Payment.method(self, payment)
     end
 
-    def push_customer(user)
-      API::SOAP::Checkout::Customer.set(self, user)
+    def push_customer
+      API::SOAP::Checkout::Customer.set(self, self.user)
     end
 
     def get_shipping_methods
@@ -115,20 +119,19 @@ module Gemgento
       API::SOAP::Checkout::Shipping.list(self)
     end
 
-    def push_shipping_method(shipping_method)
-      API::SOAP::Checkout::Shipping.method(self, shipping_method)
+    def push_shipping_method
+      raise 'Shipping method has not been set' if self.shipping_method.nil?
+      API::SOAP::Checkout::Shipping.method(self, self.shipping_method)
     end
 
     def process
       # ensure all essential cart data has been added
       self.push_cart if self.magento_quote_id.nil?
-      self.push_customer(self.user)
+      self.push_customer()
       self.push_address(self.shipping_address)
       self.push_address(self.billing_address)
-      self.push_shipping_method(self.shipping_method)
+      self.push_shipping_method
       self.push_payment_method(self.order_payment)
-
-      # process cart to order
       API::SOAP::Checkout::Cart.order(self)
     end
   end

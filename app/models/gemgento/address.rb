@@ -17,7 +17,6 @@ module Gemgento
     after_find  :explode_street_address
     before_validation :implode_street_address
 
-
     def self.index
       if Address.find(:all).size == 0
         API::SOAP::Customer::Address.fetch_all
@@ -39,6 +38,18 @@ module Gemgento
       self.street = self.address1 unless self.address1.nil?
       self.street = "#{self.street}\n#{self.address2}" unless self.address2.nil?
       self.street = "#{self.street}\n#{self.address3}" unless self.address3.nil?
+    end
+
+    def sync_local_to_magento
+      if self.sync_needed
+        if self.magento_id.nil?
+          API::SOAP::Customer::Address.create(self)
+        else
+          API::SOAP::Customer::Address.update(self)
+        end
+        self.sync_needed = false
+        self.save
+      end
     end
   end
 end
