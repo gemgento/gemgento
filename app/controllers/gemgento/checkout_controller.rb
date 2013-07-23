@@ -29,7 +29,9 @@ module Gemgento
 
         respond_to do |format|
           unless user.nil?
-            sign_in(:users, user)
+            sign_in(:user, user)
+            current_order.user = current_user
+            current_order.save
 
             format.html { render 'gemgento/checkout/address' }
             format.js { render '/gemgento/checkout/sessions/successful_session', :layout => false }
@@ -54,7 +56,10 @@ module Gemgento
 
       respond_to do |format|
         if @user.save
-          sign_in(:users, @user)
+          sign_in(:user, @user)
+          current_order.user = current_user
+          current_order.save
+
           format.html { render 'gemgento/checkout/address' }
           format.js { render 'gemgento/checkout/registrations/successful_registration', :layout => false }
         else
@@ -96,15 +101,29 @@ module Gemgento
       end
 
       def set_addresses
-        current_order.shipping_address = Address.new(shipping_address_params)
+        if current_order.shipping_address.nil?
+          current_order.shipping_address = Address.new(shipping_address_params)
+        else
+          current_order.shipping_address.update_attributes(shipping_address_params)
+        end
 
         respond_to do |format|
 
           if current_order.shipping_address.save # try to set the shipping address attributes
-            if params[:same_as_billing]
-              current_order.billing_address = Address.new(shipping_address_params) # set the billing address attributes the same as shipping
+
+            if params[:same_as_billing]  # set the billing address attributes the same as shipping
+
+              if current_order.billing_address.nil?
+                current_order.billing_address = Address.new(shipping_address_params)
+              else
+                current_order.billing_address.update_attributes(shipping_address_params)
+              end
             else
-              current_order.billing_address = Address.new(billing_address_params)
+              if current_order.billing_address.nil?
+                current_order.billing_address = Address.new(billing_address_params)
+              else
+                current_order.billing_address.update_attributes(billing_address_params)
+              end
             end
 
             if current_order.billing_address.save
@@ -113,6 +132,7 @@ module Gemgento
               format.html { redirect_to '/gemgento/checkout/addresses/shipping' }
               format.js { render '/gemgento/checkout/addresses/success' }
             else
+              current_order.shipping_address.destroy
               logger.info 'Billing failure'
               format.html { redirect_to '/gemgento/checkout/address' }
               format.js { render '/gemgento/checkout/addresses/error' }
@@ -126,11 +146,11 @@ module Gemgento
       end
 
       def shipping_address_params
-        params.require(:order).require(:shipping_address_attributes).permit(:fname, :lname, :country_id, :city, :region_id, :postcode, :telephone)
+        params.require(:order).require(:shipping_address_attributes).permit(:fname, :lname, :address1, :address2, :country_id, :city, :region_id, :postcode, :telephone, :address_type)
       end
 
       def billing_address_params
-        params.require(:order).require(:billing_address_attributes).permit(:fname, :lname, :country_id, :city, :region_id, :postcode, :telephone)
+        params.require(:order).require(:billing_address_attributes).permit(:fname, :lname, :address1, :address2, :country_id, :city, :region_id, :postcode, :telephone, :address_type)
       end
 
   end

@@ -1,7 +1,7 @@
 module Gemgento
   class Order < ActiveRecord::Base
     belongs_to  :store
-    belongs_to  :users
+    belongs_to  :user
     belongs_to  :user_group
 
     belongs_to  :shipping_address, foreign_key: 'shipping_address_id', class_name: 'Address'
