@@ -19,8 +19,6 @@ module Gemgento
         else
           raise "Unknown action - #{params[:activity]}"
       end
-
-      render nothing: true
     end
 
     def login
@@ -110,19 +108,19 @@ module Gemgento
             end
 
             if current_order.billing_address.save
+              logger.info 'Great Success'
               current_order.save
               format.html { redirect_to '/gemgento/checkout/addresses/shipping' }
               format.js { render '/gemgento/checkout/addresses/success' }
-              return
             else
+              logger.info 'Billing failure'
               format.html { redirect_to '/gemgento/checkout/address' }
               format.js { render '/gemgento/checkout/addresses/error' }
-              return
             end
           else
+            logger.info 'Shipping failure'
             format.html { redirect_to '/gemgento/checkout/address' }
             format.js { render '/gemgento/checkout/addresses/error' }
-            return
           end
         end
       end
