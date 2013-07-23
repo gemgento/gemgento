@@ -3,7 +3,7 @@ module Gemgento
     module Order
 
       def current_order
-        @current_order ||= Gemgento::Order.get_cart(nil, cookies[:cart])
+        @current_order ||= Gemgento::Order.get_cart(cookies[:cart])
       end
 
     end
