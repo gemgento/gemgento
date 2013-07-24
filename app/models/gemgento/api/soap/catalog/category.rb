@@ -30,7 +30,7 @@ module Gemgento
                 'position' => category.position,
                 'is_anchor' => 1
             }
-            message = {parentId: category.parent_id, categoryData: data}
+            message = {parentId: category.parent.magento_id, categoryData: data}
             response = Gemgento::Magento.create_call(:catalog_category_create, message)
 
             category.magento_id = response[:attribute_id]
@@ -69,11 +69,11 @@ module Gemgento
           #
           # @param [Hash] subject The returned item of Magento API call
           def self.sync_magento_to_local(subject)
-            category = Gemgento::Category.find_or_initialize_by(magento_id: subject[:category_id])
+            category = Gemgento::Category.where(magento_id: subject[:category_id]).first_or_initialize
             category.magento_id = subject[:category_id]
             category.name = subject[:name]
             category.url_key = subject[:url_key]
-            category.parent_id = subject[:parent_id]
+            category.parent = Gemgento::Category.where(magento_id: subject[:parent_id])
             category.position = subject[:position]
             category.is_active = subject[:is_active]
             category.include_in_menu = subject[:include_in_menu] == 1 ? true : false
