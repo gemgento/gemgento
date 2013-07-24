@@ -11,23 +11,22 @@ module Gemgento
           end
 
           def self.order(cart)
-            response = Gemgento::Magento.create_call(:shopping_cart_order, { quote_id: cart.magento_quote_id })
+            response = Gemgento::Magento.create_call(:shopping_cart_order, {quote_id: cart.magento_quote_id})
             puts response.inspect
-            ext
           end
 
           def self.info(cart)
-            response = Gemgento::Magento.create_call(:shopping_cart_info, { quote_id: cart.magento_quote_id })
+            response = Gemgento::Magento.create_call(:shopping_cart_info, {quote_id: cart.magento_quote_id})
             response[:result]
           end
 
           def self.totals(cart)
-            response = Gemgento::Magento.create_call(:shopping_cart_totals, { quote_id: cart.magento_quote_id })
+            response = Gemgento::Magento.create_call(:shopping_cart_totals, {quote_id: cart.magento_quote_id})
             response[:result][:item]
           end
 
           def self.license(cart)
-            response = Gemgento::Magento.create_call(:shopping_cart_license, { quote_id: cart.magento_quote_id })
+            response = Gemgento::Magento.create_call(:shopping_cart_license, {quote_id: cart.magento_quote_id})
             response[:result][:item]
           end
 

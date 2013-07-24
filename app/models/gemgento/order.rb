@@ -1,21 +1,21 @@
 module Gemgento
   class Order < ActiveRecord::Base
-    belongs_to  :store
-    belongs_to  :user
-    belongs_to  :user_group
+    belongs_to :store
+    belongs_to :user
+    belongs_to :user_group
 
-    belongs_to  :shipping_address, foreign_key: 'shipping_address_id', class_name: 'Address'
+    belongs_to :shipping_address, foreign_key: 'shipping_address_id', class_name: 'Address'
     accepts_nested_attributes_for :shipping_address
 
-    belongs_to  :billing_address, foreign_key: 'billing_address_id', class_name: 'Address'
+    belongs_to :billing_address, foreign_key: 'billing_address_id', class_name: 'Address'
     accepts_nested_attributes_for :billing_address
 
-    has_one     :order_payment
+    has_one :order_payment
     accepts_nested_attributes_for :order_payment
 
-    has_one     :gift_message
-    has_many    :order_items
-    has_many    :order_statuses
+    has_one :gift_message
+    has_many :order_items
+    has_many :order_statuses
 
     def self.index
       if Order.find(:all).size == 0
@@ -45,17 +45,17 @@ module Gemgento
       order_item = self.order_items.find_by(product: product)
 
       if order_item.nil?
-       order_item = OrderItem.new
-       order_item.product = product
-       order_item.qty_ordered = quantity
-       order_item.order = self
-       order_item.save
+        order_item = OrderItem.new
+        order_item.product = product
+        order_item.qty_ordered = quantity
+        order_item.order = self
+        order_item.save
 
-       unless self.magento_quote_id.nil?
-         API::SOAP::Checkout::Product.add(self, [order_item])
-       end
+        unless self.magento_quote_id.nil?
+          API::SOAP::Checkout::Product.add(self, [order_item])
+        end
       else
-       self.update_item(product, order_item.qty_ordered + quantity.to_i)
+        self.update_item(product, order_item.qty_ordered + quantity.to_i)
       end
     end
 
@@ -100,16 +100,16 @@ module Gemgento
 
     # functions related to processing cart into order
 
-    def push_address(address)
-      API::SOAP::Checkout::Customer.address(self, address)
+    def push_addresses
+      API::SOAP::Checkout::Customer.address(self)
     end
 
     def get_payment_methods
       API::SOAP::Checkout::Payment.list(self)
     end
 
-    def push_payment_method(payment)
-      API::SOAP::Checkout::Payment.method(self, payment)
+    def push_payment_method
+      API::SOAP::Checkout::Payment.method(self, self.order_payment)
     end
 
     def push_customer
@@ -127,13 +127,6 @@ module Gemgento
     end
 
     def process
-      # ensure all essential cart data has been added
-      self.push_cart if self.magento_quote_id.nil?
-      self.push_customer()
-      self.push_address(self.shipping_address)
-      self.push_address(self.billing_address)
-      self.push_shipping_method
-      self.push_payment_method(self.order_payment)
       API::SOAP::Checkout::Cart.order(self)
     end
   end

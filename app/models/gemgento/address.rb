@@ -5,16 +5,16 @@ module Gemgento
     belongs_to :region
     belongs_to :order
 
-    validates :fname, presence: { message: 'First name is required' }
-    validates :lname, presence: { message: 'Last name is required' }
-    validates :street, presence: { message: 'Address is required' }
+    validates :fname, presence: {message: 'First name is required'}
+    validates :lname, presence: {message: 'Last name is required'}
+    validates :street, presence: {message: 'Address is required'}
     validates :country, presence: true
-    validates :postcode, presence: { message: 'Postal code is required' }
-    validates :telephone, presence: { message: 'Phone number is required' }
+    validates :postcode, presence: {message: 'Postal code is required'}
+    validates :telephone, presence: {message: 'Phone number is required'}
 
     attr_accessor :address1, :address2, :address3
 
-    after_find  :explode_street_address
+    after_find :explode_street_address
     before_validation :implode_street_address
 
     def self.index
@@ -23,6 +23,14 @@ module Gemgento
       end
 
       Address.find(:all)
+    end
+
+    def push
+      if self.user_address_id.nil?
+        API::SOAP::Customer::Address.create(self)
+      else
+        API::SOAP::Customer::Address.update(self)
+      end
     end
 
     private
@@ -42,7 +50,7 @@ module Gemgento
 
     def sync_local_to_magento
       if self.sync_needed
-        if self.magento_id.nil?
+        if self.user_address_id.nil?
           API::SOAP::Customer::Address.create(self)
         else
           API::SOAP::Customer::Address.update(self)
