@@ -52,6 +52,16 @@ module Gemgento
       API::SOAP::Catalog::Product.check_magento(identifier, identifier_type, attribute_set)
     end
 
+    def attributes
+      attributes = []
+
+      self.product_attribute_values.each do |attribute_value|
+        attributes << attribute_value.product_attribute
+      end
+
+      attributes
+    end
+
     private
 
     # Push local product changes to magento
