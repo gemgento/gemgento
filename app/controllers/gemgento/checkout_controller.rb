@@ -57,6 +57,11 @@ module Gemgento
     end
 
     def address
+      if current_order.user.nil?
+        current_order.user = current_user
+        current_order.save
+      end
+
       current_order.push_cart if current_order.magento_quote_id.nil?
 
       if user_signed_in?
@@ -110,7 +115,7 @@ module Gemgento
       @payment = current_order.order_payment
 
       session[:shipping_methods].each do |shipping_method|
-        if shipping_method[:code] = current_order.shipping_method
+        if shipping_method[:code] == current_order.shipping_method
           @shipping_method = shipping_method
           break
         end
@@ -145,7 +150,6 @@ module Gemgento
     private
 
     def auth_order_user
-      logger.info 'here'
       unless user_signed_in? || current_order.customer_is_guest
         redirect_to '/checkout/login'
       end
@@ -157,6 +161,8 @@ module Gemgento
       else
         current_order.shipping_address.update_attributes(shipping_address_params)
       end
+
+      current_order.shipping_address.user = current_user
 
       respond_to do |format|
 
@@ -177,7 +183,8 @@ module Gemgento
             end
           end
 
-          current_order.billing_address.address_type = 'billing'
+          current_order.billing_address.address_type = 'billing' # if user selected 'billing same as shipping' we need to force the correct type
+          current_order.billing_address.user = current_user
 
           if current_order.billing_address.save
             current_order.save

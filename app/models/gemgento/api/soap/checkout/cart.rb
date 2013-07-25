@@ -12,7 +12,9 @@ module Gemgento
 
           def self.order(cart)
             response = Gemgento::Magento.create_call(:shopping_cart_order, {quote_id: cart.magento_quote_id})
-            puts response.inspect
+            cart.increment_id = response[:result]
+            cart.save
+            Gemgento::API::SOAP::Sales::Order.fetch(order.increment_id) #grab all the new order information
           end
 
           def self.info(cart)

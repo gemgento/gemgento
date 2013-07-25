@@ -6,8 +6,12 @@ module Gemgento
 
           def self.fetch_all
             list.each do |order|
-              sync_magento_to_local(info(order[:increment_id]))
+              fetch(order[:increment_id])
             end
+          end
+
+          def self.fetch(increment_id)
+            sync_magento_to_local(info(increment_id))
           end
 
           def self.list
@@ -21,7 +25,7 @@ module Gemgento
           end
 
           def self.info(increment_id)
-            response = Gemgento::Magento.create_call(:sales_order_info, { order_increment_id: increment_id })
+            response = Gemgento::Magento.create_call(:sales_order_info, {order_increment_id: increment_id})
             response[:result]
           end
 
@@ -47,7 +51,6 @@ module Gemgento
           def self.sync_magento_to_local(source)
             order = Gemgento::Order.find_or_initialize_by(order_id: source[:order_id])
             order.order_id = source[:order_id]
-            order.store = Store.find_by(magento_id: source[:store_id])
             order.is_active = source[:is_active]
             order.user = User.find_by(magento_id: source[:customer_id])
             order.tax_amount = source[:tax_amount]
@@ -100,6 +103,14 @@ module Gemgento
             order.customer_is_guest = source[:customer_is_guest]
             order.email_sent = source[:email_sent]
             order.increment_id = source[:increment_id]
+
+            store = Gemgento::Store.where(magento_id: source[:store_id]).first
+
+            if store.nil?
+              store = Gemgento::Store.first
+            end
+
+            order.store = store
             order.save
 
             sync_magento_address_to_local(source[:shipping_address], order)
@@ -146,8 +157,7 @@ module Gemgento
             address.street = source[:street]
             address.suffix = source[:suffix]
             address.telephone = source[:telephone]
-            address.is_default_billing = source[:is_default_billing]
-            address.is_default_shipping = source[:is_default_shipping]
+            address.is_default = source[:is_default_billing] || source[:is_default_shipping] ? 1 : 0
             address.address_type = source[:address_type]
             address.sync_needed = false
             address.save
