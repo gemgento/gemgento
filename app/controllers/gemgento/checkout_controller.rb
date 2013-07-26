@@ -128,6 +128,10 @@ module Gemgento
       end
     end
 
+    def thank_you
+
+    end
+
     def update
       raise 'Missing activity parameter' if params[:activity].nil?
 
@@ -252,13 +256,15 @@ module Gemgento
     end
 
     def process_order
-      current_order.process
-
       respond_to do |format|
-        format.html { redirect_to '/' }
-        format.js { render 'gemgento/checkout/confirm' }
+        if current_order.process
+          format.html { redirect_to '/checkout/thank_you' }
+          format.js { render 'gemgento/checkout/confirm/success' }
+        else
+          format.html { redirect_to '/checkout/confirm' }
+          format.js { render 'gemgento/checkout/confirm/error' }
+        end
       end
     end
-
   end
 end
