@@ -13,11 +13,13 @@ module Gemgento
           def self.list
             response = Gemgento::Magento.create_call(:catalog_product_attribute_set_list)
 
-            unless response[:result][:item].is_a? Array
-              response[:result][:item] = [response[:result][:item]]
-            end
+            if response.success?
+              unless response.body[:result][:item].is_a? Array
+                response.body[:result][:item] = [response.body[:result][:item]]
+              end
 
-            response[:result][:item]
+              response.body[:result][:item]
+            end
           end
 
           # Create a new product attribute set in Magento

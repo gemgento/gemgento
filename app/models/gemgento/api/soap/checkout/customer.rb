@@ -18,8 +18,9 @@ module Gemgento
                     'group_id' => customer.user_group.magento_id
                 }
             }
+            response = Gemgento::Magento.create_call(:shopping_cart_customer_set, message)
 
-            Gemgento::Magento.create_call(:shopping_cart_customer_set, message)
+            return response.success?
           end
 
           def self.address(cart)
@@ -27,8 +28,9 @@ module Gemgento
                 quote_id: cart.magento_quote_id,
                 customer: {item: compose_address_data([cart.shipping_address, cart.billing_address])}
             }
+            response = Gemgento::Magento.create_call(:shopping_cart_customer_addresses, message)
 
-            Gemgento::Magento.create_call(:shopping_cart_customer_addresses, message)
+            return response.success?
           end
 
           private

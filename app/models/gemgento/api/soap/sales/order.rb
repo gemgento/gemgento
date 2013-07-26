@@ -11,22 +11,30 @@ module Gemgento
           end
 
           def self.fetch(increment_id)
-            sync_magento_to_local(info(increment_id))
+            info = info(increment_id)
+            sync_magento_to_local(info) if info != false
           end
 
           def self.list
             response = Gemgento::Magento.create_call(:sales_order_list)
 
-            unless response[:result][:item].is_a? Array
-              response[:result][:item] = [response[:result][:item]]
-            end
+            if response.success?
+              unless response.body[:result][:item].is_a? Array
+                response.body[:result][:item] = [response.body[:result][:item]]
+              end
 
-            response[:result][:item]
+              response.body[:result][:item]
+            end
           end
 
           def self.info(increment_id)
             response = Gemgento::Magento.create_call(:sales_order_info, {order_increment_id: increment_id})
-            response[:result]
+
+            if response.success?
+              return response.body[:result]
+            else
+              return false
+            end
           end
 
           def self.hold

@@ -7,28 +7,33 @@ module Gemgento
           def self.fetch_all
             Gemgento::User.find(:all).each do |user|
               list(user.magento_id).each do |address|
-                  sync_magento_to_local(address, user)
+                sync_magento_to_local(address, user)
               end
             end
           end
 
           def self.list(customer_id)
-            response = Gemgento::Magento.create_call(:customer_address_list, { customer_id: customer_id })
+            response = Gemgento::Magento.create_call(:customer_address_list, {customer_id: customer_id})
 
-            unless response[:result][:item].nil?
-              unless response[:result][:item].is_a? Array
-                response[:result][:item] = [response[:result][:item]]
+            if response.success?
+              unless response.body[:result][:item].nil?
+                unless response.body[:result][:item].is_a? Array
+                  response.body[:result][:item] = [response.body[:result][:item]]
+                end
+              else
+                response.body[:result][:item] = []
               end
-            else
-              response[:result][:item] = []
-            end
 
-            response[:result][:item]
+              return response.body[:result][:item]
+            end
           end
 
           def self.info(address_id)
-            response = Gemgento::Magento.create_call(:customer_address_list, { address_id: address_id })
-            response[:result][:info]
+            response = Gemgento::Magento.create_call(:customer_address_list, {address_id: address_id})
+
+            if response.success?
+              return response.body[:result][:info]
+            end
           end
 
           def self.create(address)
@@ -38,9 +43,11 @@ module Gemgento
             }
             response = Gemgento::Magento.create_call(:customer_address_create, message)
 
-            address.user_address_id = response[:result]
-            address.sync_needed = false
-            address.save
+            if response.success?
+              address.user_address_id = response.body[:result]
+              address.sync_needed = false
+              address.save
+            end
           end
 
           def self.update(address)
@@ -48,11 +55,15 @@ module Gemgento
                 address_id: address.user_address_id,
                 address_data: compose_address_data(address)
             }
-            Gemgento::Magento.create_call(:customer_address_update, message)
+            response = Gemgento::Magento.create_call(:customer_address_update, message)
+
+            return response.success?
           end
 
           def self.delete(address_id)
-            Gemgento::Magento.create_call(:customer_address_update, { address_id: address_id })
+            response = Gemgento::Magento.create_call(:customer_address_update, {address_id: address_id})
+
+            return response.success?
           end
 
           private
@@ -87,22 +98,22 @@ module Gemgento
 
           def self.compose_address_data(address)
             address_data = {
-              city: address.city,
-              company: address.company,
-              'country_id' => address.country.magento_id,
-              fax: address.fax,
-              firstname: address.fname,
-              lastname: address.lname,
-              middlename: address.mname,
-              postcode: address.postcode,
-              prefix: address.prefix,
-              region: address.region_name,
-              'region_id' => address.region.magento_id,
-              street: { 'arr:string' => [address.street] },
-              suffix: address.suffix,
-              telephone: address.telephone,
-              'is_default_billing' => (address.address_type == 'billing' && address.is_default) ? true : false,
-              'is_default_shipping' => (address.address_type == 'shipping' && address.is_default) ? true : false
+                city: address.city,
+                company: address.company,
+                'country_id' => address.country.magento_id,
+                fax: address.fax,
+                firstname: address.fname,
+                lastname: address.lname,
+                middlename: address.mname,
+                postcode: address.postcode,
+                prefix: address.prefix,
+                region: address.region_name,
+                'region_id' => address.region.magento_id,
+                street: {'arr:string' => [address.street]},
+                suffix: address.suffix,
+                telephone: address.telephone,
+                'is_default_billing' => (address.address_type == 'billing' && address.is_default) ? true : false,
+                'is_default_shipping' => (address.address_type == 'shipping' && address.is_default) ? true : false
             }
 
             address_data

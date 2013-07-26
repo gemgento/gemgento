@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130725182530) do
+ActiveRecord::Schema.define(version: 20130726013431) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer "user_address_id"
@@ -115,6 +115,14 @@ ActiveRecord::Schema.define(version: 20130725182530) do
     t.boolean "sync_needed", default: true, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "gemgento_magento_responses", force: true do |t|
+    t.text "request"
+    t.text "body"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.boolean "success", default: true, null: false
   end
 
   create_table "gemgento_order_addresses", force: true do |t|

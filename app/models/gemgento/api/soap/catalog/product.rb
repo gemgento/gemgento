@@ -26,12 +26,14 @@ module Gemgento
           def self.list
             response = Gemgento::Magento.create_call(:catalog_product_list)
 
-            # enforce array
-            unless response[:store_view].is_a? Array
-              response[:store_view] = [response[:store_view]]
-            end
+            if response.success?
+              # enforce array
+              unless response.body[:store_view].is_a? Array
+                response.body[:store_view] = [response.body[:store_view]]
+              end
 
-            response[:store_view]
+              response.body[:store_view]
+            end
           end
 
           def self.info(product_id, attribute_set)
@@ -44,11 +46,14 @@ module Gemgento
                 product: product_id,
                 productIdentifierType: 'id',
                 attributes: {
-                    'additional_attributes' => { 'item' => additional_attributes }
+                    'additional_attributes' => {'item' => additional_attributes}
                 }
             }
             response = Gemgento::Magento.create_call(:catalog_product_info, message)
-            response[:info]
+
+            if response.success?
+              return response.body[:info]
+            end
           end
 
           # Create a new Product in Magento and set out magento_id
@@ -60,14 +65,21 @@ module Gemgento
                 productData: compose_product_data(product),
                 storeView: product.store.magento_id
             }
-            create_response = Gemgento::Magento.create_call(:catalog_product_create, message)
-            product.magento_id = create_response[:result]
+            response = Gemgento::Magento.create_call(:catalog_product_create, message)
+
+            if response.success?
+              product.magento_id = response.body[:result]
+            else
+              product.magento_id = nil
+            end
           end
 
           # Update existing Magento Product
           def self.update(product)
-            message = { product: product.magento_id, product_identifier_type: 'id', product_data: compose_product_data(product) }
-            Gemgento::Magento.create_call(:catalog_product_update, message)
+            message = {product: product.magento_id, product_identifier_type: 'id', product_data: compose_product_data(product)}
+            response = Gemgento::Magento.create_call(:catalog_product_update, message)
+
+            return response.success?
           end
 
           def self.check_magento(identifier, identifier_type, attribute_set)
@@ -80,16 +92,16 @@ module Gemgento
                 product: identifier,
                 productIdentifierType: identifier_type,
                 attributes: {
-                    'additional_attributes' => { 'arr:string' => additional_attributes }
+                    'additional_attributes' => {'arr:string' => additional_attributes}
                 }
             }
 
-            product_info_response = Gemgento::Magento.create_call(:catalog_product_info, message)
+            response = Gemgento::Magento.create_call(:catalog_product_info, message)
 
-            if product_info_response.nil?
-              Gemgento::Product.new
+            unless response.success?
+              return Gemgento::Product.new
             else
-              sync_magento_to_local(product_info_response[:info])
+              return sync_magento_to_local(response.body[:info])
             end
           end
 
@@ -168,14 +180,14 @@ module Gemgento
                 'short_description' => product.attribute_value('short_description'),
                 'weight' => product.attribute_value('weight'),
                 'status' => product.attribute_value('status'),
-                'categories' => { 'item' => compose_categories(product) },
+                'categories' => {'item' => compose_categories(product)},
                 'url_key' => product.attribute_value('url_key'),
                 'price' => product.attribute_value('price'),
-                'additional_attributes' => { 'single_data' => { 'item' => compose_attribute_values(product) }}
+                'additional_attributes' => {'single_data' => {'item' => compose_attribute_values(product)}}
             }
 
             unless product.simple_products.empty?
-              product_data.merge!({ 'associated_skus' => { 'item' => compose_associated_skus(product) }, 'price_changes' => compose_price_changes(product) })
+              product_data.merge!({'associated_skus' => {'item' => compose_associated_skus(product)}, 'price_changes' => compose_price_changes(product)})
             end
 
             product_data
@@ -223,10 +235,10 @@ module Gemgento
               options = []
 
               configurable_attribute.product_attribute_options.each do |attribute_option|
-                options << { key: attribute_option.label, value: ''}
+                options << {key: attribute_option.label, value: ''}
               end
 
-              price_changes << { key: configurable_attribute.code, value: options }
+              price_changes << {key: configurable_attribute.code, value: options}
             end
 
             [price_changes]

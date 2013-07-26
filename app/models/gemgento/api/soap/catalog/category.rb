@@ -11,12 +11,18 @@ module Gemgento
 
           def self.tree
             response = Gemgento::Magento.create_call(:catalog_category_tree)
-            response[:tree]
+
+            if response.success?
+              return response.body[:tree]
+            end
           end
 
           def self.info(category_id)
-            response = Gemgento::Magento.create_call(:catalog_category_info, { category_id: category_id })
-            response[:info]
+            response = Gemgento::Magento.create_call(:catalog_category_info, {category_id: category_id})
+
+            if response.success?
+              return response.body[:info]
+            end
           end
 
           def self.create(category)
@@ -24,7 +30,7 @@ module Gemgento
                 name: self.name,
                 'is_active' => category.is_active ? 1 : 0,
                 'include_in_menu' => category.include_in_menu ? 1 : 0,
-                'available_sort_by' =>  { 'arr:string' => %w[name] },
+                'available_sort_by' => {'arr:string' => %w[name]},
                 'default_sort_by' => 'name',
                 'url_key' => category.url_key,
                 'position' => category.position,
@@ -33,8 +39,11 @@ module Gemgento
             message = {parentId: category.parent.magento_id, categoryData: data}
             response = Gemgento::Magento.create_call(:catalog_category_create, message)
 
-            category.magento_id = response[:attribute_id]
-            category.save
+            if response.success?
+              category.magento_id = response.body[:attribute_id]
+              category.sync_needed = false
+              category.save
+            end
           end
 
           def self.update(category)
@@ -46,7 +55,8 @@ module Gemgento
                 'position' => category.position
             }
             message = {categoryId: category.magento_id, categoryData: data}
-            Gemgento::Magento.create_call(:catalog_category_update, message)
+            response = Gemgento::Magento.create_call(:catalog_category_update, message)
+            response.body
           end
 
           private
