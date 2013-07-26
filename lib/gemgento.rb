@@ -50,7 +50,7 @@ module Gemgento
       response = @client.call(function, message: message)
 
       magento_response = MagentoResponse.new
-      magento_response.request = function
+      magento_response.request = {function: function, message: message}
 
       if response.success?
         magento_response.success = true
