@@ -14,11 +14,13 @@ module Gemgento
           def self.list
             response = Gemgento::Magento.create_call(:directory_country_list)
 
-            unless response[:countries][:item].is_a? Array
-              response[:countries][:item] = [response[:countries][:item]]
-            end
+            if response.success?
+              unless response.body[:countries][:item].is_a? Array
+                response.body[:countries][:item] = [response.body[:countries][:item]]
+              end
 
-            response[:countries][:item]
+              response.body[:countries][:item]
+            end
           end
 
           private

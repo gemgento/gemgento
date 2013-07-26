@@ -21,17 +21,22 @@ module Gemgento
           def self.list
             response = Gemgento::Magento.create_call(:customer_customer_list)
 
-            # enforce array
-            unless response[:store_view].is_a? Array
-              response[:store_view] = [response[:store_view]]
-            end
+            if response.success?
+              # enforce array
+              unless response.body[:store_view].is_a? Array
+                response.body[:store_view] = [response.body[:store_view]]
+              end
 
-            response[:store_view]
+              response.body[:store_view]
+            end
           end
 
           def self.info(customer_id)
-            response = Gemgento::Magento.create_call(:customer_customer_info, { customer_id: customer_id })
-            response[:customer_info]
+            response = Gemgento::Magento.create_call(:customer_customer_info, {customer_id: customer_id})
+
+            if response.success?
+              response.body[:customer_info]
+            end
           end
 
           def self.create(customer)
@@ -39,25 +44,29 @@ module Gemgento
                 customer_data: compose_customer_data(customer)
             }
             response = Gemgento::Magento.create_call(:customer_customer_create, message)
-            puts response.inspect
-            customer.magento_id = response[:result]
-            customer.sync_needed = false
-            customer.save
 
-            # pull customer information to get the password
-            sync_magento_to_local(info(customer.magento_id))
+            if response.success?
+              customer.magento_id = response.body[:result]
+              customer.sync_needed = false
+              customer.save
+
+              # pull customer information to get the password
+              sync_magento_to_local(info(customer.magento_id))
+            end
           end
 
           def self.update(customer)
             message = {
-                customer_id:  customer.magento_id,
+                customer_id: customer.magento_id,
                 customer_data: compose_customer_data(customer)
             }
-            update_response = Gemgento::Magento.create_call(:customer_customer_update, message)
+            response = Gemgento::Magento.create_call(:customer_customer_update, message)
 
-            unless customer.password.include? ':'
-              # pull customer information to get the password
-              sync_magento_to_local(info(customer.magento_id))
+            if response.success?
+              unless customer.password.include? ':'
+                # pull customer information to get the password
+                sync_magento_to_local(info(customer.magento_id))
+              end
             end
           end
 
@@ -65,17 +74,21 @@ module Gemgento
             message = {
                 customer_id: customer.magento_id
             }
-            delete_response = Gemgento::Magento.create_call(:customer_customer_delete, message)
+            response = Gemgento::Magento.create_call(:customer_customer_delete, message)
+
+            return response.success?
           end
 
           def self.group
             response = Gemgento::Magento.create_call(:customer_group_list)
 
-            unless response[:result][:item].is_a? Array
-              response[:result][:item] = [response[:result][:item]]
-            end
+            if response.success?
+              unless response.body[:result][:item].is_a? Array
+                response.body[:result][:item] = [response.body[:result][:item]]
+              end
 
-            response[:result][:item]
+              response.body[:result][:item]
+            end
           end
 
           private
@@ -117,7 +130,7 @@ module Gemgento
             }
 
             unless customer.magento_password.include? ':'
-             customer_data[:password] = customer.magento_password # pass plain text password, magento needs to encrypt it (stupid magento)
+              customer_data[:password] = customer.magento_password # pass plain text password, magento needs to encrypt it (stupid magento)
             end
 
             customer_data

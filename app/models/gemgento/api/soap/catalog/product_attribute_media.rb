@@ -25,20 +25,22 @@ module Gemgento
 
           def self.list(product_id)
             message = {
-              product: product_id,
-              identifier_type: 'id'
+                product: product_id,
+                identifier_type: 'id'
             }
             response = Gemgento::Magento.create_call(:catalog_product_attribute_media_list, message)
 
-            if response[:result][:item].nil?
-              response[:result][:item] = []
-            end
+            if response.success?
+              if response.body[:result][:item].nil?
+                response.body[:result][:item] = []
+              end
 
-            unless response[:result][:item].is_a? Array
-              response[:result][:item] = [response[:result][:item]]
-            end
+              unless response.body[:result][:item].is_a? Array
+                response.body[:result][:item] = [response.body[:result][:item]]
+              end
 
-            response[:result][:item]
+              response.body[:result][:item]
+            end
           end
 
           def self.info
@@ -46,28 +48,35 @@ module Gemgento
           end
 
           def self.create(asset)
-            message = { product: asset.product.magento_id, data: compose_asset_entity_data(asset), identifier_type: 'id' }
-            create_response = Gemgento::Magento.create_call(:catalog_product_attribute_media_create, message)
-            asset.file = create_response[:result]
+            message = {product: asset.product.magento_id, data: compose_asset_entity_data(asset), identifier_type: 'id'}
+            response = Gemgento::Magento.create_call(:catalog_product_attribute_media_create, message)
+
+            if response.success?
+              asset.file = response.body[:result]
+            end
           end
 
           def self.remove(asset)
-            message = { product: asset.product.magento_id, file: asset.file, identifier_type: 'id' }
-            Gemgento::Magento.create_call(:catalog_product_attribute_media_remove, message)
+            message = {product: asset.product.magento_id, file: asset.file, identifier_type: 'id'}
+            response = Gemgento::Magento.create_call(:catalog_product_attribute_media_remove, message)
+
+            return response.success?
           end
 
           def self.types(product_attribute_set)
-            response = Gemgento::Magento.create_call(:catalog_product_attribute_media_types, { set_id: product_attribute_set.magento_id })
+            response = Gemgento::Magento.create_call(:catalog_product_attribute_media_types, {set_id: product_attribute_set.magento_id})
 
-            unless response[:result][:item].nil? # check if there are any options returned
-              unless response[:result][:item].is_a? Array # multiple options returned
-                response[:result][:item] = [response[:result][:item]]
+            if response.success?
+              unless response.body[:result][:item].nil? # check if there are any options returned
+                unless response.body[:result][:item].is_a? Array # multiple options returned
+                  response.body[:result][:item] = [response.body[:result][:item]]
+                end
+              else
+                response.body[:result][:item] = []
               end
-            else
-              response[:result][:item] = []
-            end
 
-            response[:result][:item]
+              response.body[:result][:item]
+            end
           end
 
           def self.current_store
@@ -102,7 +111,7 @@ module Gemgento
 
             # loop through each return category and add it to the product if needed
             asset_type_codes.each do |asset_type_code|
-              unless(asset_type_code.empty?)
+              unless (asset_type_code.empty?)
                 asset_type = Gemgento::AssetType.find_by(product_attribute_set_id: asset.product.product_attribute_set_id, code: asset_type_code)
                 asset.asset_types << asset_type unless asset.asset_types.include?(asset_type) # don't duplicate the asset types
               end
@@ -122,7 +131,7 @@ module Gemgento
                 file: compose_file_entity(asset.attachment.path(:original)),
                 label: asset.label,
                 position: asset.position,
-                types: { item: compose_types(asset) }
+                types: {item: compose_types(asset)}
             }
 
             asset_entity

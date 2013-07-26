@@ -57,6 +57,11 @@ module Gemgento
     end
 
     def address
+      if current_order.user.nil?
+        current_order.user = current_user
+        current_order.save
+      end
+
       current_order.push_cart if current_order.magento_quote_id.nil?
 
       if user_signed_in?
@@ -76,17 +81,55 @@ module Gemgento
     end
 
     def shipping
-      @shipping_methods = current_order.get_shipping_methods
+      session[:shipping_methods] = current_order.get_shipping_methods
+      @shipping_methods = session[:shipping_methods]
     end
 
     def payment
       #@payment_methods = current_order.get_payment_methods
-      @exp_years = Time.now.year.upto(Time.now.year + 10)
-      @exp_months = 1.upto(12)
+
+      @card_types = {
+          'Credit card type' => nil,
+          Visa: 'VI',
+          MasterCard: 'MC',
+          'American Express' => 'AE'
+      }
+
+      @exp_years = []
+      Time.now.year.upto(Time.now.year + 10) do |year|
+        @exp_years << year
+      end
+
+      @exp_months = []
+      1.upto(12) do |month|
+        @exp_months << month
+      end
+
+      current_order.order_payment = OrderPayment.new if current_order.order_payment.nil?
     end
 
     def confirm
       @totals = current_order.get_totals
+      @shipping_address = current_order.shipping_address
+      @billing_address = current_order.billing_address
+      @payment = current_order.order_payment
+
+      session[:shipping_methods].each do |shipping_method|
+        if shipping_method[:code] == current_order.shipping_method
+          @shipping_method = shipping_method
+          break
+        end
+      end
+
+      current_order.get_totals.each do |total|
+        if total[:title] == 'Grand Total'
+          @total = total[:amount]
+        end
+      end
+    end
+
+    def thank_you
+
     end
 
     def update
@@ -101,6 +144,8 @@ module Gemgento
           set_shipping_method
         when 'set_payment_method'
           set_payment_method
+        when 'process_order'
+          process_order
         else
           raise "Unknown action - #{params[:activity]}"
       end
@@ -108,90 +153,118 @@ module Gemgento
 
     private
 
-      def auth_order_user
-        logger.info 'here'
-        unless user_signed_in? || current_order.customer_is_guest
-          logger.info 'here'
-          redirect_to '/checkout/login'
-        end
+    def auth_order_user
+      unless user_signed_in? || current_order.customer_is_guest
+        redirect_to '/checkout/login'
+      end
+    end
+
+    def set_addresses
+      if current_order.shipping_address.nil?
+        current_order.shipping_address = Address.new(shipping_address_params)
+      else
+        current_order.shipping_address.update_attributes(shipping_address_params)
       end
 
-      def set_addresses
-        if current_order.shipping_address.nil?
-          current_order.shipping_address = Address.new(shipping_address_params)
-        else
-          current_order.shipping_address.update_attributes(shipping_address_params)
-        end
+      current_order.shipping_address.user = current_user
 
-        respond_to do |format|
+      respond_to do |format|
 
-          if current_order.shipping_address.save # try to set the shipping address attributes
+        if current_order.shipping_address.save # try to set the shipping address attributes
 
-            if params[:same_as_billing]  # set the billing address attributes the same as shipping
+          if params[:same_as_billing] # set the billing address attributes the same as shipping
 
-              if current_order.billing_address.nil?
-                current_order.billing_address = Address.new(shipping_address_params)
-              else
-                current_order.billing_address.update_attributes(shipping_address_params)
-              end
+            if current_order.billing_address.nil?
+              current_order.billing_address = Address.new(shipping_address_params)
             else
-              if current_order.billing_address.nil?
-                current_order.billing_address = Address.new(billing_address_params)
-              else
-                current_order.billing_address.update_attributes(billing_address_params)
-              end
-            end
-
-            if current_order.billing_address.save
-              logger.info 'Great Success'
-              current_order.save
-
-              current_order.push_address(current_order.shipping_address)
-              current_order.push_address(current_order.billing_address)
-
-              format.html { redirect_to '/gemgento/checkout/shipping' }
-              format.js { render '/gemgento/checkout/addresses/success' }
-            else
-              current_order.shipping_address.destroy
-              logger.info 'Billing failure'
-              format.html { redirect_to '/gemgento/checkout/address' }
-              format.js { render '/gemgento/checkout/addresses/error' }
+              current_order.billing_address.update_attributes(shipping_address_params)
             end
           else
-            logger.info 'Shipping failure'
+            if current_order.billing_address.nil?
+              current_order.billing_address = Address.new(billing_address_params)
+            else
+              current_order.billing_address.update_attributes(billing_address_params)
+            end
+          end
+
+          current_order.billing_address.address_type = 'billing' # if user selected 'billing same as shipping' we need to force the correct type
+          current_order.billing_address.user = current_user
+
+          if current_order.billing_address.save
+            current_order.save
+            current_order.shipping_address.push
+            current_order.billing_address.push
+
+            current_order.push_addresses
+
+            format.html { redirect_to '/gemgento/checkout/shipping' }
+            format.js { render '/gemgento/checkout/addresses/success' }
+          else
+            current_order.shipping_address.destroy
+
             format.html { redirect_to '/gemgento/checkout/address' }
             format.js { render '/gemgento/checkout/addresses/error' }
           end
+        else
+          format.html { redirect_to '/gemgento/checkout/address' }
+          format.js { render '/gemgento/checkout/addresses/error' }
         end
       end
-
-      def shipping_address_params
-        params.require(:order).require(:shipping_address_attributes).permit(:fname, :lname, :address1, :address2, :country_id, :city, :region_id, :postcode, :telephone, :address_type)
-      end
-
-      def billing_address_params
-        params.require(:order).require(:billing_address_attributes).permit(:fname, :lname, :address1, :address2, :country_id, :city, :region_id, :postcode, :telephone, :address_type)
-      end
-
-      def set_shipping_method
-        current_order.shipping_method = params[:shipping_method]
-        current_order.push_shipping_method
-
-        respond_to do |format|
-          format.html { redirect_to '/gemgento/checkout/payment' }
-          format.js { render '/gemgento/checkout/shipping/success' }
-        end
-      end
-
-      def set_payment_method
-        payment = OrderPayment.new(order_payment_params)
-        payment.order = current_order
-        payment.cc_owner = "#{current_order.billing_address.fname} #{current_order.billing_address.lname}"
-      end
-
-    def order_payment_params
-      params.require(:order).require(:order_payment_attributes).permit(:method, :cc_id, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month)
     end
 
+    def shipping_address_params
+      params.require(:order).require(:shipping_address_attributes).permit(:fname, :lname, :address1, :address2, :country_id, :city, :region_id, :postcode, :telephone, :address_type)
+    end
+
+    def billing_address_params
+      params.require(:order).require(:billing_address_attributes).permit(:fname, :lname, :address1, :address2, :country_id, :city, :region_id, :postcode, :telephone, :address_type)
+    end
+
+    def set_shipping_method
+      current_order.shipping_method = params[:shipping_method]
+      current_order.shipping_amount = params[params[:shipping_method]]
+      current_order.push_shipping_method
+      current_order.save
+
+      respond_to do |format|
+        format.html { redirect_to '/gemgento/checkout/payment' }
+        format.js { render '/gemgento/checkout/shipping/success' }
+      end
+    end
+
+    def set_payment_method
+      if current_order.order_payment.nil?
+        current_order.order_payment = OrderPayment.new(order_payment_params)
+      else
+        current_order.order_payment.update_attributes(order_payment_params)
+      end
+
+      current_order.order_payment.cc_owner = "#{current_order.billing_address.fname} #{current_order.billing_address.lname}"
+      current_order.order_payment.cc_last4 = current_order.order_payment.cc_number[-4..-1]
+      current_order.order_payment.save
+
+      current_order.push_payment_method
+
+      respond_to do |format|
+        format.html { redirect_to '/gemgento/checkout/confirm' }
+        format.js { render '/gemgento/checkout/payment/success' }
+      end
+    end
+
+    def order_payment_params
+      params.require(:order).require(:order_payment_attributes).permit(:method, :cc_cid, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month)
+    end
+
+    def process_order
+      respond_to do |format|
+        if current_order.process
+          format.html { redirect_to '/checkout/thank_you' }
+          format.js { render 'gemgento/checkout/confirm/success' }
+        else
+          format.html { redirect_to '/checkout/confirm' }
+          format.js { render 'gemgento/checkout/confirm/error' }
+        end
+      end
+    end
   end
 end

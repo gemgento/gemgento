@@ -29,32 +29,39 @@ module Gemgento
           end
 
           def self.list(product_attribute_set)
-            response = Gemgento::Magento.create_call(:catalog_product_attribute_list, { set_id: product_attribute_set.magento_id })
+            response = Gemgento::Magento.create_call(:catalog_product_attribute_list, {set_id: product_attribute_set.magento_id})
 
-            unless response[:result][:item].is_a? Array
-              response[:result][:item] = [response[:result][:item]]
+            if response.success?
+              unless response.body[:result][:item].is_a? Array
+                response.body[:result][:item] = [response.body[:result][:item]]
+              end
+
+              response.body[:result][:item]
             end
-
-            response[:result][:item]
           end
 
           def self.info(attribute_id)
             response = Gemgento::Magento.create_call(:catalog_product_attribute_info, {attribute: attribute_id})
-            response[:result]
+
+            if response.success?
+              response.body[:result]
+            end
           end
 
           def self.options(product_attribute_id)
             response = Gemgento::Magento.create_call(:catalog_product_attribute_options, {attributeId: product_attribute_id})
 
-            if response[:result][:item].nil?
-              response[:result][:item] = []
-            end
+            if response.success?
+              if response.body[:result][:item].nil?
+                response.body[:result][:item] = []
+              end
 
-            unless response[:result][:item].is_a? Array
-              response[:result][:item] = [response[:result][:item]]
-            end
+              unless response.body[:result][:item].is_a? Array
+                response.body[:result][:item] = [response.body[:result][:item]]
+              end
 
-            response[:result][:item]
+              response.body[:result][:item]
+            end
           end
 
           def self.types
@@ -70,13 +77,13 @@ module Gemgento
           end
 
           def self.add_option(product_attribute_option, product_attribute)
-            message = { attribute: product_attribute.magento_id, data: {
-                label: { item: [{ 'store_id' => { item: [0,1] }, value: product_attribute_option.label }] },
+            message = {attribute: product_attribute.magento_id, data: {
+                label: {item: [{'store_id' => {item: [0, 1]}, value: product_attribute_option.label}]},
                 order: '0',
                 'is_default' => '0'
             }}
-            Gemgento::Magento.create_call(:catalog_product_attribute_add_option, message)
-            fetch_all_options(product_attribute)
+            response = Gemgento::Magento.create_call(:catalog_product_attribute_add_option, message)
+            fetch_all_options(product_attribute) if response.success?
           end
 
           def self.remove_option

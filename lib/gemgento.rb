@@ -15,12 +15,14 @@ module Gemgento
       @client = Savon.client(
           wsdl: @api_url,
           log: Gemgento::Config[:magento][:debug],
+          raise_errors: false,
           basic_auth: [Gemgento::Config[:magento][:auth_username].to_s, Gemgento::Config[:magento][:auth_password].to_s]
       )
-      if Gemgento::Session.last.nil?
-        response = @client.call(:login, message: { :username => Gemgento::Config[:magento][:username], :apiKey => Gemgento::Config[:magento][:api_key] })
 
-        unless response
+      if Gemgento::Session.last.nil?
+        response = @client.call(:login, message: {:username => Gemgento::Config[:magento][:username], :apiKey => Gemgento::Config[:magento][:api_key]})
+
+        unless response.success?
           puts 'Login Failed - Check Session'
           exit
         end
@@ -43,19 +45,28 @@ module Gemgento
       api_login if !defined? @client
 
       message[:sessionId] = @session
-      puts "Making Call - #{function}"
-      begin
-        response = @client.call(function, message: message)
-        response = response.body[:"#{function}_response"]
-        puts '^^^ Success ^^^'
-      rescue
-        response = nil
-        puts '^^^ Failure ^^^'
+      Rails.logger.debug "Making Call - #{function}"
+
+      response = @client.call(function, message: message)
+
+      magento_response = MagentoResponse.new
+      magento_response.request = {function: function, message: message}
+
+      if response.success?
+        magento_response.success = true
+        magento_response.body = response.body[:"#{function}_response"]
+        Rails.logger.debug '^^^ Success ^^^'
+      else
+        magento_response.success = false
+        magento_response.body = response.body[:fault]
+        Rails.logger.warn '^^^ Failure ^^^'
       end
 
-      puts '-------------------'
+      Rails.logger.debug '-------------------'
 
-      return response
+      magento_response.save
+
+      return magento_response
     end
 
     def self.enforce_savon_string(subject)

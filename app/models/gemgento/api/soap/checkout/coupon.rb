@@ -9,11 +9,15 @@ module Gemgento
                 quote_id: cart.magento_quote_id,
                 coupon_code: coupon_code
             }
-            Gemgento::Magento.create_call(:shopping_cart_coupon_add, message)
+            response = Gemgento::Magento.create_call(:shopping_cart_coupon_add, message)
+
+            return response.success?
           end
 
           def self.remove(cart)
-            Gemgento::Magento.create_call(:shopping_cart_coupon_remove, { quote_id: cart.magento_quote_id })
+            response = Gemgento::Magento.create_call(:shopping_cart_coupon_remove, {quote_id: cart.magento_quote_id})
+
+            return response.success?
           end
 
         end
