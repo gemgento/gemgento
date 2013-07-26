@@ -1,4 +1,4 @@
-require 'Spreadsheet'
+require 'spreadsheet'
 
 module Gemgento
   class ProductImport
