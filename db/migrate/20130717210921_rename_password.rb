@@ -1,7 +1,7 @@
 class RenamePassword < ActiveRecord::Migration
   def up
     rename_column :gemgento_users, :password, :magento_password
-    remove_column :gemgentoo_users, :unencrypted_password
+    remove_column :gemgento_users, :unencrypted_password
   end
 
   def down

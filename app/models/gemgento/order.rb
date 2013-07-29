@@ -98,6 +98,16 @@ module Gemgento
       API::SOAP::Checkout::Cart.totals(self)
     end
 
+    def item_count
+      count = 0
+
+      self.order_items.each do |order_item|
+        count += order_item.qty_ordered
+      end
+
+      return count
+    end
+
     # functions related to processing cart into order
 
     def push_addresses
