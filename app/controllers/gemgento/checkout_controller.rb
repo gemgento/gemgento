@@ -21,37 +21,11 @@ module Gemgento
             current_order.save
 
             format.html { render 'gemgento/checkout/address' }
-            format.js { render '/gemgento/checkout/sessions/successful_session', :layout => false }
+            format.js { render '/gemgento/checkout/login/login_success', :layout => false }
           else
             format.html { render 'gemgento/checkout/login' }
-            format.js { render 'gemgento/checkout/sessions/errors', :layout => false }
+            format.js { render 'gemgento/checkout/login/login_fail', :layout => false }
           end
-        end
-      end
-    end
-
-    def register
-      @user = User.new
-      @user.fname = params[:fname]
-      @user.lname = params[:lname]
-      @user.email = params[:email]
-      @user.store = Gemgento::Store.first
-      @user.user_group = Gemgento::UserGroup.find_by(code: 'General')
-      @user.magento_password = params[:password]
-      @user.password = params[:password]
-      @user.password_confirmation = params[:password_confirmation]
-
-      respond_to do |format|
-        if @user.save
-          sign_in(:user, @user)
-          current_order.user = current_user
-          current_order.save
-
-          format.html { render 'gemgento/checkout/address' }
-          format.js { render 'gemgento/checkout/registrations/successful_registration', :layout => false }
-        else
-          format.html { 'gemgento/checkout/login' }
-          format.js { render 'gemgento/checkout/registrations/errors', :layout => false }
         end
       end
     end
@@ -162,6 +136,49 @@ module Gemgento
     def auth_order_user
       unless user_signed_in? || current_order.customer_is_guest
         redirect_to '/checkout/login'
+      end
+    end
+
+    def register
+      @user = User.new
+      @user.fname = params[:fname]
+      @user.lname = params[:lname]
+      @user.email = params[:email]
+      @user.store = Gemgento::Store.first
+      @user.user_group = Gemgento::UserGroup.find_by(code: 'General')
+      @user.magento_password = params[:password]
+      @user.password = params[:password]
+      @user.password_confirmation = params[:password_confirmation]
+
+      respond_to do |format|
+        if @user.save
+          sign_in(:user, @user)
+          current_order.user = current_user
+          current_order.save
+
+          format.html { render 'gemgento/checkout/address' }
+          format.js { render 'gemgento/checkout/login/registration_success', :layout => false }
+        else
+          format.html { 'gemgento/checkout/login' }
+          format.js { render 'gemgento/checkout/login/registration_fail', :layout => false }
+        end
+      end
+    end
+
+    def login_guest
+      raise 'Missing email parameter' if params[:email].nil?
+
+      current_order.customer_is_guest = true
+      current_order.customer_email = params[:email]
+
+      respond_to do |format|
+        if current_order.save
+          format.html { render 'gemgento/checkout/address' }
+          format.js { render 'gemgento/checkout/login/login_guest_success', :layout => false }
+        else
+          format.html { 'gemgento/checkout/login' }
+          format.js { render 'gemgento/checkout/login/login_guest_fail', :layout => false }
+        end
       end
     end
 
