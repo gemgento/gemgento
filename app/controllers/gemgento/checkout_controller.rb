@@ -138,6 +138,12 @@ module Gemgento
       @errors = []
 
       case params[:activity]
+        when 'login'
+          login
+        when 'login_guest'
+          login_guest
+        when 'register'
+          register
         when 'set_addresses'
           set_addresses
         when 'set_shipping_method'

@@ -25,6 +25,7 @@ Gemgento::Engine.routes.draw do
   get '/checkout/payment', to: 'checkout#payment'
   get '/checkout/confirm', to: 'checkout#confirm'
   get '/checkout/thank_you', to: 'checkout#thank_you'
+  post '/checkout/update', to: 'checkout#update'
 
   resources :products, :categories, :orders, :checkout
 
