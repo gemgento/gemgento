@@ -192,8 +192,10 @@ module Gemgento
     def set_addresses
       if current_order.shipping_address.nil?
         current_order.shipping_address = Address.new(shipping_address_params)
+        current_order.shipping_address.address_type = 'shipping'
       else
         current_order.shipping_address.update_attributes(shipping_address_params)
+        current_order.shipping_address.address_type = 'shipping'
       end
 
       current_order.shipping_address.user = current_user
