@@ -1,6 +1,6 @@
 module Gemgento
   class CheckoutController < BaseController
-    before_filter :auth_order_user, :except => [:login, :register, :shopping_bag]
+    before_filter :auth_order_user, :except => [:login, :shopping_bag]
 
     layout 'application'
 
@@ -9,23 +9,18 @@ module Gemgento
     end
 
     def login
-      if params[:email].nil? || params[:password].nil?
+      if params[:activity].nil?
         render 'gemgento/checkout/login'
       else
-        user = User::is_valid_login(params[:email], params[:password])
-
-        respond_to do |format|
-          unless user.nil?
-            sign_in(:user, user)
-            current_order.user = current_user
-            current_order.save
-
-            format.html { render 'gemgento/checkout/address' }
-            format.js { render '/gemgento/checkout/login/login_success', :layout => false }
+        case params[:activity]
+          when 'login_user'
+            login_user
+          when 'login_guest'
+            login_guest
+          when 'register'
+            register
           else
-            format.html { render 'gemgento/checkout/login' }
-            format.js { render 'gemgento/checkout/login/login_fail', :layout => false }
-          end
+            raise "Unknown action - #{params[:activity]}"
         end
       end
     end
@@ -112,12 +107,6 @@ module Gemgento
       @errors = []
 
       case params[:activity]
-        when 'login'
-          login
-        when 'login_guest'
-          login_guest
-        when 'register'
-          register
         when 'set_addresses'
           set_addresses
         when 'set_shipping_method'
@@ -136,6 +125,24 @@ module Gemgento
     def auth_order_user
       unless user_signed_in? || current_order.customer_is_guest
         redirect_to '/checkout/login'
+      end
+    end
+
+    def login_user
+      user = User::is_valid_login(params[:email], params[:password])
+
+      respond_to do |format|
+        unless user.nil?
+          sign_in(:user, user)
+          current_order.user = current_user
+          current_order.save
+
+          format.html { render 'gemgento/checkout/address' }
+          format.js { render '/gemgento/checkout/login/login_success', :layout => false }
+        else
+          format.html { render 'gemgento/checkout/login' }
+          format.js { render 'gemgento/checkout/login/login_fail', :layout => false }
+        end
       end
     end
 
