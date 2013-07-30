@@ -105,7 +105,7 @@ module Gemgento
         count += order_item.qty_ordered
       end
 
-      return count
+      return count.to_i
     end
 
     # functions related to processing cart into order

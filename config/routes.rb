@@ -29,4 +29,6 @@ Gemgento::Engine.routes.draw do
 
   resources :products, :categories, :orders, :checkout
 
+  patch '/orders', to: 'orders#update'
+
 end
