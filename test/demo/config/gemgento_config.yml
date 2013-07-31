@@ -3,13 +3,13 @@ development:
     name: Oliver Peoples
     url:  op.mny.mx
 
-  magento: 
-    url:              dev.oliverpeoples.com
-    auth_username:    ''
-    auth_password:    ''
-    username:         maui
-    api_key:          857123FHDShfd
-    api_type:	      soap
-    api_version:      2
-    debug:            true
-    encryption:       b476516d0acc86dbc0148cdb68eec8f9
+  magento:
+    url: ''
+    auth_username:  ''
+    auth_password:  ''
+    username: ''
+    api_key: ''
+    api_type: ''
+    api_version: ''
+    debug: ''
+    encryption: ''
