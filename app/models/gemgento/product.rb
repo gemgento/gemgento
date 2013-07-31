@@ -1,19 +1,22 @@
 module Gemgento
   class Product < ActiveRecord::Base
 
-    # TODO: need a way to update product type via Gemgento
-
+    belongs_to :store
     belongs_to :product_attribute_set
+    belongs_to :configurable_product, foreign_key: 'parent_id', class_name: 'Product'
+
+    has_one :inventory
+
     has_many :product_attribute_values
-    has_and_belongs_to_many :categories, -> { uniq }, join_table: 'gemgento_categories_products'
     has_many :assets
     has_many :simple_products, foreign_key: 'parent_id', class_name: 'Product'
-    belongs_to :configurable_product, foreign_key: 'parent_id', class_name: 'Product'
+
+    has_and_belongs_to_many :categories, -> { uniq }, join_table: 'gemgento_categories_products'
     has_and_belongs_to_many :configurable_attributes, -> { uniq }, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
-    after_save :sync_local_to_magento
-    belongs_to :store
-    has_one :inventory
+
     scope :configurable, where(magento_type: 'configurable')
+
+    after_save :sync_local_to_magento
 
     def self.index
       if Product.all.size == 0
@@ -52,21 +55,12 @@ module Gemgento
       API::SOAP::Catalog::Product.check_magento(identifier, identifier_type, attribute_set)
     end
 
-    def attributes
-      attributes = []
-
-      self.product_attribute_values.each do |attribute_value|
-        attributes << attribute_value.product_attribute
-      end
-
-      attributes
-    end
-
     private
 
     # Push local product changes to magento
     def sync_local_to_magento
       if self.sync_needed
+
         if !self.magento_id
           API::SOAP::Catalog::Product.create(self)
         else
