@@ -239,6 +239,7 @@ module Gemgento
               current_order.billing_address.push
             end
 
+            current_order.push_customer
             current_order.push_addresses
 
             format.html { redirect_to '/gemgento/checkout/shipping' }
