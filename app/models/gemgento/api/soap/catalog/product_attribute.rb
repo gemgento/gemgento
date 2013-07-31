@@ -19,7 +19,7 @@ module Gemgento
               label = Gemgento::Magento.enforce_savon_string(attribute_option[:label])
               value = Gemgento::Magento.enforce_savon_string(attribute_option[:value])
 
-              product_attribute_option = Gemgento::ProductAttributeOption.find_or_initialize_by(product_attribute: product_attribute, label: label)
+              product_attribute_option = Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: label).first_or_initialize
               product_attribute_option.label = label
               product_attribute_option.value = value
               product_attribute_option.product_attribute = product_attribute
@@ -94,7 +94,7 @@ module Gemgento
 
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source, product_attribute_set)
-            product_attribute = Gemgento::ProductAttribute.find_or_initialize_by(magento_id: source[:attribute_id])
+            product_attribute = Gemgento::ProductAttribute.where(magento_id: source[:attribute_id]).first_or_initialize
             product_attribute.magento_id = source[:attribute_id]
             product_attribute.product_attribute_set = product_attribute_set
             product_attribute.code = source[:attribute_code]

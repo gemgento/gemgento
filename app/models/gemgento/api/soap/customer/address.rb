@@ -5,7 +5,7 @@ module Gemgento
         class Address
 
           def self.fetch_all
-            Gemgento::User.find(:all).each do |user|
+            Gemgento::User.where(:all).each do |user|
               list(user.magento_id).each do |address|
                 sync_magento_to_local(address, user)
               end
@@ -70,13 +70,13 @@ module Gemgento
 
           # Save Magento users address to local
           def self.sync_magento_to_local(source, user)
-            address = Gemgento::Address.find_or_initialize_by(user_address_id: source[:customer_address_id])
+            address = Gemgento::Address.where(user_address_id: source[:customer_address_id]).first_or_initialize
             address.user_address_id = source[:customer_address_id]
             address.user = user
             address.increment_id = source[:increment_id]
             address.city = source[:city]
             address.company = source[:company]
-            address.country = Country.find_by(magento_id: source[:country_id])
+            address.country = Country.where(magento_id: source[:country_id]).first
             address.fax = source[:fax]
             address.fname = source[:firstname]
             address.mname = source[:middlename]
@@ -84,7 +84,7 @@ module Gemgento
             address.postcode = source[:postcode]
             address.prefix = source[:prefix]
             address.region_name = source[:region]
-            address.region = Region.find_by(magento_id: source[:region_id])
+            address.region = Region.where(magento_id: source[:region_id]).first
             address.street = source[:street]
             address.suffix = source[:suffix]
             address.telephone = source[:telephone]

@@ -95,16 +95,16 @@ module Gemgento
 
           # Save a Magento customer as local users
           def self.sync_magento_to_local(source)
-            user = Gemgento::User.find_or_initialize_by(magento_id: source[:customer_id])
+            user = Gemgento::User.where(magento_id: source[:customer_id]).first_or_initialize
             user.magento_id = source[:customer_id]
             user.increment_id = source[:increment_id]
-            user.store = Store.find_by(magento_id: source[:store_id])
+            user.store = Store.where(magento_id: source[:store_id]).first
             user.created_in = source[:created_in]
             user.email = source[:email]
             user.fname = source[:firstname]
             user.mname = source[:middlename]
             user.lname = source[:lastname]
-            user.user_group = UserGroup.find_by(magento_id: source[:group_id])
+            user.user_group = UserGroup.where(magento_id: source[:group_id]).first
             user.prefix = source[:prefix]
             user.suffix = source[:suffix]
             user.dob = source[:dob]
@@ -137,7 +137,7 @@ module Gemgento
           end
 
           def self.sync_magento_customer_group_to_local(source)
-            customer_group = Gemgento::UserGroup.find_or_initialize_by(magento_id: source[:customer_group_id])
+            customer_group = Gemgento::UserGroup.where(magento_id: source[:customer_group_id]).first_or_initialize
             customer_group.magento_id = source[:customer_group_id]
             customer_group.code = source[:customer_group_code]
             customer_group.save

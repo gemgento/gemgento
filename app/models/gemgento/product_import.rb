@@ -50,7 +50,7 @@ Assumptions
       accepted_headers = []
 
       @worksheet.row(0).each do |h|
-        accepted_headers << h.downcase.gsub(' ','_')
+        accepted_headers << h.downcase.gsub(' ', '_')
       end
 
       accepted_headers
@@ -63,7 +63,7 @@ Assumptions
       product = Gemgento::Product.find_by(sku: sku)
 
       if product.nil? # If product isn't known locally, check with Magento
-         product = Gemgento::Product.check_magento(sku, 'sku', @attribute_set)
+        product = Gemgento::Product.check_magento(sku, 'sku', @attribute_set)
       end
 
       product.magento_type = 'simple'
@@ -71,8 +71,8 @@ Assumptions
       product.product_attribute_set = @attribute_set
 
       unless product.magento_id
-         product.sync_needed = false
-         product.save
+        product.sync_needed = false
+        product.save
       end
 
       set_attribute_values(product)
@@ -195,7 +195,7 @@ Assumptions
       sku = @row[@headers.index('sku')].to_s.strip
 
       # set the default configurable product attributes
-      configurable_product = Gemgento::Product.find_or_initialize_by(sku: sku)
+      configurable_product = Gemgento::Product.where(sku: sku).first_or_initialize
 
       configurable_product.magento_type = 'configurable'
       configurable_product.sku = sku

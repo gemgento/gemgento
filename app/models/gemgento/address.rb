@@ -18,11 +18,11 @@ module Gemgento
     before_validation :implode_street_address
 
     def self.index
-      if Address.find(:all).size == 0
+      if Address.all.size == 0
         API::SOAP::Customer::Address.fetch_all
       end
 
-      Address.find(:all)
+      Address.all
     end
 
     def push

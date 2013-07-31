@@ -7,16 +7,16 @@ module Gemgento
 
     belongs_to :user_group
     belongs_to :store
-    has_many   :addresses
+    has_many :addresses
 
     after_save :sync_local_to_magento
 
     def self.index
-      if User.find(:all).size == 0
+      if User.all.size == 0
         API::SOAP::Customer::Customer.fetch_all
       end
 
-      User.find(:all)
+      User.all
     end
 
     def self.is_valid_login(email, password)

@@ -43,30 +43,30 @@ module Gemgento
     end
 
     private
-      def add_item
-        # validate the parameters
-        raise 'Product not specified' if params[:product].nil?
-        raise 'Quantity not specified' if params[:quantity].nil?
-        raise 'Quantity must be greater than 0'  if params[:quantity].to_i <= 0
+    def add_item
+      # validate the parameters
+      raise 'Product not specified' if params[:product].nil?
+      raise 'Quantity not specified' if params[:quantity].nil?
+      raise 'Quantity must be greater than 0' if params[:quantity].to_i <= 0
 
-        product = Gemgento::Product.find(params[:product])
-        raise 'Product does not exist' if product.nil?
+      product = Gemgento::Product.where(params[:product]).first
+      raise 'Product does not exist' if product.nil?
 
-        # add the item to the order
-        current_order.add_item(product, params[:quantity])
-      end
+      # add the item to the order
+      current_order.add_item(product, params[:quantity])
+    end
 
-      def update_item
-        raise 'Product not specified' if params[:product].nil?
-        raise 'Quantity not specified' if params[:quantity].nil?
-        raise 'Quantity must be greater than 0'  if params[:quantity].to_i <= 0
+    def update_item
+      raise 'Product not specified' if params[:product].nil?
+      raise 'Quantity not specified' if params[:quantity].nil?
+      raise 'Quantity must be greater than 0' if params[:quantity].to_i <= 0
 
-        product = Gemgento::Product.find(params[:product])
-        raise 'Product does not exist' if product.nil?
+      product = Gemgento::Product.where(params[:product]).first
+      raise 'Product does not exist' if product.nil?
 
-        # update the item
-        current_order.update_item(product, params[:quantity])
-      end
+      # update the item
+      current_order.update_item(product, params[:quantity])
+    end
 
     def set_addresses
 

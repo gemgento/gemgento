@@ -57,10 +57,10 @@ module Gemgento
 
           # Save Magento order to local
           def self.sync_magento_to_local(source)
-            order = Gemgento::Order.find_or_initialize_by(order_id: source[:order_id])
+            order = Gemgento::Order.where(order_id: source[:order_id]).first_or_initialize
             order.order_id = source[:order_id]
             order.is_active = source[:is_active]
-            order.user = User.find_by(magento_id: source[:customer_id])
+            order.user = User.where(magento_id: source[:customer_id]).first
             order.tax_amount = source[:tax_amount]
             order.shipping_amount = source[:shipping_amount]
             order.discount_amount = source[:discount_amount]
@@ -106,7 +106,7 @@ module Gemgento
             order.customer_lastname = source[:customer_lastname]
             order.magento_quote_id = source[:quote_id]
             order.is_virtual = source[:is_virtual]
-            order.user_group = UserGroup.find_by(magento_id: source[:customer_group_id])
+            order.user_group = UserGroup.where(magento_id: source[:customer_group_id]).first
             order.customer_note_notify = source[:customer_note_notify]
             order.customer_is_guest = source[:customer_is_guest]
             order.email_sent = source[:email_sent]
@@ -147,13 +147,13 @@ module Gemgento
           end
 
           def self.sync_magento_address_to_local(source, order)
-            address = Gemgento::Address.find_or_initialize_by(order_address_id: source[:address_id])
+            address = Gemgento::Address.where(order_address_id: source[:address_id]).first_or_initialize
             address.order_address_id = source[:address_id]
             address.order = order
             address.increment_id = source[:increment_id]
             address.city = source[:city]
             address.company = source[:company]
-            address.country = Country.find_by(magento_id: source[:country_id])
+            address.country = Country.where(magento_id: source[:country_id]).first
             address.fax = source[:fax]
             address.fname = source[:firstname]
             address.mname = source[:middlename]
@@ -161,7 +161,7 @@ module Gemgento
             address.postcode = source[:postcode]
             address.prefix = source[:prefix]
             address.region_name = source[:region]
-            address.region = Region.find_by(magento_id: source[:region_id])
+            address.region = Region.where(magento_id: source[:region_id]).first
             address.street = source[:street]
             address.suffix = source[:suffix]
             address.telephone = source[:telephone]
@@ -174,7 +174,7 @@ module Gemgento
           end
 
           def self.sync_magento_payment_to_local(source, order)
-            payment = Gemgento::OrderPayment.find_or_initialize_by(magento_id: source[:payment_id])
+            payment = Gemgento::OrderPayment.where(magento_id: source[:payment_id]).first_or_initialize
             payment.order = order
             payment.magento_id = source[:payment_id]
             payment.increment_id = source[:increment_id]
@@ -199,7 +199,7 @@ module Gemgento
           end
 
           def self.sync_magento_order_status_to_local(source, order)
-            order_status = Gemgento::OrderStatus.find_or_initialize_by(order: order, status: source[:status], comment: source[:comment])
+            order_status = Gemgento::OrderStatus.where(order: order, status: source[:status], comment: source[:comment]).first_or_initialize
             order_status.order = order
             order_status.status = source[:status]
             order_status.is_active = source[:is_active]
@@ -212,11 +212,11 @@ module Gemgento
           end
 
           def self.sync_magento_order_item_to_local(source, order)
-            order_item = Gemgento::OrderItem.find_or_initialize_by(magento_id: source[:item_id])
+            order_item = Gemgento::OrderItem.where(magento_id: source[:item_id]).first_or_initialize
             order_item.order = order
             order_item.magento_id = source[:item_id]
             order_item.quote_item_id = source[:quote_item_id]
-            order_item.product = Product.find_by(magento_id: source[:product_id])
+            order_item.product = Product.where(magento_id: source[:product_id]).first
             order_item.product_type = source[:product_type]
             order_item.product_options = source[:product_options]
             order_item.weight = source[:weight]

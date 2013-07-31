@@ -35,12 +35,12 @@ module Gemgento
 
       if user_signed_in?
         if current_order.shipping_address.nil?
-          current_order.shipping_address = current_user.addresses.find_by(address_type: 'shipping', is_default: true)
+          current_order.shipping_address = current_user.addresses.where(address_type: 'shipping', is_default: true).first
           current_order.shipping_address = Address.new if current_order.shipping_address.nil?
         end
 
         if current_order.billing_address.nil?
-          current_order.billing_address = current_user.addresses.find_by(address_type: 'billing', is_default: true)
+          current_order.billing_address = current_user.addresses.where(address_type: 'billing', is_default: true).first
           current_order.billing_address = Address.new if current_order.billing_address.nil?
         end
       else
@@ -152,7 +152,7 @@ module Gemgento
       @user.lname = params[:lname]
       @user.email = params[:email]
       @user.store = Gemgento::Store.first
-      @user.user_group = Gemgento::UserGroup.find_by(code: 'General')
+      @user.user_group = Gemgento::UserGroup.where(code: 'General').first
       @user.magento_password = params[:password]
       @user.password = params[:password]
       @user.password_confirmation = params[:password_confirmation]

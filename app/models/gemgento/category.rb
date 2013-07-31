@@ -1,6 +1,6 @@
 module Gemgento
   class Category < ActiveRecord::Base
-    has_and_belongs_to_many :products, -> { uniq } , :join_table => 'gemgento_categories_products'
+    has_and_belongs_to_many :products, -> { uniq }, :join_table => 'gemgento_categories_products'
     belongs_to :parent, foreign_key: 'parent_id', class_name: 'Category'
 
     after_save :sync_local_to_magento
@@ -8,10 +8,10 @@ module Gemgento
     scope :top_level, lambda { where(:parent_id => 2) }
 
     def self.index
-      if Category.find(:all).size == 0
+      if Category.all.size == 0
         API::SOAP::Catalog::Category.fetch_all
       end
-      Category.find(:all)
+      Category.all
     end
 
     private

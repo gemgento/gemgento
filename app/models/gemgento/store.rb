@@ -4,11 +4,11 @@ module Gemgento
     has_many :users
 
     def self.index
-      if Store.find(:all).size == 0
+      if Store.all.size == 0
         API::SOAP::Miscellaneous::Store.fetch_all
       end
 
-      Store.find(:all)
+      Store.all
     end
   end
 end

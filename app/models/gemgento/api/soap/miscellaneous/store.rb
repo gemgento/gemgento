@@ -34,7 +34,7 @@ module Gemgento
 
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source)
-            store = Gemgento::Store.find_or_initialize_by(magento_id: source[:store_id])
+            store = Gemgento::Store.where(magento_id: source[:store_id]).first_or_initialize
             store.magento_id = source[:store_id]
             store.code = source[:code]
             store.group_id = source[:group_id]

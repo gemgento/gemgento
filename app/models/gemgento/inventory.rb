@@ -3,11 +3,11 @@ module Gemgento
     belongs_to :product
 
     def self.index
-      if Inventory.find(:all).size == 0
+      if Inventory.all.size == 0
         API::SOAP::CatalogInventory::StockItem.fetch_all
       end
 
-      Inventory.find(:all)
+      Inventory.all
     end
 
   end

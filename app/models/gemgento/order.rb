@@ -18,11 +18,11 @@ module Gemgento
     has_many :order_statuses
 
     def self.index
-      if Order.find(:all).size == 0
+      if Order.all.size == 0
         API::SOAP::Sales::Order.fetch_all
       end
 
-      Order.find(:all)
+      Order.all
     end
 
     # CART specific functions
@@ -42,7 +42,7 @@ module Gemgento
     def add_item(product, quantity = 1)
       raise 'Order not in cart state' if self.state != 'cart'
 
-      order_item = self.order_items.find_by(product: product)
+      order_item = self.order_items.where(product: product).first
 
       if order_item.nil?
         order_item = OrderItem.new
@@ -62,7 +62,7 @@ module Gemgento
     def update_item(product, quantity = 1)
       raise 'Order not in cart state' if self.state != 'cart'
 
-      order_item = self.order_items.find_by(product: product)
+      order_item = self.order_items.where(product: product).first
 
       unless order_item.nil?
         order_item.qty_ordered = quantity.to_i
@@ -79,7 +79,7 @@ module Gemgento
     def remove_item(product)
       raise 'Order not in cart state' if self.state != 'cart'
 
-      order_item = self.order_items.find_by(product: product)
+      order_item = self.order_items.where(product: product).first
 
       unless order_item.nil?
         API::SOAP::Checkout::Product.remove(self, [order_item])

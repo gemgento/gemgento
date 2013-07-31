@@ -14,7 +14,7 @@ module Gemgento
               end
 
               store_view[:item].each do |product|
-                attribute_set = Gemgento::ProductAttributeSet.find_by(magento_id: product[:set])
+                attribute_set = Gemgento::ProductAttributeSet.where(magento_id: product[:set]).first
                 product_info = info(product[:product_id], attribute_set)
                 sync_magento_to_local(product_info)
               end
@@ -108,12 +108,12 @@ module Gemgento
           private
 
           def self.sync_magento_to_local(subject)
-            product = Gemgento::Product.find_or_initialize_by(magento_id: subject[:product_id])
+            product = Gemgento::Product.where(magento_id: subject[:product_id]).first_or_initialize
             product.magento_id = subject[:product_id]
             product.magento_type = subject[:type]
             product.sku = subject[:sku]
             product.sync_needed = false
-            product.product_attribute_set = Gemgento::ProductAttributeSet.find_by(magento_id: subject[:set])
+            product.product_attribute_set = Gemgento::ProductAttributeSet.where(magento_id: subject[:set]).first
             product.store = Gemgento::Store.first
             product.save
 
@@ -154,7 +154,7 @@ module Gemgento
 
             # loop through each return category and add it to the product if needed
             magento_categories.each do |magento_category|
-              category = Gemgento::Category.find_by(magento_id: magento_category)
+              category = Gemgento::Category.where(magento_id: magento_category).first
               product.categories << category unless product.categories.include?(category) # don't duplicate the categories
             end
 

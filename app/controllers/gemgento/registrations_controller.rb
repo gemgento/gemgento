@@ -8,7 +8,7 @@ module Gemgento
       @user.lname = params[:user][:lname]
       @user.email = params[:user][:email]
       @user.store = Gemgento::Store.first
-      @user.user_group = Gemgento::UserGroup.find_by(code: 'General')
+      @user.user_group = Gemgento::UserGroup.where(code: 'General').first
       @user.magento_password = params[:user][:password]
       @user.password = params[:user][:password]
       @user.password_confirmation = params[:user][:password_confirmation]

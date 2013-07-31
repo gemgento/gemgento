@@ -3,8 +3,8 @@ module Gemgento
     layout false
 
     def region_options
-      country = Country.find(params[:country_id])
-      @regions = Region.where(country: country).map{|r| [r.name, r.id]}.insert(0, "Select a State")
+      country = Country.where(params[:country_id]).first
+      @regions = Region.where(country: country).map { |r| [r.name, r.id] }.insert(0, "Select a State")
     end
   end
 end

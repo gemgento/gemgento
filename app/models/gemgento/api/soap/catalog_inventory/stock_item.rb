@@ -39,8 +39,8 @@ module Gemgento
 
           # Save Magento users inventory to local
           def self.sync_magento_to_local(source)
-            product = Gemgento::Product.find_or_initialize_by(magento_id: source[:product_id])
-            inventory = Gemgento::Inventory.find_or_initialize_by(product: product)
+            product = Gemgento::Product.where(magento_id: source[:product_id]).first_or_initialize
+            inventory = Gemgento::Inventory.where(product: product).first_or_initialize
             inventory.product = product
             inventory.quantity = source[:qty]
             inventory.is_in_stock = source[:is_in_stock]

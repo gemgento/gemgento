@@ -4,11 +4,11 @@ module Gemgento
     has_many :products
 
     def self.index
-      if ProductAttributeSet.find(:all).size == 0
+      if ProductAttributeSet.all.size == 0
         API::SOAP::Catalog::ProductAttributeSet.fetch_all
       end
 
-      ProductAttributeSet.find(:all)
+      ProductAttributeSet.all
     end
 
   end

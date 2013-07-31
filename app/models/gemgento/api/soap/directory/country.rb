@@ -27,7 +27,7 @@ module Gemgento
 
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source)
-            country = Gemgento::Country.find_or_initialize_by(magento_id: source[:country_id])
+            country = Gemgento::Country.where(magento_id: source[:country_id]).first_or_initialize
             country.magento_id = source[:country_id]
             country.iso2_code = source[:iso2_code]
             country.iso3_code = source[:iso3_code]
