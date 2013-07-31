@@ -131,9 +131,11 @@ module Gemgento
               order.save
             end
 
-
             if !source[:items][:item].nil?
+              source[:items][:item] = [source[:items][:item]] if source[:items].size == 3
+
               source[:items][:item].each do |item|
+                puts item.inspect
                 sync_magento_order_item_to_local(item, order)
               end
             end
