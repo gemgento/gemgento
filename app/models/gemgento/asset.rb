@@ -1,5 +1,3 @@
-require 'open-uri'
-
 module Gemgento
   class Asset < ActiveRecord::Base
     belongs_to :product
@@ -11,10 +9,6 @@ module Gemgento
                       :default_style => :normal,
                       :url => "/system/assets/products/:id/:style/:filename",
                       :path => ":rails_root/public/system/assets/products/:id/:style/:filename"
-
-    def attachment_from_url(url)
-      self.attachment = open(url)
-    end
 
     private
 

@@ -1,3 +1,5 @@
+require 'open-uri'
+
 module Gemgento
   module API
     module SOAP
@@ -92,14 +94,13 @@ module Gemgento
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source, product)
             asset = Gemgento::Asset.where(product_id: product.id, url: source[:url]).first_or_initialize
-            asset.attachment_from_url(source[:url])
+            asset.attachment = open(source[:url])
             asset.url = source[:url]
             asset.position = source[:position]
             asset.label = Gemgento::Magento.enforce_savon_string(source[:label])
             asset.file = source[:file]
             asset.product = product
             asset.sync_needed = false
-            asset.attachment = source[:url]
             asset.save
 
             set_types(source[:types][:item], asset)
