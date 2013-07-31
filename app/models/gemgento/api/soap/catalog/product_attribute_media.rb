@@ -7,11 +7,15 @@ module Gemgento
           def self.fetch_all
             Gemgento::Asset.skip_callback(:destroy, :before, :delete_magento)
             Gemgento::Product.all.each do |product|
-              product.assets.destroy_all
+              fetch(product)
+            end
+          end
 
-              list(product.magento_id).each do |product_attribute_media|
-                sync_magento_to_local(product_attribute_media, product)
-              end
+          def self.fetch(product)
+            product.assets.destroy_all
+
+            list(product.magento_id).each do |product_attribute_media|
+              sync_magento_to_local(product_attribute_media, product)
             end
           end
 
