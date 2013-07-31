@@ -10,7 +10,7 @@ module Gemgento
   class Magento
 
     # Log into the Magento API and setup the session and client
-    def self.api_login
+    def self.api_login(force_new_session = false)
       @api_url = "http://#{Gemgento::Config[:magento][:url]}/index.php/api/v#{Gemgento::Config[:magento][:api_version]}_#{Gemgento::Config[:magento][:api_type]}/index/wsdl/1"
       @client = Savon.client(
           wsdl: @api_url,
@@ -19,7 +19,7 @@ module Gemgento
           basic_auth: [Gemgento::Config[:magento][:auth_username].to_s, Gemgento::Config[:magento][:auth_password].to_s]
       )
 
-      if Gemgento::Session.last.nil?
+      if Gemgento::Session.last.nil? || force_new_session
         response = @client.call(:login, message: {:username => Gemgento::Config[:magento][:username], :apiKey => Gemgento::Config[:magento][:api_key]})
 
         unless response.success?
@@ -60,6 +60,12 @@ module Gemgento
         magento_response.success = false
         magento_response.body = response.body[:fault]
         Rails.logger.warn '^^^ Failure ^^^'
+
+        if !magento_response.body[:faultcode].nil? && magento_response.body[:faultcode].to_i == 5
+          Rails.logger.debug '--- Attempting To Start New Session ---'
+          api_login(true)
+          create_call(function, message)
+        end
       end
 
       Rails.logger.debug '-------------------'
