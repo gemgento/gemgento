@@ -7,13 +7,13 @@ module Gemgento
         class ProductAttributeMedia
 
           def self.fetch_all
-            Gemgento::Asset.skip_callback(:destroy, :before, :delete_magento)
             Gemgento::Product.all.each do |product|
               fetch(product)
             end
           end
 
           def self.fetch(product)
+            Gemgento::Asset.skip_callback(:destroy, :before, :delete_magento)
             product.assets.destroy_all
 
             list(product.magento_id).each do |product_attribute_media|
