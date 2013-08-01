@@ -47,10 +47,10 @@ module Gemgento
       message[:sessionId] = @session
       Rails.logger.debug "Making Call - #{function}"
 
-      response = @client.call(function, message: message)
-
       magento_response = MagentoResponse.new
-      magento_response.request = {function: function, message: message}
+      magento_response.request = {function: function, message: function == :catalog_product_attribute_media_create ? '' : message}
+
+      response = @client.call(function, message: message)
 
       if response.success?
         magento_response.success = true
