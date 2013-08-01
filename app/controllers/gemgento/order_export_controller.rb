@@ -10,6 +10,7 @@ module Gemgento
       order_attributes = params[:order_attributes].split(',')
       order_item_product_attributes = params[:order_item_product_attributes].split(',')
       order_item_attributes = params[:order_item_attributes].split(',')
+      delimiter = params[:delimiter].nil? ? ',' : params[:delimiter]
 
       Gemgento::Order.where('state != ?', 'cart').each do |order|
         details = []
@@ -38,7 +39,7 @@ module Gemgento
           end
         end
 
-        @order_export << details.join(',')
+        @order_export << details.join(delimiter)
       end
     end
   end
