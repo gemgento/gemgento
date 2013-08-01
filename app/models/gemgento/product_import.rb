@@ -16,13 +16,14 @@ Assumptions
 -Products are grouped by SKU
 =end
 
-    def initialize(file, store_view = 1, root_category_id = 2, configurable_attributes = [], image_prefix = '', image_suffix = '', attribute_set_id)
+    def initialize(file, store_view = 1, root_category_id = 2, configurable_attributes = [], image_prefix = '', image_suffix = '', image_labels = nil, attribute_set_id)
       @worksheet = Spreadsheet.open(file).worksheet(0)
       @headers = get_headers
       @messages = []
       @associated_simple_products = []
       @image_prefix = image_prefix
       @image_suffix = image_suffix
+      @image_labels = image_labels
       @attribute_set = Gemgento::ProductAttributeSet.find(attribute_set_id) # assuming there is only one product attribute set
       @root_category = Gemgento::Category.find(root_category_id)
       @store_view = store_view
@@ -148,17 +149,14 @@ Assumptions
 
     def set_image(product)
       product.assets.destroy_all
-      labels = %w[angle back front side]
 
       # find the correct image file name and path
-      %w[A B F S].each_with_index do |angle, position|
-        file_name = @image_prefix + product.sku + '_' + angle + @image_suffix
+      @image_labels.each_with_index do |label, position|
+        file_name = @image_prefix + @row[@headers.index('image')] + '_' + label + @image_suffix
+
         unless File.exist?(file_name)
-          file_name = @image_prefix + product.sku + ' ' + angle + @image_suffix
-          unless File.exist?(file_name)
-            @messages << "ERROR: Missing Images - SKU: #{product.sku}"
-            next
-          end
+          @messages << "WARNING: Image not found - #{file_name}"
+          next
         end
 
         types = Gemgento::AssetType.find_by(product_attribute_set: @attribute_set)
@@ -167,7 +165,7 @@ Assumptions
           types = [types]
         end
 
-        product.assets << create_image(product, file_name, types, position, labels[position])
+        product.assets << create_image(product, file_name, types, position, label)
       end
     end
 
