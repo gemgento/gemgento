@@ -83,7 +83,7 @@ module Gemgento
             category.magento_id = subject[:category_id]
             category.name = subject[:name]
             category.url_key = subject[:url_key]
-            category.parent = Gemgento::Category.where(magento_id: subject[:parent_id])
+            category.parent = Gemgento::Category.find_by(magento_id: subject[:parent_id])
             category.position = subject[:position]
             category.is_active = subject[:is_active]
             category.include_in_menu = subject[:include_in_menu] == 1 ? true : false
