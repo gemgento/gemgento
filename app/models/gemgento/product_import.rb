@@ -138,6 +138,7 @@ Assumptions
 
         subcategories.each do |category_url_key|
           category = Gemgento::Category.find_by(url_key: category_url_key)
+
           unless category.nil?
             product.categories << category unless product.categories.include?(category)
           else
