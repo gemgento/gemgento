@@ -151,14 +151,12 @@ Assumptions
     def set_image(product)
       product.assets.destroy_all
 
+      images_found = []
       # find the correct image file name and path
       @image_labels.each_with_index do |label, position|
         file_name = @image_prefix + @row[@headers.index('image')] + '_' + label + @image_suffix
-
-        unless File.exist?(file_name)
-          @messages << "WARNING: Image not found - #{file_name}"
-          next
-        end
+        next unless File.exist?(file_name)
+        images_found << file_name
 
         types = Gemgento::AssetType.find_by(product_attribute_set: @attribute_set)
 
@@ -167,6 +165,10 @@ Assumptions
         end
 
         product.assets << create_image(product, file_name, types, position, label)
+      end
+
+      if images_found.empty?
+        @messages << "WARNING: No images found for id:#{product.id}, sku: #{product.sku}"
       end
     end
 
