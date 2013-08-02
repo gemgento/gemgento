@@ -12,6 +12,7 @@ module Gemgento
                   email: cart.customer_email,
                   firstname: cart.billing_address.fname,
                   lastname: cart.billing_address.lname,
+                  'website_id' => '1'
               }
             else
               customer = {
@@ -22,7 +23,8 @@ module Gemgento
                   lastname: customer.lname,
                   password: customer.password,
                   confirmation: true,
-                  'group_id' => customer.user_group.magento_id
+                  'group_id' => customer.user_group.magento_id,
+                  'website_id' => '1'
               }
             end
 
