@@ -19,7 +19,7 @@ module Gemgento
             if response.success?
               cart.increment_id = response.body[:result]
               cart.save
-              response = Gemgento::API::SOAP::Sales::Order.fetch(order.increment_id) #grab all the new order information
+              response = Gemgento::API::SOAP::Sales::Order.fetch(cart.increment_id) #grab all the new order information
             end
 
             return response.success?

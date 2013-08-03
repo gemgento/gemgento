@@ -1,3 +1,5 @@
+require 'open-uri'
+
 module Gemgento
   module API
     module SOAP
@@ -5,13 +7,17 @@ module Gemgento
         class ProductAttributeMedia
 
           def self.fetch_all
-            Gemgento::Asset.skip_callback(:destroy, :before, :delete_magento)
             Gemgento::Product.all.each do |product|
-              product.assets.destroy_all
+              fetch(product)
+            end
+          end
 
-              list(product.magento_id).each do |product_attribute_media|
-                sync_magento_to_local(product_attribute_media, product)
-              end
+          def self.fetch(product)
+            Gemgento::Asset.skip_callback(:destroy, :before, :delete_magento)
+            product.assets.destroy_all
+
+            list(product.magento_id).each do |product_attribute_media|
+              sync_magento_to_local(product_attribute_media, product)
             end
           end
 
@@ -88,14 +94,13 @@ module Gemgento
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source, product)
             asset = Gemgento::Asset.where(product_id: product.id, url: source[:url]).first_or_initialize
-            asset.attachment = File.open(source[:url])
+            asset.attachment = open(source[:url])
             asset.url = source[:url]
             asset.position = source[:position]
             asset.label = Gemgento::Magento.enforce_savon_string(source[:label])
             asset.file = source[:file]
             asset.product = product
             asset.sync_needed = false
-            asset.attachment = source[:url]
             asset.save
 
             set_types(source[:types][:item], asset)

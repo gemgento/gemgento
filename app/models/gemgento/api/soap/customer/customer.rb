@@ -123,6 +123,7 @@ module Gemgento
                 lastname: customer.lname,
                 'store_id' => customer.store.magento_id,
                 'group_id' => customer.user_group.magento_id,
+                'website_id' => '1',
                 prefix: customer.prefix,
                 suffix: customer.suffix,
                 dob: customer.dob,

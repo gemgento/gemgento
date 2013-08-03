@@ -30,16 +30,24 @@ module Gemgento
     end
 
     def is_valid_password(password)
-      unless self.encrypted_password.nil?
+      unless self.encrypted_password == ''
         return self.valid_password?(password)
       else
         # NOTE: this method is untested, but should replicate the Magento encrypted password
-        salt = self.password.split(':')[1]
+        salt = self.magento_password.split(':')[1]
         encrypted_password = OpenSSL::HMAC.hexdigest('sha256', salt + password, Gemgento::Config[:magento][:encryption])
+        encrypted_password = Digest::MD5.hexdigest(salt + password)
         encrypted_password += ':' + salt
-        puts encrypted_password
 
-        return self.password == encrypted_password
+        if self.magento_password == encrypted_password
+          self.password = password
+          self.password_confirmation = password
+          self.save
+
+          return true
+        else
+          return false
+        end
       end
     end
 

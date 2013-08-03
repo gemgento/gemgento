@@ -27,6 +27,8 @@ Gemgento::Engine.routes.draw do
   get '/checkout/thank_you', to: 'checkout#thank_you'
   post '/checkout/update', to: 'checkout#update'
 
+  get '/order_export', to: 'order_export#index'
+
   resources :products, :categories, :orders, :checkout
 
   patch '/orders', to: 'orders#update'

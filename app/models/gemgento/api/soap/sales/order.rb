@@ -57,7 +57,7 @@ module Gemgento
 
           # Save Magento order to local
           def self.sync_magento_to_local(source)
-            order = Gemgento::Order.where(order_id: source[:order_id]).first_or_initialize
+            order = Gemgento::Order.where(increment_id: source[:increment_id]).first_or_initialize
             order.order_id = source[:order_id]
             order.is_active = source[:is_active]
             order.user = User.where(magento_id: source[:customer_id]).first
@@ -131,9 +131,11 @@ module Gemgento
               order.save
             end
 
-
             if !source[:items][:item].nil?
+              source[:items][:item] = [source[:items][:item]] if source[:items].size == 3
+
               source[:items][:item].each do |item|
+                puts item.inspect
                 sync_magento_order_item_to_local(item, order)
               end
             end

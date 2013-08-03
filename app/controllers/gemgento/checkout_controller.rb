@@ -26,7 +26,7 @@ module Gemgento
     end
 
     def address
-      if current_order.user.nil?
+      if current_order.user.nil? && !current_order.customer_is_guest
         current_order.user = current_user
         current_order.save
       end
@@ -198,7 +198,11 @@ module Gemgento
         current_order.shipping_address.address_type = 'shipping'
       end
 
-      current_order.shipping_address.user = current_user
+      if user_signed_in?
+        current_order.shipping_address.user = current_user
+      else
+        current_order.shipping_address.sync_needed = false
+      end
 
       respond_to do |format|
 
@@ -220,13 +224,22 @@ module Gemgento
           end
 
           current_order.billing_address.address_type = 'billing' # if user selected 'billing same as shipping' we need to force the correct type
-          current_order.billing_address.user = current_user
+
+          if user_signed_in?
+            current_order.billing_address.user = current_user
+          else
+            current_order.billing_address.sync_needed = false
+          end
 
           if current_order.billing_address.save
             current_order.save
-            current_order.shipping_address.push
-            current_order.billing_address.push
 
+            if user_signed_in?
+              current_order.shipping_address.push
+              current_order.billing_address.push
+            end
+
+            current_order.push_customer
             current_order.push_addresses
 
             format.html { redirect_to '/gemgento/checkout/shipping' }

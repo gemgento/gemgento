@@ -5,18 +5,32 @@ module Gemgento
         class Customer
 
           def self.set(cart, customer)
+
+            if cart.customer_is_guest
+              customer = {
+                  mode: 'guest',
+                  email: cart.customer_email,
+                  firstname: cart.billing_address.fname,
+                  lastname: cart.billing_address.lname,
+                  'website_id' => '1'
+              }
+            else
+              customer = {
+                  mode: 'customer',
+                  'customer_id' => customer.magento_id,
+                  email: customer.email,
+                  firstname: customer.fname,
+                  lastname: customer.lname,
+                  password: customer.password,
+                  confirmation: true,
+                  'group_id' => customer.user_group.magento_id,
+                  'website_id' => '1'
+              }
+            end
+
             message = {
                 quote_id: cart.magento_quote_id,
-                customer: {
-                    mode: customer.magento_id.nil? ? 'guest' : 'customer',
-                    'customer_id' => customer.magento_id,
-                    email: customer.email,
-                    firstname: customer.fname,
-                    lastname: customer.lname,
-                    password: customer.password,
-                    confirmation: true,
-                    'group_id' => customer.user_group.magento_id
-                }
+                customer: customer
             }
             response = Gemgento::Magento.create_call(:shopping_cart_customer_set, message)
 
