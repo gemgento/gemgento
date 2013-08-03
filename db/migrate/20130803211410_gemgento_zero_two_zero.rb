@@ -106,11 +106,11 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
     end
 
     create_table "gemgento_magento_responses", force: true do |t|
-      t.text     "request"
-      t.text     "body"
-      t.datetime "created_at"
-      t.datetime "updated_at"
-      t.boolean  "success",    default: false, null: false
+      t.mediumtext  "request"
+      t.text        "body"
+      t.datetime    "created_at"
+      t.datetime    "updated_at"
+      t.boolean     "success",    default: false, null: false
     end
 
     create_table "gemgento_order_addresses", force: true do |t|
