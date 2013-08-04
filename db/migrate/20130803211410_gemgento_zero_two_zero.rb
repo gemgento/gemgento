@@ -1,6 +1,6 @@
 class GemgentoZeroOneTwo < ActiveRecord::Migration
-  def change
 
+  def change
     create_table "gemgento_addresses", force: true do |t|
       t.integer  "user_address_id"
       t.integer  "user_id"
@@ -20,13 +20,12 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
       t.string   "street"
       t.string   "telephone"
       t.string   "address_type"
-      t.boolean  "is_default_billing",  default: false
-      t.boolean  "is_default_shipping", default: false
-      t.boolean  "sync_needed",         default: true,  null: false
+      t.boolean  "sync_needed",      default: true,  null: false
       t.datetime "created_at"
       t.datetime "updated_at"
       t.integer  "order_address_id"
       t.integer  "order_id"
+      t.boolean  "is_default",       default: false
     end
 
     create_table "gemgento_asset_types", force: true do |t|
@@ -69,7 +68,7 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
       t.boolean  "include_in_menu", default: true, null: false
     end
 
-    add_index "gemgento_categories", ["magento_id"], name: "index_gemgento_categories_on_magento_id", unique: true
+    add_index "gemgento_categories", ["magento_id"], name: "index_gemgento_categories_on_magento_id", unique: true, using: :btree
 
     create_table "gemgento_categories_products", id: false, force: true do |t|
       t.integer "product_id",  default: 0, null: false
@@ -106,6 +105,14 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
       t.datetime "updated_at"
     end
 
+    create_table "gemgento_magento_responses", force: true do |t|
+      t.mediumtext  "request"
+      t.text        "body"
+      t.datetime    "created_at"
+      t.datetime    "updated_at"
+      t.boolean     "success",    default: false, null: false
+    end
+
     create_table "gemgento_order_addresses", force: true do |t|
       t.integer  "order_id",                    null: false
       t.integer  "increment_id"
@@ -128,7 +135,7 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
     end
 
     create_table "gemgento_order_items", force: true do |t|
-      t.integer  "magento_id",                                                null: false
+      t.integer  "magento_id"
       t.integer  "order_id"
       t.integer  "quote_item_id"
       t.integer  "product_id"
@@ -222,7 +229,7 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
     end
 
     create_table "gemgento_orders", force: true do |t|
-      t.integer  "magento_id",                                           null: false
+      t.integer  "order_id"
       t.integer  "store_id",                                             null: false
       t.boolean  "is_active"
       t.integer  "user_id"
@@ -283,7 +290,7 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
       t.string   "customer_note_notify"
       t.boolean  "customer_is_guest"
       t.boolean  "email_sent"
-      t.integer  "increment_id"
+      t.string   "increment_id"
       t.string   "gift_message_id"
       t.string   "gift_message"
       t.datetime "created_at"
@@ -373,7 +380,7 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
       t.datetime "updated_at"
     end
 
-    add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true
+    add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true, using: :btree
 
     create_table "gemgento_user_groups", force: true do |t|
       t.integer  "magento_id"
@@ -383,10 +390,10 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
     end
 
     create_table "gemgento_users", force: true do |t|
-      t.integer  "magento_id",                   null: false
-      t.integer  "store_id",                     null: false
+      t.integer  "magento_id"
+      t.integer  "store_id"
       t.string   "created_in"
-      t.string   "email"
+      t.string   "email",                  default: "",   null: false
       t.string   "fname"
       t.string   "lname"
       t.string   "mname"
@@ -396,14 +403,25 @@ class GemgentoZeroOneTwo < ActiveRecord::Migration
       t.date     "dob"
       t.string   "taxvat"
       t.boolean  "confirmation"
-      t.string   "password"
-      t.boolean  "sync_needed",   default: true, null: false
+      t.string   "magento_password"
+      t.boolean  "sync_needed",            default: true, null: false
       t.datetime "created_at"
       t.datetime "updated_at"
       t.integer  "increment_id"
+      t.string   "encrypted_password",     default: "",   null: false
+      t.string   "reset_password_token"
+      t.datetime "reset_password_sent_at"
+      t.datetime "remember_created_at"
+      t.integer  "sign_in_count",          default: 0
+      t.datetime "current_sign_in_at"
+      t.datetime "last_sign_in_at"
+      t.string   "current_sign_in_ip"
+      t.string   "last_sign_in_ip"
     end
 
-    add_index "gemgento_users", ["magento_id"], name: "index_gemgento_users_on_magento_id", unique: true
+    add_index "gemgento_users", ["email"], name: "index_gemgento_users_on_email", unique: true, using: :btree
+    add_index "gemgento_users", ["magento_id"], name: "index_gemgento_users_on_magento_id", unique: true, using: :btree
+    add_index "gemgento_users", ["reset_password_token"], name: "index_gemgento_users_on_reset_password_token", unique: true, using: :btree
 
   end
 end
