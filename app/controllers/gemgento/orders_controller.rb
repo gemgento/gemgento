@@ -32,14 +32,17 @@ module Gemgento
 
       case params[:activity]
         when 'add_item'
-          add_item
+          @product = add_item
         when 'update_item'
-          update_item
+          @product = update_item
         else
           raise "Unknown action - #{params[:activity]}"
       end
 
-      render nothing: true
+      respond_to do |format|
+        format.html { render '/checkout/shopping_bag' }
+        format.js { render '/gemgento/order/update', :layout => false }
+      end
     end
 
     private
@@ -54,6 +57,8 @@ module Gemgento
 
       # add the item to the order
       current_order.add_item(product, params[:quantity])
+
+      return product
     end
 
     def update_item
@@ -66,6 +71,8 @@ module Gemgento
 
       # update the item
       current_order.update_item(product, params[:quantity])
+
+      return product
     end
 
     def set_addresses
