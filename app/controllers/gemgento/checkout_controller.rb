@@ -288,11 +288,16 @@ module Gemgento
       current_order.order_payment.cc_last4 = current_order.order_payment.cc_number[-4..-1]
       current_order.order_payment.save
 
-      current_order.push_payment_method
 
       respond_to do |format|
-        format.html { redirect_to '/gemgento/checkout/confirm' }
-        format.js { render '/gemgento/checkout/payment/success' }
+        if current_order.push_payment_method
+          format.html { redirect_to '/gemgento/checkout/confirm' }
+          format.js { render '/gemgento/checkout/payment/success' }
+        else
+          format.html { redirect_to '/gemgento/checkout/payment' }
+          format.js { render '/gemgento/checkout/payment/error' }
+        end
+
       end
     end
 
@@ -303,6 +308,7 @@ module Gemgento
     def process_order
       respond_to do |format|
         if current_order.process
+          create_new_cart
           format.html { redirect_to '/checkout/thank_you' }
           format.js { render 'gemgento/checkout/confirm/success' }
         else

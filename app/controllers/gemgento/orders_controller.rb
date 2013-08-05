@@ -49,7 +49,7 @@ module Gemgento
       raise 'Quantity not specified' if params[:quantity].nil?
       raise 'Quantity must be greater than 0' if params[:quantity].to_i <= 0
 
-      product = Gemgento::Product.where(params[:product]).first
+      product = Gemgento::Product.find(params[:product])
       raise 'Product does not exist' if product.nil?
 
       # add the item to the order
@@ -61,7 +61,7 @@ module Gemgento
       raise 'Quantity not specified' if params[:quantity].nil?
       raise 'Quantity must be greater than 0' if params[:quantity].to_i <= 0
 
-      product = Gemgento::Product.where(params[:product]).first
+      product = Gemgento::Product.find(params[:product])
       raise 'Product does not exist' if product.nil?
 
       # update the item
