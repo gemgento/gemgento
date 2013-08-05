@@ -126,6 +126,7 @@ module Gemgento
     end
 
     def get_shipping_methods
+      logger.info self.shipping_address.inspect
       raise 'Order shipping address not set' if self.shipping_address.nil?
       API::SOAP::Checkout::Shipping.list(self)
     end

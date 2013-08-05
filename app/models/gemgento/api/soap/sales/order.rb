@@ -12,7 +12,12 @@ module Gemgento
 
           def self.fetch(increment_id)
             info = info(increment_id)
-            sync_magento_to_local(info) if info != false
+
+            unless info == false
+              sync_magento_to_local(info)
+              return true
+            end
+            return false
           end
 
           def self.list

@@ -190,67 +190,64 @@ module Gemgento
     end
 
     def set_addresses
+      # shipping address
       if current_order.shipping_address.nil?
         current_order.shipping_address = Address.new(shipping_address_params)
-        current_order.shipping_address.address_type = 'shipping'
       else
         current_order.shipping_address.update_attributes(shipping_address_params)
-        current_order.shipping_address.address_type = 'shipping'
       end
 
+      current_order.shipping_address.address_type = 'shipping'
+
+      #billing address
+      if params[:same_as_billing]
+        if current_order.billing_address.nil?
+          current_order.billing_address = Address.new(shipping_address_params)
+        else
+          current_order.billing_address.update_attributes(shipping_address_params)
+        end
+      else
+        if current_order.billing_address.nil?
+          current_order.billing_address = Address.new(billing_address_params)
+        else
+          current_order.billing_address.update_attributes(billing_address_params)
+        end
+      end
+
+      current_order.billing_address.address_type = 'billing'
+
+      #assign a user
       if user_signed_in?
         current_order.shipping_address.user = current_user
+        current_order.billing_address.user = current_user
       else
         current_order.shipping_address.sync_needed = false
+        current_order.billing_address.sync_needed = false
       end
 
+      # attempt to save the addresses and respond appropriately
       respond_to do |format|
 
-        if current_order.shipping_address.save # try to set the shipping address attributes
-
-          if params[:same_as_billing] # set the billing address attributes the same as shipping
-
-            if current_order.billing_address.nil?
-              current_order.billing_address = Address.new(shipping_address_params)
-            else
-              current_order.billing_address.update_attributes(shipping_address_params)
-            end
-          else
-            if current_order.billing_address.nil?
-              current_order.billing_address = Address.new(billing_address_params)
-            else
-              current_order.billing_address.update_attributes(billing_address_params)
-            end
-          end
-
-          current_order.billing_address.address_type = 'billing' # if user selected 'billing same as shipping' we need to force the correct type
+        if current_order.shipping_address.save && current_order.billing_address.save
+          current_order.save
 
           if user_signed_in?
-            current_order.billing_address.user = current_user
-          else
-            current_order.billing_address.sync_needed = false
+            current_order.shipping_address.push
+            current_order.billing_address.push
           end
 
-          if current_order.billing_address.save
-            current_order.save
+          current_order.push_customer
+          current_order.push_addresses
 
-            if user_signed_in?
-              current_order.shipping_address.push
-              current_order.billing_address.push
-            end
-
-            current_order.push_customer
-            current_order.push_addresses
-
-            format.html { redirect_to '/gemgento/checkout/shipping' }
-            format.js { render '/gemgento/checkout/addresses/success' }
-          else
-            current_order.shipping_address.destroy
-
-            format.html { redirect_to '/gemgento/checkout/address' }
-            format.js { render '/gemgento/checkout/addresses/error' }
-          end
+          format.html { redirect_to '/gemgento/checkout/shipping' }
+          format.js { render '/gemgento/checkout/addresses/success' }
         else
+          @shipping_address = current_order.shipping_address
+          @billing_address = current_order.billing_address
+
+          current_order.shipping_address.destroy
+          current_order.billing_address.destroy
+
           format.html { redirect_to '/gemgento/checkout/address' }
           format.js { render '/gemgento/checkout/addresses/error' }
         end
