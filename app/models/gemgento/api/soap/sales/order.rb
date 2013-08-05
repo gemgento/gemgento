@@ -126,8 +126,8 @@ module Gemgento
             order.store = store
             order.save
 
-            sync_magento_address_to_local(source[:shipping_address], order)
-            sync_magento_address_to_local(source[:billing_address], order)
+            sync_magento_address_to_local(source[:shipping_address], order.shipping_address.nil? ? nil : order.shipping_address)
+            sync_magento_address_to_local(source[:billing_address], order.billing_address.nil? ? nil : order.billing_address)
             sync_magento_payment_to_local(source[:payment], order)
 
             unless source[:gift_message_id].nil?
@@ -136,6 +136,7 @@ module Gemgento
               order.save
             end
 
+            order.order_item.destroy_all
             if !source[:items][:item].nil?
               source[:items][:item] = [source[:items][:item]] if source[:items].size == 3
 
@@ -153,8 +154,8 @@ module Gemgento
             end
           end
 
-          def self.sync_magento_address_to_local(source, order)
-            address = Gemgento::Address.where(order_address_id: source[:address_id]).first_or_initialize
+          def self.sync_magento_address_to_local(source, order, address = nil)
+            address = Gemgento::Address.where(order_address_id: source[:address_id]).first_or_initialize if address.nil?
             address.order_address_id = source[:address_id]
             address.order = order
             address.increment_id = source[:increment_id]
