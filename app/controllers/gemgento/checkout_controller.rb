@@ -1,6 +1,6 @@
 module Gemgento
   class CheckoutController < BaseController
-    before_filter :auth_order_user, :except => [:login, :shopping_bag]
+    before_filter :auth_order_user, :except => [:login, :shopping_bag, :thank_you]
 
     layout 'application'
 

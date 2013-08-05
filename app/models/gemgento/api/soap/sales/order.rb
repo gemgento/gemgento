@@ -136,7 +136,7 @@ module Gemgento
               order.save
             end
 
-            order.order_item.destroy_all
+            order.order_items.destroy_all
             if !source[:items][:item].nil?
               source[:items][:item] = [source[:items][:item]] if source[:items].size == 3
 

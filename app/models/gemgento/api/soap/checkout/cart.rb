@@ -10,6 +10,9 @@ module Gemgento
             if response.success?
               cart.magento_quote_id = response.body[:quote_id]
               cart.save
+              return true
+            else
+              return false
             end
           end
 
