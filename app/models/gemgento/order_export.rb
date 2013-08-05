@@ -9,7 +9,7 @@ module Gemgento
       @item_attributes = item_attributes
       @delimiter = delimiter
       @start_datetime = start_datetime
-      @file_name = "orders-#{Time.now.strftime("%Y%m%d%H%M%S")}"
+      @file_name = "orders-#{Time.now.strftime("%Y%m%d")}"
       @path = path
       @report = []
     end
