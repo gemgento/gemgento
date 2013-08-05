@@ -6,6 +6,10 @@ module Gemgento
         @current_order ||= Gemgento::Order.get_cart(cookies[:cart])
       end
 
+      def create_new_cart
+        @current_rder = Gemgento::Order.get_cart
+      end
+
     end
   end
 end
