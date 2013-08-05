@@ -8,6 +8,8 @@ module Gemgento
             response = Gemgento::Magento.create_call(:shopping_cart_shipping_list, {quote_id: cart.magento_quote_id})
 
             if response.success?
+              response.body[:result][:item] = [response.body[:result][:item]] unless response.body[:result][:item].is_a? Array
+
               return response.body[:result][:item]
             end
           end
