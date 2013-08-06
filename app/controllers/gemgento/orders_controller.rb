@@ -33,19 +33,26 @@ module Gemgento
       case params[:activity]
         when 'add_item'
           @product = add_item
+
+          respond_to do |format|
+            format.html { render 'gemgento/checkout/shopping_bag' }
+            format.js { render '/gemgento/order/add_item', :layout => false }
+          end
         when 'update_item'
           @product = update_item
+
+          respond_to do |format|
+            format.html { render 'gemgento/checkout/shopping_bag' }
+            format.js { render '/gemgento/order/add_item', :layout => false }
+          end
         else
           raise "Unknown action - #{params[:activity]}"
-      end
-
-      respond_to do |format|
-        format.html { render '/checkout/shopping_bag' }
-        format.js { render '/gemgento/order/update', :layout => false }
+          render nothing: true
       end
     end
 
     private
+
     def add_item
       # validate the parameters
       raise 'Product not specified' if params[:product].nil?
