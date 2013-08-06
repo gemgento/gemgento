@@ -22,7 +22,10 @@ module Gemgento
 
       add_item
 
-      render nothing: true
+      respond_to do |format|
+        format.html { render 'gemgento/checkout/shopping_bag' }
+        format.js { render '/gemgento/order/add_item', :layout => false }
+      end
     end
 
     def update
