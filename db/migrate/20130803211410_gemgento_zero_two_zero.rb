@@ -1,4 +1,4 @@
-class GemgentoZeroOneTwo < ActiveRecord::Migration
+class GemgentoZeroTwoZero < ActiveRecord::Migration
 
   def change
     create_table "gemgento_addresses", force: true do |t|
