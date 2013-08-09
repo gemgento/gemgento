@@ -136,11 +136,13 @@ Assumptions
       categories.each do |category_string|
         subcategories = category_string.split('>')
 
+        parent_id = @root_category.id
         subcategories.each do |category_url_key|
-          category = Gemgento::Category.find_by(url_key: category_url_key)
+          category = Gemgento::Category.find_by(url_key: category_url_key, parent_id: parent_id)
 
           unless category.nil?
             product.categories << category unless product.categories.include?(category)
+            parent_id = category.id
           else
             @messages << "ERROR - row #{@row.index} - Unknown category url key '#{category_url_key}' - skipped"
           end
