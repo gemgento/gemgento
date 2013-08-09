@@ -24,6 +24,8 @@ module Gemgento
       unless self.file.nil?
         API::SOAP::Catalog::ProductAttributeMedia.remove(self)
       end
+
+      self.asset_types.clear
     end
 
   end
