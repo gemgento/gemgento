@@ -1,13 +1,6 @@
 Gemgento::Engine.routes.draw do
   root :to => "products#index"
-
-  devise_for :users, class_name: 'Gemgento::User'
-
   get '/error/:action', :controller => "errors"
-
-  namespace 'users' do
-    resources :orders, :addresses
-  end
 
   get '/addresses/region_options', to: 'addresses#region_options'
 
@@ -26,10 +19,15 @@ Gemgento::Engine.routes.draw do
   get '/checkout/confirm', to: 'checkout#confirm'
   get '/checkout/thank_you', to: 'checkout#thank_you'
   post '/checkout/update', to: 'checkout#update'
-
   get '/order_export', to: 'order_export#index'
 
-  resources :products, :categories, :orders, :checkout
+  devise_for :users, class_name: 'Gemgento::User'
+
+  namespace 'users' do
+    resources :orders, :addresses
+  end
+
+  resources :products, :categories, :orders, :checkout, :subscribers
 
   patch '/orders', to: 'orders#update'
 

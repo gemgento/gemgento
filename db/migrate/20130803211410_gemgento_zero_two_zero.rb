@@ -419,6 +419,12 @@ class GemgentoZeroTwoZero < ActiveRecord::Migration
       t.string   "last_sign_in_ip"
     end
 
+    create_table "gemgento_subscribers", force: true do |t|
+      t.string :name
+      t.string :email
+      t.timestamps
+    end
+
     add_index "gemgento_users", ["email"], name: "index_gemgento_users_on_email", unique: true, using: :btree
     add_index "gemgento_users", ["magento_id"], name: "index_gemgento_users_on_magento_id", unique: true, using: :btree
     add_index "gemgento_users", ["reset_password_token"], name: "index_gemgento_users_on_reset_password_token", unique: true, using: :btree
