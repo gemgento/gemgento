@@ -7,8 +7,8 @@ module Gemgento
 
     has_one :inventory
 
-    has_many :product_attribute_values
-    has_many :assets
+    has_many :product_attribute_values, dependent: :destroy
+    has_many :assets, dependent: :destroy
     has_many :simple_products, foreign_key: 'parent_id', class_name: 'Product'
 
     has_and_belongs_to_many :categories, -> { uniq }, join_table: 'gemgento_categories_products'
@@ -17,6 +17,8 @@ module Gemgento
     scope :configurable, where(magento_type: 'configurable')
 
     after_save :sync_local_to_magento
+
+    before_destroy :delete_associations
 
     def self.index
       if Product.all.size == 0
@@ -69,6 +71,18 @@ module Gemgento
 
         self.sync_needed = false
         self.save
+      end
+    end
+
+    def delete_associations
+      self.categories.clear
+      self.configurable_attributes.clear
+
+      unless self.simple_products.nil?
+        self.simple_products.each do |simple_product|
+          simple_product.configurable_product = nil
+          simple_product.save
+        end
       end
     end
 
