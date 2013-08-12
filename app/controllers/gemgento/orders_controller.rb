@@ -46,7 +46,14 @@ module Gemgento
 
           respond_to do |format|
             format.html { render 'gemgento/checkout/shopping_bag' }
-            format.js { render '/gemgento/order/add_item', :layout => false }
+            format.js { render '/gemgento/order/update_item', :layout => false }
+          end
+        when 'remove_item'
+          remove_item
+
+          respond_to do |format|
+            format.html { render 'gemgento/checkout/shopping_bag' }
+            format.js { render '/gemgento/order/remove_item', :layout => false }
           end
         else
           raise "Unknown action - #{params[:activity]}"
@@ -85,8 +92,13 @@ module Gemgento
       return product
     end
 
-    def set_addresses
+    def remove_item
+      raise 'Product not specified' if params[:product].nil?
 
+      product = Gemgento::Product.find(params[:product])
+      raise 'Product does not exist' if product.nil?
+
+      current_order.remove_item(product)
     end
   end
 end
