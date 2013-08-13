@@ -49,7 +49,7 @@ module Gemgento
       if product_attribute.product_attribute_options.empty?
         return product_attribute_value.value
       else
-        return Gemgento::ProductAttributeOption.find_by(value: product_attribute_value.value).label
+        return product_attribute.product_attribute_options.find_by(value: product_attribute_value.value).label
       end
     end
 
