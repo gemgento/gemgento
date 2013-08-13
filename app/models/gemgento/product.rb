@@ -68,10 +68,12 @@ module Gemgento
     def method_missing(method, *args)
       relation_type = self.class.relation_types.detect { |rt| rt.name.downcase.gsub(" ", "_").pluralize == method.to_s.downcase }
 
-      if relation_type.nil?
-        super
+      if !relation_type.nil?
+        return relations.where(relation_type: relation_type)
+      elsif !Gemgento::ProductAttribute.find_by(code: method).nil?
+        return attribute_value(method)
       else
-        relations.where(relation_type: relation_type)
+        super
       end
     end
 
