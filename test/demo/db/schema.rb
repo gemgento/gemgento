@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130726013431) do
+ActiveRecord::Schema.define(version: 20130813142239) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer "user_address_id"
@@ -119,7 +119,7 @@ ActiveRecord::Schema.define(version: 20130726013431) do
 
   create_table "gemgento_magento_responses", force: true do |t|
     t.text "request"
-    t.text "body"
+    t.text "body", limit: 16777215
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean "success", default: true, null: false
@@ -373,6 +373,24 @@ ActiveRecord::Schema.define(version: 20130726013431) do
     t.integer "country_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "gemgento_relation_types", force: true do |t|
+    t.string "name"
+    t.text "description"
+    t.string "applies_to"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "gemgento_relations", force: true do |t|
+    t.integer "relation_type_id"
+    t.integer "relatable_id"
+    t.string "relatable_type"
+    t.integer "related_to_id"
+    t.string "related_to_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "gemgento_sessions", force: true do |t|
