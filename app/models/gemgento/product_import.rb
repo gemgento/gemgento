@@ -1,20 +1,11 @@
 require 'spreadsheet'
 
 module Gemgento
-  class ProductImport
-=begin
-Pre-requisites:
--Column headers match attribute codes
--There is only one attribute set, or the needed attribute set is the first one
--All needed attributes already belong to the attribute set
+  class ProductImport < ActiveRecord::Base
+    attr_accessor :store_view, :root_category, :configurable_attributes,
+                  :image_prefix, :image_suffix, :image_labels, :attribute_set_id
 
-Assumptions
--'Collections' is the parent category of the 'parent_category' column
--'Collections' already exists
--Only 'child_category' is assigned to product
--Two assets are created from one image
--Products are grouped by SKU
-=end
+    has_attached_file :spreadsheet
 
     def initialize(file, store_view = 1, root_category_id = 2, configurable_attributes = [], image_prefix = '', image_suffix = '', image_labels = nil, attribute_set_id)
       @worksheet = Spreadsheet.open(file).worksheet(0)
