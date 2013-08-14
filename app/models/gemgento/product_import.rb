@@ -16,14 +16,10 @@ module Gemgento
     attr_accessor :include_images, :image_path, :image_file_extension, :image_labels, :image_labels_raw,
                   :count_created, :count_updated, :import_errors
 
-    after_post_process :process
+    after_commit :process
 
     def process
-      puts product_attribute_set_id
-      puts root_category.inspect
-      puts store.inspect
-      exit
-      @worksheet = Spreadsheet.open(self.spreadsheet.queued_for_write[:original].path).worksheet(0)
+      @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
       @headers = get_headers
       associated_simple_products = []
       self.count_created = 0
@@ -59,7 +55,9 @@ module Gemgento
       accepted_headers = []
 
       @worksheet.row(0).each do |h|
-        accepted_headers << h.nil? ? h : h.downcase.gsub(' ', '_').strip
+        unless h.nil?
+          accepted_headers << h.downcase.gsub(' ', '_').strip
+        end
       end
 
       accepted_headers

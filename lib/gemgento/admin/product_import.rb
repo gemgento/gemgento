@@ -22,14 +22,14 @@ if defined?(ActiveAdmin)
       form multipart: true do |f|
         f.inputs do
           f.input :spreadsheet, as: :file, label: 'Spreadsheet'
-          f.input :product_attribute_set_id, as: :select, :include_blank => false, collection: ProductAttributeSet.all.map { |as| [as.name, as.id] }
-          f.input :root_category_id, as: :select, :include_blank => false, collection: Category.all.map { |c| [c.name, c.id] }
-          f.input :store_id, as: :select, :include_blank => false, collection: Store.all.map { |s| [s.name, s.id] }
+          f.input :product_attribute_set, as: :select, :include_blank => false, collection: ProductAttributeSet.all.map { |as| [as.name, as.id] }
+          f.input :root_category, as: :select, :include_blank => false, collection: Category.all.map { |c| [c.name, c.id] }
+          f.input :store, as: :select, :include_blank => false, collection: Store.all.map { |s| [s.name, s.id] }
           f.input :configurable_attributes,
                   as: :check_boxes,
                   multiple: true,
                   collection: ProductAttribute.where(is_configurable: true, scope: 'global', frontend_input: 'select').map { |pa| [pa.code, pa.id] }
-          f.input :include_images, as: :radio
+          f.input :include_images
           f.input :image_path
           f.input :image_file_extension
           f.input :image_labels_raw, as: :text, label: 'Image Labels', hint: 'Enter image labels in appearance order.  Separate labels with line breaks (hit enter)'
