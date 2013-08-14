@@ -2,12 +2,20 @@ require 'spreadsheet'
 
 module Gemgento
   class ProductImport < ActiveRecord::Base
-    attr_accessor :store_view, :root_category, :configurable_attributes,
-                  :image_prefix, :image_suffix, :image_labels, :attribute_set_id
+    belongs_to :product_attribute_set
+    belongs_to :root_category, foreign_key: 'root_category_id', class_name: 'Category'
+    belongs_to :store
+
+    has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_product_imports_configurable_attributes', class_name: 'ProductAttribute'
 
     has_attached_file :spreadsheet
 
-    def initialize(file, store_view = 1, root_category_id = 2, configurable_attributes = [], image_prefix = '', image_suffix = '', image_labels = nil, attribute_set_id)
+    serialize :import_errors, Hash
+    serialize :image_labels, Array
+
+    attr_accessor :image_labels_raw
+
+    def initialize1(file, store_view = 1, root_category_id = 2, configurable_attributes = [], image_prefix = '', image_suffix = '', image_labels = nil, attribute_set_id)
       @worksheet = Spreadsheet.open(file).worksheet(0)
       @headers = get_headers
       @messages = []
@@ -34,6 +42,15 @@ module Gemgento
       end
 
       puts @messages
+    end
+
+    def image_labels_raw
+      self.image_labels.join("\n") unless self.image_labels.nil?
+    end
+
+    def image_labels_raw=(values)
+      self.image_labels = []
+      self.image_labels = values.split("\n")
     end
 
     private
