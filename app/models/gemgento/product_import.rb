@@ -13,35 +13,35 @@ module Gemgento
     serialize :import_errors, Hash
     serialize :image_labels, Array
 
-    attr_accessor :image_labels_raw
+    attr_accessor :include_images, :image_path, :image_file_extension, :image_labels, :image_labels_raw,
+                  :count_created, :count_updated, :import_errors
 
-    def initialize1(file, store_view = 1, root_category_id = 2, configurable_attributes = [], image_prefix = '', image_suffix = '', image_labels = nil, attribute_set_id)
-      @worksheet = Spreadsheet.open(file).worksheet(0)
-      @headers = get_headers
-      @messages = []
-      @associated_simple_products = []
-      @image_prefix = image_prefix
-      @image_suffix = image_suffix
-      @image_labels = image_labels
-      @attribute_set = Gemgento::ProductAttributeSet.find(attribute_set_id) # assuming there is only one product attribute set
-      @root_category = Gemgento::Category.find(root_category_id)
-      @store_view = store_view
-      @configurable_attributes = configurable_attributes
-    end
+    after_post_process :process
 
     def process
+      puts product_attribute_set_id
+      puts root_category.inspect
+      puts store.inspect
+      exit
+      @worksheet = Spreadsheet.open(self.spreadsheet.queued_for_write[:original].path).worksheet(0)
+      @headers = get_headers
+      associated_simple_products = []
+      self.count_created = 0
+      self.count_updated = 0
+
       1.upto @worksheet.last_row_index do |index|
         puts "Working on row #{index}"
         @row = @worksheet.row(index)
 
-        if @row[@headers.index('magento_type')].to_s.casecmp('simple') == 0
-          @associated_simple_products << create_simple_product
+        if @row[@headers.index('magento_type').to_i].to_s.strip.casecmp('simple') == 0
+          associated_simple_products << create_simple_product
         else
-          create_configurable_product
+          create_configurable_product(associated_simple_products)
+          associated_simple_products = []
         end
       end
 
-      puts @messages
+      self.save
     end
 
     def image_labels_raw
@@ -59,25 +59,29 @@ module Gemgento
       accepted_headers = []
 
       @worksheet.row(0).each do |h|
-        accepted_headers << h.downcase.gsub(' ', '_')
+        accepted_headers << h.nil? ? h : h.downcase.gsub(' ', '_').strip
       end
 
       accepted_headers
     end
 
     def create_simple_product
-      # Decide how to format skus - for now use suffix of size column
-      sku = @row[@headers.index('sku')].to_s.strip
+      sku = @row[@headers.index('sku').to_i].to_s.strip
 
-      product = Gemgento::Product.find_by(sku: sku)
+      product = Product.find_by(sku: sku)
 
       if product.nil? # If product isn't known locally, check with Magento
-        product = Gemgento::Product.check_magento(sku, 'sku', @attribute_set)
+        product = Product.check_magento(sku, 'sku', product_attribute_set)
       end
 
-      product.magento_type = 'simple'
+      if product.magento_id.nil?
+        self.count_created += 1
+      else
+        self.count_updated += 1
+      end
+
       product.sku = sku
-      product.product_attribute_set = @attribute_set
+      product.product_attribute_set = product_attribute_set
 
       unless product.magento_id
         product.sync_needed = false
@@ -86,28 +90,30 @@ module Gemgento
 
       set_attribute_values(product)
       set_categories(product)
-      product.store = Gemgento::Store.first
+
+      product.store = store
       product.sync_needed = true
       product.save
 
-      set_image(product)
+      create_images(product) if self.include_images
 
       product
     end
 
     def set_attribute_values(product)
       @headers.each do |attribute_code|
-        product_attribute = Gemgento::ProductAttribute.find_by(code: attribute_code) # try to load attribute associated with column header
+        product_attribute = ProductAttribute.find_by(code: attribute_code) # try to load attribute associated with column header
 
-        # apply the attribute value if the attribute exists and is part of the attribute set or default attribute set
+        # apply the attribute value if the attribute exists
         if !product_attribute.nil? && product_attribute.code != 'sku'
           if product_attribute.product_attribute_options.empty?
-            value = @row[@headers.index(attribute_code)]
+            value = @row[@headers.index(attribute_code).to_i].to_s.strip
           else # attribute value may have to be associated with an attribute option id
-            attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: @row[@headers.index(attribute_code)])
+            label = @row[@headers.index(attribute_code).to_i].to_s.strip
+            attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: label)
 
             if attribute_option.nil?
-              attribute_option = create_attribute_option(product_attribute, @row[@headers.index(attribute_code)])
+              attribute_option = create_attribute_option(product_attribute, label)
             end
 
             value = attribute_option.value
@@ -121,7 +127,7 @@ module Gemgento
     end
 
     def create_attribute_option(product_attribute, option_label)
-      attribute_option = Gemgento::ProductAttributeOption.new
+      attribute_option = ProductAttributeOption.new
       attribute_option.product_attribute = product_attribute
       attribute_option.label = option_label
       attribute_option.save
@@ -133,42 +139,44 @@ module Gemgento
     end
 
     def set_default_attribute_values(product)
-      product.set_attribute_value('url_key', product.attribute_value('name').sub(' ', '-').downcase) if product.attribute_value('url_key').blank?
+      product.set_attribute_value('url_key', product.attribute_value('name').strip.sub(' ', '-').downcase) if product.attribute_value('url_key').blank?
       product.set_attribute_value('status', '1') if product.attribute_value('status').blank?
       product.set_attribute_value('visibility', '4') if product.attribute_value('visibility').blank?
     end
 
     def set_categories(product)
-      categories = @row[@headers.index('category')].split('&')
+      categories = @row[@headers.index('category').to_i].strip.split('&')
 
       categories.each do |category_string|
+        category_string.strip!
         subcategories = category_string.split('>')
 
-        parent_id = @root_category.id
+        parent_id = root_category.id
         subcategories.each do |category_url_key|
-          category = Gemgento::Category.find_by(url_key: category_url_key, parent_id: parent_id)
+          category_url_key.strip!
+          category = Category.find_by(url_key: category_url_key, parent_id: parent_id)
 
           unless category.nil?
             product.categories << category unless product.categories.include?(category)
             parent_id = category.id
           else
-            @messages << "ERROR - row #{@row.index} - Unknown category url key '#{category_url_key}' - skipped"
+            self.import_errors << "ERROR - row #{@row.index} - Unknown category url key '#{category_url_key}' - skipped"
           end
         end
       end
     end
 
-    def set_image(product)
+    def create_images(product)
       product.assets.destroy_all
 
       images_found = []
       # find the correct image file name and path
-      @image_labels.each_with_index do |label, position|
-        file_name = @image_prefix + @row[@headers.index('image')] + '_' + label + @image_suffix
+      self.image_labels.each_with_index do |label, position|
+        file_name = self.image_path + @row[@headers.index('image').to].strip + '_' + label + self.image_file_extension
         next unless File.exist?(file_name)
         images_found << file_name
 
-        types = Gemgento::AssetType.find_by(product_attribute_set: @attribute_set)
+        types = Gemgento::AssetType.find_by(product_attribute_set: product_attribute_set)
 
         unless types.is_a? Array
           types = [types]
@@ -178,7 +186,7 @@ module Gemgento
       end
 
       if images_found.empty?
-        @messages << "WARNING: No images found for id:#{product.id}, sku: #{product.sku}"
+        self.import_errors << "WARNING: No images found for id:#{product.id}, sku: #{product.sku}"
       end
     end
 
@@ -202,27 +210,33 @@ module Gemgento
       image
     end
 
-    def create_configurable_product
-      sku = @row[@headers.index('sku')].to_s.strip
+    def create_configurable_product(simple_products)
+      sku = @row[@headers.index('sku').to_i].to_s.strip
 
       # set the default configurable product attributes
       configurable_product = Gemgento::Product.where(sku: sku).first_or_initialize
 
+      if configurable_product.magento_id.nil?
+        count_created += 1
+      else
+        count_created += 1
+      end
+
       configurable_product.magento_type = 'configurable'
       configurable_product.sku = sku
-      configurable_product.product_attribute_set = @attribute_set
+      configurable_product.product_attribute_set = product_attribute_set
       configurable_product.sync_needed = false
-      configurable_product.store = Gemgento::Store.first
+      configurable_product.store = store
       configurable_product.save
 
       # associate all simple products with the new configurable product
-      @associated_simple_products.each do |simple_product|
+      simple_products.each do |simple_product|
         configurable_product.simple_products << simple_product unless configurable_product.simple_products.include?(simple_product)
       end
 
       # add the configurable attributes
-      @configurable_attributes.each do |configurable_attribute|
-        configurable_product.configurable_attributes << configurable_attribute unless configurable_product.configurable_attributes.include?(configurable_attribute)
+      configurable_attributes.each do |configurable_attribute|
+        configurable_product.configurable_attributes << configurable_attribute unless configurable_product.configurable_attributes.include? configurable_attribute
       end
 
       # set the additional configurable product details
@@ -234,13 +248,11 @@ module Gemgento
       configurable_product.save
 
       # add the images
-      set_configurable_product_images(configurable_product)
+      create_configurable_images(configurable_product) if include_images
 
-      # clear the simple products
-      @associated_simple_products.clear
     end
 
-    def set_configurable_product_images(configurable_product)
+    def create_configurable_images(configurable_product)
       configurable_product.assets.destroy_all
       default_product = configurable_product.simple_products.first
 

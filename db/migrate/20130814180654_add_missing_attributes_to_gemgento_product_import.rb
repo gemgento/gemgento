@@ -1,8 +1,8 @@
 class AddMissingAttributesToGemgentoProductImport < ActiveRecord::Migration
   def change
     add_column :gemgento_product_imports, :include_images, :boolean, default: true
-    add_column :gemgento_product_imports, :image_prefix, :string
-    add_column :gemgento_product_imports, :image_suffix, :string
+    add_column :gemgento_product_imports, :image_path, :string
+    add_column :gemgento_product_imports, :image_file_extension, :string
     add_column :gemgento_product_imports, :image_labels, :text
     add_column :gemgento_product_imports, :store_id, :integer
     add_column :gemgento_product_imports, :root_category_id, :integer
