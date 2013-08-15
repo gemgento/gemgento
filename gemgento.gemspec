@@ -21,5 +21,4 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'savon', '=2.2.0'
   gem.add_dependency 'spreadsheet', '=0.8.5'
   gem.add_dependency 'devise', '=3.0.2'
-  gem.add_dependency 'sunspot_rails', '=2.0.0'
 end
