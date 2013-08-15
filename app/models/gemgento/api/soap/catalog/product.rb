@@ -183,6 +183,7 @@ module Gemgento
                 'categories' => {'item' => compose_categories(product)},
                 'url_key' => product.attribute_value('url_key'),
                 'price' => product.attribute_value('price'),
+                'tax_class_id' => '2',
                 'additional_attributes' => {'single_data' => {'item' => compose_attribute_values(product)}}
             }
 

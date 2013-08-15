@@ -10,11 +10,10 @@ module Gemgento
 
     has_attached_file :spreadsheet
 
-    serialize :import_errors, Hash
+    serialize :import_errors, Array
     serialize :image_labels, Array
 
-    attr_accessor :include_images, :image_path, :image_file_extension, :image_labels, :image_labels_raw,
-                  :count_created, :count_updated, :import_errors
+    attr_accessor :image_labels_raw
 
     after_commit :process
 
@@ -22,6 +21,7 @@ module Gemgento
       @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
       @headers = get_headers
       associated_simple_products = []
+      self.import_errors = []
       self.count_created = 0
       self.count_updated = 0
 
@@ -37,6 +37,7 @@ module Gemgento
         end
       end
 
+      ProductImport.skip_callback(:commit, :after, :process)
       self.save
     end
 
@@ -103,7 +104,8 @@ module Gemgento
         product_attribute = ProductAttribute.find_by(code: attribute_code) # try to load attribute associated with column header
 
         # apply the attribute value if the attribute exists
-        if !product_attribute.nil? && product_attribute.code != 'sku'
+        if !product_attribute.nil? && attribute_code != 'sku'
+
           if product_attribute.product_attribute_options.empty?
             value = @row[@headers.index(attribute_code).to_i].to_s.strip
           else # attribute value may have to be associated with an attribute option id
@@ -118,6 +120,8 @@ module Gemgento
           end
 
           product.set_attribute_value(product_attribute.code, value)
+        elsif product_attribute.nil? && attribute_code != 'sku' && attribute_code != 'magento_type' && attribute_code != 'category'
+          self.import_errors << "ERROR - row #{@row.index} - Unknown attribute code, '#{attribute_code}'"
         end
       end
 
@@ -148,8 +152,8 @@ module Gemgento
       categories.each do |category_string|
         category_string.strip!
         subcategories = category_string.split('>')
+        parent_id = self.root_category.id
 
-        parent_id = root_category.id
         subcategories.each do |category_url_key|
           category_url_key.strip!
           category = Category.find_by(url_key: category_url_key, parent_id: parent_id)
@@ -215,9 +219,9 @@ module Gemgento
       configurable_product = Gemgento::Product.where(sku: sku).first_or_initialize
 
       if configurable_product.magento_id.nil?
-        count_created += 1
+        self.count_created += 1
       else
-        count_created += 1
+        self.count_created += 1
       end
 
       configurable_product.magento_type = 'configurable'

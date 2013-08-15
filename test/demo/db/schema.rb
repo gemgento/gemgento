@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130814153548) do
+ActiveRecord::Schema.define(version: 20130815141832) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer "user_address_id"
@@ -362,6 +362,20 @@ ActiveRecord::Schema.define(version: 20130814153548) do
     t.string "spreadsheet_content_type"
     t.integer "spreadsheet_file_size"
     t.datetime "spreadsheet_updated_at"
+    t.boolean "include_images"
+    t.string "image_path"
+    t.string "image_file_extension"
+    t.text "image_labels"
+    t.integer "store_id"
+    t.integer "root_category_id"
+    t.integer "product_attribute_set_id"
+    t.integer "count_created"
+    t.integer "count_updated"
+  end
+
+  create_table "gemgento_product_imports_configurable_attributes", id: false, force: true do |t|
+    t.integer "product_import_id", default: 0, null: false
+    t.integer "product_attribute_id", default: 0, null: false
   end
 
   create_table "gemgento_products", force: true do |t|
