@@ -50,6 +50,11 @@ module Gemgento
       self.image_labels = values.gsub("\r", '').split("\n")
     end
 
+    def image_path=(path)
+      path = "#{path}/" unless path[-1, 1].to_s == '/'
+      self.image_path = path
+    end
+
     private
 
     def get_headers
