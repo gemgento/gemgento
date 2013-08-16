@@ -47,7 +47,7 @@ module Gemgento
 
     def image_labels_raw=(values)
       self.image_labels = []
-      self.image_labels = values.split("\n")
+      self.image_labels = values.gsub("\r", '').split("\n")
     end
 
     private
@@ -171,12 +171,11 @@ module Gemgento
     def create_images(product)
       product.assets.destroy_all
 
-      images_found = []
+      images_found = false
       # find the correct image file name and path
       self.image_labels.each_with_index do |label, position|
-        file_name = self.image_path + @row[@headers.index('image').to].strip + '_' + label + self.image_file_extension
+        file_name = self.image_path + @row[@headers.index('image').to_i].strip + '_' + label + self.image_file_extension
         next unless File.exist?(file_name)
-        images_found << file_name
 
         types = Gemgento::AssetType.find_by(product_attribute_set: product_attribute_set)
 
@@ -185,9 +184,10 @@ module Gemgento
         end
 
         product.assets << create_image(product, file_name, types, position, label)
+        images_found = true
       end
 
-      if images_found.empty?
+      unless images_found
         self.import_errors << "WARNING: No images found for id:#{product.id}, sku: #{product.sku}"
       end
     end
