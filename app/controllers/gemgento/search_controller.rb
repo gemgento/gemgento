@@ -5,15 +5,8 @@ module Gemgento
     def index
       @results = Gemgento::Search.products(params[:query])
 
-      respond_to do |format|
-        Rails.logger.info format.inspect
-        if @results.length == 0
-          format.html { render 'gemgento/search/index' }
-          format.js { render 'gemgento/search/no_results', :layout => false }
-        else
-          format.html { render 'gemgento/search/index' }
-          format.js { render 'gemgento/search/index' }
-        end
+      if request.xhr?
+        render layout: false
       end
     end
 
