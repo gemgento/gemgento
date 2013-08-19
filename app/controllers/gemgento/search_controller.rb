@@ -3,7 +3,7 @@ module Gemgento
     layout 'application'
 
     def index
-
+      @results = Gemgento::Search.products(params[:query])
     end
 
   end

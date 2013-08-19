@@ -21,6 +21,8 @@ Gemgento::Engine.routes.draw do
   post '/checkout/update', to: 'checkout#update'
   get '/order_export', to: 'order_export#index'
 
+  get '/search', to: 'search#index'
+
   devise_for :users, class_name: 'Gemgento::User'
 
   namespace 'users' do
