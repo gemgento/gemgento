@@ -77,6 +77,25 @@ module Gemgento
       end
     end
 
+    def self.by_attributes(filters)
+      products = Gemgento::Product.configurable
+
+      filters.each do |code, value|
+        product_attribute = ProductAttribute.find_by(code: code)
+        next if product_attribute.nil?
+
+        if product_attribute.product_attribute_options.empty?
+          product_attribute_values = product_attribute.product_attribute_values.where(value: value)
+        else
+          product_attribute_values = product_attribute.product_attribute_options.where(label: value).product_attribute_values
+        end
+
+        products = products.joins(:product_attribute_values).where('gemgento_product_attribute_values.value' => product_attribute_values)
+      end
+
+      return products
+    end
+
     private
 
     # Push local product changes to magento
