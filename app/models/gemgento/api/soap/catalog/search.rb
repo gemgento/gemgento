@@ -15,9 +15,8 @@ module Gemgento
                 result = [result] unless result.is_a? Array
                 return result
               end
-
             else
-              return false
+              return []
             end
           end
 

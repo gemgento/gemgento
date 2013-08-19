@@ -11,7 +11,8 @@ module Gemgento
           format.html { render 'gemgento/search/index' }
           format.js { render 'gemgento/search/no_results', :layout => false }
         else
-          render 'gemgento/search/index'
+          format.html { render 'gemgento/search/index' }
+          format.js { render 'gemgento/search/index' }
         end
       end
     end
