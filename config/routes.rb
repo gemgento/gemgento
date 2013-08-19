@@ -7,7 +7,7 @@ Gemgento::Engine.routes.draw do
   match '/shop/:permalink' => 'products#show', via: :get, as: 'shop_permalink'
   get '/shop/product/:url_key', to: 'products#show'
   get '/shop/category/:url_key', to: 'categories#show'
-  get '/shop/search', to: 'searches#index'
+  get '/shop/search', to: 'search#index'
 
   get '/checkout/shopping_bag', to: 'checkout#shopping_bag'
   get '/checkout/login', to: 'checkout#login'

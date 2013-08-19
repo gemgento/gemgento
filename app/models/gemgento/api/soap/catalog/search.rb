@@ -9,8 +9,13 @@ module Gemgento
 
             if response.success?
               result = response.body[:result][:item]
-              result = [result] unless result.is_a? Array
-              return result
+              if result.nil?
+                return []
+              else
+                result = [result] unless result.is_a? Array
+                return result
+              end
+
             else
               return false
             end
