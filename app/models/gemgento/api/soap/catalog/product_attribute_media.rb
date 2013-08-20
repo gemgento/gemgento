@@ -136,7 +136,8 @@ module Gemgento
                 file: compose_file_entity(asset),
                 label: asset.label,
                 position: asset.position,
-                types: {item: compose_types(asset)}
+                types: {item: compose_types(asset)},
+                exclude: '0'
             }
 
             asset_entity
