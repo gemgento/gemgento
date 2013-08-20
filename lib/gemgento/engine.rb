@@ -1,5 +1,4 @@
 require 'rails/engine'
-require 'devise'
 
 module Gemgento
   class Engine < ::Rails::Engine

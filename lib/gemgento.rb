@@ -1,10 +1,10 @@
+require 'devise'
+require 'savon'
+require 'exception_notifier'
+require 'builder'
 require 'gemgento/version'
 require 'gemgento/engine'
-require 'exception_notifier'
 require 'gemgento/controller_helpers/order.rb'
-require 'savon'
-require 'builder'
-require 'devise'
 
 module Gemgento
   class Magento
