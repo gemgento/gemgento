@@ -1,6 +1,5 @@
 module Gemgento
-  class SessionsController < Devise::SessionsController
-    layout 'application'
+  class Users::SessionsController < Devise::SessionsController
 
     ## GET /resource/sign_in
     #def new
