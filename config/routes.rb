@@ -24,8 +24,9 @@ Gemgento::Engine.routes.draw do
   get '/search', to: 'search#index'
 
   devise_for :users, class_name: 'Gemgento::User',
-             :controllers => {:sessions => 'gemgento/sessions', :registrations => 'gemgento/registrations', :passwords => 'gemgento/passwords'},
-             :skip => [:unlocks, :omniauth_callbacks]
+             controllers: {:sessions => 'gemgento/sessions', :registrations => 'gemgento/registrations', :passwords => 'gemgento/passwords'},
+             skip: [:unlocks, :omniauth_callbacks],
+             module: :devise
 
   namespace 'users' do
     resources :orders, :addresses
