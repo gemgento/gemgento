@@ -6,7 +6,7 @@ require 'gemgento/version'
 Gem::Specification.new do |gem|
   gem.name = "gemgento"
   gem.version = Gemgento::VERSION
-  gem.authors = ["Philip Vasilevski"]
+  gem.authors = ["Philip Vasilevski", "Kevin Pheasey"]
   gem.email = ["phil@mauinewyork.com"]
   gem.description = %q{rails based magento bridge for ecommerce}
   gem.summary = %q{gemgento rails magento integration ecommerce platform}

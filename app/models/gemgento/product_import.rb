@@ -146,9 +146,13 @@ module Gemgento
     end
 
     def set_default_attribute_values(product)
-      product.set_attribute_value('url_key', product.attribute_value('name').strip.sub(' ', '-').downcase) if product.attribute_value('url_key').blank?
       product.set_attribute_value('status', '1') if product.attribute_value('status').blank?
       product.set_attribute_value('visibility', '4') if product.attribute_value('visibility').blank?
+
+      if product.attribute_value('url_key').blank?
+        url_key = product.attribute_value('name').strip.gsub(' ', '-').gsub(/[^\w\s]/, "#").downcase
+        product.set_attribute_value('url_key', url_key)
+      end
     end
 
     def set_categories(product)
