@@ -63,7 +63,7 @@ module Gemgento
             response = Gemgento::Magento.create_call(:customer_customer_update, message)
 
             if response.success?
-              unless customer.password.include? ':'
+              unless customer.magento_password.include? ':'
                 # pull customer information to get the password
                 sync_magento_to_local(info(customer.magento_id))
               end
