@@ -90,9 +90,12 @@ module Gemgento
         end
       end
 
-      current_order.get_totals.each do |total|
+      @totals.each do |total|
         if total[:title] == 'Grand Total'
-          @total = total[:amount]
+          @total = total[:amount].to_f
+          next
+        elsif total[:title] == 'Tax'
+          @tax = total[:amount].to_f
         end
       end
     end
