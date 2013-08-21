@@ -51,6 +51,10 @@ module Gemgento
       end
     end
 
+    def is_subscriber?
+      return !Subscriber.find_by(email: self.email).nil?
+    end
+
     private
 
     # Push local users changes to magento
