@@ -32,7 +32,7 @@ Gemgento::Engine.routes.draw do
     resources :orders, :addresses
   end
 
-  resources :products, :categories, :orders, :checkout, :subscribers
+  resources :products, :categories, :orders, :checkout, :subscribers, :users
 
   patch '/orders', to: 'orders#update'
 
