@@ -16,8 +16,12 @@ module Gemgento
             Gemgento::Asset.skip_callback(:destroy, :before, :delete_magento)
             product.assets.destroy_all
 
-            list(product.magento_id).each do |product_attribute_media|
-              sync_magento_to_local(product_attribute_media, product)
+            media_list = list(product.magento_id)
+
+            unless media_list.nil?
+              list(product.magento_id).each do |product_attribute_media|
+                sync_magento_to_local(product_attribute_media, product)
+              end
             end
           end
 
