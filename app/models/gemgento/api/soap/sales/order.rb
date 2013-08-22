@@ -141,14 +141,12 @@ module Gemgento
               source[:items][:item] = [source[:items][:item]] if source[:items].size == 3
 
               source[:items][:item].each do |item|
-                puts item.inspect
                 sync_magento_order_item_to_local(item, order)
               end
             end
 
             if !source[:status_history][:item].nil?
               source[:status_history][:item].each do |status|
-                puts status.inspect
                 sync_magento_order_status_to_local(status, order)
               end
             end
