@@ -17,6 +17,8 @@ module Gemgento
     has_many :order_items
     has_many :order_statuses
 
+    attr_accessor :tax, :total
+
     def self.index
       if Order.all.size == 0
         API::SOAP::Sales::Order.fetch_all

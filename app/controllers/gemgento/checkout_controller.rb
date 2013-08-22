@@ -50,11 +50,13 @@ module Gemgento
     end
 
     def shipping
+      set_totals
       session[:shipping_methods] = current_order.get_shipping_methods
       @shipping_methods = session[:shipping_methods]
     end
 
     def payment
+      set_totals
       #@payment_methods = current_order.get_payment_methods
 
       @card_types = {
@@ -78,7 +80,7 @@ module Gemgento
     end
 
     def confirm
-      @totals = current_order.get_totals
+      set_totals
       @shipping_address = current_order.shipping_address
       @billing_address = current_order.billing_address
       @payment = current_order.order_payment
@@ -87,15 +89,6 @@ module Gemgento
         if shipping_method[:code] == current_order.shipping_method
           @shipping_method = shipping_method
           break
-        end
-      end
-
-      @totals.each do |total|
-        if total[:title] == 'Grand Total'
-          @total = total[:amount].to_f
-          next
-        elsif total[:title] == 'Tax'
-          @tax = total[:amount].to_f
         end
       end
     end
@@ -253,6 +246,20 @@ module Gemgento
 
           format.html { redirect_to '/gemgento/checkout/address' }
           format.js { render '/gemgento/checkout/addresses/error' }
+        end
+      end
+    end
+
+    def set_totals
+      totals = current_order.get_totals
+
+      unless totals.nil?
+        totals.each do |total|
+          if total[:title] == 'Grand Total'
+            @total = total[:amount].to_f
+          elsif total[:title] == 'Tax'
+            @tax = total[:amount].to_f
+          end
         end
       end
     end
