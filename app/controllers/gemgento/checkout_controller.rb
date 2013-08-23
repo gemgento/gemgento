@@ -84,6 +84,8 @@ module Gemgento
       @shipping_address = current_order.shipping_address
       @billing_address = current_order.billing_address
       @payment = current_order.order_payment
+      @cc_types = Gemgento::OrderPayment.cc_types
+      Rails.logger.info @cc_types
 
       session[:shipping_methods].each do |shipping_method|
         if shipping_method[:code] == current_order.shipping_method
