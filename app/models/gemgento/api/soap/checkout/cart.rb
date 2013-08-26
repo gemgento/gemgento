@@ -32,8 +32,10 @@ module Gemgento
           def self.info(cart)
             response = Gemgento::Magento.create_call(:shopping_cart_info, {quote_id: cart.magento_quote_id})
 
-            if response.result?
-              response.body[:result]
+            if response.success?
+              return response.body[:result]
+            else
+              return false
             end
           end
 

@@ -62,7 +62,7 @@ module Gemgento
 
           # Save Magento order to local
           def self.sync_magento_to_local(source)
-            order = Gemgento::Order.where(increment_id: source[:increment_id]).first_or_initialize
+            order = Gemgento::Order.where(increment_id: source[:increment_id].to_i).first_or_initialize
             order.order_id = source[:order_id]
             order.is_active = source[:is_active]
             order.user = User.where(magento_id: source[:customer_id]).first
@@ -153,7 +153,7 @@ module Gemgento
           end
 
           def self.sync_magento_address_to_local(source, order, address = nil)
-            address = Gemgento::Address.where(order_address_id: source[:address_id]).first_or_initialize if address.nil?
+            address = Gemgento::Address.where(order_address_id: source[:address_id].to_i).first_or_initialize if address.nil?
             address.order_address_id = source[:address_id]
             address.order = order
             address.increment_id = source[:increment_id]
@@ -180,7 +180,7 @@ module Gemgento
           end
 
           def self.sync_magento_payment_to_local(source, order)
-            payment = Gemgento::OrderPayment.where(magento_id: source[:payment_id]).first_or_initialize
+            payment = Gemgento::OrderPayment.where(magento_id: source[:payment_id].to_i).first_or_initialize
             payment.order = order
             payment.magento_id = source[:payment_id]
             payment.increment_id = source[:increment_id]
@@ -218,7 +218,7 @@ module Gemgento
           end
 
           def self.sync_magento_order_item_to_local(source, order)
-            order_item = Gemgento::OrderItem.where(magento_id: source[:item_id]).first_or_initialize
+            order_item = Gemgento::OrderItem.where(magento_id: source[:item_id].to_i).first_or_initialize
             order_item.order = order
             order_item.magento_id = source[:item_id]
             order_item.quote_item_id = source[:quote_item_id]
