@@ -261,6 +261,8 @@ module Gemgento
             @total = total[:amount].to_f
           elsif total[:title] == 'Tax'
             @tax = total[:amount].to_f
+          elsif total[:title].to_s.include? 'Shipping'
+            @shipping = total[:amount].to_f
           end
         end
       end
