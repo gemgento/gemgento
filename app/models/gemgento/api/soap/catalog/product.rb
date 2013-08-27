@@ -114,7 +114,7 @@ module Gemgento
             product.sku = subject[:sku]
             product.sync_needed = false
             product.product_attribute_set = Gemgento::ProductAttributeSet.where(magento_id: subject[:set]).first
-            product.store = Gemgento::Store.first
+            product.store = Gemgento::Store.current
             product.save
 
             product.set_attribute_value('name', subject[:name])

@@ -30,7 +30,8 @@ module Gemgento
 
             message = {
                 quote_id: cart.magento_quote_id,
-                customer: customer
+                customer: customer,
+                store_id: Gemgento::Store.current.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_customer_set, message)
 
@@ -40,7 +41,8 @@ module Gemgento
           def self.address(cart)
             message = {
                 quote_id: cart.magento_quote_id,
-                customer: {item: compose_address_data([cart.shipping_address, cart.billing_address])}
+                customer: {item: compose_address_data([cart.shipping_address, cart.billing_address])},
+                store_id: Gemgento::Store.current.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_customer_addresses, message)
 

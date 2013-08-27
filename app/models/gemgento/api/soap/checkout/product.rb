@@ -7,7 +7,8 @@ module Gemgento
           def self.add(cart, order_items)
             message = {
                 quote_id: cart.magento_quote_id,
-                products: {item: compose_products_data(order_items)}
+                products: {item: compose_products_data(order_items)},
+                store_id: Gemgento::Store.current.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_product_add, message)
 
@@ -19,7 +20,8 @@ module Gemgento
           def self.update(cart, products)
             message = {
                 quote_id: cart.magento_quote_id,
-                products: {item: compose_products_data(products)}
+                products: {item: compose_products_data(products)},
+                store_id: Gemgento::Store.current.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_product_update, message)
 
@@ -31,7 +33,8 @@ module Gemgento
           def self.remove(cart, products)
             message = {
                 quote_id: cart.magento_quote_id,
-                products: {item: compose_products_data(products)}
+                products: {item: compose_products_data(products)},
+                store_id: Gemgento::Store.current.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_product_remove, message)
 
@@ -41,7 +44,11 @@ module Gemgento
           end
 
           def self.list(cart)
-            response = Gemgento::Magento.create_call(:shopping_cart_product_list, {quote_id: cart.magento_quote_id})
+            message = {
+                quote_id: cart.magento_quote_id,
+                store_id: Gemgento::Store.current.magento_id
+            }
+            response = Gemgento::Magento.create_call(:shopping_cart_product_list, message)
 
             if response.success?
               if response.body[:result][:item].nil?

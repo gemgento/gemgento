@@ -5,7 +5,10 @@ module Gemgento
         class Cart
 
           def self.create(cart)
-            response = Gemgento::Magento.create_call(:shopping_cart_create)
+            message = {
+                store_id: Gemgento::Store.current.magento_id
+            }
+            response = Gemgento::Magento.create_call(:shopping_cart_create, message)
 
             if response.success?
               cart.magento_quote_id = response.body[:quote_id]
@@ -30,7 +33,11 @@ module Gemgento
           end
 
           def self.info(cart)
-            response = Gemgento::Magento.create_call(:shopping_cart_info, {quote_id: cart.magento_quote_id})
+            message = {
+                quote_id: cart.magento_quote_id,
+                store_id: Gemgento::Store.current.magento_id
+            }
+            response = Gemgento::Magento.create_call(:shopping_cart_info, message)
 
             if response.success?
               return response.body[:result]
@@ -40,7 +47,11 @@ module Gemgento
           end
 
           def self.totals(cart)
-            response = Gemgento::Magento.create_call(:shopping_cart_totals, {quote_id: cart.magento_quote_id})
+            message = {
+                quote_id: cart.magento_quote_id,
+                store_id: Gemgento::Store.current.magento_id
+            }
+            response = Gemgento::Magento.create_call(:shopping_cart_totals, message)
 
             if response.success?
               response.body[:result][:item]
@@ -48,7 +59,11 @@ module Gemgento
           end
 
           def self.license(cart)
-            response = Gemgento::Magento.create_call(:shopping_cart_license, {quote_id: cart.magento_quote_id})
+            message = {
+                quote_id: cart.magento_quote_id,
+                store_id: Gemgento::Store.current.magento_id
+            }
+            response = Gemgento::Magento.create_call(:shopping_cart_license, message)
 
             if response.success?
               response.body[:result][:item]

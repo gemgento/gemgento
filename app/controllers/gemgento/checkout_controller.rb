@@ -149,7 +149,7 @@ module Gemgento
       @user.fname = params[:fname]
       @user.lname = params[:lname]
       @user.email = params[:email]
-      @user.store = Gemgento::Store.first
+      @user.store = Gemgento::Store.current
       @user.user_group = Gemgento::UserGroup.where(code: 'General').first
       @user.magento_password = params[:password]
       @user.password = params[:password]

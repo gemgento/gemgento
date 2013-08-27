@@ -120,7 +120,7 @@ module Gemgento
             store = Gemgento::Store.where(magento_id: source[:store_id]).first
 
             if store.nil?
-              store = Gemgento::Store.first
+              store = Gemgento::Store.current
             end
 
             order.store = store

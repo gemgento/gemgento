@@ -33,7 +33,7 @@ module Gemgento
       if order_id.nil?
         cart = Order.new
         cart.state = 'cart'
-        cart.store = Store.first
+        cart.store = Store.current
       else
         cart = Order.find(order_id)
       end
