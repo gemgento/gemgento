@@ -50,7 +50,17 @@ module Gemgento
       if product_attribute.product_attribute_options.empty?
         return product_attribute_value.value
       else
-        return product_attribute.product_attribute_options.find_by(value: product_attribute_value.value).label
+        value = product_attribute.product_attribute_options.find_by(value: product_attribute_value.value).label
+
+        unless product_attribute.frontend_input == 'boolean'
+          return value
+        else
+          if value == 'Yes' || value == '1'
+            return true
+          else
+            return false
+          end
+        end
       end
     end
 
@@ -94,6 +104,16 @@ module Gemgento
       end
 
       return products
+    end
+
+    def is_in_stock?
+      if self.inventory.nil?
+        return true;
+      elsif self.inventory.is_in_stock
+        return true;
+      else
+        return false
+      end
     end
 
     private
