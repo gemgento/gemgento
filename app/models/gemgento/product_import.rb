@@ -147,7 +147,7 @@ module Gemgento
 
     def set_default_attribute_values(product)
       product.set_attribute_value('status', '1') if product.attribute_value('status').blank?
-      product.set_attribute_value('visibility', '4') if product.attribute_value('visibility').blank?
+      product.set_attribute_value('visibility', self.simple_product_visibility.to_s) if product.attribute_value('visibility').blank?
 
       if product.attribute_value('url_key').blank?
         url_key = product.attribute_value('name').strip.gsub(' ', '-').gsub(/[^\w\s]/, '').downcase
@@ -253,6 +253,10 @@ module Gemgento
       # set the additional configurable product details
       set_attribute_values(configurable_product)
       set_categories(configurable_product)
+
+      if configurable_product.attribute_value('visibility').blank?
+        configurable_product.set_attribute_value('visibility', self.configurable_product_visibility.to_s)
+      end
 
       # push to magento
       configurable_product.sync_needed = true
