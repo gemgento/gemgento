@@ -106,7 +106,7 @@ module Gemgento
       return products
     end
 
-    def is_in_stock?
+    def in_stock?
       if self.inventory.nil?
         return true;
       elsif self.inventory.is_in_stock
