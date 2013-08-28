@@ -36,11 +36,13 @@ module Gemgento
       if user_signed_in?
         if current_order.shipping_address.nil?
           current_order.shipping_address = current_user.addresses.where(address_type: 'shipping', is_default: true).first
+          current_order.shipping_address = current_user.addresses.where(address_type: 'shipping').first if current_order.shipping_address.nil?
           current_order.shipping_address = Address.new if current_order.shipping_address.nil?
         end
 
         if current_order.billing_address.nil?
           current_order.billing_address = current_user.addresses.where(address_type: 'billing', is_default: true).first
+          current_order.billing_address = current_user.addresses.where(address_type: 'billing').first if current_order.billing_address.nil?
           current_order.billing_address = Address.new if current_order.billing_address.nil?
         end
       else
