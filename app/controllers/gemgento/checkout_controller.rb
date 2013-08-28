@@ -317,6 +317,8 @@ module Gemgento
     end
 
     def process_order
+      current_order.enforce_cart_data
+
       respond_to do |format|
         if current_order.process
           create_new_cart

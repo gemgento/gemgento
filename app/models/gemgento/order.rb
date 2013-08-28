@@ -151,22 +151,34 @@ module Gemgento
       end
     end
 
+    def enforce_cart_data
+      magento_cart = API::SOAP::Checkout::Cart.info(self)
+      self.verify_address(self.shipping_address, magento_cart[:shipping_address])
+      self.verify_address(self.billing_address, magento_cart[:billing_address])
+    end
+
     private
 
     def valid_stock?
-      #products = []
-      #
-      #self.order_items.each do |item|
-      #  products << item.product
-      #end
-      #
-      #API::SOAP::CatalogInventory::StockItem.fetch_all(products)
-
       self.order_items.each do |item|
         return false if item.product.in_stock?
       end
 
       return true
+    end
+
+    def verify_address(local_address, remote_address)
+      if (
+      local_address.fname != remote_address[:firstname] ||
+          local_address.lname != remote_address[:lastname] ||
+          local_address.street != remote_address[:street] ||
+          local_address.city != remote_address[:city]
+      local_address.region != Region.find_by(magento_id: remote_address[:region_id]) ||
+          local_address.country != Country.find_by(magento_id: remote_address[:country_id]) ||
+          local_address.postcode != remote_address[:postcode]
+      )
+        self.push_addresses
+      end
     end
   end
 end
