@@ -144,7 +144,29 @@ module Gemgento
     end
 
     def process
-      API::SOAP::Checkout::Cart.order(self)
+      if !self.valid_stock?
+        return false
+      else
+        API::SOAP::Checkout::Cart.order(self)
+      end
+    end
+
+    private
+
+    def valid_stock?
+      #products = []
+      #
+      #self.order_items.each do |item|
+      #  products << item.product
+      #end
+      #
+      #API::SOAP::CatalogInventory::StockItem.fetch_all(products)
+
+      self.order_items.each do |item|
+        return false if item.product.in_stock?
+      end
+
+      return true
     end
   end
 end
