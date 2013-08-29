@@ -57,7 +57,6 @@ module Gemgento
             addresses.each do |address|
               address_data << {
                   mode: address.address_type,
-                  'address_id' => address.user_address_id,
                   firstname: address.fname,
                   lastname: address.lname,
                   company: address.company,
