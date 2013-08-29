@@ -98,7 +98,7 @@ module Gemgento
             user = Gemgento::User.where(magento_id: source[:customer_id]).first_or_initialize
             user.magento_id = source[:customer_id]
             user.increment_id = source[:increment_id]
-            user.store = Store.where(magento_id: source[:store_id]).first
+            user.store = Store.find_by(magento_id: source[:store_id])
             user.created_in = source[:created_in]
             user.email = source[:email]
             user.fname = source[:firstname]
