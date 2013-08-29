@@ -23,11 +23,11 @@ module Gemgento
 
             if response.success?
               # enforce array
-              unless response.body[:store_view].is_a? Array
-                response.body[:store_view] = [response.body[:store_view]]
+              unless response.body_overflow[:store_view].is_a? Array
+                response.body_overflow[:store_view] = [response.body_overflow[:store_view]]
               end
 
-              response.body[:store_view]
+              response.body_overflow[:store_view]
             end
           end
 

@@ -24,11 +24,11 @@ module Gemgento
             response = Gemgento::Magento.create_call(:sales_order_list)
 
             if response.success?
-              unless response.body[:result][:item].is_a? Array
-                response.body[:result][:item] = [response.body[:result][:item]]
+              unless response.body_overflow[:result][:item].is_a? Array
+                response.body_overflow[:result][:item] = [response.body_overflow[:result][:item]]
               end
 
-              response.body[:result][:item]
+              response.body_overflow[:result][:item]
             end
           end
 

@@ -48,13 +48,26 @@ module Gemgento
       Rails.logger.debug "Making Call - #{function}"
 
       magento_response = MagentoResponse.new
-      magento_response.request = {function: function, message: function == :catalog_product_attribute_media_create ? '' : message}
+
+      # don't save some messages because they are just too big!
+      if [:catalog_product_attribute_media_create].include? function
+        magento_response.request = {function: function, message: ''}
+      else
+        magento_response.request = {function: function, message: message}
+      end
 
       response = @client.call(function, message: message)
 
       if response.success?
         magento_response.success = true
-        magento_response.body = response.body[:"#{function}_response"]
+
+        if [:customer_customer_list, :sales_order_list].include? function
+          magento_response.body = response.body[:"body_too_big"]
+          magento_response.body_overflow = response.body[:"#{function}_response"]
+        else
+          magento_response.body = response.body[:"#{function}_response"]
+        end
+
         Rails.logger.debug '^^^ Success ^^^'
       else
         magento_response.success = false
