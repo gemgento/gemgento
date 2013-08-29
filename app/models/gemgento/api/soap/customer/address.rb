@@ -5,7 +5,7 @@ module Gemgento
         class Address
 
           def self.fetch_all
-            Gemgento::User.where(:all).each do |user|
+            Gemgento::User.all.each do |user|
               list(user.magento_id).each do |address|
                 sync_magento_to_local(address, user)
               end
