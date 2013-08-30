@@ -137,15 +137,16 @@ module Gemgento
             end
 
             order.order_items.destroy_all
-            if !source[:items][:item].nil?
-              source[:items][:item] = [source[:items][:item]] if source[:items].size == 3
-
+            unless source[:items][:item].nil?
+              source[:items][:item] = [source[:items][:item]] unless source[:items][:item].is_a? Array
               source[:items][:item].each do |item|
                 sync_magento_order_item_to_local(item, order)
               end
             end
 
             if !source[:status_history][:item].nil?
+              source[:status_history][:item] = [source[:status_history][:item]] unless source[:status_history][:item].is_a? Array
+
               source[:status_history][:item].each do |status|
                 sync_magento_order_status_to_local(status, order)
               end
@@ -205,11 +206,11 @@ module Gemgento
           end
 
           def self.sync_magento_order_status_to_local(source, order)
-            order_status = Gemgento::OrderStatus.where(order: order, status: source[:status], comment: source[:comment]).first_or_initialize
+            order_status = Gemgento::OrderStatus.where(order_id: order.id, status: source[:status], comment: source[:comment]).first_or_initialize
             order_status.order = order
             order_status.status = source[:status]
             order_status.is_active = source[:is_active]
-            order_status.is_customer_notified = source[:is_customer_notified]
+            order_status.is_customer_notified = source[:is_customer_notified].to_i
             order_status.comment = source[:comment]
             order_status.created_at = source[:created_at]
             order_status.save
