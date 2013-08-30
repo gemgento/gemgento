@@ -98,7 +98,13 @@ module Gemgento
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source, product)
             asset = Gemgento::Asset.where(product_id: product.id, url: source[:url]).first_or_initialize
-            asset.attachment = open(source[:url])
+
+            begin
+              asset.attachment = open(source[:url])
+            rescue
+              asset.attachment = nil
+            end
+
             asset.url = source[:url]
             asset.position = source[:position]
             asset.label = Gemgento::Magento.enforce_savon_string(source[:label])
