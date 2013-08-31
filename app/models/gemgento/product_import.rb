@@ -150,13 +150,13 @@ module Gemgento
       product.set_attribute_value('visibility', self.simple_product_visibility.to_s) if product.attribute_value('visibility').blank?
 
       if product.attribute_value('url_key').blank?
-        url_key = product.attribute_value('name').strip.gsub(' ', '-').gsub(/[^\w\s]/, '').downcase
+        url_key = product.attribute_value('name').to_s.strip.gsub(' ', '-').gsub(/[^\w\s]/, '').downcase
         product.set_attribute_value('url_key', url_key)
       end
     end
 
     def set_categories(product)
-      categories = @row[@headers.index('category').to_i].strip.split('&')
+      categories = @row[@headers.index('category').to_i].to_s.strip.split('&')
 
       categories.each do |category_string|
         category_string.strip!
@@ -183,7 +183,8 @@ module Gemgento
       images_found = false
       # find the correct image file name and path
       self.image_labels.each_with_index do |label, position|
-        file_name = self.image_path + @row[@headers.index('image').to_i].strip + '_' + label + self.image_file_extension
+        file_name = self.image_path + @row[@headers.index('image').to_i].to_s.strip + '_' + label + self.image_file_extension
+        Rails.logger.info file_name
         next unless File.exist?(file_name)
 
         types = Gemgento::AssetType.find_by(product_attribute_set: product_attribute_set)
