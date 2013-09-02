@@ -105,6 +105,24 @@ module Gemgento
             end
           end
 
+          def self.visibility
+            {
+                'Not Visible Individually' => 1,
+                'Catalog' => 2,
+                'Search' => 3,
+                'Catalog, Search' => 4
+            }
+          end
+
+          def self.status
+            {
+                1 => true,
+                2 => false,
+                'Enabled' => true,
+                'Disabled' => false
+            }
+          end
+
           private
 
           def self.sync_magento_to_local(subject)
@@ -121,10 +139,8 @@ module Gemgento
             product.set_attribute_value('description', subject[:description])
             product.set_attribute_value('short_description', subject[:short_description])
             product.set_attribute_value('weight', subject[:weight])
-            product.set_attribute_value('status', subject[:status])
             product.set_attribute_value('url_key', subject[:url_key])
             product.set_attribute_value('url_path', subject[:url_path])
-            product.set_attribute_value('visibility', subject[:visibility])
             product.set_attribute_value('has_options', subject[:has_options])
             product.set_attribute_value('gift_message_available', subject[:gift_message_available])
             product.set_attribute_value('price', subject[:price])
@@ -139,6 +155,18 @@ module Gemgento
             product.set_attribute_value('custom_layout_update', subject[:custom_layout_update])
             product.set_attribute_value('options_container', subject[:options_container])
             product.set_attribute_value('enable_googlecheckout', subject[:enable_googlecheckout])
+
+            if (subject[:visibility].is_a? String) && (Gemgento::API::SOAP::Catalog::Product.visibility.has_key? subject[:visibility])
+              product.visibility = Gemgento::API::SOAP::Catalog::Product.visibility[subject[:visibility]]
+            else
+              product.visibility = subject[:visibility]
+            end
+
+            if (subject[:status].is_a? String) && (Gemgento::API::SOAP::Catalog::Product.status.has_key? subject[:status])
+              product.status = Gemgento::API::SOAP::Catalog::Product.status[subject[:status]]
+            else
+              product.status = subject[:status] == 1 ? 1 : 0
+            end
 
             set_categories(subject[:categories][:item], product) if subject[:categories][:item]
             set_attribute_values_from_magento(subject[:additional_attributes][:item], product) if (subject[:additional_attributes] and subject[:additional_attributes][:item])
@@ -179,12 +207,13 @@ module Gemgento
                 'description' => product.attribute_value('description'),
                 'short_description' => product.attribute_value('short_description'),
                 'weight' => product.attribute_value('weight'),
-                'status' => product.attribute_value('status'),
+                'status' => product.status == 1 ? 1 : 2,
                 'categories' => {'item' => compose_categories(product)},
                 'url_key' => product.attribute_value('url_key'),
                 'price' => product.attribute_value('price'),
                 'tax_class_id' => '2',
-                'additional_attributes' => {'single_data' => {'item' => compose_attribute_values(product)}}
+                'additional_attributes' => {'single_data' => {'item' => compose_attribute_values(product)}},
+                'visibility' => product.visibility
             }
 
             unless product.simple_products.empty?

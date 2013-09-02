@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130830171634) do
+ActiveRecord::Schema.define(version: 20130902135324) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer "user_address_id"
@@ -390,6 +390,8 @@ ActiveRecord::Schema.define(version: 20130830171634) do
     t.string "store_id"
     t.boolean "sync_needed", default: true, null: false
     t.integer "parent_id"
+    t.boolean "status", default: true
+    t.integer "visibility", default: 4
   end
 
   create_table "gemgento_regions", force: true do |t|
