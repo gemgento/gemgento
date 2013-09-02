@@ -15,7 +15,12 @@ module Gemgento
     has_and_belongs_to_many :categories, -> { distinct }, join_table: 'gemgento_categories_products'
     has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
 
-    scope :configurable, where(magento_type: 'configurable')
+    scope :configurable, -> { where(magento_type: 'configurable') }
+    scope :simple, -> { where(magento_type: 'simple') }
+    scope :enabled, -> { where(status: true) }
+    scope :disabled, -> { where(status: false) }
+    scope :catalog_visible, -> { where(visibility: [2, 4]) }
+    scope :search_visible, -> { where(visibility: [3, 4]) }
 
     after_save :sync_local_to_magento
 

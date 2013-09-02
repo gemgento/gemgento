@@ -207,7 +207,7 @@ module Gemgento
                 'description' => product.attribute_value('description'),
                 'short_description' => product.attribute_value('short_description'),
                 'weight' => product.attribute_value('weight'),
-                'status' => product.status == 1 ? 1 : 2,
+                'status' => product.status ? 1 : 2,
                 'categories' => {'item' => compose_categories(product)},
                 'url_key' => product.attribute_value('url_key'),
                 'price' => product.attribute_value('price'),

@@ -86,13 +86,14 @@ module Gemgento
 
       product.sku = sku
       product.product_attribute_set = product_attribute_set
+      product.status = @row[@headers.index('status').to_i].to_i
 
       unless product.magento_id
         product.sync_needed = false
         product.save
       end
 
-      set_attribute_values(product)
+      product = set_attribute_values(product)
       set_categories(product)
 
       product.store = store
@@ -109,7 +110,7 @@ module Gemgento
         product_attribute = ProductAttribute.find_by(code: attribute_code) # try to load attribute associated with column header
 
         # apply the attribute value if the attribute exists
-        if !product_attribute.nil? && attribute_code != 'sku'
+        if !product_attribute.nil? && attribute_code != 'sku' && attribute_code != 'status'
 
           if product_attribute.product_attribute_options.empty?
             value = @row[@headers.index(attribute_code).to_i].to_s.strip
@@ -130,7 +131,9 @@ module Gemgento
         end
       end
 
-      set_default_attribute_values(product)
+      product = set_default_attribute_values(product)
+
+      return product
     end
 
     def create_attribute_option(product_attribute, option_label)
@@ -147,12 +150,14 @@ module Gemgento
 
     def set_default_attribute_values(product)
       product.status = 1 if product.status.nil?
-      product.visibility = self.simple_product_visibility.to_i if product.visibility = nil?
+      product.visibility = self.simple_product_visibility.to_i
 
       if product.attribute_value('url_key').blank?
         url_key = product.attribute_value('name').to_s.strip.gsub(' ', '-').gsub(/[^\w\s]/, '').downcase
         product.set_attribute_value('url_key', url_key)
       end
+
+      return product
     end
 
     def set_categories(product)
@@ -236,9 +241,11 @@ module Gemgento
 
       configurable_product.magento_type = 'configurable'
       configurable_product.sku = sku
+
       configurable_product.product_attribute_set = product_attribute_set
-      configurable_product.sync_needed = false
+      configurable_product.status = @row[@headers.index('status').to_i].to_i
       configurable_product.store = store
+      configurable_product.sync_needed = false
       configurable_product.save
 
       # associate all simple products with the new configurable product
@@ -255,9 +262,7 @@ module Gemgento
       set_attribute_values(configurable_product)
       set_categories(configurable_product)
 
-      if configurable_product.visibility.nil?
-        configurable_product.visibility = self.configurable_product_visibility.to_i
-      end
+      configurable_product.visibility = self.configurable_product_visibility.to_i
 
       # push to magento
       configurable_product.sync_needed = true
