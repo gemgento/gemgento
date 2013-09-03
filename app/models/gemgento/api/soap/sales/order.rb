@@ -4,9 +4,12 @@ module Gemgento
       module Sales
         class Order
 
-          def self.fetch_all
-            list.each do |order|
-              fetch(order[:increment_id])
+          def self.fetch_all(last_updated = nil)
+            tp = Gemgento::ThreadPool.new(50)
+
+            list(last_updated).each do |order|
+              tp.process { fetch(order[:increment_id]) }
+
             end
           end
 
@@ -20,8 +23,24 @@ module Gemgento
             return false
           end
 
-          def self.list
-            response = Gemgento::Magento.create_call(:sales_order_list)
+          def self.list(last_updated = nil)
+            if last_updated.nil?
+              message = {}
+            else
+              message = {
+                  'filters' => {
+                      'complex_filter' => {item: [
+                          key: 'updated_at',
+                          value: {
+                              key: 'gt',
+                              value: last_updated
+                          }
+                      ]}
+                  }
+              }
+            end
+
+            response = Gemgento::Magento.create_call(:sales_order_list, message)
 
             if response.success?
               unless response.body_overflow[:result][:item].is_a? Array

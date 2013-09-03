@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130903185745) do
+ActiveRecord::Schema.define(version: 20130903202409) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer "user_address_id"
@@ -444,6 +444,7 @@ ActiveRecord::Schema.define(version: 20130903185745) do
     t.string "subject"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean "is_complete", default: false
   end
 
   create_table "gemgento_user_groups", force: true do |t|

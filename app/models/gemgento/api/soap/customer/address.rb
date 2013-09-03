@@ -5,10 +5,16 @@ module Gemgento
         class Address
 
           def self.fetch_all
+            tp = Gemgento::ThreadPool.new(50)
+
             Gemgento::User.all.each do |user|
-              list(user.magento_id).each do |address|
-                sync_magento_to_local(address, user)
-              end
+              tp.process { fetch(user.magento_id) }
+            end
+          end
+
+          def self.fetch(customer_id)
+            list(customer_id).each do |address|
+              sync_magento_to_local(address, user)
             end
           end
 

@@ -5,10 +5,11 @@ module Gemgento
         class ProductAttribute
 
           def self.fetch_all
-            #TODO: Use info() instead of list() to retrieve all attribute information
+            tp = Gemgento::ThreadPool.new(50)
+
             Gemgento::ProductAttributeSet.all.each do |product_attribute_set|
               list(product_attribute_set).each do |product_attribute|
-                sync_magento_to_local(info(product_attribute[:attribute_id]), product_attribute_set)
+                tp.process { sync_magento_to_local(info(product_attribute[:attribute_id]), product_attribute_set) }
               end
             end
           end
@@ -112,7 +113,7 @@ module Gemgento
             product_attribute.sync_needed = false
             product_attribute.save
 
-            fetch_all_options(product_attribute)
+            fetch_all_options(product_attribute) if product_attribute.frontend_input == 'select'
           end
 
         end

@@ -113,6 +113,8 @@ module Gemgento
             user.magento_password = source[:password_hash]
             user.sync_needed = false
             user.save(validate: false)
+
+            Gemgento::API::SOAP::Customer::Address.fetch(user.magento_id)
           end
 
           def self.compose_customer_data(customer)
