@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130902135324) do
+ActiveRecord::Schema.define(version: 20130903185745) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer "user_address_id"
@@ -439,6 +439,12 @@ ActiveRecord::Schema.define(version: 20130902135324) do
   end
 
   add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true
+
+  create_table "gemgento_syncs", force: true do |t|
+    t.string "subject"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "gemgento_user_groups", force: true do |t|
     t.integer "magento_id"

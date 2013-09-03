@@ -5,34 +5,55 @@ module Gemgento
         class Product
 
           # Synchronize local database with Magento database
-          def self.fetch_all
-            list.each do |store_view|
+          def self.fetch_all(last_updated = nil)
+            list(last_updated).each do |store_view|
 
-              # enforce array
-              unless store_view[:item].is_a? Array
-                store_view[:item] = [store_view][:item]
-              end
+              unless store_view == empty_product_list
+                # enforce array
+                unless store_view[:item].is_a? Array
+                  store_view[:item] = [store_view][:item]
+                end
 
-              store_view[:item].each do |product|
-                attribute_set = Gemgento::ProductAttributeSet.where(magento_id: product[:set]).first
-                product_info = info(product[:product_id], attribute_set)
-                sync_magento_to_local(product_info)
+                store_view[:item].each do |basic_product_info|
+                  attribute_set = Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
+                  product_info = info(basic_product_info[:product_id], attribute_set)
+                  sync_magento_to_local(product_info)
+                end
               end
             end
 
             associate_simple_products_to_configurable_products
           end
 
-          def self.list
-            response = Gemgento::Magento.create_call(:catalog_product_list)
+          def self.list(last_updated = nil)
+            if last_updated.nil?
+              message = {}
+            else
+              message = {
+                  'filters' => {
+                      'complex_filter' => {item: [
+                          key: 'updated_at',
+                          value: {
+                              key: 'gt',
+                              value: last_updated
+                          }
+                      ]}
+                  }
+              }
+            end
 
-            if response.success?
+            response = Gemgento::Magento.create_call(:catalog_product_list, message)
+
+            if response.success? && !response.body_overflow[:store_view].nil?
+
               # enforce array
-              unless response.body[:store_view].is_a? Array
-                response.body[:store_view] = [response.body[:store_view]]
+              unless response.body_overflow[:store_view].is_a? Array
+                response.body_overflow[:store_view] = [response.body_overflow[:store_view]]
               end
 
-              response.body[:store_view]
+              response.body_overflow[:store_view]
+            else
+              return []
             end
           end
 
@@ -272,6 +293,10 @@ module Gemgento
             end
 
             [price_changes]
+          end
+
+          def self.empty_product_list
+            {:'@soap_enc:array_type' => 'ns1:catalogProductEntity[0]', :'@xsi:type' => 'ns1:catalogProductEntityArray'}
           end
 
         end

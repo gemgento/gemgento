@@ -61,7 +61,7 @@ module Gemgento
       if response.success?
         magento_response.success = true
 
-        if [:customer_customer_list, :sales_order_list].include? function
+        if [:customer_customer_list, :sales_order_list, :catalog_product_list].include? function
           magento_response.body = response.body[:"body_too_big"]
           magento_response.body_overflow = response.body[:"#{function}_response"]
         else
