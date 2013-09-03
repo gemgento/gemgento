@@ -9,6 +9,7 @@ module Gemgento
             list(last_updated).each do |store_view|
 
               unless store_view == empty_product_list
+
                 # enforce array
                 unless store_view[:item].is_a? Array
                   store_view[:item] = [store_view][:item]
@@ -17,7 +18,10 @@ module Gemgento
                 store_view[:item].each do |basic_product_info|
                   attribute_set = Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
                   product_info = info(basic_product_info[:product_id], attribute_set)
-                  sync_magento_to_local(product_info)
+
+                  # update the product and grab the images
+                  product = sync_magento_to_local(product_info)
+                  Gemgento::API::SOAP::Catalog.fetch(product)
                 end
               end
             end
