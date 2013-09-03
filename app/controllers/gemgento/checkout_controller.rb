@@ -1,5 +1,6 @@
 module Gemgento
   class CheckoutController < BaseController
+    before_filter :auth_cart_contents, :except => [:shopping_bag, :thank_you]
     before_filter :auth_order_user, :except => [:login, :shopping_bag, :thank_you]
 
     layout 'application'
@@ -121,6 +122,12 @@ module Gemgento
     end
 
     private
+
+    def auth_cart_contents
+      if current_order.item_count == 0
+        redirect_to '/checkout/shopping_bag'
+      end
+    end
 
     def auth_order_user
       # if the user is not signed in and the cart is not a guest checkout, go to login
