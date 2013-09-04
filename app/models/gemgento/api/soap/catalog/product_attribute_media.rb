@@ -19,7 +19,7 @@ module Gemgento
             media_list = list(product.magento_id)
 
             unless media_list.nil?
-              list(product.magento_id).each do |product_attribute_media|
+              media_list.each do |product_attribute_media|
                 sync_magento_to_local(product_attribute_media, product)
               end
             end

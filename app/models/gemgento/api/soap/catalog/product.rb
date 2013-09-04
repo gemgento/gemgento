@@ -137,7 +137,11 @@ module Gemgento
                 'Not Visible Individually' => 1,
                 'Catalog' => 2,
                 'Search' => 3,
-                'Catalog, Search' => 4
+                'Catalog, Search' => 4,
+                1 => 'Not Visible Individually',
+                2 => 'Catalog',
+                3 => 'Search',
+                4 => 'Catalog, Search'
             }
           end
 
@@ -183,18 +187,6 @@ module Gemgento
             product.set_attribute_value('options_container', subject[:options_container])
             product.set_attribute_value('enable_googlecheckout', subject[:enable_googlecheckout])
 
-            if (subject[:visibility].is_a? String) && (Gemgento::API::SOAP::Catalog::Product.visibility.has_key? subject[:visibility])
-              product.visibility = Gemgento::API::SOAP::Catalog::Product.visibility[subject[:visibility]]
-            else
-              product.visibility = subject[:visibility]
-            end
-
-            if (subject[:status].is_a? String) && (Gemgento::API::SOAP::Catalog::Product.status.has_key? subject[:status])
-              product.status = Gemgento::API::SOAP::Catalog::Product.status[subject[:status]]
-            else
-              product.status = subject[:status] == 1 ? 1 : 0
-            end
-
             set_categories(subject[:categories][:item], product) if subject[:categories][:item]
             set_attribute_values_from_magento(subject[:additional_attributes][:item], product) if (subject[:additional_attributes] and subject[:additional_attributes][:item])
 
@@ -218,7 +210,17 @@ module Gemgento
 
           def self.set_attribute_values_from_magento(magento_attribute_values, product)
             magento_attribute_values.each do |attribute_value|
-              product.set_attribute_value(attribute_value[:key], attribute_value[:value])
+
+              if attribute_value[:key] == 'visibility'
+                product.visibility = attribute_value[:value].to_i
+                product.save
+              elsif attribute_value[:key] == 'status'
+                product.status = attribute_value[:value].to_i == 1 ? 1 : 0
+                product.save
+              else
+                product.set_attribute_value(attribute_value[:key], attribute_value[:value])
+              end
+
             end
           end
 
