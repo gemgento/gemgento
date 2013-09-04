@@ -1,5 +1,6 @@
 module Gemgento
   class Sync < ActiveRecord::Base
+    scope :active, -> { where(is_complete: false) }
 
     def self.locations
       Gemgento::API::SOAP::Directory::Country.fetch_all
@@ -80,6 +81,14 @@ module Gemgento
     def complete
       self.is_complete = true
       self.save
+    end
+
+    def self.is_active?(subject = nil)
+      if subject.nil?
+        return !Sync.active.empty?
+      else
+        return !Sync.where('subject IN (?)', subject).active.empty?
+      end
     end
 
     private
