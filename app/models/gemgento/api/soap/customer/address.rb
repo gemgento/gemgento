@@ -5,10 +5,8 @@ module Gemgento
         class Address
 
           def self.fetch_all
-            tp = Gemgento::ThreadPool.new(50)
-
             Gemgento::User.all.each do |user|
-              tp.process { fetch(user.magento_id) }
+              fetch(user.magento_id)
             end
           end
 

@@ -5,13 +5,9 @@ module Gemgento
         class Customer
 
           def self.fetch_all(last_updated = nil)
-            customer_thread_pool = Gemgento::ThreadPool.new(50)
-
             list.each do |store_view|
               store_view[:item].each do |customer|
-                customer_thread_pool.process {
-                  sync_magento_to_local(customer)
-                }
+                sync_magento_to_local(customer)
               end
             end
           end

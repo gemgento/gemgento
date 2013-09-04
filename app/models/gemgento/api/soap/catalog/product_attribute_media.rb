@@ -7,10 +7,8 @@ module Gemgento
         class ProductAttributeMedia
 
           def self.fetch_all
-            attribute_media_thread_pool = Gemgento::ThreadPool.new(50)
-
             Gemgento::Product.all.each do |product|
-              attribute_media_thread_pool.process { fetch(product) }
+              fetch(product)
             end
           end
 

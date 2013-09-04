@@ -6,8 +6,6 @@ module Gemgento
 
           # Synchronize local database with Magento database
           def self.fetch_all(last_updated = nil)
-            product_thread_pool = Gemgento::ThreadPool.new(50)
-
             list(last_updated).each do |store_view|
               unless store_view == empty_product_list
 
@@ -18,9 +16,7 @@ module Gemgento
 
                 store_view[:item].each do |basic_product_info|
                   attribute_set = Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
-                  product_thread_pool.process {
-                    fetch(basic_product_info[:product_id], attribute_set)
-                  }
+                  fetch(basic_product_info[:product_id], attribute_set)
                 end
               end
             end
@@ -30,7 +26,7 @@ module Gemgento
 
           def self.fetch(product_id, attribute_set)
             product_info = info(product_id, attribute_set)
-            puts product_info.inspect
+
             # update the product and grab the images
             product = sync_magento_to_local(product_info)
             Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch(product)

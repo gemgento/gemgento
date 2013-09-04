@@ -5,10 +5,8 @@ module Gemgento
         class Order
 
           def self.fetch_all(last_updated = nil)
-            order_thread_pool = Gemgento::ThreadPool.new(50)
-
             list(last_updated).each do |order|
-              order_thread_pool.process { fetch(order[:increment_id]) }
+              fetch(order[:increment_id])
             end
           end
 
