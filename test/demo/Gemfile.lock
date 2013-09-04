@@ -6,6 +6,7 @@ PATH
       exception_notification_rails3 (= 1.2.0)
       savon (= 2.2.0)
       spreadsheet (= 0.8.5)
+      threadz (= 1.1.0.rc3)
 
 GEM
   remote: https://rubygems.org/
@@ -39,7 +40,7 @@ GEM
       nokogiri (>= 1.4.0)
     arel (4.0.0)
     atomic (1.1.12)
-    bcrypt-ruby (3.1.1)
+    bcrypt-ruby (3.1.2)
     builder (3.1.4)
     climate_control (0.0.3)
       activesupport (>= 3.0)
@@ -137,6 +138,7 @@ GEM
     thor (0.18.1)
     thread_safe (0.1.2)
       atomic
+    threadz (1.1.0.rc3)
     tilt (1.4.1)
     treetop (1.4.14)
       polyglot
