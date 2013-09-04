@@ -5,7 +5,7 @@ module Gemgento
         class Customer
 
           def self.fetch_all(last_updated = nil)
-            list.each do |store_view|
+            list(last_updated).each do |store_view|
               store_view[:item].each do |customer|
                 sync_magento_to_local(customer)
               end
@@ -18,7 +18,7 @@ module Gemgento
             end
           end
 
-          def self.list
+          def self.list(last_updated = nil)
             if last_updated.nil?
               message = {}
             else
@@ -130,7 +130,7 @@ module Gemgento
             user.sync_needed = false
             user.save(validate: false)
 
-            Gemgento::API::SOAP::Customer::Address.fetch(user.magento_id)
+            Gemgento::API::SOAP::Customer::Address.fetch(user)
           end
 
           def self.compose_customer_data(customer)

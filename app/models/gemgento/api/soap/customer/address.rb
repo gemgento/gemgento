@@ -6,12 +6,12 @@ module Gemgento
 
           def self.fetch_all
             Gemgento::User.all.each do |user|
-              fetch(user.magento_id)
+              fetch(user)
             end
           end
 
-          def self.fetch(customer_id)
-            list(customer_id).each do |address|
+          def self.fetch(user)
+            list(user.magento_id).each do |address|
               sync_magento_to_local(address, user)
             end
           end

@@ -17,7 +17,9 @@ module Gemgento
           wsdl: @api_url,
           log: Gemgento::Config[:magento][:debug],
           raise_errors: false,
-          basic_auth: [Gemgento::Config[:magento][:auth_username].to_s, Gemgento::Config[:magento][:auth_password].to_s]
+          basic_auth: [Gemgento::Config[:magento][:auth_username].to_s, Gemgento::Config[:magento][:auth_password].to_s],
+          open_timeout: 300,
+          read_timeout: 300,
       )
 
       if Gemgento::Session.last.nil? || force_new_session
