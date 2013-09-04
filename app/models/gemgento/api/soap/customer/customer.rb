@@ -4,10 +4,14 @@ module Gemgento
       module Customer
         class Customer
 
-          def self.fetch_all
+          def self.fetch_all(last_updated = nil)
+            customer_thread_pool = Gemgento::ThreadPool.new(50)
+
             list.each do |store_view|
               store_view[:item].each do |customer|
-                sync_magento_to_local(customer)
+                customer_thread_pool.process {
+                  sync_magento_to_local(customer)
+                }
               end
             end
           end
@@ -19,7 +23,23 @@ module Gemgento
           end
 
           def self.list
-            response = Gemgento::Magento.create_call(:customer_customer_list)
+            if last_updated.nil?
+              message = {}
+            else
+              message = {
+                  'filters' => {
+                      'complex_filter' => {item: [
+                          key: 'updated_at',
+                          value: {
+                              key: 'gt',
+                              value: last_updated
+                          }
+                      ]}
+                  }
+              }
+            end
+
+            response = Gemgento::Magento.create_call(:customer_customer_list, message)
 
             if response.success?
               # enforce array

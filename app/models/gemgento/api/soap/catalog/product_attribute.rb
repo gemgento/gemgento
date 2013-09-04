@@ -5,11 +5,13 @@ module Gemgento
         class ProductAttribute
 
           def self.fetch_all
-            tp = Gemgento::ThreadPool.new(50)
+            product_attribute_thread_pool = Gemgento::ThreadPool.new(50)
 
             Gemgento::ProductAttributeSet.all.each do |product_attribute_set|
               list(product_attribute_set).each do |product_attribute|
-                tp.process { sync_magento_to_local(info(product_attribute[:attribute_id]), product_attribute_set) }
+                product_attribute_thread_pool.process {
+                  sync_magento_to_local(info(product_attribute[:attribute_id]), product_attribute_set)
+                }
               end
             end
           end

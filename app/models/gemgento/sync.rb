@@ -40,12 +40,13 @@ module Gemgento
     end
 
     def self.customers
-      Gemgento::API::SOAP::Customer::Customer.fetch_all_customer_groups
-      Gemgento::API::SOAP::Customer::Customer.fetch_all
-    end
+      last_updated = Sync.where('subject IN (?)', %w[customers everything]).order('created_at DESC').first.created_at
+      current = create_current('customers')
 
-    def self.addresses
-      Gemgento::API::SOAP::Customer::Address.fetch_all
+      Gemgento::API::SOAP::Customer::Customer.fetch_all_customer_groups
+      Gemgento::API::SOAP::Customer::Customer.fetch_all last_updated.to_s(:db)
+
+      current.complete
     end
 
     def self.orders

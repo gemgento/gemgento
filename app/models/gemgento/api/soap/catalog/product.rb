@@ -6,9 +6,9 @@ module Gemgento
 
           # Synchronize local database with Magento database
           def self.fetch_all(last_updated = nil)
-            tp = Gemgento::ThreadPool.new(50)
+            product_thread_pool = Gemgento::ThreadPool.new(50)
+
             list(last_updated).each do |store_view|
-              puts store_view.inspect
               unless store_view == empty_product_list
 
                 # enforce array
@@ -18,7 +18,9 @@ module Gemgento
 
                 store_view[:item].each do |basic_product_info|
                   attribute_set = Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
-                  tp.process { fetch(basic_product_info[:product_id], attribute_set) }
+                  product_thread_pool.process {
+                    fetch(basic_product_info[:product_id], attribute_set)
+                  }
                 end
               end
             end
