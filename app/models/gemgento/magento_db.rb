@@ -1,6 +1,6 @@
 module Gemgento
   class MagentoDB < ActiveRecord::Base
-    establish_connection(:magento)
+    establish_connection("magento_#{Rails.env}".to_sym)
 
     def self.associated_simple_products(configurable_product)
       self.table_name = 'catalog_product_super_link'
