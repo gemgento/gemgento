@@ -8,7 +8,7 @@ module Gemgento
           def self.fetch_all(last_updated = nil)
             tp = Gemgento::ThreadPool.new(50)
             list(last_updated).each do |store_view|
-
+              puts store_view.inspect
               unless store_view == empty_product_list
 
                 # enforce array
@@ -28,7 +28,7 @@ module Gemgento
 
           def self.fetch(product_id, attribute_set)
             product_info = info(product_id, attribute_set)
-
+            puts product_info.inspect
             # update the product and grab the images
             product = sync_magento_to_local(product_info)
             Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch(product)
