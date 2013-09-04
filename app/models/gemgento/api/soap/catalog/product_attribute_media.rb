@@ -7,12 +7,15 @@ module Gemgento
         class ProductAttributeMedia
 
           def self.fetch_all
+            tp = Gemgento::ThreadPool.new(10)
+
             Gemgento::Product.all.each do |product|
-              fetch(product)
+              tp.process { fetch(product) }
             end
           end
 
           def self.fetch(product)
+            tp = Gemgegento::ThreadPool.new(5)
             Gemgento::Asset.skip_callback(:destroy, :before, :delete_magento)
             product.assets.destroy_all
 
@@ -20,7 +23,7 @@ module Gemgento
 
             unless media_list.nil?
               list(product.magento_id).each do |product_attribute_media|
-                sync_magento_to_local(product_attribute_media, product)
+                tp.process { sync_magento_to_local(product_attribute_media, product) }
               end
             end
           end

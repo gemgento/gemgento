@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130903202409) do
+ActiveRecord::Schema.define(version: 20130903235620) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer "user_address_id"
@@ -62,6 +62,11 @@ ActiveRecord::Schema.define(version: 20130903202409) do
   create_table "gemgento_assets_asset_types", id: false, force: true do |t|
     t.integer "asset_id", default: 0, null: false
     t.integer "asset_type_id", default: 0, null: false
+  end
+
+  create_table "gemgento_attribute_set_attributes", id: false, force: true do |t|
+    t.integer "attribute_set_id", default: 0, null: false
+    t.integer "attribute_id", default: 0, null: false
   end
 
   create_table "gemgento_categories", force: true do |t|

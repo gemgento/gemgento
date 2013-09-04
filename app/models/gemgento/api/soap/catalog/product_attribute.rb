@@ -97,7 +97,7 @@ module Gemgento
           def self.sync_magento_to_local(source, product_attribute_set)
             product_attribute = Gemgento::ProductAttribute.where(magento_id: source[:attribute_id]).first_or_initialize
             product_attribute.magento_id = source[:attribute_id]
-            product_attribute.product_attribute_set = product_attribute_set
+            product_attribute.product_attribute_sets << product_attribute_set unless product_attribute.product_attribute_sets.include? product_attribute_set
             product_attribute.code = source[:attribute_code]
             product_attribute.frontend_input = source[:frontend_input]
             product_attribute.scope = source[:scope]

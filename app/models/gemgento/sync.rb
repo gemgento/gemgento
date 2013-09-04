@@ -48,11 +48,11 @@ module Gemgento
       Gemgento::API::SOAP::Customer::Address.fetch_all
     end
 
-    def orders
+    def self.orders
       last_updated = Sync.where('subject IN (?)', %w[orders everything]).order('created_at DESC').first.created_at
       current = create_current('orders')
 
-      Gemgento::API::SOAP::Sales::Order.fetch_all
+      Gemgento::API::SOAP::Sales::Order.fetch_all last_updated.to_s(:db)
 
       current.complete
     end
