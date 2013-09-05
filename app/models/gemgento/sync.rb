@@ -91,6 +91,10 @@ module Gemgento
       end
     end
 
+    def self.end_all
+      Gemgento::Sync.update_all('is_complete = 1')
+    end
+
     private
 
     def self.create_current(subject)
