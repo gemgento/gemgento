@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130904062335) do
+ActiveRecord::Schema.define(version: 20130905152651) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer "user_address_id"
@@ -356,6 +356,7 @@ ActiveRecord::Schema.define(version: 20130904062335) do
     t.boolean "sync_needed", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "default_value"
   end
 
   create_table "gemgento_product_imports", force: true do |t|

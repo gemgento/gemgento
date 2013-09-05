@@ -99,6 +99,7 @@ module Gemgento
             product_attribute.code = source[:attribute_code]
             product_attribute.frontend_input = source[:frontend_input]
             product_attribute.scope = source[:scope]
+            product_attribute.default_value = source[:default_value]
             product_attribute.is_unique = source[:is_unique]
             product_attribute.is_required = source[:is_required]
             product_attribute.is_configurable = source[:is_configurable]
