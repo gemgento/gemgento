@@ -12,6 +12,11 @@ module Gemgento
             end
           end
 
+          def self.fetch(attribute_id, attribute_set)
+            attribute_info = info(attribute_id)
+            sync_magento_to_local(attribute_info, attribute_set)
+          end
+
           def self.fetch_all_options(product_attribute)
             # add attribute options if there are any
             options(product_attribute.magento_id).each do |attribute_option|
@@ -99,7 +104,7 @@ module Gemgento
             product_attribute.code = source[:attribute_code]
             product_attribute.frontend_input = source[:frontend_input]
             product_attribute.scope = source[:scope]
-            product_attribute.default_value = source[:default_value]
+            product_attribute.default_value = source[:default_value] == {:'@xsi:type' => 'xsd:string'} ? nil : source[:default_value]
             product_attribute.is_unique = source[:is_unique]
             product_attribute.is_required = source[:is_required]
             product_attribute.is_configurable = source[:is_configurable]
@@ -114,7 +119,6 @@ module Gemgento
 
             fetch_all_options(product_attribute) if product_attribute.frontend_input == 'select'
           end
-
         end
       end
     end
