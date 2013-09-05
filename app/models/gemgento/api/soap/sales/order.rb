@@ -6,7 +6,9 @@ module Gemgento
 
           def self.fetch_all(last_updated = nil)
             list(last_updated).each do |order|
-              fetch(order[:increment_id])
+              unless order.nil?
+                fetch(order[:increment_id])
+              end
             end
           end
 
