@@ -6,8 +6,10 @@ module Gemgento
 
           def self.fetch_all(last_updated = nil)
             list(last_updated).each do |store_view|
-              store_view[:item].each do |customer|
-                sync_magento_to_local(customer)
+              unless store_view[:item].nil?
+                store_view[:item].each do |customer|
+                  sync_magento_to_local(customer)
+                end
               end
             end
           end
