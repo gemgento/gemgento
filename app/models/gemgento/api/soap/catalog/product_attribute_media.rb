@@ -19,7 +19,7 @@ module Gemgento
             media_list = list(product.magento_id)
 
             unless media_list.nil?
-              list(product.magento_id).each do |product_attribute_media|
+              media_list.each do |product_attribute_media|
                 sync_magento_to_local(product_attribute_media, product)
               end
             end
@@ -98,7 +98,13 @@ module Gemgento
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source, product)
             asset = Gemgento::Asset.where(product_id: product.id, url: source[:url]).first_or_initialize
-            asset.attachment = open(source[:url])
+
+            begin
+              asset.attachment = open(source[:url])
+            rescue
+              asset.attachment = nil
+            end
+
             asset.url = source[:url]
             asset.position = source[:position]
             asset.label = Gemgento::Magento.enforce_savon_string(source[:label])

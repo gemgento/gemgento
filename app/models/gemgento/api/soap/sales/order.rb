@@ -4,9 +4,11 @@ module Gemgento
       module Sales
         class Order
 
-          def self.fetch_all
-            list.each do |order|
-              fetch(order[:increment_id])
+          def self.fetch_all(last_updated = nil)
+            list(last_updated).each do |order|
+              unless order.nil?
+                fetch(order[:increment_id])
+              end
             end
           end
 
@@ -20,15 +22,31 @@ module Gemgento
             return false
           end
 
-          def self.list
-            response = Gemgento::Magento.create_call(:sales_order_list)
+          def self.list(last_updated = nil)
+            if last_updated.nil?
+              message = {}
+            else
+              message = {
+                  'filters' => {
+                      'complex_filter' => {item: [
+                          key: 'updated_at',
+                          value: {
+                              key: 'gt',
+                              value: last_updated
+                          }
+                      ]}
+                  }
+              }
+            end
+
+            response = Gemgento::Magento.create_call(:sales_order_list, message)
 
             if response.success?
-              unless response.body[:result][:item].is_a? Array
-                response.body[:result][:item] = [response.body[:result][:item]]
+              unless response.body_overflow[:result][:item].is_a? Array
+                response.body_overflow[:result][:item] = [response.body_overflow[:result][:item]]
               end
 
-              response.body[:result][:item]
+              response.body_overflow[:result][:item]
             end
           end
 
@@ -62,7 +80,7 @@ module Gemgento
 
           # Save Magento order to local
           def self.sync_magento_to_local(source)
-            order = Gemgento::Order.where(increment_id: source[:increment_id]).first_or_initialize
+            order = Gemgento::Order.where(increment_id: source[:increment_id].to_i).first_or_initialize
             order.order_id = source[:order_id]
             order.is_active = source[:is_active]
             order.user = User.where(magento_id: source[:customer_id]).first
@@ -120,7 +138,7 @@ module Gemgento
             store = Gemgento::Store.where(magento_id: source[:store_id]).first
 
             if store.nil?
-              store = Gemgento::Store.first
+              store = Gemgento::Store.current
             end
 
             order.store = store
@@ -137,15 +155,16 @@ module Gemgento
             end
 
             order.order_items.destroy_all
-            if !source[:items][:item].nil?
-              source[:items][:item] = [source[:items][:item]] if source[:items].size == 3
-
+            unless source[:items][:item].nil?
+              source[:items][:item] = [source[:items][:item]] unless source[:items][:item].is_a? Array
               source[:items][:item].each do |item|
                 sync_magento_order_item_to_local(item, order)
               end
             end
 
             if !source[:status_history][:item].nil?
+              source[:status_history][:item] = [source[:status_history][:item]] unless source[:status_history][:item].is_a? Array
+
               source[:status_history][:item].each do |status|
                 sync_magento_order_status_to_local(status, order)
               end
@@ -153,7 +172,7 @@ module Gemgento
           end
 
           def self.sync_magento_address_to_local(source, order, address = nil)
-            address = Gemgento::Address.where(order_address_id: source[:address_id]).first_or_initialize if address.nil?
+            address = Gemgento::Address.where(order_address_id: source[:address_id].to_i).first_or_initialize if address.nil?
             address.order_address_id = source[:address_id]
             address.order = order
             address.increment_id = source[:increment_id]
@@ -180,7 +199,7 @@ module Gemgento
           end
 
           def self.sync_magento_payment_to_local(source, order)
-            payment = Gemgento::OrderPayment.where(magento_id: source[:payment_id]).first_or_initialize
+            payment = Gemgento::OrderPayment.where(magento_id: source[:payment_id].to_i).first_or_initialize
             payment.order = order
             payment.magento_id = source[:payment_id]
             payment.increment_id = source[:increment_id]
@@ -205,11 +224,11 @@ module Gemgento
           end
 
           def self.sync_magento_order_status_to_local(source, order)
-            order_status = Gemgento::OrderStatus.where(order: order, status: source[:status], comment: source[:comment]).first_or_initialize
+            order_status = Gemgento::OrderStatus.where(order_id: order.id, status: source[:status], comment: source[:comment]).first_or_initialize
             order_status.order = order
             order_status.status = source[:status]
             order_status.is_active = source[:is_active]
-            order_status.is_customer_notified = source[:is_customer_notified]
+            order_status.is_customer_notified = source[:is_customer_notified].to_i
             order_status.comment = source[:comment]
             order_status.created_at = source[:created_at]
             order_status.save

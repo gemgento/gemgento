@@ -4,10 +4,12 @@ module Gemgento
       module Customer
         class Customer
 
-          def self.fetch_all
-            list.each do |store_view|
-              store_view[:item].each do |customer|
-                sync_magento_to_local(customer)
+          def self.fetch_all(last_updated = nil)
+            list(last_updated).each do |store_view|
+              unless store_view[:item].nil?
+                store_view[:item].each do |customer|
+                  sync_magento_to_local(customer)
+                end
               end
             end
           end
@@ -18,16 +20,32 @@ module Gemgento
             end
           end
 
-          def self.list
-            response = Gemgento::Magento.create_call(:customer_customer_list)
+          def self.list(last_updated = nil)
+            if last_updated.nil?
+              message = {}
+            else
+              message = {
+                  'filters' => {
+                      'complex_filter' => {item: [
+                          key: 'updated_at',
+                          value: {
+                              key: 'gt',
+                              value: last_updated
+                          }
+                      ]}
+                  }
+              }
+            end
+
+            response = Gemgento::Magento.create_call(:customer_customer_list, message)
 
             if response.success?
               # enforce array
-              unless response.body[:store_view].is_a? Array
-                response.body[:store_view] = [response.body[:store_view]]
+              unless response.body_overflow[:store_view].is_a? Array
+                response.body_overflow[:store_view] = [response.body_overflow[:store_view]]
               end
 
-              response.body[:store_view]
+              response.body_overflow[:store_view]
             end
           end
 
@@ -98,7 +116,7 @@ module Gemgento
             user = Gemgento::User.where(magento_id: source[:customer_id]).first_or_initialize
             user.magento_id = source[:customer_id]
             user.increment_id = source[:increment_id]
-            user.store = Store.where(magento_id: source[:store_id]).first
+            user.store = Store.find_by(magento_id: source[:store_id])
             user.created_in = source[:created_in]
             user.email = source[:email]
             user.fname = source[:firstname]
@@ -113,6 +131,8 @@ module Gemgento
             user.magento_password = source[:password_hash]
             user.sync_needed = false
             user.save(validate: false)
+
+            Gemgento::API::SOAP::Customer::Address.fetch(user)
           end
 
           def self.compose_customer_data(customer)

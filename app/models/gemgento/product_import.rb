@@ -18,6 +18,11 @@ module Gemgento
     after_commit :process
 
     def process
+      # create a fake sync record, so products are not synced during the import
+      sync_buffer = Gemgento::Sync.new
+      sync_buffer.subject = 'products'
+      sync_buffer.save
+
       @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
       @headers = get_headers
       associated_simple_products = []
@@ -39,6 +44,10 @@ module Gemgento
 
       ProductImport.skip_callback(:commit, :after, :process)
       self.save
+
+      sync_buffer.is_complete = true
+      sync_buffer.created_at = Time.now
+      sync_buffer.save
     end
 
     def image_labels_raw
@@ -86,13 +95,14 @@ module Gemgento
 
       product.sku = sku
       product.product_attribute_set = product_attribute_set
+      product.status = @row[@headers.index('status').to_i].to_i
 
       unless product.magento_id
         product.sync_needed = false
         product.save
       end
 
-      set_attribute_values(product)
+      product = set_attribute_values(product)
       set_categories(product)
 
       product.store = store
@@ -109,7 +119,7 @@ module Gemgento
         product_attribute = ProductAttribute.find_by(code: attribute_code) # try to load attribute associated with column header
 
         # apply the attribute value if the attribute exists
-        if !product_attribute.nil? && attribute_code != 'sku'
+        if !product_attribute.nil? && attribute_code != 'sku' && attribute_code != 'status'
 
           if product_attribute.product_attribute_options.empty?
             value = @row[@headers.index(attribute_code).to_i].to_s.strip
@@ -130,7 +140,9 @@ module Gemgento
         end
       end
 
-      set_default_attribute_values(product)
+      product = set_default_attribute_values(product)
+
+      return product
     end
 
     def create_attribute_option(product_attribute, option_label)
@@ -146,17 +158,19 @@ module Gemgento
     end
 
     def set_default_attribute_values(product)
-      product.set_attribute_value('status', '1') if product.attribute_value('status').blank?
-      product.set_attribute_value('visibility', '4') if product.attribute_value('visibility').blank?
+      product.status = 1 if product.status.nil?
+      product.visibility = self.simple_product_visibility.to_i
 
       if product.attribute_value('url_key').blank?
-        url_key = product.attribute_value('name').strip.gsub(' ', '-').gsub(/[^\w\s]/, '').downcase
+        url_key = product.attribute_value('name').to_s.strip.gsub(' ', '-').gsub(/[^\w\s]/, '').downcase
         product.set_attribute_value('url_key', url_key)
       end
+
+      return product
     end
 
     def set_categories(product)
-      categories = @row[@headers.index('category').to_i].strip.split('&')
+      categories = @row[@headers.index('category').to_i].to_s.strip.split('&')
 
       categories.each do |category_string|
         category_string.strip!
@@ -183,7 +197,8 @@ module Gemgento
       images_found = false
       # find the correct image file name and path
       self.image_labels.each_with_index do |label, position|
-        file_name = self.image_path + @row[@headers.index('image').to_i].strip + '_' + label + self.image_file_extension
+        file_name = self.image_path + @row[@headers.index('image').to_i].to_s.strip + '_' + label + self.image_file_extension
+        Rails.logger.info file_name
         next unless File.exist?(file_name)
 
         types = Gemgento::AssetType.find_by(product_attribute_set: product_attribute_set)
@@ -235,9 +250,11 @@ module Gemgento
 
       configurable_product.magento_type = 'configurable'
       configurable_product.sku = sku
+
       configurable_product.product_attribute_set = product_attribute_set
-      configurable_product.sync_needed = false
+      configurable_product.status = @row[@headers.index('status').to_i].to_i
       configurable_product.store = store
+      configurable_product.sync_needed = false
       configurable_product.save
 
       # associate all simple products with the new configurable product
@@ -253,6 +270,8 @@ module Gemgento
       # set the additional configurable product details
       set_attribute_values(configurable_product)
       set_categories(configurable_product)
+
+      configurable_product.visibility = self.configurable_product_visibility.to_i
 
       # push to magento
       configurable_product.sync_needed = true

@@ -1,5 +1,6 @@
 module Gemgento
   class CheckoutController < BaseController
+    before_filter :auth_cart_contents, :except => [:shopping_bag, :thank_you]
     before_filter :auth_order_user, :except => [:login, :shopping_bag, :thank_you]
 
     layout 'application'
@@ -36,16 +37,18 @@ module Gemgento
       if user_signed_in?
         if current_order.shipping_address.nil?
           current_order.shipping_address = current_user.addresses.where(address_type: 'shipping', is_default: true).first
+          current_order.shipping_address = current_user.addresses.where(address_type: 'shipping').first if current_order.shipping_address.nil?
           current_order.shipping_address = Address.new if current_order.shipping_address.nil?
         end
 
         if current_order.billing_address.nil?
           current_order.billing_address = current_user.addresses.where(address_type: 'billing', is_default: true).first
+          current_order.billing_address = current_user.addresses.where(address_type: 'billing').first if current_order.billing_address.nil?
           current_order.billing_address = Address.new if current_order.billing_address.nil?
         end
       else
-        current_order.shipping_address = Address.new
-        current_order.billing_address = Address.new
+        current_order.shipping_address = Address.new if current_order.shipping_address.nil?
+        current_order.billing_address = Address.new if current_order.billing_address.nil?
       end
     end
 
@@ -120,9 +123,23 @@ module Gemgento
 
     private
 
+    def auth_cart_contents
+      if current_order.item_count == 0
+        redirect_to '/checkout/shopping_bag'
+      end
+    end
+
     def auth_order_user
+      # if the user is not signed in and the cart is not a guest checkout, go to login
       unless user_signed_in? || current_order.customer_is_guest
         redirect_to '/checkout/login'
+      end
+
+      # if the logged in user doesn't match the cart user, go to login
+      if user_signed_in? && !current_order.customer_is_guest
+        if current_user != current_order.user
+          redirect_to '/checkout/login'
+        end
       end
     end
 
@@ -149,7 +166,7 @@ module Gemgento
       @user.fname = params[:fname]
       @user.lname = params[:lname]
       @user.email = params[:email]
-      @user.store = Gemgento::Store.first
+      @user.store = Gemgento::Store.current
       @user.user_group = Gemgento::UserGroup.where(code: 'General').first
       @user.magento_password = params[:password]
       @user.password = params[:password]
@@ -261,6 +278,8 @@ module Gemgento
             @total = total[:amount].to_f
           elsif total[:title] == 'Tax'
             @tax = total[:amount].to_f
+          elsif total[:title].to_s.include? 'Shipping'
+            @shipping = total[:amount].to_f
           end
         end
       end
@@ -315,6 +334,8 @@ module Gemgento
     end
 
     def process_order
+      current_order.enforce_cart_data
+
       respond_to do |format|
         if current_order.process
           create_new_cart

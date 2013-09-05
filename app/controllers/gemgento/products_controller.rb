@@ -14,17 +14,17 @@ module Gemgento
             gemgento_product_attributes: {code: 'url_key'},
             gemgento_product_attribute_values: {value: params[:url_key]}).first
       end
+
       respond_to do |format|
         format.js {
           if @product.magento_type == 'configurable'
 
             @ps = []
-            p = @product; first_simple = p.simple_products.first
+            p = @product; first_simple = p.simple_products.enabled.first
             @ps << {id: p.id, name: p.attribute_value('name'), description: first_simple.attribute_value('description'), price: first_simple.attribute_value('price')}
             @product.simple_products.each do |p|
               @ps << {id: p.id, size: p.attribute_value('size'), upc: p.attribute_value('upc'), quantity: '10'}
             end
-
 
             render :json => @ps.to_json
           else

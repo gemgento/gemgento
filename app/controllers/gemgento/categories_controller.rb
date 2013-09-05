@@ -15,15 +15,17 @@ module Gemgento
       respond_to do |format|
         format.js {
           @category = Gemgento::Category.where(params[:id]).first
-          @c = []
-          @category.products.configurable.each do |p|
-            @c << {id: p.id, price: p.simple_products.first.attribute_value('price'), url_key: p.attribute_value('url_key'), name: p.attribute_value('name')}
+          @products = []
+
+          @category.products.catalog_visible.enabled.each do |p|
+            @products << {id: p.id, price: p.simple_products.first.price, url_key: p.url_key, name: p.name}
           end
-          render :json => @c.to_json
+          render :json => @products.to_json
         }
+
         format.html {
           @category = Gemgento::Category.where(url_key: params[:url_key]).first
-          @product = @category.products
+          @product = @category.products.catalog_visible.enabled
         }
       end
 

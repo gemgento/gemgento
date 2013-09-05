@@ -8,7 +8,8 @@ module Gemgento
     validates :fname, presence: {message: 'First name is required'}
     validates :lname, presence: {message: 'Last name is required'}
     validates :street, presence: {message: 'Address is required'}
-    validates :country, presence: true
+    validates :region, presence: {message: 'State is required'}
+    validates :country, presence: {message: 'Country is required'}
     validates :postcode, presence: {message: 'Postal code is required'}
     validates :telephone, presence: {message: 'Phone number is required'}
 

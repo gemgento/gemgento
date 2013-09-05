@@ -4,13 +4,15 @@ module Gemgento
       module CatalogInventory
         class StockItem
 
-          def self.fetch_all
-            products_ids = []
-            Gemgento::Product.all.each do |product|
-              products_ids << product.magento_id
+          def self.fetch_all(products = nil)
+            products = Gemgento::Product.all if products.nil?
+            magento_product_ids = []
+
+            products.each do |product|
+              magento_product_ids << product.magento_id
             end
 
-            list(products_ids).each do |inventory|
+            list(magento_product_ids).each do |inventory|
               sync_magento_to_local(inventory)
             end
           end

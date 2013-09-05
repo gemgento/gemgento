@@ -15,7 +15,12 @@ module Gemgento
     has_and_belongs_to_many :categories, -> { distinct }, join_table: 'gemgento_categories_products'
     has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
 
-    scope :configurable, where(magento_type: 'configurable')
+    scope :configurable, -> { where(magento_type: 'configurable') }
+    scope :simple, -> { where(magento_type: 'simple') }
+    scope :enabled, -> { where(status: true) }
+    scope :disabled, -> { where(status: false) }
+    scope :catalog_visible, -> { where(visibility: [2, 4]) }
+    scope :search_visible, -> { where(visibility: [3, 4]) }
 
     after_save :sync_local_to_magento
 
@@ -44,13 +49,29 @@ module Gemgento
       product_attribute_value = Gemgento::ProductAttributeValue.find_by(product_id: self.id, product_attribute_id: product_attribute.id)
 
       if product_attribute_value.nil?
-        return nil
+        value = product_attribute.default_value
+
+        if value.nil?
+          return nil
+        end
+      else
+        value = product_attribute_value.value
       end
 
       if product_attribute.product_attribute_options.empty?
-        return product_attribute_value.value
+        return value
       else
-        return product_attribute.product_attribute_options.find_by(value: product_attribute_value.value).label
+        value = product_attribute.product_attribute_options.find_by(value: value).label
+
+        unless product_attribute.frontend_input == 'boolean'
+          return value
+        else
+          if value == 'Yes' || value == '1'
+            return true
+          else
+            return false
+          end
+        end
       end
     end
 
@@ -94,6 +115,16 @@ module Gemgento
       end
 
       return products
+    end
+
+    def in_stock?
+      if self.inventory.nil?
+        return true;
+      elsif self.inventory.is_in_stock
+        return true;
+      else
+        return false
+      end
     end
 
     private

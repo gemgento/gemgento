@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130815141832) do
+ActiveRecord::Schema.define(version: 20130905152651) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer "user_address_id"
@@ -62,6 +62,11 @@ ActiveRecord::Schema.define(version: 20130815141832) do
   create_table "gemgento_assets_asset_types", id: false, force: true do |t|
     t.integer "asset_id", default: 0, null: false
     t.integer "asset_type_id", default: 0, null: false
+  end
+
+  create_table "gemgento_attribute_set_attributes", id: false, force: true do |t|
+    t.integer "attribute_set_id", default: 0, null: false
+    t.integer "attribute_id", default: 0, null: false
   end
 
   create_table "gemgento_categories", force: true do |t|
@@ -336,7 +341,6 @@ ActiveRecord::Schema.define(version: 20130815141832) do
 
   create_table "gemgento_product_attributes", force: true do |t|
     t.integer "magento_id"
-    t.integer "product_attribute_set_id", null: false
     t.string "code"
     t.string "frontend_input"
     t.string "scope"
@@ -352,6 +356,7 @@ ActiveRecord::Schema.define(version: 20130815141832) do
     t.boolean "sync_needed", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "default_value"
   end
 
   create_table "gemgento_product_imports", force: true do |t|
@@ -371,6 +376,8 @@ ActiveRecord::Schema.define(version: 20130815141832) do
     t.integer "product_attribute_set_id"
     t.integer "count_created"
     t.integer "count_updated"
+    t.integer "simple_product_visibility"
+    t.integer "configurable_product_visibility"
   end
 
   create_table "gemgento_product_imports_configurable_attributes", id: false, force: true do |t|
@@ -388,6 +395,8 @@ ActiveRecord::Schema.define(version: 20130815141832) do
     t.string "store_id"
     t.boolean "sync_needed", default: true, null: false
     t.integer "parent_id"
+    t.boolean "status", default: true
+    t.integer "visibility", default: 4
   end
 
   create_table "gemgento_regions", force: true do |t|
@@ -435,6 +444,13 @@ ActiveRecord::Schema.define(version: 20130815141832) do
   end
 
   add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true
+
+  create_table "gemgento_syncs", force: true do |t|
+    t.string "subject"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.boolean "is_complete", default: false
+  end
 
   create_table "gemgento_user_groups", force: true do |t|
     t.integer "magento_id"

@@ -5,34 +5,61 @@ module Gemgento
         class Product
 
           # Synchronize local database with Magento database
-          def self.fetch_all
-            list.each do |store_view|
+          def self.fetch_all(last_updated = nil)
+            list(last_updated).each do |store_view|
+              unless store_view == empty_product_list
 
-              # enforce array
-              unless store_view[:item].is_a? Array
-                store_view[:item] = [store_view][:item]
-              end
+                # enforce array
+                unless store_view[:item].is_a? Array
+                  store_view[:item] = [store_view][:item]
+                end
 
-              store_view[:item].each do |product|
-                attribute_set = Gemgento::ProductAttributeSet.where(magento_id: product[:set]).first
-                product_info = info(product[:product_id], attribute_set)
-                sync_magento_to_local(product_info)
+                store_view[:item].each do |basic_product_info|
+                  attribute_set = Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
+                  fetch(basic_product_info[:product_id], attribute_set)
+                end
               end
             end
 
             associate_simple_products_to_configurable_products
           end
 
-          def self.list
-            response = Gemgento::Magento.create_call(:catalog_product_list)
+          def self.fetch(product_id, attribute_set)
+            product_info = info(product_id, attribute_set)
 
-            if response.success?
+            # update the product and grab the images
+            product = sync_magento_to_local(product_info)
+            Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch(product)
+          end
+
+          def self.list(last_updated = nil)
+            if last_updated.nil?
+              message = {}
+            else
+              message = {
+                  'filters' => {
+                      'complex_filter' => {item: [
+                          key: 'updated_at',
+                          value: {
+                              key: 'gt',
+                              value: last_updated
+                          }
+                      ]}
+                  }
+              }
+            end
+
+            response = Gemgento::Magento.create_call(:catalog_product_list, message)
+            if response.success? && !response.body_overflow[:store_view].nil?
+
               # enforce array
-              unless response.body[:store_view].is_a? Array
-                response.body[:store_view] = [response.body[:store_view]]
+              unless response.body_overflow[:store_view].is_a? Array
+                response.body_overflow[:store_view] = [response.body_overflow[:store_view]]
               end
 
-              response.body[:store_view]
+              response.body_overflow[:store_view]
+            else
+              return []
             end
           end
 
@@ -105,6 +132,28 @@ module Gemgento
             end
           end
 
+          def self.visibility
+            {
+                'Not Visible Individually' => 1,
+                'Catalog' => 2,
+                'Search' => 3,
+                'Catalog, Search' => 4,
+                1 => 'Not Visible Individually',
+                2 => 'Catalog',
+                3 => 'Search',
+                4 => 'Catalog, Search'
+            }
+          end
+
+          def self.status
+            {
+                1 => true,
+                2 => false,
+                'Enabled' => true,
+                'Disabled' => false
+            }
+          end
+
           private
 
           def self.sync_magento_to_local(subject)
@@ -114,17 +163,15 @@ module Gemgento
             product.sku = subject[:sku]
             product.sync_needed = false
             product.product_attribute_set = Gemgento::ProductAttributeSet.where(magento_id: subject[:set]).first
-            product.store = Gemgento::Store.first
+            product.store = Gemgento::Store.current
             product.save
 
             product.set_attribute_value('name', subject[:name])
             product.set_attribute_value('description', subject[:description])
             product.set_attribute_value('short_description', subject[:short_description])
             product.set_attribute_value('weight', subject[:weight])
-            product.set_attribute_value('status', subject[:status])
             product.set_attribute_value('url_key', subject[:url_key])
             product.set_attribute_value('url_path', subject[:url_path])
-            product.set_attribute_value('visibility', subject[:visibility])
             product.set_attribute_value('has_options', subject[:has_options])
             product.set_attribute_value('gift_message_available', subject[:gift_message_available])
             product.set_attribute_value('price', subject[:price])
@@ -147,6 +194,8 @@ module Gemgento
           end
 
           def self.set_categories(magento_categories, product)
+            product.categories.clear
+
             # if there is only one category, the returned value is not interpreted array
             unless magento_categories.is_a? Array
               magento_categories = [magento_categories]
@@ -163,12 +212,23 @@ module Gemgento
 
           def self.set_attribute_values_from_magento(magento_attribute_values, product)
             magento_attribute_values.each do |attribute_value|
-              product.set_attribute_value(attribute_value[:key], attribute_value[:value])
+
+              if attribute_value[:key] == 'visibility'
+                product.visibility = attribute_value[:value].to_i
+                product.save
+              elsif attribute_value[:key] == 'status'
+                product.status = attribute_value[:value].to_i == 1 ? 1 : 0
+                product.save
+              else
+                product.set_attribute_value(attribute_value[:key], attribute_value[:value])
+              end
+
             end
           end
 
           def self.associate_simple_products_to_configurable_products
             Gemgento::Product.where(magento_type: 'configurable').each do |configurable_product|
+              configurable_product.simple_products.clear
               configurable_product.simple_products = Gemgento::MagentoDB.associated_simple_products(configurable_product)
             end
           end
@@ -179,12 +239,13 @@ module Gemgento
                 'description' => product.attribute_value('description'),
                 'short_description' => product.attribute_value('short_description'),
                 'weight' => product.attribute_value('weight'),
-                'status' => product.attribute_value('status'),
+                'status' => product.status ? 1 : 2,
                 'categories' => {'item' => compose_categories(product)},
                 'url_key' => product.attribute_value('url_key'),
                 'price' => product.attribute_value('price'),
                 'tax_class_id' => '2',
-                'additional_attributes' => {'single_data' => {'item' => compose_attribute_values(product)}}
+                'additional_attributes' => {'single_data' => {'item' => compose_attribute_values(product)}},
+                'visibility' => product.visibility
             }
 
             unless product.simple_products.empty?
@@ -243,6 +304,10 @@ module Gemgento
             end
 
             [price_changes]
+          end
+
+          def self.empty_product_list
+            {:'@soap_enc:array_type' => 'ns1:catalogProductEntity[0]', :'@xsi:type' => 'ns1:catalogProductEntityArray'}
           end
 
         end

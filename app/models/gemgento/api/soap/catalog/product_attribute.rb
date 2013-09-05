@@ -5,12 +5,16 @@ module Gemgento
         class ProductAttribute
 
           def self.fetch_all
-            #TODO: Use info() instead of list() to retrieve all attribute information
             Gemgento::ProductAttributeSet.all.each do |product_attribute_set|
               list(product_attribute_set).each do |product_attribute|
                 sync_magento_to_local(info(product_attribute[:attribute_id]), product_attribute_set)
               end
             end
+          end
+
+          def self.fetch(attribute_id, attribute_set)
+            attribute_info = info(attribute_id)
+            sync_magento_to_local(attribute_info, attribute_set)
           end
 
           def self.fetch_all_options(product_attribute)
@@ -96,10 +100,11 @@ module Gemgento
           def self.sync_magento_to_local(source, product_attribute_set)
             product_attribute = Gemgento::ProductAttribute.where(magento_id: source[:attribute_id]).first_or_initialize
             product_attribute.magento_id = source[:attribute_id]
-            product_attribute.product_attribute_set = product_attribute_set
+            product_attribute.product_attribute_sets << product_attribute_set unless product_attribute.product_attribute_sets.include? product_attribute_set
             product_attribute.code = source[:attribute_code]
             product_attribute.frontend_input = source[:frontend_input]
             product_attribute.scope = source[:scope]
+            product_attribute.default_value = source[:default_value] == {:'@xsi:type' => 'xsd:string'} ? nil : source[:default_value]
             product_attribute.is_unique = source[:is_unique]
             product_attribute.is_required = source[:is_required]
             product_attribute.is_configurable = source[:is_configurable]
@@ -112,9 +117,8 @@ module Gemgento
             product_attribute.sync_needed = false
             product_attribute.save
 
-            fetch_all_options(product_attribute)
+            fetch_all_options(product_attribute) if product_attribute.frontend_input == 'select'
           end
-
         end
       end
     end

@@ -29,6 +29,14 @@ if defined?(ActiveAdmin)
                   as: :check_boxes,
                   multiple: true,
                   collection: ProductAttribute.where(is_configurable: true, scope: 'global', frontend_input: 'select').map { |pa| [pa.code, pa.id] }
+          f.input :simple_product_visibility,
+                  as: :select,
+                  include_blank: false,
+                  collection: {'Not Visible' => 1, 'Catalog' => 2, 'Search' => 3, 'Catalog, Search' => 4}
+          f.input :configurable_product_visibility,
+                  as: :select,
+                  include_blank: false,
+                  collection: {'Not Visible' => 1, 'Catalog' => 2, 'Search' => 3, 'Catalog, Search' => 4}
           f.input :include_images
           f.input :image_path
           f.input :image_file_extension

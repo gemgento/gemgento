@@ -1,6 +1,6 @@
 module Gemgento
   class ProductAttributeSet < ActiveRecord::Base
-    has_many :product_attributes
+    has_and_belongs_to_many :product_attributes, -> { uniq }, :join_table => 'gemgento_attribute_set_attributes'
     has_many :products
 
     def self.index
