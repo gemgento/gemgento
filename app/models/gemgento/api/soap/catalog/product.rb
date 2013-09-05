@@ -194,6 +194,8 @@ module Gemgento
           end
 
           def self.set_categories(magento_categories, product)
+            product.categories.clear
+
             # if there is only one category, the returned value is not interpreted array
             unless magento_categories.is_a? Array
               magento_categories = [magento_categories]
@@ -226,6 +228,7 @@ module Gemgento
 
           def self.associate_simple_products_to_configurable_products
             Gemgento::Product.where(magento_type: 'configurable').each do |configurable_product|
+              configurable_product.simple_products.clear
               configurable_product.simple_products = Gemgento::MagentoDB.associated_simple_products(configurable_product)
             end
           end
