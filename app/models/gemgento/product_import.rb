@@ -18,6 +18,11 @@ module Gemgento
     after_commit :process
 
     def process
+      # create a fake sync record, so products are not synced during the import
+      sync_buffer = Gemgento::Sync.new
+      sync_buffer.subject = 'products'
+      sync.save
+
       @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
       @headers = get_headers
       associated_simple_products = []
@@ -39,6 +44,9 @@ module Gemgento
 
       ProductImport.skip_callback(:commit, :after, :process)
       self.save
+
+      sync_buffer.is_complete = true
+      sync_buffer.save
     end
 
     def image_labels_raw
