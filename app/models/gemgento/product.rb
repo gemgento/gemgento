@@ -49,13 +49,19 @@ module Gemgento
       product_attribute_value = Gemgento::ProductAttributeValue.find_by(product_id: self.id, product_attribute_id: product_attribute.id)
 
       if product_attribute_value.nil?
-        return product_attribute.default_value
+        value = product_attribute.default_value
+
+        if value.nil?
+          return nil
+        end
+      else
+        value = product_attribute_value.value
       end
 
       if product_attribute.product_attribute_options.empty?
-        return product_attribute_value.value
+        return value
       else
-        value = product_attribute.product_attribute_options.find_by(value: product_attribute_value.value).label
+        value = product_attribute.product_attribute_options.find_by(value: value).label
 
         unless product_attribute.frontend_input == 'boolean'
           return value

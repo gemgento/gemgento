@@ -21,7 +21,7 @@ module Gemgento
       # create a fake sync record, so products are not synced during the import
       sync_buffer = Gemgento::Sync.new
       sync_buffer.subject = 'products'
-      sync.save
+      sync_buffer.save
 
       @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
       @headers = get_headers
@@ -46,6 +46,7 @@ module Gemgento
       self.save
 
       sync_buffer.is_complete = true
+      sync_buffer.created_at = Time.now
       sync_buffer.save
     end
 
