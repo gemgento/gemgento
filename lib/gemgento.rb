@@ -12,7 +12,7 @@ module Gemgento
 
     # Log into the Magento API and setup the session and client
     def self.api_login(force_new_session = false)
-      @api_url = "http://#{Gemgento::Config[:magento][:url]}/index.php/api/v#{Gemgento::Config[:magento][:api_version]}_#{Gemgento::Config[:magento][:api_type]}/index/wsdl/1"
+      @api_url = "https://#{Gemgento::Config[:magento][:url]}/index.php/api/v#{Gemgento::Config[:magento][:api_version]}_#{Gemgento::Config[:magento][:api_type]}/index/wsdl/1"
       @client = Savon.client(
           wsdl: @api_url,
           log: Gemgento::Config[:magento][:debug],
