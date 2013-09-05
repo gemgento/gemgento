@@ -18,7 +18,7 @@ module Gemgento
           raise_errors: false,
           basic_auth: [Gemgento::Config[:magento][:auth_username].to_s, Gemgento::Config[:magento][:auth_password].to_s]
       )
-
+      @client.http.auth.ssl.verify_mode = :none
       if Gemgento::Session.last.nil? || force_new_session
         response = @client.call(:login, message: {:username => Gemgento::Config[:magento][:username], :apiKey => Gemgento::Config[:magento][:api_key]})
 
