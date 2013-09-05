@@ -27,7 +27,7 @@ module Gemgento
 
     private
 
-    def ensure_no_active_product_syn
+    def ensure_no_active_product_sync
       return Gemgento::Sync.is_active? %w[attributes products inventory everything]
     end
 
