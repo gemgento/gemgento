@@ -100,6 +100,7 @@ module Gemgento
     def self.create_current(subject)
       current = Sync.new
       current.subject = subject
+      current.is_complete = false
       current.save
       current
     end
