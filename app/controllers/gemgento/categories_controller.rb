@@ -17,7 +17,7 @@ module Gemgento
           @category = Gemgento::Category.where(params[:id]).first
           @products = []
 
-          @category.products.configurable.catalog_visible.each do |p|
+          @category.products.catalog_visible.enabled.each do |p|
             @products << {id: p.id, price: p.simple_products.first.price, url_key: p.url_key, name: p.name}
           end
           render :json => @products.to_json
@@ -25,7 +25,7 @@ module Gemgento
 
         format.html {
           @category = Gemgento::Category.where(url_key: params[:url_key]).first
-          @product = @category.products.configurable.catalog_visible
+          @product = @category.products.catalog_visible.enabled
         }
       end
 
