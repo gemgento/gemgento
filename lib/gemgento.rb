@@ -22,6 +22,7 @@ module Gemgento
           read_timeout: 300,
       )
       @client.http.auth.ssl.verify_mode = :none
+
       if Gemgento::Session.last.nil? || force_new_session
         response = @client.call(:login, message: {:username => Gemgento::Config[:magento][:username], :apiKey => Gemgento::Config[:magento][:api_key]})
 
