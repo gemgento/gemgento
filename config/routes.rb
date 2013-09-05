@@ -26,6 +26,7 @@ Gemgento::Engine.routes.draw do
   get '/sync/complete', to: 'sync#everything'
   get '/sync/products', to: 'sync#products'
   get '/sync/orders', to: 'sync#orders'
+  get '/sync/busy', to: 'sync#busy'
 
   devise_for :users, class_name: 'Gemgento::User',
              controllers: {:sessions => 'gemgento/users/sessions', :registrations => 'gemgento/users/registrations', :passwords => 'gemgento/users/passwords'},

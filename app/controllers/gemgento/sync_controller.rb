@@ -28,15 +28,21 @@ module Gemgento
     private
 
     def ensure_no_active_product_sync
-      return Gemgento::Sync.is_active? %w[attributes products inventory everything]
+      if Gemgento::Sync.is_active? %w[attributes products inventory everything]
+        redirect_to '/sync/busy'
+      end
     end
 
     def ensure_no_active_order_sync
-      return Gemgento::Sync.is_active? %w[customers orders everything]
+      if Gemgento::Sync.is_active? %w[customers orders everything]
+        redirect_to '/sync/busy'
+      end
     end
 
     def ensure_no_active_sync
-      return Gemgento::Sync.is_active?
+      if Gemgento::Sync.is_active?
+        redirect_to '/sync/busy'
+      end
     end
 
   end
