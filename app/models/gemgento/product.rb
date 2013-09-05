@@ -49,7 +49,7 @@ module Gemgento
       product_attribute_value = Gemgento::ProductAttributeValue.find_by(product_id: self.id, product_attribute_id: product_attribute.id)
 
       if product_attribute_value.nil?
-        return nil
+        return product_attribute.default_value
       end
 
       if product_attribute.product_attribute_options.empty?
