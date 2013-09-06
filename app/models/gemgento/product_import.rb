@@ -94,8 +94,10 @@ module Gemgento
         self.count_updated += 1
       end
 
+      product.magento_type = 'simple'
       product.sku = sku
       product.product_attribute_set = product_attribute_set
+      product.store = store
       product.status = @row[@headers.index('status').to_i].to_i
 
       unless product.magento_id
@@ -106,7 +108,6 @@ module Gemgento
       product = set_attribute_values(product)
       set_categories(product)
 
-      product.store = store
       product.sync_needed = true
       product.save
 

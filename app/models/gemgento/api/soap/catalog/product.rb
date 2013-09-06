@@ -89,8 +89,8 @@ module Gemgento
                 type: product.magento_type,
                 set: product.product_attribute_set.magento_id,
                 sku: product.sku,
-                productData: compose_product_data(product),
-                storeView: product.store.magento_id
+                product_data: compose_product_data(product),
+                store_view: product.store.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_product_create, message)
 
