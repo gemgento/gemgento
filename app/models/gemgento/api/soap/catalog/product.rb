@@ -12,18 +12,12 @@ module Gemgento
               unless store_view == empty_product_list
                 updates_made = true
 
-                puts store_view.inspect
-
                 # enforce array
                 unless store_view[:item].is_a? Array
                   store_view[:item] = [store_view[:item]]
                 end
 
-                puts store_view[:item].inspect
-
                 store_view[:item].each do |basic_product_info|
-                  puts 'basic product info ---'
-                  puts basic_product_info.inspect
                   attribute_set = Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
                   fetch(basic_product_info[:product_id], attribute_set)
                 end
