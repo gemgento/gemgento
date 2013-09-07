@@ -21,10 +21,14 @@ module Gemgento
     scope :disabled, -> { where(status: false) }
     scope :catalog_visible, -> { where(visibility: [2, 4]) }
     scope :search_visible, -> { where(visibility: [3, 4]) }
+    scope :not_deleted, -> { where(deleted_at: nil) }
+    scope :active, -> { where(deleted_at: nil, status: true) }
 
     after_save :sync_local_to_magento
 
     before_destroy :delete_associations
+
+    validates_uniqueness_of :sku, :scope => [:deleted_at]
 
     def self.index
       if Product.all.size == 0
@@ -125,6 +129,15 @@ module Gemgento
       else
         return false
       end
+    end
+
+    def mark_deleted
+      self.deleted_at = Time.now
+    end
+
+    def mark_deleted!
+      mark_deleted
+      self.save
     end
 
     private
