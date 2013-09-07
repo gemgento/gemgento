@@ -82,7 +82,7 @@ module Gemgento
     def create_simple_product
       sku = @row[@headers.index('sku').to_i].to_s.strip
 
-      product = Product.find_by(sku: sku)
+      product = Gemgento::Product.where(sku: sku).not_deleted.first_or_initialize
 
       if product.nil? # If product isn't known locally, check with Magento
         product = Product.check_magento(sku, 'sku', product_attribute_set)
@@ -242,7 +242,7 @@ module Gemgento
       sku = @row[@headers.index('sku').to_i].to_s.strip
 
       # set the default configurable product attributes
-      configurable_product = Gemgento::Product.where(sku: sku).first_or_initialize
+      configurable_product = Gemgento::Product.where(sku: sku).not_deleted.first_or_initialize
 
       if configurable_product.magento_id.nil?
         self.count_created += 1

@@ -160,7 +160,7 @@ module Gemgento
           private
 
           def self.sync_magento_to_local(subject)
-            product = Gemgento::Product.where(magento_id: subject[:product_id]).first_or_initialize
+            product = Gemgento::Product.where(magento_id: subject[:product_id]).not_deleted.first_or_initialize
             product.magento_id = subject[:product_id]
             product.magento_type = subject[:type]
             product.sku = subject[:sku]
