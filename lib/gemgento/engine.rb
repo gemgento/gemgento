@@ -2,7 +2,6 @@ require 'rails/engine'
 
 module Gemgento
   class Engine < ::Rails::Engine
-    include SslRequirement
     isolate_namespace Gemgento
     engine_name 'gemgento'
 

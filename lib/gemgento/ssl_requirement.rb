@@ -18,45 +18,61 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-module SslRequirement
-  def self.included(controller)
-    controller.extend(ClassMethods)
-    controller.before_filter(:ensure_proper_protocol)
-  end
-
-  module ClassMethods
-    # Specifies that the named actions requires an SSL connection to be performed (which is enforced by ensure_proper_protocol).
-    def ssl_required(*actions)
-      write_inheritable_array(:ssl_required_actions, actions)
+module Gemgento
+  module SslRequirement
+    def self.included(controller)
+      controller.extend(ClassMethods)
+      controller.before_filter(:ensure_proper_protocol)
     end
 
-    def ssl_allowed(*actions)
-      write_inheritable_array(:ssl_allowed_actions, actions)
+    module ClassMethods
+      # Specifies that the named actions requires an SSL connection to be performed (which is enforced by ensure_proper_protocol).
+      def ssl_required(*actions)
+        class_attribute(:ssl_required_actions)
+        self.ssl_required_actions = actions
+      end
+
+      def ssl_allowed(*actions)
+        class_attribute(:ssl_allowed_actions)
+        self.ssl_allowed_actions = actions
+      end
     end
-  end
 
-  protected
-  # Returns true if the current action is supposed to run as SSL
-  def ssl_required?
-    (self.class.read_inheritable_attribute(:ssl_required_actions) || []).include?(action_name.to_sym)
-  end
+    protected
+    # Returns true if the current action is supposed to run as SSL
+    def ssl_required?
+      if self.class.respond_to?(:ssl_required_actions)
+        actions = self.class.ssl_required_actions
+        actions.empty? || actions.include?(action_name.to_sym)
+      else
+        return false
+      end
+    end
 
-  def ssl_allowed?
-    (self.class.read_inheritable_attribute(:ssl_allowed_actions) || []).include?(action_name.to_sym)
-  end
+    def ssl_allowed?
+      if self.class.respond_to?(:ssl_allowed_actions)
+        actions = self.class.ssl_allowed_actions
+        actions.empty? || actions.include?(action_name.to_sym)
+      else
+        return false
+      end
+    end
 
-  private
-  def ensure_proper_protocol
-    return true if ssl_allowed?
+    private
 
-    if ssl_required? && !request.ssl?
-      redirect_to "https://" + request.host + request.request_uri
-      flash.keep
-      return false
-    elsif request.ssl? && !ssl_required?
-      redirect_to "http://" + request.host + request.request_uri
-      flash.keep
-      return false
+    def ssl_supported?
+      return Rails.env.production?
+    end
+
+    def ensure_proper_protocol
+      return true if ssl_allowed?
+      if ssl_required? && !request.ssl? && ssl_supported?
+        redirect_to "https://" + request.host + request.fullpath
+        flash.keep
+      elsif request.ssl? && !ssl_required?
+        redirect_to "http://" + request.host + request.fullpath
+        flash.keep
+      end
     end
   end
 end

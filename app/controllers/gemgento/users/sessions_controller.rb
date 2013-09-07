@@ -1,5 +1,7 @@
 module Gemgento
   class Users::SessionsController < Devise::SessionsController
+    include SslRequirement
+
     ssl_required :new, :create, :destroy
 
     # DELETE /resource/sign_out
