@@ -1,5 +1,7 @@
 module Gemgento
   class Users::AddressesController < BaseController
+    ssl_required :index, :show, :create, :update
+
     layout 'application'
 
     def index

@@ -1,5 +1,7 @@
 module Gemgento
   class Users::OrdersController < BaseController
+    ssl_required :index, :show
+
     layout 'application'
 
     def index

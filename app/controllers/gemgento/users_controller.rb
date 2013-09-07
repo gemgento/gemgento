@@ -2,6 +2,8 @@ module Gemgento
   class UsersController < BaseController
     before_filter :auth_user
 
+    ssl_required :show, :update
+
     layout 'application'
 
     def show
