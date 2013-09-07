@@ -6,8 +6,11 @@ module Gemgento
 
           # Synchronize local database with Magento database
           def self.fetch_all(last_updated = nil)
+            updates_made = false
+
             list(last_updated).each do |store_view|
               unless store_view == empty_product_list
+                updates_made = true
 
                 # enforce array
                 unless store_view[:item].is_a? Array
@@ -21,7 +24,7 @@ module Gemgento
               end
             end
 
-            associate_simple_products_to_configurable_products
+            associate_simple_products_to_configurable_products if updates_made
           end
 
           def self.fetch(product_id, attribute_set)
