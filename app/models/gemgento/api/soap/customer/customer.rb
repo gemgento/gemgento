@@ -6,7 +6,13 @@ module Gemgento
 
           def self.fetch_all(last_updated = nil)
             list(last_updated).each do |store_view|
+
               unless store_view[:item].nil?
+                # enforce array
+                unless store_view[:item].is_a? Array
+                  store_view[:item] = [store_view[:item]]
+                end
+
                 store_view[:item].each do |customer|
                   sync_magento_to_local(customer)
                 end
