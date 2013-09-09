@@ -62,21 +62,17 @@ module Gemgento
         value = product_attribute_value.value
       end
 
-      if product_attribute.product_attribute_options.empty?
-        return value
-      else
-        value = product_attribute.product_attribute_options.find_by(value: value).label
-
-        unless product_attribute.frontend_input == 'boolean'
-          return value
+      if product_attribute.frontend_input == 'boolean'
+        if value == 'Yes' || value == '1' || value == '1.0'
+          value = true
         else
-          if value == 'Yes' || value == '1'
-            return true
-          else
-            return false
-          end
+          value = false
         end
+      elsif product_attribute.frontend_input == 'select'
+        value = product_attribute.product_attribute_options.find_by(value: value).label
       end
+
+      return value
     end
 
     def self.check_magento(identifier, identifier_type, attribute_set)
