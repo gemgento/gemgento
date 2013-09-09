@@ -3,17 +3,25 @@ module Gemgento
 
     belongs_to :store
     belongs_to :product_attribute_set
-    belongs_to :configurable_product, foreign_key: 'parent_id', class_name: 'Product'
 
     has_one :inventory
 
     has_many :product_attribute_values, dependent: :destroy
     has_many :assets, dependent: :destroy
-    has_many :simple_products, foreign_key: 'parent_id', class_name: 'Product'
     has_many :relations, -> { distinct }, as: :relatable, :class_name => 'Relation'
 
     has_and_belongs_to_many :categories, -> { distinct }, join_table: 'gemgento_categories_products'
     has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
+    has_and_belongs_to_many :configurable_products, -> { distinct },
+                            join_table: 'gemgento_configurable_simple_relations',
+                            foreign_key: 'simple_product_id',
+                            association_foreign_key: 'configurable_product_id',
+                            class_name: 'Product'
+    has_and_belongs_to_many :simple_products, -> { distinct },
+                            join_table: 'gemgento_configurable_simple_relations',
+                            foreign_key: 'configurable_product_id',
+                            association_foreign_key: 'simple_product_id',
+                            class_name: 'Product'
 
     scope :configurable, -> { where(magento_type: 'configurable') }
     scope :simple, -> { where(magento_type: 'simple') }
@@ -160,7 +168,7 @@ module Gemgento
 
       unless self.simple_products.nil?
         self.simple_products.each do |simple_product|
-          simple_product.configurable_product = nil
+          simple_product.configurable_products.clear
           simple_product.save
         end
       end

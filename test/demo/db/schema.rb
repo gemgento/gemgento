@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130907164548) do
+ActiveRecord::Schema.define(version: 20130909232416) do
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer "user_address_id"
@@ -95,6 +95,11 @@ ActiveRecord::Schema.define(version: 20130907164548) do
   create_table "gemgento_configurable_attributes", id: false, force: true do |t|
     t.integer "product_id", default: 0, null: false
     t.integer "product_attribute_id", default: 0, null: false
+  end
+
+  create_table "gemgento_configurable_simple_relations", id: false, force: true do |t|
+    t.integer "configurable_product_id", default: 0, null: false
+    t.integer "simple_product_id", default: 0, null: false
   end
 
   create_table "gemgento_countries", force: true do |t|
