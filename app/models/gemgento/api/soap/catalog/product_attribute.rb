@@ -23,7 +23,7 @@ module Gemgento
               label = Gemgento::Magento.enforce_savon_string(attribute_option[:label])
               value = Gemgento::Magento.enforce_savon_string(attribute_option[:value])
 
-              product_attribute_option = Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: label).first_or_initialize
+              product_attribute_option = Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: label, value: value).first_or_initialize
               product_attribute_option.label = label
               product_attribute_option.value = value
               product_attribute_option.product_attribute = product_attribute
