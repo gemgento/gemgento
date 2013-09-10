@@ -77,7 +77,8 @@ module Gemgento
           value = false
         end
       elsif product_attribute.frontend_input == 'select'
-        value = product_attribute.product_attribute_options.find_by(value: value).label
+        option = product_attribute.product_attribute_options.find_by(value: value)
+        value = option.nil? ? nil : option.label
       end
 
       return value
