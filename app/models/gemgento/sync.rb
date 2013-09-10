@@ -12,7 +12,11 @@ module Gemgento
     end
 
     def self.categories
+      current = create_current('categories')
+
       Gemgento::API::SOAP::Catalog::Category.fetch_all
+
+      current.complete
     end
 
     def self.attributes

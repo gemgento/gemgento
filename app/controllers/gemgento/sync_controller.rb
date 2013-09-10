@@ -4,6 +4,7 @@ module Gemgento
     before_filter :ensure_no_active_order_sync, :except => [:busy, :products, :everything]
 
     def products
+      Gemgento::Sync.categories
       Gemgento::Sync.attributes
       Gemgento::Sync.products
       Gemgento::Sync.inventory
@@ -28,7 +29,7 @@ module Gemgento
     private
 
     def ensure_no_active_product_sync
-      if Gemgento::Sync.is_active? %w[attributes products inventory everything]
+      if Gemgento::Sync.is_active? %w[categories attributes products inventory everything]
         redirect_to '/sync/busy'
       end
     end
