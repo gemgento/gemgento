@@ -8,7 +8,10 @@ module Gemgento
     layout 'application'
 
     def shopping_bag
-
+      respond_to do |format|
+        format.html { render '/gemgento/checkout/shopping_bag' }
+        format.js { render '/gemgento/checkout/shopping_bag', :layout => false }
+      end
     end
 
     def login
