@@ -23,6 +23,8 @@ module Gemgento
                             association_foreign_key: 'simple_product_id',
                             class_name: 'Product'
 
+    default_scope include: [{product_attribute_values: :product_attribute}, :assets]
+
     scope :configurable, -> { where(magento_type: 'configurable') }
     scope :simple, -> { where(magento_type: 'simple') }
     scope :enabled, -> { where(status: true) }
@@ -57,11 +59,11 @@ module Gemgento
     end
 
     def attribute_value(code)
-      product_attribute = Gemgento::ProductAttribute.find_by(code: code)
-      product_attribute_value = Gemgento::ProductAttributeValue.find_by(product_id: self.id, product_attribute_id: product_attribute.id)
+      product_attribute_value = self.product_attribute_values.select { |value| value.product_attribute.code == code.to_s }.first
+      product_attribute = product_attribute_value.product_attribute
 
       if product_attribute_value.nil?
-        value = product_attribute.default_value
+        value = product_attribute_value.product_attribute.default_value
 
         if value.nil?
           return nil
@@ -96,14 +98,18 @@ module Gemgento
 
     # Attempts to return relations before method missing response
     def method_missing(method, *args)
-      relation_type = self.class.relation_types.detect { |rt| rt.name.downcase.gsub(" ", "_").pluralize == method.to_s.downcase }
+      puts self.inspect
+      relation_type = self.class.relation_types.detect { |rt| rt.name.downcase.gsub(' ', '_').pluralize == method.to_s.downcase }
 
       if !relation_type.nil?
         return relations.where(relation_type: relation_type)
-      elsif !Gemgento::ProductAttribute.find_by(code: method).nil?
-        return attribute_value(method)
       else
-        super
+
+        begin
+          return self.attribute_value(method)
+        rescue
+          super
+        end
       end
     end
 
