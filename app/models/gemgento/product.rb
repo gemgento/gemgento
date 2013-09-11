@@ -23,7 +23,7 @@ module Gemgento
                             association_foreign_key: 'simple_product_id',
                             class_name: 'Product'
 
-    default_scope include: [{product_attribute_values: :product_attribute}, :assets]
+    default_scope include: [{product_attribute_values: :product_attribute}, :assets, :inventory]
 
     scope :configurable, -> { where(magento_type: 'configurable') }
     scope :simple, -> { where(magento_type: 'simple') }
@@ -98,18 +98,10 @@ module Gemgento
 
     # Attempts to return relations before method missing response
     def method_missing(method, *args)
-      puts self.inspect
-      relation_type = self.class.relation_types.detect { |rt| rt.name.downcase.gsub(' ', '_').pluralize == method.to_s.downcase }
-
-      if !relation_type.nil?
-        return relations.where(relation_type: relation_type)
-      else
-
-        begin
-          return self.attribute_value(method)
-        rescue
-          super
-        end
+      begin
+        return self.attribute_value(method)
+      rescue
+        super
       end
     end
 

@@ -8,11 +8,14 @@ module Gemgento
 
     def show
       if (params[:id])
-        @product = Product.where(params[:id]).first
+        @product = Product.find(params[:id])
       else
-        @product = Product.joins(:product_attribute_values => :product_attribute).where(
+        @product = Product.active.where(
             gemgento_product_attributes: {code: 'url_key'},
-            gemgento_product_attribute_values: {value: params[:url_key]}).active.first
+            gemgento_product_attribute_values: {value: params[:url_key]},
+        ).first include: :simple_products
+
+        @product.product_attribute_values.reload
       end
 
       respond_to do |format|
