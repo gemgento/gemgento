@@ -199,7 +199,7 @@ module Gemgento
       current_order.customer_email = params[:email]
 
       respond_to do |format|
-        if current_order.save
+        if Devise::email_regexp.match(params[:email]) && current_order.save
           format.html { render 'gemgento/checkout/address' }
           format.js { render 'gemgento/checkout/login/login_guest_success', :layout => false }
         else
