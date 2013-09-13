@@ -1,5 +1,7 @@
 module Gemgento
   class AddressesController < BaseController
+    ssl_allowed :region_options
+
     layout false
 
     def region_options
