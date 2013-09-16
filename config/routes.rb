@@ -1,5 +1,11 @@
 Gemgento::Engine.routes.draw do
   root :to => "products#index"
+
+  if defined?(ActiveAdmin)
+    devise_for :admin_users, ActiveAdmin::Devise.config
+    ActiveAdmin.routes(self) if defined?(ActiveAdmin)
+  end
+
   get '/error/:action', :controller => "errors"
 
   get '/addresses/region_options', to: 'addresses#region_options'

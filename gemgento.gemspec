@@ -18,8 +18,10 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_dependency 'exception_notification_rails3', '=1.2.0'
+  gem.add_dependency 'sass-rails', '=4.0.0'
+  gem.add_dependency 'coffee-rails', '=4.0.0'
   gem.add_dependency 'savon', '=2.2.0'
   gem.add_dependency 'spreadsheet', '=0.8.5'
   gem.add_dependency 'devise', '=3.0.3'
-  gem.add_dependency 'threadz', '=1.1.0.rc3'
+  gem.add_dependency 'paperclip', '=3.5.1'
 end

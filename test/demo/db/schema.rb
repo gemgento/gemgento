@@ -11,7 +11,38 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130916132556) do
+ActiveRecord::Schema.define(version: 20130916173255) do
+
+  create_table "active_admin_comments", force: true do |t|
+    t.string "namespace"
+    t.text "body"
+    t.string "resource_id", null: false
+    t.string "resource_type", null: false
+    t.integer "author_id"
+    t.string "author_type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "active_admin_comments", ["author_type", "author_id"], name: "index_active_admin_comments_on_author_type_and_author_id", using: :btree
+  add_index "active_admin_comments", ["namespace"], name: "index_active_admin_comments_on_namespace", using: :btree
+  add_index "active_admin_comments", ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource_type_and_resource_id", using: :btree
+
+  create_table "admin_users", force: true do |t|
+    t.string "email", default: "", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.integer "sign_in_count", default: 0
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string "current_sign_in_ip"
+    t.string "last_sign_in_ip"
+  end
+
+  add_index "admin_users", ["email"], name: "index_admin_users_on_email", unique: true, using: :btree
+  add_index "admin_users", ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true, using: :btree
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer "user_address_id"
@@ -85,7 +116,7 @@ ActiveRecord::Schema.define(version: 20130916132556) do
     t.boolean "include_in_menu", default: true, null: false
   end
 
-  add_index "gemgento_categories", ["magento_id"], name: "index_gemgento_categories_on_magento_id", unique: true
+  add_index "gemgento_categories", ["magento_id"], name: "index_gemgento_categories_on_magento_id", unique: true, using: :btree
 
   create_table "gemgento_categories_products", id: false, force: true do |t|
     t.integer "product_id", default: 0, null: false
@@ -449,7 +480,7 @@ ActiveRecord::Schema.define(version: 20130916132556) do
     t.datetime "updated_at"
   end
 
-  add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true
+  add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true, using: :btree
 
   create_table "gemgento_syncs", force: true do |t|
     t.string "subject"
@@ -497,8 +528,8 @@ ActiveRecord::Schema.define(version: 20130916132556) do
     t.string "type"
   end
 
-  add_index "gemgento_users", ["email"], name: "index_gemgento_users_on_email", unique: true
-  add_index "gemgento_users", ["magento_id"], name: "index_gemgento_users_on_magento_id", unique: true
-  add_index "gemgento_users", ["reset_password_token"], name: "index_gemgento_users_on_reset_password_token", unique: true
+  add_index "gemgento_users", ["email"], name: "index_gemgento_users_on_email", unique: true, using: :btree
+  add_index "gemgento_users", ["magento_id"], name: "index_gemgento_users_on_magento_id", unique: true, using: :btree
+  add_index "gemgento_users", ["reset_password_token"], name: "index_gemgento_users_on_reset_password_token", unique: true, using: :btree
 
 end
