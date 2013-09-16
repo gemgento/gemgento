@@ -1,7 +1,7 @@
 PATH
   remote: ../../
   specs:
-    gemgento (0.2.0)
+    gemgento (0.8.0)
       devise (= 3.0.3)
       exception_notification_rails3 (= 1.2.0)
       savon (= 2.2.0)
