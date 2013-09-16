@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130916173255) do
+ActiveRecord::Schema.define(version: 20130916202316) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string "namespace"
@@ -430,7 +430,6 @@ ActiveRecord::Schema.define(version: 20130916173255) do
     t.string "product_attribute_set_id"
     t.string "store_id"
     t.boolean "sync_needed", default: true, null: false
-    t.integer "parent_id"
     t.boolean "status", default: true
     t.integer "visibility", default: 4
     t.datetime "deleted_at"
