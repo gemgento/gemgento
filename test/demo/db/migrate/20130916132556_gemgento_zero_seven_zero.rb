@@ -45,6 +45,10 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
       t.string "file"
       t.string "label"
       t.boolean "sync_needed", default: true, null: false
+      t.string "attachment_file_name"
+      t.string "attachment_content_type"
+      t.integer "attachment_file_size"
+      t.datetime "attachment_updated_at"
     end
 
     create_table "gemgento_assets_asset_types", id: false, force: true do |t|

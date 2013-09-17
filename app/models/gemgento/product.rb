@@ -60,10 +60,20 @@ module Gemgento
 
     def attribute_value(code)
       product_attribute_value = self.product_attribute_values.select { |value| value.product_attribute.code == code.to_s }.first
-      product_attribute = product_attribute_value.product_attribute
+
+      ## if the attribute is not currently associated with the product, check if it exists
+      if product_attribute_value.nil?
+        product_attribute = Gemgento::ProductAttribute.find_by(code: code)
+
+        if product_attribute.nil? # throw an error if the code is not recognized
+          raise "Unknown product attribute code - #{code}"
+        end
+      else
+        product_attribute = product_attribute_value.product_attribute
+      end
 
       if product_attribute_value.nil?
-        value = product_attribute_value.product_attribute.default_value
+        value = product_attribute.default_value
 
         if value.nil?
           return nil

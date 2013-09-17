@@ -66,6 +66,26 @@ if defined?(ActiveAdmin)
         end
       end
 
+      controller do
+        def permitted_params
+          params.permit(
+              :gemgento_product_import => [
+                  :image_labels,
+                  :spreadsheet,
+                  :product_attribute_set_id,
+                  :root_category_id,
+                  :store_id,
+                  :configurable_attribute_ids,
+                  :simple_product_visibility,
+                  :configurable_product_visibility,
+                  :include_images,
+                  :image_path,
+                  :image_file_extension,
+                  :image_labels_raw
+              ])
+        end
+      end
+
     end
   end
 end

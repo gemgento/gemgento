@@ -154,17 +154,17 @@ module Gemgento
       attribute_option.save
 
       attribute_option.sync_local_to_magento
-      attribute_option.reload
+      attribute_option.destroy #option values are not unique, search for newly fetched option for Magento
 
-      attribute_option
+      return Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: option_label).first
     end
 
     def set_default_attribute_values(product)
       product.status = 1 if product.status.nil?
       product.visibility = self.simple_product_visibility.to_i
 
-      if product.attribute_value('url_key').blank?
-        url_key = product.attribute_value('name').to_s.strip.gsub(' ', '-').gsub(/[^\w\s]/, '').downcase
+      if product.url_key.nil?
+        url_key = product.name.to_s.strip.gsub(' ', '-').gsub(/[^\w\s]/, '').downcase
         product.set_attribute_value('url_key', url_key)
       end
 
