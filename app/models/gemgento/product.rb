@@ -5,6 +5,7 @@ module Gemgento
     belongs_to :product_attribute_set
 
     has_one :inventory
+    has_one :swatch
 
     has_many :product_attribute_values, dependent: :destroy
     has_many :assets, dependent: :destroy
