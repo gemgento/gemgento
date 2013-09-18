@@ -4,5 +4,7 @@ module Gemgento
     belongs_to :relatable, :polymorphic => true, :touch => true
     belongs_to :related_to, :polymorphic => true, :touch => true
     validates :relation_type, :relatable, :related_to, :presence => true
+
+    default_scope -> { includes(:related_to) }
   end
 end

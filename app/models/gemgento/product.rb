@@ -23,7 +23,7 @@ module Gemgento
                             association_foreign_key: 'simple_product_id',
                             class_name: 'Product'
 
-    default_scope include: [{product_attribute_values: :product_attribute}, :assets, :inventory]
+    default_scope -> { includes([{product_attribute_values: :product_attribute}, :assets, :inventory]) }
 
     scope :configurable, -> { where(magento_type: 'configurable') }
     scope :simple, -> { where(magento_type: 'simple') }
@@ -100,12 +100,6 @@ module Gemgento
       API::SOAP::Catalog::Product.check_magento(identifier, identifier_type, attribute_set)
     end
 
-    # Returns all the RelationType's which apply to the Product class.
-    def self.relation_types
-      RelationType.where(applies_to: self.to_s).order(name: :asc)
-    end
-
-
     # Attempts to return relations before method missing response
     def method_missing(method, *args)
       begin
@@ -151,6 +145,13 @@ module Gemgento
     def mark_deleted!
       mark_deleted
       self.save
+    end
+
+    def related(relation_name)
+      relation_type = RelationType.find_by(name: relation_name)
+      raise "Unknown relation type - #{relation_name}" if relation_type.nil?
+
+      return self.relations.where(relation_type: relation_type).collect { |relation| relation.related_to }
     end
 
     private
