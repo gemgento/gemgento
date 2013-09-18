@@ -433,6 +433,7 @@ ActiveRecord::Schema.define(version: 20130918192944) do
     t.string "sku"
     t.string "product_attribute_set_id"
     t.string "store_id"
+    t.integer "swatch_id"
     t.boolean "sync_needed", default: true, null: false
     t.boolean "status", default: true
     t.integer "visibility", default: 4
