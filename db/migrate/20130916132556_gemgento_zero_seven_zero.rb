@@ -492,5 +492,14 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
     add_index "gemgento_users", ["magento_id"], name: "index_gemgento_users_on_magento_id", unique: true
     add_index "gemgento_users", ["reset_password_token"], name: "index_gemgento_users_on_reset_password_token", unique: true
 
+    create_table "gemgento_swatches", force: true do |t|
+      t.string "name"
+      t.string "description"
+      t.string "image_file_name"
+      t.string "image_content_type"
+      t.integer "image_file_size"
+      t.datetime "image_updated_at"
+    end
+
   end
 end
