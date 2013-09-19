@@ -24,7 +24,7 @@ module Gemgento
                             association_foreign_key: 'simple_product_id',
                             class_name: 'Product'
 
-    default_scope -> { includes([{product_attribute_values: :product_attribute}, :assets, :inventory]) }
+    default_scope -> { includes([{product_attribute_values: :product_attribute}, :assets, :inventory, :swatch]) }
 
     scope :configurable, -> { where(magento_type: 'configurable') }
     scope :simple, -> { where(magento_type: 'simple') }

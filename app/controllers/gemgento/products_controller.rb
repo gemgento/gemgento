@@ -40,5 +40,11 @@ module Gemgento
 
     end
 
+    private
+
+    def distinct_swatches(product)
+      product.simple_products.map { |p| p.swatch }.uniq
+    end
+
   end
 end
