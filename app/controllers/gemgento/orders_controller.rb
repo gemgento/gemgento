@@ -1,10 +1,8 @@
 module Gemgento
   class OrdersController < BaseController
+    ssl_allowed
+
     layout 'application'
-
-    def cart
-
-    end
 
     def show
       case current_order.state

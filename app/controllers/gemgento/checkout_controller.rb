@@ -1,18 +1,10 @@
 module Gemgento
   class CheckoutController < BaseController
-    before_filter :auth_cart_contents, :except => [:shopping_bag, :thank_you]
-    before_filter :auth_order_user, :except => [:login, :shopping_bag, :thank_you]
+    before_filter :auth_cart_contents, :except => [:thank_you]
+    before_filter :auth_order_user, :except => [:login, :thank_you]
     ssl_required :login, :address, :shipping, :payment, :confirm, :thank_you, :update
-    ssl_allowed :shopping_bag
 
     layout 'application'
-
-    def shopping_bag
-      respond_to do |format|
-        format.html { render '/gemgento/checkout/shopping_bag' }
-        format.js { render '/gemgento/checkout/shopping_bag', :layout => false }
-      end
-    end
 
     def login
       if params[:activity].nil?

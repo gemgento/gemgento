@@ -84,7 +84,7 @@ module Gemgento
       order_item = self.order_items.where(product: product).first
 
       unless order_item.nil?
-        API::SOAP::Checkout::Product.remove(self, [order_item])
+        API::SOAP::Checkout::Product.remove(self, [order_item]) unless self.magento_quote_id.nil?
         order_item.destroy
       end
     end

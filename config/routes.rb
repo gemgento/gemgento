@@ -1,5 +1,5 @@
 Gemgento::Engine.routes.draw do
-  root :to => "products#index"
+  root :to => 'products#index'
 
   if defined?(ActiveAdmin)
     devise_for :admin_users, ActiveAdmin::Devise.config
@@ -15,7 +15,7 @@ Gemgento::Engine.routes.draw do
   get '/shop/category/:url_key', to: 'categories#show'
   get '/shop/search', to: 'search#index'
 
-  get '/checkout/shopping_bag', to: 'checkout#shopping_bag'
+  get '/checkout/shopping_bag', to: 'cart#show'
   get '/checkout/login', to: 'checkout#login'
   post '/checkout/login', to: 'checkout#login'
   post '/checkout/register', to: 'checkout#register'
