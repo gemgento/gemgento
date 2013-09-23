@@ -1,5 +1,7 @@
 module Gemgento
-  class Checkout::LoginController < BaseController
+  class Checkout::LoginController < Checkout::CheckoutBaseController
+    before_filter :auth_cart_contents
+    before_filter :verify_guest
 
     def show
 
@@ -20,12 +22,22 @@ module Gemgento
 
     private
 
+    def check_user
+      if user_signed_in? && current_order.user.nil?
+        current_order.user = current_user
+        redirect_to checkout_address_path
+      elsif user_signed_in? && current_order.user != current_user
+        # don't know how to handle this
+      end
+    end
+
     def login_user
       user = User::is_valid_login(params[:email], params[:password])
 
       respond_to do |format|
         unless user.nil?
           sign_in(:user, user)
+          current_order.customer_is_guest = false
           current_order.user = current_user
           current_order.save
 
@@ -52,6 +64,7 @@ module Gemgento
       respond_to do |format|
         if @user.save
           sign_in(:user, @user)
+          current_order.customer_is_guest = false
           current_order.user = current_user
           current_order.save
 

@@ -1,5 +1,7 @@
 module Gemgento
-  class Checkout::AddressController < BaseController
+  class Checkout::AddressController < Checkout::CheckoutBaseController
+    before_filter :auth_cart_contents
+    before_filter :auth_order_user
 
     def show
       if current_order.user.nil? && !current_order.customer_is_guest
@@ -78,7 +80,7 @@ module Gemgento
           current_order.push_customer
           current_order.push_addresses
 
-          format.html { redirect_to '/gemgento/checkout/address/shipping' }
+          format.html { redirect_to checkout_shipping_path }
           format.js { render '/gemgento/checkout/address/success' }
         else
           @shipping_address = current_order.shipping_address
@@ -87,7 +89,7 @@ module Gemgento
           current_order.shipping_address.destroy
           current_order.billing_address.destroy
 
-          format.html { redirect_to '/gemgento/checkout/address/show' }
+          format.html { redirect_to checkout_address_path }
           format.js { render '/gemgento/checkout/address/error' }
         end
       end

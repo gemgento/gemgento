@@ -1,5 +1,7 @@
 module Gemgento
-  class Checkout::PaymentController < BaseController
+  class Checkout::PaymentController < Checkout::CheckoutBaseController
+    before_filter :auth_cart_contents
+    before_filter :auth_order_user
 
     def show
       set_totals
@@ -39,10 +41,10 @@ module Gemgento
 
       respond_to do |format|
         if current_order.push_payment_method
-          format.html { redirect_to '/gemgento/checkout/confirm' }
+          format.html { redirect_to checkout_confirmation_path }
           format.js { render '/gemgento/checkout/payment/success' }
         else
-          format.html { redirect_to '/gemgento/checkout/payment' }
+          format.html { redirect_to checkout_payment_path }
           format.js { render '/gemgento/checkout/payment/error' }
         end
 

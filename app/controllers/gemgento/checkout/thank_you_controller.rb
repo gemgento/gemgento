@@ -1,5 +1,5 @@
 module Gemgento
-  class Checkout::ThankYouController < BaseController
+  class Checkout::ThankYouController < Checkout::CheckoutBaseController
 
     def show
 

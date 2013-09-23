@@ -1,5 +1,7 @@
 module Gemgento
-  class Checkout::ShippingController < BaseController
+  class Checkout::ShippingController < Checkout::CheckoutBaseController
+    before_filter :auth_cart_contents
+    before_filter :auth_order_user
 
     def show
       set_totals
@@ -14,7 +16,7 @@ module Gemgento
       current_order.save
 
       respond_to do |format|
-        format.html { redirect_to '/gemgento/checkout/payment' }
+        format.html { redirect_to checkout_payment_path }
         format.js { render '/gemgento/checkout/shipping/success' }
       end
     end

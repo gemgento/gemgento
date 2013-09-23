@@ -1,5 +1,7 @@
 module Gemgento
-  class Checkout::ConfirmationController < BaseController
+  class Checkout::ConfirmationController < Checkout::CheckoutBaseController
+    before_filter :auth_cart_contents
+    before_filter :auth_order_user
 
     def show
       set_totals
@@ -23,10 +25,10 @@ module Gemgento
       respond_to do |format|
         if current_order.process
           create_new_cart
-          format.html { redirect_to '/checkout/thank_you' }
+          format.html { redirect_to checkout_thank_you_path }
           format.js { render 'gemgento/checkout/confirm/success' }
         else
-          format.html { redirect_to '/checkout/confirm' }
+          format.html { redirect_to checkout_confirmation_path }
           format.js { render 'gemgento/checkout/confirm/error' }
         end
       end
