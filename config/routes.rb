@@ -15,16 +15,6 @@ Gemgento::Engine.routes.draw do
   get '/shop/category/:url_key', to: 'categories#show'
   get '/shop/search', to: 'search#index'
 
-  get '/checkout/shopping_bag', to: 'cart#show'
-  get '/checkout/login', to: 'checkout#login'
-  post '/checkout/login', to: 'checkout#login'
-  post '/checkout/register', to: 'checkout#register'
-  get '/checkout/address', to: 'checkout#address'
-  get '/checkout/shipping', to: 'checkout#shipping'
-  get '/checkout/payment', to: 'checkout#payment'
-  get '/checkout/confirm', to: 'checkout#confirm'
-  get '/checkout/thank_you', to: 'checkout#thank_you'
-  post '/checkout/update', to: 'checkout#update'
   get '/order_export', to: 'order_export#index'
 
   get '/search', to: 'search#index'
@@ -38,6 +28,26 @@ Gemgento::Engine.routes.draw do
              controllers: {:sessions => 'gemgento/users/sessions', :registrations => 'gemgento/users/registrations', :passwords => 'gemgento/users/passwords'},
              skip: [:unlocks, :omniauth_callbacks],
              module: :devise
+
+  get '/checkout/shopping_bag', to: 'cart#show'
+
+  namespace 'checkout' do
+    get 'login', to: 'login#show', as: 'login'
+    post 'login', to: 'login#update', as: 'login_update'
+
+    get 'address', to: 'address#show', as: 'address'
+    post 'address', to: 'address#update', as: 'address_update'
+
+    get 'shipping', to: 'shipping#show', as: 'shipping'
+    post 'shipping', to: 'shipping#update', as: 'shipping_update'
+
+    get 'payment', to: 'payment#show', as: 'payment'
+    post 'payment', to: 'payment#update', as: 'payment_update'
+
+    get 'confirmation', to: 'confirmation#show', as: 'confirmation'
+
+    get 'thank_you', to: 'thank_you#show', as: 'thank_you'
+  end
 
   namespace 'users' do
     resources :orders, :addresses
