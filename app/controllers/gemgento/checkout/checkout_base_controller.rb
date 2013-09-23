@@ -25,5 +25,22 @@ module Gemgento
         end
       end
     end
+
+    def set_totals
+      totals = current_order.get_totals
+
+      unless totals.nil?
+        totals.each do |total|
+          if total[:title] == 'Grand Total'
+            @total = total[:amount].to_f
+          elsif total[:title] == 'Tax'
+            @tax = total[:amount].to_f
+          elsif total[:title].to_s.include? 'Shipping'
+            @shipping = total[:amount].to_f
+          end
+        end
+      end
+    end
+
   end
 end

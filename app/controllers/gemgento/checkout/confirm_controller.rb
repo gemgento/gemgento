@@ -1,5 +1,5 @@
 module Gemgento
-  class Checkout::ConfirmationController < Checkout::CheckoutBaseController
+  class Checkout::ConfirmController < Checkout::CheckoutBaseController
     before_filter :auth_cart_contents
     before_filter :auth_order_user
 

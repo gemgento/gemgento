@@ -22,7 +22,7 @@ module Gemgento
 
     private
 
-    def check_user
+    def verify_guest
       if user_signed_in? && current_order.user.nil?
         current_order.user = current_user
         redirect_to checkout_address_path

@@ -36,15 +36,16 @@ Gemgento::Engine.routes.draw do
     post 'login', to: 'login#update', as: 'login_update'
 
     get 'address', to: 'address#show', as: 'address'
-    post 'address', to: 'address#update', as: 'address_update'
+    patch 'address', to: 'address#update', as: 'address_update'
 
     get 'shipping', to: 'shipping#show', as: 'shipping'
-    post 'shipping', to: 'shipping#update', as: 'shipping_update'
+    patch 'shipping', to: 'shipping#update', as: 'shipping_update'
 
     get 'payment', to: 'payment#show', as: 'payment'
-    post 'payment', to: 'payment#update', as: 'payment_update'
+    patch 'payment', to: 'payment#update', as: 'payment_update'
 
-    get 'confirmation', to: 'confirmation#show', as: 'confirmation'
+    get 'confirm', to: 'confirm#show', as: 'confirm'
+    patch 'confirm', to: 'confirm#update', as: 'confirm_update'
 
     get 'thank_you', to: 'thank_you#show', as: 'thank_you'
   end
@@ -53,7 +54,7 @@ Gemgento::Engine.routes.draw do
     resources :orders, :addresses
   end
 
-  resources :products, :categories, :orders, :checkout, :subscribers, :users
+  resources :products, :categories, :orders, :subscribers, :users
 
   patch '/orders', to: 'orders#update'
 
