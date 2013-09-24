@@ -186,7 +186,7 @@ module Gemgento
 
     def decrement_stock
       self.order_items.each do |item|
-        item.product.inventory.quantity -= item.qty_ordered
+        item.product.inventory.quantity.to_f -= item.qty_ordered.to_f
         item.product.inventory.save
       end
     end

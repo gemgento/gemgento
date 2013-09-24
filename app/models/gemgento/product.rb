@@ -132,7 +132,7 @@ module Gemgento
     def in_stock?(quantity = 0)
       if self.inventory.nil?
         return true;
-      elsif self.inventory.is_in_stock && quantity <= self.inventory.quantity
+      elsif self.inventory.is_in_stock && quantity.to_f <= self.inventory.quantity.to_f
         return true;
       else
         return false
