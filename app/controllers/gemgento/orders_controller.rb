@@ -70,10 +70,13 @@ module Gemgento
       product = Gemgento::Product.find(params[:product])
       raise 'Product does not exist' if product.nil?
 
-      # add the item to the order
-      current_order.add_item(product, params[:quantity])
-
-      return product
+      if product.in_stock? params[:quantity]
+        # add the item to the order
+        current_order.add_item(product, params[:quantity])
+        return product
+      else
+        return false
+      end
     end
 
     def update_item
@@ -84,10 +87,13 @@ module Gemgento
       product = Gemgento::Product.find(params[:product])
       raise 'Product does not exist' if product.nil?
 
-      # update the item
-      current_order.update_item(product, params[:quantity])
-
-      return product
+      if product.in_stock? params[:quantity]
+        # update the item
+        current_order.update_item(product, params[:quantity])
+        return product
+      else
+        return false
+      end
     end
 
     def remove_item

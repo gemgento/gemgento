@@ -148,6 +148,7 @@ module Gemgento
         return false
       else
         API::SOAP::Checkout::Cart.order(self)
+        decrement_stock
       end
     end
 
@@ -161,7 +162,7 @@ module Gemgento
 
     def valid_stock?
       self.order_items.each do |item|
-        return false if !item.product.in_stock?
+        return false unless item.product.in_stock? item.qty_ordered
       end
 
       return true
@@ -180,6 +181,13 @@ module Gemgento
           local_address.postcode != remote_address[:postcode]
       )
         self.push_addresses
+      end
+    end
+
+    def decrement_stock
+      self.order_items.each do |item|
+        item.product.inventory.quantity -= item.qty_ordered
+        item.product.inventory.save
       end
     end
   end
