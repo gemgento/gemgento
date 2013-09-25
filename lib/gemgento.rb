@@ -71,6 +71,9 @@ module Gemgento
           magento_response.body = response.body[:"#{function}_response"]
         end
 
+        # only save successful responses if debugging is enabled
+        magento_response.save if Gemgento::Config[:magento][:debug]
+
         Rails.logger.debug '^^^ Success ^^^'
       else
         magento_response.success = false
@@ -82,11 +85,9 @@ module Gemgento
           api_login(true)
           create_call(function, message)
         end
+
+        magento_response.save
       end
-
-      Rails.logger.debug '-------------------'
-
-      magento_response.save
 
       return magento_response
     end
