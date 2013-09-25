@@ -37,14 +37,24 @@ module Gemgento
 
           respond_to do |format|
             format.html { render 'gemgento/checkout/shopping_bag' }
-            format.js { render '/gemgento/order/add_item', :layout => false }
+
+            unless @product
+              format.js { render '/gemgento/order/no_inventory', :layout => false }
+            else
+              format.js { render '/gemgento/order/add_item', :layout => false }
+            end
           end
         when 'update_item'
           @product = update_item
 
           respond_to do |format|
             format.html { render 'gemgento/checkout/shopping_bag' }
-            format.js { render '/gemgento/order/update_item', :layout => false }
+
+            unless @product
+              format.js { render '/gemgento/order/no_inventory', :layout => false }
+            else
+              format.js { render '/gemgento/order/update_item', :layout => false }
+            end
           end
         when 'remove_item'
           remove_item
