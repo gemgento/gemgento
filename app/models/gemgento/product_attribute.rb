@@ -1,9 +1,7 @@
 module Gemgento
   class ProductAttribute < ActiveRecord::Base
     has_and_belongs_to_many :product_attribute_sets, -> { uniq },
-                            :join_table => 'gemgento_attribute_set_attributes',
-                            foreign_key: 'attribute_id',
-                            association_foreign_key: 'attribute_set_id'
+                            :join_table => 'gemgento_attribute_set_attributes'
     has_and_belongs_to_many :configurable_products, -> { uniq },
                             join_table: 'gemgento_configurable_attributes',
                             class_name: 'Product'
