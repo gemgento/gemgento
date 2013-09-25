@@ -13,5 +13,10 @@ module Gemgento
 
       simple_products
     end
+
+    def self.query(table_name)
+      self.table_name = table_name
+      return self
+    end
   end
 end
