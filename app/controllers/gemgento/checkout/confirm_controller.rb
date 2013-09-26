@@ -11,7 +11,7 @@ module Gemgento
       @cc_types = Gemgento::OrderPayment.cc_types
       Rails.logger.info @cc_types
 
-      session[:shipping_methods].each do |shipping_method|
+      current_order.get_shipping_methods.each do |shipping_method|
         if shipping_method[:code] == current_order.shipping_method
           @shipping_method = shipping_method
           break

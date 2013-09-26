@@ -135,7 +135,7 @@ module Gemgento
     def get_shipping_methods
       logger.info self.shipping_address.inspect
       raise 'Order shipping address not set' if self.shipping_address.nil?
-      API::SOAP::Checkout::Shipping.list(self)
+      @shipping_methods ||= API::SOAP::Checkout::Shipping.list(self)
     end
 
     def push_shipping_method
@@ -186,7 +186,7 @@ module Gemgento
 
     def decrement_stock
       self.order_items.each do |item|
-        item.product.inventory.quantity.to_f -= item.qty_ordered.to_f
+        item.product.inventory.quantity -= item.qty_ordered.to_f
         item.product.inventory.save
       end
     end

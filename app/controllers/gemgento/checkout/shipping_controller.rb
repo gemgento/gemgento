@@ -5,8 +5,7 @@ module Gemgento
 
     def show
       set_totals
-      session[:shipping_methods] = current_order.get_shipping_methods
-      @shipping_methods = session[:shipping_methods]
+      @shipping_methods = current_order.get_shipping_methods
     end
 
     def update
