@@ -1,6 +1,6 @@
 module Gemgento
   class Asset < ActiveRecord::Base
-    belongs_to :product, touch: true, class_name: 'Gemgento::Product'
+    belongs_to :product, touch: true
     has_and_belongs_to_many :asset_types, -> { uniq }, :join_table => 'gemgento_assets_asset_types'
     after_save :sync_local_to_magento
     before_destroy :delete_magento
