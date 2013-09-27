@@ -155,6 +155,33 @@ module Gemgento
       return self.relations.where(relation_type: relation_type).collect { |relation| relation.related_to }
     end
 
+    def self.filter(filters)
+      products = self
+
+      filters.each_with_index do |filter, index|
+        filter[:attribute] = [filter[:attribute]] unless filter[:attribute].is_a? Array
+
+        unless filter[:attribute][0].frontend_input == 'select'
+          products = products.joins(ActiveRecord::Base.escape_sql(
+                                        "INNER JOIN gemgento_product_attribute_values AS value#{index} ON value#{index}.product_id = gemgento_products.id AND value#{index}.value IN (?)
+                    INNER JOIN gemgento_product_attributes AS attribute#{index} ON attribute#{index}.id = value#{index}.product_attribute_id AND attribute#{index}.id IN (?)",
+                                        filter[:value],
+                                        filter[:attribute].map { |a| a.id }
+                                    ))
+        else
+          products = products.joins(ActiveRecord::Base.escape_sql(
+                                        "INNER JOIN gemgento_product_attribute_values AS value#{index} ON value#{index}.product_id = gemgento_products.id
+                    INNER JOIN gemgento_product_attributes AS attribute#{index} ON attribute#{index}.id = value#{index}.product_attribute_id AND attribute#{index}.id IN (?)
+                    INNER JOIN gemgento_product_attribute_options AS option#{index} ON option#{index}.product_attribute_id = attribute#{index}.id AND option#{index}.label IN (?)",
+                                        filter[:attribute].map { |a| a.id },
+                                        filter[:value]
+                                    ))
+        end
+      end
+
+      return products
+    end
+
     private
 
     # Push local product changes to magento
