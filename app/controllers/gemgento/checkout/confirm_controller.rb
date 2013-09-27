@@ -21,10 +21,11 @@ module Gemgento
 
     def update
       current_order.enforce_cart_data
+      @order = current_order
 
       respond_to do |format|
         if current_order.process
-          create_new_cart
+          @order.reload
           format.html { redirect_to checkout_thank_you_path }
           format.js { render 'gemgento/checkout/confirm/success' }
         else
