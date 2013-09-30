@@ -8,6 +8,7 @@ module Gemgento
     belongs_to :user_group
     belongs_to :store
     has_many :addresses
+    has_many :orders
 
     after_save :sync_local_to_magento
 

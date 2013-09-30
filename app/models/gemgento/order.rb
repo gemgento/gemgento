@@ -19,6 +19,9 @@ module Gemgento
 
     attr_accessor :tax, :total
 
+    scope :cart, -> { where(state: 'cart') }
+    scope :placed, -> { where("state != 'cart'") }
+
     def self.index
       if Order.all.size == 0
         API::SOAP::Sales::Order.fetch_all

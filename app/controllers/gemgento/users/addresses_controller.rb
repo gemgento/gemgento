@@ -1,10 +1,5 @@
 module Gemgento
-  class Users::AddressesController < BaseController
-    before_filter :auth_user
-
-    ssl_required :index, :show, :create, :update
-
-    layout 'application'
+  class Users::AddressesController < Users::UsersBaseController
 
     def index
       @new_shipping_address = Address.new
@@ -54,10 +49,5 @@ module Gemgento
     def address_params
       params.require(:address).permit(:fname, :lname, :country_id, :city, :region_id, :postcode, :telephone)
     end
-
-    def auth_user
-      redirect_to new_user_session_path unless user_signed_in?
-    end
-
   end
 end

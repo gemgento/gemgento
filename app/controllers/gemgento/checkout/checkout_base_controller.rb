@@ -14,15 +14,8 @@ module Gemgento
 
     def auth_order_user
       # if the user is not signed in and the cart is not a guest checkout, go to login
-      unless user_signed_in? || current_order.customer_is_guest
+      if !user_signed_in? && !current_order.customer_is_guest
         redirect_to checkout_login_path
-      end
-
-      # if the logged in user doesn't match the cart user, go to login
-      if user_signed_in? && !current_order.customer_is_guest
-        if current_user != current_order.user
-          redirect_to checkout_login_path
-        end
       end
     end
 
