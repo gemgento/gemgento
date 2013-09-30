@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130918192944) do
+ActiveRecord::Schema.define(version: 20130930183059) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string "namespace"
@@ -433,11 +433,11 @@ ActiveRecord::Schema.define(version: 20130918192944) do
     t.string "sku"
     t.string "product_attribute_set_id"
     t.string "store_id"
-    t.integer "swatch_id"
     t.boolean "sync_needed", default: true, null: false
     t.boolean "status", default: true
     t.integer "visibility", default: 4
     t.datetime "deleted_at"
+    t.integer "order"
   end
 
   create_table "gemgento_regions", force: true do |t|

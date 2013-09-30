@@ -389,6 +389,7 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
       t.datetime "updated_at", null: false
       t.string "sku"
       t.string "product_attribute_set_id"
+      t.integer "position"
       t.string "store_id"
       t.integer "swatch_id"
       t.boolean "sync_needed", default: true, null: false
