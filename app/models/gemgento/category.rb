@@ -1,6 +1,7 @@
 module Gemgento
   class Category < ActiveRecord::Base
-    has_many :products, through: :product_category
+    has_many :product_categories
+    has_many :products, -> { distinct }, through: :product_categories
 
     belongs_to :parent, foreign_key: 'parent_id', class_name: 'Category'
 
