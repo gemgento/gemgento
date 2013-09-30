@@ -503,5 +503,13 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
       t.datetime "image_updated_at"
     end
 
+    create_table "gemgento_product_categories", force: true do |t|
+      t.integer "category_id"
+      t.integer "product_id"
+      t.integer "position", default: 0, null: false
+      t.datetime "created_at"
+      t.datetime "updated_at"
+    end
+
   end
 end

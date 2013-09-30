@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20130930183059) do
+ActiveRecord::Schema.define(version: 20130930195203) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string "namespace"
@@ -399,6 +399,14 @@ ActiveRecord::Schema.define(version: 20130930183059) do
     t.text "default_value"
   end
 
+  create_table "gemgento_product_categories", force: true do |t|
+    t.integer "category_id"
+    t.integer "product_id"
+    t.integer "position", default: 0, null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "gemgento_product_imports", force: true do |t|
     t.text "import_errors"
     t.datetime "created_at"
@@ -437,7 +445,6 @@ ActiveRecord::Schema.define(version: 20130930183059) do
     t.boolean "status", default: true
     t.integer "visibility", default: 4
     t.datetime "deleted_at"
-    t.integer "order"
   end
 
   create_table "gemgento_regions", force: true do |t|
