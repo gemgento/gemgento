@@ -100,8 +100,8 @@ ActiveRecord::Schema.define(version: 20130930183059) do
   end
 
   create_table "gemgento_attribute_set_attributes", id: false, force: true do |t|
-    t.integer "attribute_set_id", default: 0, null: false
-    t.integer "attribute_id", default: 0, null: false
+    t.integer "product_attribute_set_id", default: 0, null: false
+    t.integer "product_attribute_id", default: 0, null: false
   end
 
   create_table "gemgento_categories", force: true do |t|
