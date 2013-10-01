@@ -503,5 +503,12 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
       t.datetime "image_updated_at"
     end
 
+    create_table "gemgento_subscribers", force: true do |t|
+      t.string "name"
+      t.string "email"
+      t.datetime "created_at"
+      t.datetime "updated_at"
+    end
+
   end
 end
