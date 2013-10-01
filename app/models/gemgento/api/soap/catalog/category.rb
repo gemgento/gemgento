@@ -60,7 +60,10 @@ module Gemgento
           end
 
           def self.assigned_products(category)
-            message = {categoryId: category.magento_id}
+            message = {
+                categoryId: category.magento_id,
+                storeId: Gemgento::Store.current.magento_id
+            }
             response = Gemgento::Magento.create_call(:catalog_category_assigned_products, message)
 
             if response.success? && !response.body[:result][:item].nil?
