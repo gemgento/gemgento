@@ -1,6 +1,8 @@
 module Gemgento
   class Category < ActiveRecord::Base
-    has_and_belongs_to_many :products, -> { uniq }, :join_table => 'gemgento_categories_products'
+    has_many :product_categories
+    has_many :products, -> { distinct }, through: :product_categories
+
     belongs_to :parent, foreign_key: 'parent_id', class_name: 'Category'
 
     after_save :sync_local_to_magento

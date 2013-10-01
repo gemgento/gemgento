@@ -12,23 +12,8 @@ module Gemgento
     end
 
     def show
-      respond_to do |format|
-        format.js {
-          @category = Gemgento::Category.where(params[:id]).first
-          @products = []
-
-          @category.products.catalog_visible.active.each do |p|
-            @products << {id: p.id, price: p.simple_products.active.first.price, url_key: p.url_key, name: p.name}
-          end
-          render :json => @products.to_json
-        }
-
-        format.html {
-          @category = Gemgento::Category.where(url_key: params[:url_key]).first
-          @product = @category.products.catalog_visible.active
-        }
-      end
-
+      @category = Gemgento::Category.where(params[:id]).first
+      @products = @category.products.catalog_visibile.active.order('gemgento_product_categories.position ASC')
     end
 
   end

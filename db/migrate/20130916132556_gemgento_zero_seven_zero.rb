@@ -57,8 +57,8 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
     end
 
     create_table "gemgento_attribute_set_attributes", id: false, force: true do |t|
-      t.integer "product_attribute_set_id", default: 0, null: false
-      t.integer "product_attribute_id", default: 0, null: false
+      t.integer "attribute_set_id", default: 0, null: false
+      t.integer "attribute_id", default: 0, null: false
     end
 
     create_table "gemgento_categories", force: true do |t|
@@ -506,6 +506,14 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
     create_table "gemgento_subscribers", force: true do |t|
       t.string "name"
       t.string "email"
+      t.datetime "created_at"
+      t.datetime "updated_at"
+    end
+
+    create_table "gemgento_product_categories", force: true do |t|
+      t.integer "category_id"
+      t.integer "product_id"
+      t.integer "position", default: 1, null: false
       t.datetime "created_at"
       t.datetime "updated_at"
     end

@@ -59,6 +59,37 @@ module Gemgento
             response.body
           end
 
+          def self.assigned_products(category)
+            message = {categoryId: category.magento_id}
+            response = Gemgento::Magento.create_call(:catalog_category_assigned_products, message)
+
+            if response.success? && !response.body[:result][:item].nil?
+              result = response.body[:result][:item]
+              result = [result] unless result.is_a? Array
+
+              return result
+            else
+              return false
+            end
+          end
+
+          def self.set_product_categories
+            Gemgento::Category.all.each do |category|
+              next if category.products.empty?
+
+              result = assigned_products(category)
+
+              next if result.nil? || result == false || result.empty?
+
+              result.each do |item|
+                product = Gemgento::Product.find_by(magento_id: item[:product_id])
+                pairing = Gemgento::ProductCategory.where(category: category, product: product).first_or_initialize
+                pairing.position = item[:position].nil? ? 1 : item[:position]
+                pairing.save
+              end
+            end
+          end
+
           private
 
           # Traverse Magento category tree while synchronizing with local category tree

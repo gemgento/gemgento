@@ -34,6 +34,7 @@ module Gemgento
       current = create_current('products')
 
       Gemgento::API::SOAP::Catalog::Product.fetch_all last_updated.to_s(:db)
+      Gemgento::API::SOAP::Catalog::Category.set_product_categories
 
       current.complete
     end
@@ -74,6 +75,7 @@ module Gemgento
       Gemgento::API::SOAP::Catalog::ProductAttribute.fetch_all
       Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch_all_media_types
       Gemgento::API::SOAP::Catalog::Product.fetch_all
+      Gemgento::API::SOAP::Catalog::Category.set_product_categories
       Gemgento::API::SOAP::CatalogInventory::StockItem.fetch_all
       Gemgento::API::SOAP::Customer::Customer.fetch_all_customer_groups
       Gemgento::API::SOAP::Customer::Customer.fetch_all
