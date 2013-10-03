@@ -5,7 +5,7 @@ module Gemgento
         class Product
 
           # Synchronize local database with Magento database
-          def self.fetch_all(last_updated = nil)
+          def self.fetch_all(last_updated = nil, skip_existing = false)
             updates_made = false
 
             list(last_updated).each do |store_view|
@@ -18,6 +18,8 @@ module Gemgento
                 end
 
                 store_view[:item].each do |basic_product_info|
+                  next if skip_existing && Gemgento::Product.where(magento_id: basic_product_info[:product_id]).present?
+
                   attribute_set = Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
                   fetch(basic_product_info[:product_id], attribute_set)
                 end
