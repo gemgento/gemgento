@@ -29,11 +29,11 @@ module Gemgento
       current.complete
     end
 
-    def self.products
+    def self.products(skip_existing = false)
       last_updated = Sync.where('subject IN (?)', %w[products everything]).order('created_at DESC').first.created_at
       current = create_current('products')
 
-      Gemgento::API::SOAP::Catalog::Product.fetch_all last_updated.to_s(:db)
+      Gemgento::API::SOAP::Catalog::Product.fetch_all(last_updated.to_s(:db), skip_existing)
       Gemgento::API::SOAP::Catalog::Category.set_product_categories
 
       current.complete
