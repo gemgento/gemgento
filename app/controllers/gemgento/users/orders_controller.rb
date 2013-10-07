@@ -6,7 +6,7 @@ module Gemgento
     end
 
     def show
-
+      @order = Gemgento::Order.find_by(id: params[:id], user: current_user)
     end
 
   end

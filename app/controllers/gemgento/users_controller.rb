@@ -7,13 +7,17 @@ module Gemgento
     layout 'application'
 
     def show
-
+      @user = current_user
     end
 
     def update
       user = User.find(params[:id])
       user.update_attributes!(user_params)
       redirect_to user
+    end
+
+    def edit
+      @user = current_user
     end
 
     private
