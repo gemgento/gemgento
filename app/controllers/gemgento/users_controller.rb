@@ -11,9 +11,14 @@ module Gemgento
     end
 
     def update
-      user = User.find(params[:id])
-      user.update_attributes!(user_params)
-      redirect_to user
+      @user = User.find(current_user.id)
+
+      if @user.update_attributes(user_params)
+        sign_in @user, :bypass => true
+        redirect_to @user
+      else
+        render 'edit'
+      end
     end
 
     def edit
@@ -27,7 +32,7 @@ module Gemgento
     end
 
     def user_params
-      params.require(:user).permit(:fname, :lname, :email, :mname, :prefix, :suffix)
+      params.require(:user).permit(:fname, :lname, :email, :mname, :prefix, :suffix, :password, :password_confirmation)
     end
 
   end
