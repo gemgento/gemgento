@@ -149,9 +149,11 @@ module Gemgento
     def process
       if !valid_stock?
         return false
-      else
-        API::SOAP::Checkout::Cart.order(self)
+      elsif API::SOAP::Checkout::Cart.order(self)
         decrement_stock
+        return true
+      else
+        return false
       end
     end
 
