@@ -2,6 +2,8 @@ module Gemgento
   class ProductAttributeOption < ActiveRecord::Base
     belongs_to :product_attribute
 
+    default_scope -> { order(:order) }
+
     # Push local product changes to magento
     def sync_local_to_magento
       if self.sync_needed
