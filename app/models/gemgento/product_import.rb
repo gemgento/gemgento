@@ -26,7 +26,7 @@ module Gemgento
       sync_buffer.is_complete = false
       sync_buffer.save
 
-      @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
+      @worksheet = Spreadsheet.open(self.spreadsheet.url).worksheet(0)
       @headers = get_headers
       associated_simple_products = []
       self.import_errors = []
