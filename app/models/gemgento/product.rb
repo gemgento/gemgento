@@ -188,15 +188,23 @@ module Gemgento
       raise 'Direction must be equivalent to ASC or DESC' if direction != 'ASC' and direction != 'DESC'
 
       products = self
-      products = products.joins(:product_attribute_values).
-          joins(ActiveRecord::Base.escape_sql(ActiveRecord::Base.escape_sql(
-                                                  "INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id AND gemgento_product_attributes.id = '?'", attribute.id
-                                              )))
 
       unless attribute.frontend_input = 'select'
-        products = products.order("gemgento_product_attribute_values.value #{direction}")
+        products = products.joins(
+            ActiveRecord::Base.escape_sql(
+                'INNER JOIN gemgento_product_attribute_values ON gemgento_product_attribute_values.product_id = gemgento_products.id AND gemgento_product_attribute_values.product_attribute_id = ? ' +
+                    'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ',
+                attribute.id
+            )).
+            order("gemgento_product_attribute_values.value #{direction}")
       else
-        products = products.joins(ActiveRecord::Base.escape_sql('INNER JOIN gemgento_product_attribute_options ON gemgento_product_attribute_options.product_attribute_id = gemgento_product_attributes.id')).
+        products = products.joins(
+            ActiveRecord::Base.escape_sql(
+                'INNER JOIN gemgento_product_attribute_values ON gemgento_product_attribute_values.product_id = gemgento_products.id AND gemgento_product_attribute_values.product_attribute_id = ? ' +
+                    'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ' +
+                    'INNER JOIN gemgento_product_attribute_options ON gemgento_product_attribute_options.product_attribute_id = gemgento_product_attributes.id AND gemgento_product_attribute_options.value = gemgento_product_attribute_values.value',
+                attribute.id
+            )).
             order("gemgento_product_attribute_options.order #{direction}")
       end
 
