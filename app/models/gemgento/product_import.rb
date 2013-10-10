@@ -15,6 +15,7 @@ module Gemgento
     serialize :image_file_extensions, Array
 
     attr_accessor :image_labels_raw
+    attr_accessor :image_file_extensions_raw
 
     after_commit :process
 
@@ -62,10 +63,10 @@ module Gemgento
     end
 
     def image_file_extensions_raw
-      self.image_file_extensions.join("\n") unless self.image_file_extensions.nil?
+      self.image_file_extensions.join(', ') unless self.image_file_extensions.nil?
     end
 
-    def image_file_extensions_raw(values)
+    def image_file_extensions_raw=(values)
       self.image_file_extensions = []
       self.image_file_extensions = values.gsub(' ', '').split(',')
     end
