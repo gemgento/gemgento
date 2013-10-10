@@ -12,6 +12,7 @@ module Gemgento
 
     serialize :import_errors, Array
     serialize :image_labels, Array
+    serialize :image_file_extensions, Array
 
     attr_accessor :image_labels_raw
 
@@ -58,6 +59,15 @@ module Gemgento
     def image_labels_raw=(values)
       self.image_labels = []
       self.image_labels = values.gsub("\r", '').split("\n")
+    end
+
+    def image_file_extensions_raw
+      self.image_file_extensions.join("\n") unless self.image_file_extensions.nil?
+    end
+
+    def image_file_extensions_raw(values)
+      self.image_file_extensions = []
+      self.image_file_extensions = values.gsub(' ', '').split(',')
     end
 
     def image_path=(path)
@@ -199,18 +209,20 @@ module Gemgento
       images_found = false
       # find the correct image file name and path
       self.image_labels.each_with_index do |label, position|
-        file_name = self.image_path + @row[@headers.index('image').to_i].to_s.strip + '_' + label + self.image_file_extension
-        Rails.logger.info file_name
-        next unless File.exist?(file_name)
+        self.image_file_extensions.each do |extension|
+          file_name = self.image_path + @row[@headers.index('image').to_i].to_s.strip + '_' + label + extension
+          Rails.logger.info file_name
+          next unless File.exist?(file_name)
 
-        types = Gemgento::AssetType.find_by(product_attribute_set: product_attribute_set)
+          types = Gemgento::AssetType.find_by(product_attribute_set: product_attribute_set)
 
-        unless types.is_a? Array
-          types = [types]
+          unless types.is_a? Array
+            types = [types]
+          end
+
+          product.assets << create_image(product, file_name, types, position, label)
+          images_found = true
         end
-
-        product.assets << create_image(product, file_name, types, position, label)
-        images_found = true
       end
 
       unless images_found

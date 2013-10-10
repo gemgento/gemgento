@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131009132913) do
+ActiveRecord::Schema.define(version: 20131010142655) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string "namespace"
@@ -418,7 +418,6 @@ ActiveRecord::Schema.define(version: 20131009132913) do
     t.datetime "spreadsheet_updated_at"
     t.boolean "include_images"
     t.string "image_path"
-    t.string "image_file_extension"
     t.text "image_labels"
     t.integer "store_id"
     t.integer "root_category_id"
@@ -427,6 +426,7 @@ ActiveRecord::Schema.define(version: 20131009132913) do
     t.integer "count_updated"
     t.integer "simple_product_visibility"
     t.integer "configurable_product_visibility"
+    t.text "image_file_extensions"
   end
 
   create_table "gemgento_product_imports_configurable_attributes", id: false, force: true do |t|
