@@ -157,7 +157,7 @@ module Gemgento
             if asset.attachment.url(:original) =~ URI::regexp
               content = open(asset.attachment.url(:original)).read
             else
-              content = File.open(asset.attachment.url(:original)).read
+              content = File.open(asset.attachment.path(:original)).read
             end
 
             file_entity = {
