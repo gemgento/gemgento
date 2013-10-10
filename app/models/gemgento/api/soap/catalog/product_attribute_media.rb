@@ -155,7 +155,7 @@ module Gemgento
 
           def self.compose_file_entity(asset)
             file_entity = {
-                content: Base64.encode64(File.open(asset.attachment.path(:original)).read),
+                content: Base64.encode64(open(asset.attachment.url(:original)).read),
                 mime: asset.attachment_content_type
             }
 
