@@ -26,8 +26,14 @@ module Gemgento
       sync_buffer.subject = 'products'
       sync_buffer.is_complete = false
       sync_buffer.save
+      puts self.spreadsheet.url.inspect
 
-      @worksheet = Spreadsheet.open(open(self.spreadsheet.url)).worksheet(0)
+      if self.spreadsheet.url =~ URI::regexp
+        @worksheet = Spreadsheet.open(open(self.spreadsheet.url)).worksheet(0)
+      else
+        @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
+      end
+
       @headers = get_headers
       associated_simple_products = []
       self.import_errors = []

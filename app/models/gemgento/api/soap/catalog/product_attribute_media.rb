@@ -154,8 +154,14 @@ module Gemgento
           end
 
           def self.compose_file_entity(asset)
+            if asset.attachment.url(:original) =~ URI::regexp
+              content = open(asset.attachment.url(:original)).read
+            else
+              content = File.open(asset.attachment.url(:original)).read
+            end
+
             file_entity = {
-                content: Base64.encode64(open(asset.attachment.url(:original)).read),
+                content: Base64.encode64(content),
                 mime: asset.attachment_content_type
             }
 
