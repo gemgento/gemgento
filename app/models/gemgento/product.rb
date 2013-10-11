@@ -211,6 +211,16 @@ module Gemgento
       return products
     end
 
+    def swatches
+      swatches = []
+
+      self.simple_products.each do |p|
+        swatches << p.swatch unless swatches.include? p.swatch
+      end
+
+      return swatches
+    end
+
     private
 
     # Push local product changes to magento
