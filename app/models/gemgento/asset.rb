@@ -15,6 +15,8 @@ module Gemgento
                       :url => "/system/assets/products/:id/:style/:filename",
                       :path => ":rails_root/public/system/assets/products/:id/:style/:filename"
 
+    default_scope -> { order(:label) }
+
     private
 
     def sync_local_to_magento
