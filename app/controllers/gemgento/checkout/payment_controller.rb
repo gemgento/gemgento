@@ -25,6 +25,8 @@ module Gemgento
       end
 
       current_order.order_payment = OrderPayment.new if current_order.order_payment.nil?
+
+      render :layout => false if request.headers['X-PJAX']
     end
 
     def update

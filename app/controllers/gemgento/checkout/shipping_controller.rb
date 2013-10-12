@@ -6,6 +6,8 @@ module Gemgento
     def show
       set_totals
       @shipping_methods = current_order.get_shipping_methods
+
+      render :layout => false if request.headers['X-PJAX']
     end
 
     def update

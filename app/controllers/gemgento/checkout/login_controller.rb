@@ -4,7 +4,7 @@ module Gemgento
     before_filter :verify_guest
 
     def show
-
+      render :layout => false if request.headers['X-PJAX']
     end
 
     def update

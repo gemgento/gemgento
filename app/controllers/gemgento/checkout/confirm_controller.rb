@@ -17,6 +17,8 @@ module Gemgento
           break
         end
       end
+
+      render :layout => false if request.headers['X-PJAX']
     end
 
     def update

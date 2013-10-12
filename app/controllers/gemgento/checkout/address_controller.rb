@@ -27,6 +27,8 @@ module Gemgento
         current_order.shipping_address = Address.new if current_order.shipping_address.nil?
         current_order.billing_address = Address.new if current_order.billing_address.nil?
       end
+
+      render :layout => false if request.headers['X-PJAX']
     end
 
     def update
