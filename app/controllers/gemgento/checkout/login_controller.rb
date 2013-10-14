@@ -4,7 +4,7 @@ module Gemgento
     before_filter :verify_guest
 
     def show
-
+      @user = current_user
     end
 
     def update
@@ -42,6 +42,7 @@ module Gemgento
 
         redirect_to checkout_address_path
       else
+        flash.now[:error] = 'Invalid username and password'
         render action: 'show'
       end
     end
@@ -78,6 +79,7 @@ module Gemgento
       if Devise::email_regexp.match(params[:email]) && current_order.save
         redirect_to checkout_address_path
       else
+        flash.now[:error] = 'Invalid email address'
         render action: 'show'
       end
     end
