@@ -215,7 +215,7 @@ module Gemgento
       swatches = []
 
       self.simple_products.each do |p|
-        swatches << p.swatch unless swatches.include? p.swatch
+        swatches << p.swatch unless p.swatch.nil? || swatches.include?(p.swatch)
       end
 
       return swatches
