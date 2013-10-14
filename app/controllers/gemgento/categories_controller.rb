@@ -1,6 +1,5 @@
 module Gemgento
   class CategoriesController < BaseController
-    layout 'application'
 
     def index
       @categories = Gemgento::Category.all

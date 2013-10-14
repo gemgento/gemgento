@@ -2,8 +2,6 @@ module Gemgento
   class Checkout::CheckoutBaseController < BaseController
     ssl_required
 
-    layout 'application'
-
     private
 
     def auth_cart_contents

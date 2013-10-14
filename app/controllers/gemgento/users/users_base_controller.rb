@@ -1,9 +1,8 @@
 module Gemgento
   class Users::UsersBaseController < BaseController
     before_filter :auth_user
-    ssl_required
 
-    layout 'application'
+    ssl_required
 
     private
 

@@ -4,7 +4,7 @@ module Gemgento
     before_filter :verify_guest
 
     def show
-
+      @user = current_user
     end
 
     def update
@@ -34,19 +34,16 @@ module Gemgento
     def login_user
       user = User::is_valid_login(params[:email], params[:password])
 
-      respond_to do |format|
-        unless user.nil?
-          sign_in(:user, user)
-          current_order.customer_is_guest = false
-          current_order.user = current_user
-          current_order.save
+      unless user.nil?
+        sign_in(:user, user)
+        current_order.customer_is_guest = false
+        current_order.user = current_user
+        current_order.save
 
-          format.html { render 'gemgento/checkout/address' }
-          format.js { render '/gemgento/checkout/login/login_success', :layout => false }
-        else
-          format.html { render 'gemgento/checkout/login' }
-          format.js { render 'gemgento/checkout/login/login_fail', :layout => false }
-        end
+        redirect_to checkout_address_path
+      else
+        flash.now[:error] = 'Invalid username and password'
+        render action: 'show'
       end
     end
 
@@ -61,19 +58,15 @@ module Gemgento
       @user.password = params[:password]
       @user.password_confirmation = params[:password_confirmation]
 
-      respond_to do |format|
-        if @user.save
-          sign_in(:user, @user)
-          current_order.customer_is_guest = false
-          current_order.user = current_user
-          current_order.save
+      if @user.save
+        sign_in(:user, @user)
+        current_order.customer_is_guest = false
+        current_order.user = current_user
+        current_order.save
 
-          format.html { render 'gemgento/checkout/address' }
-          format.js { render 'gemgento/checkout/login/registration_success', :layout => false }
-        else
-          format.html { 'gemgento/checkout/login' }
-          format.js { render 'gemgento/checkout/login/registration_fail', :layout => false }
-        end
+        redirect_to checkout_address_path
+      else
+        render action: 'show'
       end
     end
 
@@ -83,14 +76,11 @@ module Gemgento
       current_order.customer_is_guest = true
       current_order.customer_email = params[:email]
 
-      respond_to do |format|
-        if Devise::email_regexp.match(params[:email]) && current_order.save
-          format.html { render 'gemgento/checkout/address' }
-          format.js { render 'gemgento/checkout/login/login_guest_success', :layout => false }
-        else
-          format.html { 'gemgento/checkout/login' }
-          format.js { render 'gemgento/checkout/login/login_guest_fail', :layout => false }
-        end
+      if Devise::email_regexp.match(params[:email]) && current_order.save
+        redirect_to checkout_address_path
+      else
+        flash.now[:error] = 'Invalid email address'
+        render action: 'show'
       end
     end
 

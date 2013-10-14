@@ -4,8 +4,6 @@ module Gemgento
 
     ssl_required :show, :update
 
-    layout 'application'
-
     def show
       @user = current_user
     end

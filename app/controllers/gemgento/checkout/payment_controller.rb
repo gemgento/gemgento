@@ -38,16 +38,11 @@ module Gemgento
       current_order.order_payment.cc_last4 = current_order.order_payment.cc_number[-4..-1]
       current_order.order_payment.save
 
-
-      respond_to do |format|
-        if current_order.push_payment_method
-          format.html { redirect_to checkout_confirmation_path }
-          format.js { render '/gemgento/checkout/payment/success' }
-        else
-          format.html { redirect_to checkout_payment_path }
-          format.js { render '/gemgento/checkout/payment/error' }
-        end
-
+      if current_order.push_payment_method
+        redirect_to checkout_confirm_path
+      else
+        flash[:error] = 'Invalid payment information.  Please review all details and try again.'
+        redirect_to checkout_payment_path
       end
     end
 
