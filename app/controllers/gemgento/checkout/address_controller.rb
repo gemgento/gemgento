@@ -27,8 +27,6 @@ module Gemgento
         current_order.shipping_address = Address.new if current_order.shipping_address.nil?
         current_order.billing_address = Address.new if current_order.billing_address.nil?
       end
-
-      render :layout => false if request.headers['X-PJAX']
     end
 
     def update
@@ -68,32 +66,27 @@ module Gemgento
       end
 
       # attempt to save the addresses and respond appropriately
-      respond_to do |format|
+      if current_order.shipping_address.save && current_order.billing_address.save
+        current_order.save
 
-        if current_order.shipping_address.save && current_order.billing_address.save
-          current_order.save
-
-          # push the order information to Magento
-          if user_signed_in?
-            current_order.shipping_address.push
-            current_order.billing_address.push
-          end
-
-          current_order.push_customer
-          current_order.push_addresses
-
-          format.html { redirect_to checkout_shipping_path }
-          format.js { render '/gemgento/checkout/address/success' }
-        else
-          @shipping_address = current_order.shipping_address
-          @billing_address = current_order.billing_address
-
-          current_order.shipping_address.destroy
-          current_order.billing_address.destroy
-
-          format.html { redirect_to checkout_address_path }
-          format.js { render '/gemgento/checkout/address/error' }
+        # push the order information to Magento
+        if user_signed_in?
+          current_order.shipping_address.push
+          current_order.billing_address.push
         end
+
+        current_order.push_customer
+        current_order.push_addresses
+
+        redirect_to checkout_shipping_path
+      else
+        @shipping_address = current_order.shipping_address
+        @billing_address = current_order.billing_address
+
+        current_order.shipping_address.destroy
+        current_order.billing_address.destroy
+
+        render action: 'show'
       end
     end
 

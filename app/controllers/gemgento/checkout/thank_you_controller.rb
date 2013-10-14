@@ -3,8 +3,6 @@ module Gemgento
 
     def show
       create_new_cart
-
-      render :layout => false if request.headers['X-PJAX']
     end
 
   end

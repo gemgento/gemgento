@@ -25,8 +25,6 @@ module Gemgento
       end
 
       current_order.order_payment = OrderPayment.new if current_order.order_payment.nil?
-
-      render :layout => false if request.headers['X-PJAX']
     end
 
     def update
@@ -40,16 +38,10 @@ module Gemgento
       current_order.order_payment.cc_last4 = current_order.order_payment.cc_number[-4..-1]
       current_order.order_payment.save
 
-
-      respond_to do |format|
-        if current_order.push_payment_method
-          format.html { redirect_to checkout_confirmation_path }
-          format.js { render '/gemgento/checkout/payment/success' }
-        else
-          format.html { redirect_to checkout_payment_path }
-          format.js { render '/gemgento/checkout/payment/error' }
-        end
-
+      if current_order.push_payment_method
+        redirect_to checkout_confirm_path
+      else
+        rende action: 'show'
       end
     end
 

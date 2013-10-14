@@ -1,6 +1,5 @@
 module Gemgento
   class ProductsController < BaseController
-    layout 'application'
 
     def index
       @products = Product.index

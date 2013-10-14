@@ -6,8 +6,6 @@ module Gemgento
     def show
       set_totals
       @shipping_methods = current_order.get_shipping_methods
-
-      render :layout => false if request.headers['X-PJAX']
     end
 
     def update
@@ -16,10 +14,7 @@ module Gemgento
       current_order.push_shipping_method
       current_order.save
 
-      respond_to do |format|
-        format.html { redirect_to checkout_payment_path }
-        format.js { render '/gemgento/checkout/shipping/success' }
-      end
+      redirect_to checkout_payment_path
     end
 
   end

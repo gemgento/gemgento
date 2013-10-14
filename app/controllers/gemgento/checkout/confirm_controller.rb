@@ -17,23 +17,17 @@ module Gemgento
           break
         end
       end
-
-      render :layout => false if request.headers['X-PJAX']
     end
 
     def update
       current_order.enforce_cart_data
       @order = current_order
 
-      respond_to do |format|
-        if current_order.process
-          @order.reload
-          format.html { redirect_to checkout_thank_you_path }
-          format.js { render 'gemgento/checkout/confirm/success' }
-        else
-          format.html { redirect_to checkout_confirmation_path }
-          format.js { render 'gemgento/checkout/confirm/error' }
-        end
+      if current_order.process
+        @order.reload
+        redirect_to checkout_thank_you_path
+      else
+        render action: 'show'
       end
     end
 

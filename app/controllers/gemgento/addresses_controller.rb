@@ -2,7 +2,7 @@ module Gemgento
   class AddressesController < BaseController
     ssl_allowed :region_options
 
-    layout false
+    layout -> { set_layout false }
 
     def region_options
       country = Country.find(params[:country_id])
