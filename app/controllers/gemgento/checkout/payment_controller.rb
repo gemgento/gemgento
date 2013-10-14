@@ -41,7 +41,8 @@ module Gemgento
       if current_order.push_payment_method
         redirect_to checkout_confirm_path
       else
-        rende action: 'show'
+        flash[:error] = 'Invalid payment information.  Please review all details and try again.'
+        redirect_to checkout_payment_path
       end
     end
 

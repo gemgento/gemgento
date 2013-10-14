@@ -27,7 +27,8 @@ module Gemgento
         @order.reload
         redirect_to checkout_thank_you_path
       else
-        render action: 'show'
+        flash[:error] = 'There was a problem processing your order.  Please review order details and try again.'
+        redirect_to checkout_confirm_path
       end
     end
 

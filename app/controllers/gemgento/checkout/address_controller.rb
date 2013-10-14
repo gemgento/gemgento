@@ -27,6 +27,8 @@ module Gemgento
         current_order.shipping_address = Address.new if current_order.shipping_address.nil?
         current_order.billing_address = Address.new if current_order.billing_address.nil?
       end
+
+      @same_as_billing = true;
     end
 
     def update
@@ -41,12 +43,16 @@ module Gemgento
 
       # create/update billing address
       if params[:same_as_billing]
+        @same_as_billing = true
+
         if current_order.billing_address.nil?
           current_order.billing_address = Address.new(shipping_address_params)
         else
           current_order.billing_address.update_attributes(shipping_address_params)
         end
       else
+        @same_as_billing = false
+
         if current_order.billing_address.nil?
           current_order.billing_address = Address.new(billing_address_params)
         else

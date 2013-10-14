@@ -11,10 +11,15 @@ module Gemgento
     def update
       current_order.shipping_method = params[:shipping_method]
       current_order.shipping_amount = params[params[:shipping_method]]
-      current_order.push_shipping_method
-      current_order.save
 
-      redirect_to checkout_payment_path
+      if current_order.push_shipping_method
+        current_order.save
+
+        redirect_to checkout_payment_path
+      else
+        flash[:error] = 'Please select a shipping method'
+        redirect_to checkout_shipping_path
+      end
     end
 
   end
