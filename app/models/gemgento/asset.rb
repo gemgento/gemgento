@@ -17,6 +17,29 @@ module Gemgento
 
     default_scope -> { order(:label) }
 
+    def save
+      # Dirty dirty dirty(S3Bug)..
+      begin
+        super
+      rescue Exception => e
+        puts "Upload Failed once.."
+
+        begin
+          super
+        rescue Exception => e
+          puts "Upload Failed twice.."
+
+          begin
+            super
+          rescue Exception => e
+            puts "Upload Failed three times.."
+
+            super
+          end
+        end
+      end
+    end
+
     private
 
     def sync_local_to_magento
