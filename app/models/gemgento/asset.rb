@@ -15,7 +15,7 @@ module Gemgento
                       :url => "/system/assets/products/:id/:style/:filename",
                       :path => ":rails_root/public/system/assets/products/:id/:style/:filename"
 
-    default_scope -> { order(:label) }
+    default_scope -> { order(:position) }
 
     def save
       # Dirty dirty dirty(S3Bug)..
