@@ -125,10 +125,8 @@ module Gemgento
 
             if category.children_count > 0
               category.all_children = subject[:all_children]
-              category.children = subject[:children]
             else
               category.all_children = ''
-              category.children = ''
             end
 
             category.sync_needed = false
