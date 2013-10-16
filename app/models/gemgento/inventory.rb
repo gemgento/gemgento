@@ -12,9 +12,14 @@ module Gemgento
       Inventory.all
     end
 
+    def push
+      Gemgento::API::SOAP::CatalogInventory::StockItem.update(self.product);
+    end
+
     private
 
     def touch_product
+      Gemgento::Product.skip_callback(:save, :after, :sync_local_to_magento)
       self.product.update(updated_at: Time.now) if self.changed?
     end
 

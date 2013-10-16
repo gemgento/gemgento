@@ -33,8 +33,15 @@ module Gemgento
             end
           end
 
-          def self.update
-            #TODO: Create update API call
+          def self.update(product)
+            message = {
+                product: product.magento_id,
+                data: compose_inventory_data(product.inventory)
+            }
+
+            response = Gemgento::Magento.create_call(:catalog_inventory_stock_item_update, message)
+
+            return response.success?
           end
 
           private
@@ -48,6 +55,14 @@ module Gemgento
             inventory.is_in_stock = source[:is_in_stock]
             inventory.sync_needed = false
             inventory.save
+          end
+
+          def self.compose_inventory_data(inventory)
+            {
+                qty: inventory.quantity.to_s,
+                'is_in_stock' => inventory.is_in_stock ? 1 : 0,
+                'manage_stock' => 1
+            }
           end
 
         end
