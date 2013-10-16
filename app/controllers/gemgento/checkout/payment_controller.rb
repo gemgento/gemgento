@@ -16,12 +16,13 @@ module Gemgento
 
       @exp_years = []
       Time.now.year.upto(Time.now.year + 10) do |year|
-        @exp_years << year
+        @exp_years << year.to_s
       end
 
-      @exp_months = []
+      @exp_months = {}
       1.upto(12) do |month|
-        @exp_months << month
+        month_string = month.to_s.length == 1 ? "0#{month.to_s}" : month.to_s
+        @exp_months[month] = month_string
       end
 
       current_order.order_payment = OrderPayment.new if current_order.order_payment.nil?
