@@ -3,11 +3,6 @@ module Gemgento
 
     def index
       @categories = Gemgento::Category.all
-      respond_to do |format|
-        format.json {
-          render :json => @categories.to_json
-        }
-      end
     end
 
     def show
