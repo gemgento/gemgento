@@ -36,7 +36,7 @@ module Gemgento
     scope :not_deleted, -> { where(deleted_at: nil) }
     scope :active, -> { where(deleted_at: nil, status: true) }
 
-    after_save :sync_local_to_magento
+    after_save :x
     after_save :touch_categories
 
     before_destroy :delete_associations
@@ -131,12 +131,21 @@ module Gemgento
       return products
     end
 
-    def in_stock?(quantity = 0)
-      if self.inventory.nil?
-        return true;
-      elsif self.inventory.is_in_stock && quantity.to_f <= self.inventory.quantity.to_f
-        return true;
+    def in_stock?(quantity = 1)
+      if self.magento_type == 'simple'
+        if self.inventory.nil?
+          return true;
+        elsif self.inventory.is_in_stock || quantity.to_f <= self.inventory.quantity.to_f
+          puts quantity.to_f
+          return true;
+        else
+          return false
+        end
       else
+        self.simple_products.each do |simple_product|
+          return true if simple_product.in_stock?
+        end
+
         return false
       end
     end
