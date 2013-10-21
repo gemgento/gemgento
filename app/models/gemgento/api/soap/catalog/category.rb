@@ -85,12 +85,17 @@ module Gemgento
               next if result.nil? || result == false || result.empty?
 
               result.each do |item|
-                product = Gemgento::Product.find_by(magento_id: item[:product_id])
-                next if product.nil?
+                begin
+                  product = Gemgento::Product.find_by(magento_id: item[:product_id])
+                  next if product.nil?
 
-                pairing = Gemgento::ProductCategory.where(category: category, product: product).first_or_initialize
-                pairing.position = item[:position].nil? ? 1 : item[:position]
-                pairing.save
+                  pairing = Gemgento::ProductCategory.where(category: category, product: product).first_or_initialize
+                  pairing.position = item[:position].nil? ? 1 : item[:position]
+                  pairing.save
+                rescue
+                  'unknown error'
+                  # TODO: solve - NameError: undefined local variable or method `x' for #<Gemgento::Product:0x007ff280bbb370>
+                end
               end
             end
           end
