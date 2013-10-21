@@ -3,13 +3,13 @@ PATH
   specs:
     gemgento (0.8.0)
       coffee-rails (~> 4.0.0)
-      devise (= 3.0.3)
+      devise (~> 3.0.3)
       exception_notification_rails3 (= 1.2.0)
       haml (~> 4.0.0)
-      paperclip (= 3.5.1)
+      paperclip (~> 3.5.1)
       sass-rails (~> 4.0.0)
-      savon (= 2.2.0)
-      spreadsheet (= 0.8.5)
+      savon (~> 2.2.0)
+      spreadsheet (~> 0.8.5)
 
 GEM
   remote: https://rubygems.org/
