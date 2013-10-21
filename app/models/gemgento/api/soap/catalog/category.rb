@@ -86,6 +86,8 @@ module Gemgento
 
               result.each do |item|
                 product = Gemgento::Product.find_by(magento_id: item[:product_id])
+                next if product.nil?
+
                 pairing = Gemgento::ProductCategory.where(category: category, product: product).first_or_initialize
                 pairing.position = item[:position].nil? ? 1 : item[:position]
                 pairing.save

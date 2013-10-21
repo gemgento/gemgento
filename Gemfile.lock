@@ -2,11 +2,12 @@ PATH
   remote: .
   specs:
     gemgento (0.8.0)
-      coffee-rails (= 4.0.0)
+      coffee-rails (~> 4.0.0)
       devise (= 3.0.3)
       exception_notification_rails3 (= 1.2.0)
+      haml (~> 4.0.0)
       paperclip (= 3.5.1)
-      sass-rails (= 4.0.0)
+      sass-rails (~> 4.0.0)
       savon (= 2.2.0)
       spreadsheet (= 0.8.5)
 
@@ -55,6 +56,8 @@ GEM
     execjs (2.0.1)
     gyoku (1.0.0)
       builder (>= 2.1.2)
+    haml (4.0.2)
+      tilt
     hike (1.2.3)
     httpi (2.0.2)
       rack
