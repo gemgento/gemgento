@@ -13,12 +13,7 @@ module Gemgento
             end
 
             list(magento_product_ids).each do |inventory|
-              begin
-                sync_magento_to_local(inventory)
-              rescue
-                'unknown error'
-                # TODO: solve - NameError: undefined local variable or method `x' for #<Gemgento::Product:0x007ff280bbb370>
-              end
+              sync_magento_to_local(inventory)
             end
           end
 

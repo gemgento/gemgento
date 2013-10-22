@@ -36,7 +36,7 @@ module Gemgento
     scope :not_deleted, -> { where(deleted_at: nil) }
     scope :active, -> { where(deleted_at: nil, status: true) }
 
-    after_save :x
+    after_save :sync_local_to_magento
     after_save :touch_categories
 
     before_destroy :delete_associations
