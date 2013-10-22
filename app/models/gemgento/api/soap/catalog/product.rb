@@ -159,6 +159,12 @@ module Gemgento
             }
           end
 
+          def self.propagate_magento_deletions
+            Gemgento::Product.not_deleted.where('magento_id NOT IN (?)', all_magento_product_ids).each do |product|
+              product.mark_deleted!
+            end
+          end
+
           private
 
           def self.sync_magento_to_local(subject)
@@ -315,6 +321,26 @@ module Gemgento
 
           def self.empty_product_list
             {:'@soap_enc:array_type' => 'ns1:catalogProductEntity[0]', :'@xsi:type' => 'ns1:catalogProductEntityArray'}
+          end
+
+          def self.all_magento_product_ids
+            magento_product_ids = []
+
+            list.each do |store_view|
+              unless store_view == empty_product_list
+
+                # enforce array
+                unless store_view[:item].is_a? Array
+                  store_view[:item] = [store_view[:item]]
+                end
+
+                store_view[:item].each do |basic_product_info|
+                  magento_product_ids << basic_product_info[:product_id] unless magento_product_ids.include? basic_product_info[:product_id]
+                end
+              end
+            end
+
+            return magento_product_ids
           end
 
         end
