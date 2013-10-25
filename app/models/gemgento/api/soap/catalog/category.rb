@@ -131,6 +131,14 @@ module Gemgento
               category.all_children = ''
             end
 
+            if subject.key? :image
+              begin
+                category.image = open("http://#{Gemgento::Config[:magento][:url]}/media/catalog/category/#{subject[:image]}")
+              rescue
+                category.image = nil
+              end
+            end
+
             category.sync_needed = false
             category.save
           end
