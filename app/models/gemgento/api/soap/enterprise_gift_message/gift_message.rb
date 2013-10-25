@@ -18,8 +18,6 @@ module Gemgento
 
           def self.sync_magento_to_local(source)
             # TODO: save gift messages locally
-            puts source
-            exit
           end
         end
       end

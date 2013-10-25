@@ -5,7 +5,6 @@ module Gemgento
         class ProductAttribute
 
           def self.fetch_all
-            #TODO: Use info() instead of list() to retrieve all attribute information
             Gemgento::ProductAttributeSet.all.each do |product_attribute_set|
               list(product_attribute_set).each do |product_attribute|
                 sync_magento_to_local(info(product_attribute[:attribute_id]), product_attribute_set)
@@ -13,33 +12,61 @@ module Gemgento
             end
           end
 
-          def self.list(product_attribute_set)
-            response = Gemgento::Magento.create_call(:catalog_product_attribute_list, { set_id: product_attribute_set.magento_id })
+          def self.fetch(attribute_id, attribute_set)
+            attribute_info = info(attribute_id)
+            sync_magento_to_local(attribute_info, attribute_set)
+          end
 
-            unless response[:result][:item].is_a? Array
-              response[:result][:item] = [response[:result][:item]]
+          def self.fetch_all_options(product_attribute)
+            # add attribute options if there are any
+            options(product_attribute.magento_id).each_with_index do |attribute_option, index|
+              label = Gemgento::Magento.enforce_savon_string(attribute_option[:label])
+              value = Gemgento::Magento.enforce_savon_string(attribute_option[:value])
+
+              product_attribute_option = Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: label, value: value).first_or_initialize
+              product_attribute_option.label = label
+              product_attribute_option.value = value
+              product_attribute_option.product_attribute = product_attribute
+              product_attribute_option.order = index
+              product_attribute_option.sync_needed = false
+              product_attribute_option.save
             end
+          end
 
-            response[:result][:item]
+          def self.list(product_attribute_set)
+            response = Gemgento::Magento.create_call(:catalog_product_attribute_list, {set_id: product_attribute_set.magento_id})
+
+            if response.success?
+              unless response.body[:result][:item].is_a? Array
+                response.body[:result][:item] = [response.body[:result][:item]]
+              end
+
+              response.body[:result][:item]
+            end
           end
 
           def self.info(attribute_id)
             response = Gemgento::Magento.create_call(:catalog_product_attribute_info, {attribute: attribute_id})
-            response[:result]
+
+            if response.success?
+              response.body[:result]
+            end
           end
 
           def self.options(product_attribute_id)
             response = Gemgento::Magento.create_call(:catalog_product_attribute_options, {attributeId: product_attribute_id})
 
-            if response[:result][:item].nil?
-              response[:result][:item] = []
-            end
+            if response.success?
+              if response.body[:result][:item].nil?
+                response.body[:result][:item] = []
+              end
 
-            unless response[:result][:item].is_a? Array
-              response[:result][:item] = [response[:result][:item]]
-            end
+              unless response.body[:result][:item].is_a? Array
+                response.body[:result][:item] = [response.body[:result][:item]]
+              end
 
-            response[:result][:item]
+              response.body[:result][:item]
+            end
           end
 
           def self.types
@@ -55,12 +82,13 @@ module Gemgento
           end
 
           def self.add_option(product_attribute_option, product_attribute)
-            message = { attribute: product_attribute.magento_id, data: {
-                label: { item: [{ 'store_id' => { item: [0,1] }, value: product_attribute_option.label }] },
+            message = {attribute: product_attribute.magento_id, data: {
+                label: {item: [{'store_id' => {item: [0, 1]}, value: product_attribute_option.label}]},
                 order: '0',
                 'is_default' => '0'
             }}
-            Gemgento::Magento.create_call(:catalog_product_attribute_add_option, message)
+            response = Gemgento::Magento.create_call(:catalog_product_attribute_add_option, message)
+            fetch_all_options(product_attribute) if response.success?
           end
 
           def self.remove_option
@@ -71,12 +99,13 @@ module Gemgento
 
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source, product_attribute_set)
-            product_attribute = Gemgento::ProductAttribute.find_or_initialize_by(magento_id: source[:attribute_id])
+            product_attribute = Gemgento::ProductAttribute.where(magento_id: source[:attribute_id]).first_or_initialize
             product_attribute.magento_id = source[:attribute_id]
-            product_attribute.product_attribute_set = product_attribute_set
+            product_attribute.product_attribute_sets << product_attribute_set unless product_attribute.product_attribute_sets.include? product_attribute_set
             product_attribute.code = source[:attribute_code]
             product_attribute.frontend_input = source[:frontend_input]
             product_attribute.scope = source[:scope]
+            product_attribute.default_value = source[:default_value] == {:'@xsi:type' => 'xsd:string'} ? nil : source[:default_value]
             product_attribute.is_unique = source[:is_unique]
             product_attribute.is_required = source[:is_required]
             product_attribute.is_configurable = source[:is_configurable]
@@ -89,20 +118,8 @@ module Gemgento
             product_attribute.sync_needed = false
             product_attribute.save
 
-            # add attribute options if there are any
-            options(product_attribute.magento_id).each do |attribute_option|
-              label = Gemgento::Magento.enforce_savon_string(attribute_option[:label])
-              value = Gemgento::Magento.enforce_savon_string(attribute_option[:value])
-
-              product_attribute_option = Gemgento::ProductAttributeOption.find_or_initialize_by(product_attribute: product_attribute, label: label)
-              product_attribute_option.label = label
-              product_attribute_option.value = value
-              product_attribute_option.product_attribute = product_attribute
-              product_attribute_option.sync_needed = false
-              product_attribute_option.save
-            end
+            fetch_all_options(product_attribute) if product_attribute.frontend_input == 'select'
           end
-
         end
       end
     end

@@ -1,21 +1,36 @@
 module Gemgento
   class UsersController < BaseController
-    layout 'application'
+    before_filter :auth_user
 
-    def login
+    ssl_required :show, :update
 
+    def show
+      @user = current_user
     end
 
-    def account
+    def update
+      @user = User.find(current_user.id)
 
+      if @user.update_attributes(user_params)
+        sign_in @user, :bypass => true
+        redirect_to @user
+      else
+        render 'edit'
+      end
     end
 
-    def info
-
+    def edit
+      @user = current_user
     end
 
-    def address
+    private
 
+    def auth_user
+      redirect_to new_user_session_path unless user_signed_in?
+    end
+
+    def user_params
+      params.require(:user).permit(:fname, :lname, :email, :mname, :prefix, :suffix, :password, :password_confirmation)
     end
 
   end

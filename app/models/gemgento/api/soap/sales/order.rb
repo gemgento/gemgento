@@ -4,25 +4,60 @@ module Gemgento
       module Sales
         class Order
 
-          def self.fetch_all
-            list.each do |order|
-              sync_magento_to_local(info(order[:increment_id]))
+          def self.fetch_all(last_updated = nil)
+            list(last_updated).each do |order|
+              unless order.nil?
+                fetch(order[:increment_id])
+              end
             end
           end
 
-          def self.list
-            response = Gemgento::Magento.create_call(:sales_order_list)
+          def self.fetch(increment_id)
+            info = info(increment_id)
 
-            unless response[:result][:item].is_a? Array
-              response[:result][:item] = [response[:result][:item]]
+            unless info == false
+              sync_magento_to_local(info)
+              return true
+            end
+            return false
+          end
+
+          def self.list(last_updated = nil)
+            if last_updated.nil?
+              message = {}
+            else
+              message = {
+                  'filters' => {
+                      'complex_filter' => {item: [
+                          key: 'updated_at',
+                          value: {
+                              key: 'gt',
+                              value: last_updated
+                          }
+                      ]}
+                  }
+              }
             end
 
-            response[:result][:item]
+            response = Gemgento::Magento.create_call(:sales_order_list, message)
+
+            if response.success?
+              unless response.body_overflow[:result][:item].is_a? Array
+                response.body_overflow[:result][:item] = [response.body_overflow[:result][:item]]
+              end
+
+              response.body_overflow[:result][:item]
+            end
           end
 
           def self.info(increment_id)
-            response = Gemgento::Magento.create_call(:sales_order_info, { order_increment_id: increment_id })
-            response[:result]
+            response = Gemgento::Magento.create_call(:sales_order_info, {order_increment_id: increment_id})
+
+            if response.success?
+              return response.body[:result]
+            else
+              return false
+            end
           end
 
           def self.hold
@@ -45,11 +80,10 @@ module Gemgento
 
           # Save Magento order to local
           def self.sync_magento_to_local(source)
-            order = Gemgento::Order.find_or_initialize_by(magento_order_id: source[:order_id])
-            order.magento_order_id = source[:order_id]
-            order.store = Store.find_by(magento_id: source[:store_id])
+            order = Gemgento::Order.where(increment_id: source[:increment_id].to_i).first_or_initialize
+            order.order_id = source[:order_id]
             order.is_active = source[:is_active]
-            order.user = User.find_by(magento_id: source[:customer_id])
+            order.user = User.where(magento_id: source[:customer_id]).first
             order.tax_amount = source[:tax_amount]
             order.shipping_amount = source[:shipping_amount]
             order.discount_amount = source[:discount_amount]
@@ -95,16 +129,24 @@ module Gemgento
             order.customer_lastname = source[:customer_lastname]
             order.magento_quote_id = source[:quote_id]
             order.is_virtual = source[:is_virtual]
-            order.user_group = UserGroup.find_by(magento_id: source[:customer_group_id])
+            order.user_group = UserGroup.where(magento_id: source[:customer_group_id]).first
             order.customer_note_notify = source[:customer_note_notify]
             order.customer_is_guest = source[:customer_is_guest]
             order.email_sent = source[:email_sent]
             order.increment_id = source[:increment_id]
+
+            store = Gemgento::Store.where(magento_id: source[:store_id]).first
+
+            if store.nil?
+              store = Gemgento::Store.current
+            end
+
+            order.store = store
             order.save
 
-            sync_magento_address_to_local(source[:shipping_address], order)
-            sync_magento_address_to_local(source[:billing_address], order)
-            OrderPayment.sync_magento_to_local(source[:payment], order)
+            sync_magento_address_to_local(source[:shipping_address], order, order.shipping_address)
+            sync_magento_address_to_local(source[:billing_address], order, order.billing_address)
+            sync_magento_payment_to_local(source[:payment], order)
 
             unless source[:gift_message_id].nil?
               gift_message = Gemgento::API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
@@ -112,28 +154,31 @@ module Gemgento
               order.save
             end
 
-
-            if !source[:items][:item].nil?
+            order.order_items.destroy_all
+            unless source[:items][:item].nil?
+              source[:items][:item] = [source[:items][:item]] unless source[:items][:item].is_a? Array
               source[:items][:item].each do |item|
-                OrderItem.sync_magento_to_local(item, order)
+                sync_magento_order_item_to_local(item, order)
               end
             end
 
             if !source[:status_history][:item].nil?
+              source[:status_history][:item] = [source[:status_history][:item]] unless source[:status_history][:item].is_a? Array
+
               source[:status_history][:item].each do |status|
-                OrderStatus.sync_magento_to_local(status, order)
+                sync_magento_order_status_to_local(status, order)
               end
             end
           end
 
-          def self.sync_magento_address_to_local(source, order)
-            address = Gemgento::Address.find_or_initialize_by(order_address_id: source[:address_id])
+          def self.sync_magento_address_to_local(source, order, address = nil)
+            address = Gemgento::Address.where(order_address_id: source[:address_id].to_i).first_or_initialize if address.nil?
             address.order_address_id = source[:address_id]
             address.order = order
             address.increment_id = source[:increment_id]
             address.city = source[:city]
             address.company = source[:company]
-            address.country = Country.find_by(magento_id: source[:country_id])
+            address.country = Country.where(magento_id: source[:country_id]).first
             address.fax = source[:fax]
             address.fname = source[:firstname]
             address.mname = source[:middlename]
@@ -141,12 +186,11 @@ module Gemgento
             address.postcode = source[:postcode]
             address.prefix = source[:prefix]
             address.region_name = source[:region]
-            address.region = Region.find_by(magento_id: source[:region_id])
+            address.region = Region.where(magento_id: source[:region_id]).first
             address.street = source[:street]
             address.suffix = source[:suffix]
             address.telephone = source[:telephone]
-            address.is_default_billing = source[:is_default_billing]
-            address.is_default_shipping = source[:is_default_shipping]
+            address.is_default = source[:is_default_billing] || source[:is_default_shipping] ? 1 : 0
             address.address_type = source[:address_type]
             address.sync_needed = false
             address.save
@@ -155,7 +199,7 @@ module Gemgento
           end
 
           def self.sync_magento_payment_to_local(source, order)
-            payment = Gemgento::OrderPayment.find_or_initialize_by(magento_id: source[:payment_id])
+            payment = Gemgento::OrderPayment.where(magento_id: source[:payment_id].to_i).first_or_initialize
             payment.order = order
             payment.magento_id = source[:payment_id]
             payment.increment_id = source[:increment_id]
@@ -180,11 +224,11 @@ module Gemgento
           end
 
           def self.sync_magento_order_status_to_local(source, order)
-            order_status = Gemgento::OrderStatus.find_or_initialize_by(order: order, status: source[:status], comment: source[:comment])
+            order_status = Gemgento::OrderStatus.where(order_id: order.id, status: source[:status], comment: source[:comment]).first_or_initialize
             order_status.order = order
             order_status.status = source[:status]
             order_status.is_active = source[:is_active]
-            order_status.is_customer_notified = source[:is_customer_notified]
+            order_status.is_customer_notified = source[:is_customer_notified].to_i
             order_status.comment = source[:comment]
             order_status.created_at = source[:created_at]
             order_status.save
@@ -193,11 +237,11 @@ module Gemgento
           end
 
           def self.sync_magento_order_item_to_local(source, order)
-            order_item = Gemgento::OrderItem.find_or_initialize_by(magento_id: source[:item_id])
+            order_item = Gemgento::OrderItem.where(magento_id: source[:item_id]).first_or_initialize
             order_item.order = order
             order_item.magento_id = source[:item_id]
             order_item.quote_item_id = source[:quote_item_id]
-            order_item.product = Product.find_by(magento_id: source[:product_id])
+            order_item.product = Product.where(magento_id: source[:product_id]).first
             order_item.product_type = source[:product_type]
             order_item.product_options = source[:product_options]
             order_item.weight = source[:weight]

@@ -13,23 +13,28 @@ module Gemgento
           def self.list
             response = Gemgento::Magento.create_call(:store_list)
 
-            unless response[:stores][:item].is_a? Array
-              response[:stores][:item] = [response[:stores][:item]]
-            end
+            if response.success?
+              unless response.body[:stores][:item].is_a? Array
+                response.body[:stores][:item] = [response.body[:stores][:item]]
+              end
 
-            response[:stores][:item]
+              response.body[:stores][:item]
+            end
           end
 
           def self.info
             response = Gemgento::Magento.create_call(:store_list)
-            response[:result]
+
+            if response.success?
+              response.body[:result]
+            end
           end
 
           private
 
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source)
-            store = Gemgento::Store.find_or_initialize_by(magento_id: source[:store_id])
+            store = Gemgento::Store.where(magento_id: source[:store_id]).first_or_initialize
             store.magento_id = source[:store_id]
             store.code = source[:code]
             store.group_id = source[:group_id]

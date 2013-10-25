@@ -1,4 +1,2 @@
-eval(File.read(File.dirname(__FILE__) + '/common_gemgento_dependencies.rb'))
-
-
+source 'https://rubygems.org'
 gemspec

@@ -1,3 +1,5 @@
 Demo::Application.routes.draw do
-  mount Gemgento::Engine => "/"
+  devise_for :admin_users, ActiveAdmin::Devise.config
+  ActiveAdmin.routes(self)
+  mount Gemgento::Engine => '/'
 end

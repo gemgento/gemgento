@@ -5,7 +5,7 @@ module Gemgento
         class Region
 
           def self.fetch_all
-            Gemgento::Country.find(:all).each do |country|
+            Gemgento::Country.all.each do |country|
               list(country.iso2_code).each do |region|
                 sync_magento_to_local(region, country)
               end
@@ -13,24 +13,26 @@ module Gemgento
           end
 
           def self.list(country)
-            response = Gemgento::Magento.create_call(:directory_region_list, { country: country })
+            response = Gemgento::Magento.create_call(:directory_region_list, {country: country})
 
-            if !response[:countries][:item].nil?
-              unless response[:countries][:item].is_a? Array
-                response[:countries][:item] = [response[:countries][:item]]
+            if response.success?
+              if !response.body[:countries][:item].nil?
+                unless response.body[:countries][:item].is_a? Array
+                  response.body[:countries][:item] = [response.body[:countries][:item]]
+                end
+              else
+                response.body[:countries][:item] = []
               end
-            else
-              response[:countries][:item] = []
-            end
 
-            response[:countries][:item]
+              response.body[:countries][:item]
+            end
           end
 
           private
 
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source, country)
-            region = Gemgento::Region.find_or_initialize_by(magento_id: source[:region_id])
+            region = Gemgento::Region.where(magento_id: source[:region_id]).first_or_initialize
             region.magento_id = source[:region_id]
             region.code = source[:code]
             region.name = source[:name]

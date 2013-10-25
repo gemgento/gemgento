@@ -11,12 +11,18 @@ module Gemgento
 
           def self.tree
             response = Gemgento::Magento.create_call(:catalog_category_tree)
-            response[:tree]
+
+            if response.success?
+              return response.body[:tree]
+            end
           end
 
           def self.info(category_id)
-            response = Gemgento::Magento.create_call(:catalog_category_info, { category_id: category_id })
-            response[:info]
+            response = Gemgento::Magento.create_call(:catalog_category_info, {category_id: category_id})
+
+            if response.success?
+              return response.body[:info]
+            end
           end
 
           def self.create(category)
@@ -24,17 +30,20 @@ module Gemgento
                 name: self.name,
                 'is_active' => category.is_active ? 1 : 0,
                 'include_in_menu' => category.include_in_menu ? 1 : 0,
-                'available_sort_by' =>  { 'arr:string' => %w[name] },
+                'available_sort_by' => {'arr:string' => %w[name]},
                 'default_sort_by' => 'name',
                 'url_key' => category.url_key,
                 'position' => category.position,
                 'is_anchor' => 1
             }
-            message = {parentId: category.parent_id, categoryData: data}
+            message = {parentId: category.parent.magento_id, categoryData: data}
             response = Gemgento::Magento.create_call(:catalog_category_create, message)
 
-            category.magento_id = response[:attribute_id]
-            category.save
+            if response.success?
+              category.magento_id = response.body[:attribute_id]
+              category.sync_needed = false
+              category.save
+            end
           end
 
           def self.update(category)
@@ -46,7 +55,44 @@ module Gemgento
                 'position' => category.position
             }
             message = {categoryId: category.magento_id, categoryData: data}
-            Gemgento::Magento.create_call(:catalog_category_update, message)
+            response = Gemgento::Magento.create_call(:catalog_category_update, message)
+            response.body
+          end
+
+          def self.assigned_products(category)
+            message = {
+                categoryId: category.magento_id,
+                storeId: Gemgento::Store.current.magento_id
+            }
+            response = Gemgento::Magento.create_call(:catalog_category_assigned_products, message)
+
+            if response.success? && !response.body[:result][:item].nil?
+              result = response.body[:result][:item]
+              result = [result] unless result.is_a? Array
+
+              return result
+            else
+              return false
+            end
+          end
+
+          def self.set_product_categories
+            Gemgento::Category.all.each do |category|
+              next if category.products.empty?
+
+              result = assigned_products(category)
+
+              next if result.nil? || result == false || result.empty?
+
+              result.each do |item|
+                product = Gemgento::Product.find_by(magento_id: item[:product_id])
+                next if product.nil?
+
+                pairing = Gemgento::ProductCategory.where(category: category, product: product).first_or_initialize
+                pairing.position = item[:position].nil? ? 1 : item[:position]
+                pairing.save
+              end
+            end
           end
 
           private
@@ -69,11 +115,11 @@ module Gemgento
           #
           # @param [Hash] subject The returned item of Magento API call
           def self.sync_magento_to_local(subject)
-            category = Gemgento::Category.find_or_initialize_by(magento_id: subject[:category_id])
+            category = Gemgento::Category.where(magento_id: subject[:category_id]).first_or_initialize
             category.magento_id = subject[:category_id]
             category.name = subject[:name]
             category.url_key = subject[:url_key]
-            category.parent_id = subject[:parent_id]
+            category.parent = Gemgento::Category.find_by(magento_id: subject[:parent_id])
             category.position = subject[:position]
             category.is_active = subject[:is_active]
             category.include_in_menu = subject[:include_in_menu] == 1 ? true : false
@@ -81,10 +127,8 @@ module Gemgento
 
             if category.children_count > 0
               category.all_children = subject[:all_children]
-              category.children = subject[:children]
             else
               category.all_children = ''
-              category.children = ''
             end
 
             category.sync_needed = false

@@ -14,18 +14,20 @@ module Gemgento
           def self.list
             response = Gemgento::Magento.create_call(:directory_country_list)
 
-            unless response[:countries][:item].is_a? Array
-              response[:countries][:item] = [response[:countries][:item]]
-            end
+            if response.success?
+              unless response.body[:countries][:item].is_a? Array
+                response.body[:countries][:item] = [response.body[:countries][:item]]
+              end
 
-            response[:countries][:item]
+              response.body[:countries][:item]
+            end
           end
 
           private
 
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source)
-            country = Gemgento::Country.find_or_initialize_by(magento_id: source[:country_id])
+            country = Gemgento::Country.where(magento_id: source[:country_id]).first_or_initialize
             country.magento_id = source[:country_id]
             country.iso2_code = source[:iso2_code]
             country.iso3_code = source[:iso3_code]

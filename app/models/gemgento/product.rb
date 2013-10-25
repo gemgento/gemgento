@@ -1,30 +1,58 @@
 module Gemgento
   class Product < ActiveRecord::Base
 
-    # TODO: need a way to update product type via Gemgento
-
-    belongs_to :product_attribute_set
-    has_many :product_attribute_values
-    has_and_belongs_to_many :categories, -> { uniq } , join_table: 'gemgento_categories_products'
-    has_many :assets
-    has_many :simple_products, foreign_key: 'parent_id', class_name: 'Product'
-    belongs_to :configurable_product, foreign_key: 'parent_id', class_name: 'Product'
-    has_and_belongs_to_many :configurable_attributes, -> { uniq } , join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
-    after_save :sync_local_to_magento
     belongs_to :store
+    belongs_to :product_attribute_set
+    belongs_to :swatch
+
     has_one :inventory
-    scope :configurable, where(magento_type: 'configurable')
+
+    has_many :product_attribute_values, dependent: :destroy
+    has_many :assets, dependent: :destroy
+    has_many :relations, -> { distinct }, as: :relatable, :class_name => 'Relation'
+    has_many :product_categories, -> { distinct }, dependent: :destroy
+    has_many :categories, -> { distinct }, through: :product_categories
+
+    has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
+    has_and_belongs_to_many :configurable_products, -> { distinct },
+                            join_table: 'gemgento_configurable_simple_relations',
+                            foreign_key: 'simple_product_id',
+                            association_foreign_key: 'configurable_product_id',
+                            class_name: 'Product'
+    has_and_belongs_to_many :simple_products, -> { distinct },
+                            join_table: 'gemgento_configurable_simple_relations',
+                            foreign_key: 'configurable_product_id',
+                            association_foreign_key: 'simple_product_id',
+                            class_name: 'Product'
+
+    default_scope -> { includes([{product_attribute_values: :product_attribute}, :assets, :inventory, :swatch]) }
+
+    scope :configurable, -> { where(magento_type: 'configurable') }
+    scope :simple, -> { where(magento_type: 'simple') }
+    scope :enabled, -> { where(status: true) }
+    scope :disabled, -> { where(status: false) }
+    scope :catalog_visible, -> { where(visibility: [2, 4]) }
+    scope :search_visible, -> { where(visibility: [3, 4]) }
+    scope :not_deleted, -> { where(deleted_at: nil) }
+    scope :active, -> { where(deleted_at: nil, status: true) }
+
+    after_save :sync_local_to_magento
+    after_save :touch_categories
+
+    before_destroy :delete_associations
+
+    validates_uniqueness_of :sku, :scope => [:deleted_at]
 
     def self.index
-      if Product.find(:all).size == 0
+      if Product.all.size == 0
         API::SOAP::Catalog::Product.fetch_all
       end
-      Product.find(:all)
+      Product.all
     end
 
     def set_attribute_value(code, value)
-      product_attribute = Gemgento::ProductAttribute.find_by(code: code)
-      product_attribute_value = Gemgento::ProductAttributeValue.find_or_initialize_by(product_id: self.id, product_attribute_id: product_attribute.id)
+      product_attribute = Gemgento::ProductAttribute.where(code: code).first
+      product_attribute_value = Gemgento::ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id).first_or_initialize
       product_attribute_value.product = self
       product_attribute_value.product_attribute = product_attribute
       product_attribute_value.value = value
@@ -34,18 +62,172 @@ module Gemgento
     end
 
     def attribute_value(code)
-      product_attribute = Gemgento::ProductAttribute.find_by(code: code)
-      product_attribute_value = Gemgento::ProductAttributeValue.find_by(product_id: self.id, product_attribute_id: product_attribute.id)
+      product_attribute_value = self.product_attribute_values.select { |value| value.product_attribute.code == code.to_s }.first
+
+      ## if the attribute is not currently associated with the product, check if it exists
+      if product_attribute_value.nil?
+        product_attribute = Gemgento::ProductAttribute.find_by(code: code)
+
+        if product_attribute.nil? # throw an error if the code is not recognized
+          raise "Unknown product attribute code - #{code}"
+        end
+      else
+        product_attribute = product_attribute_value.product_attribute
+      end
 
       if product_attribute_value.nil?
-        return nil
+        value = product_attribute.default_value
+
+        if value.nil?
+          return nil
+        end
+      else
+        value = product_attribute_value.value
       end
 
-      if product_attribute.product_attribute_options.empty?
-        return product_attribute_value.value
-      else
-        return Gemgento::ProductAttributeOption.find_by(value: product_attribute_value.value).label
+      if product_attribute.frontend_input == 'boolean'
+        if value == 'Yes' || value == '1' || value == '1.0'
+          value = true
+        else
+          value = false
+        end
+      elsif product_attribute.frontend_input == 'select'
+        option = product_attribute.product_attribute_options.find_by(value: value)
+        value = option.nil? ? nil : option.label
       end
+
+      return value
+    end
+
+    def self.check_magento(identifier, identifier_type, attribute_set)
+      API::SOAP::Catalog::Product.check_magento(identifier, identifier_type, attribute_set)
+    end
+
+    # Attempts to return relations before method missing response
+    def method_missing(method, *args)
+      begin
+        return self.attribute_value(method)
+      rescue
+        super
+      end
+    end
+
+    def self.by_attributes(filters)
+      products = Gemgento::Product.configurable
+
+      filters.each do |code, value|
+        product_attribute = ProductAttribute.find_by(code: code)
+        next if product_attribute.nil?
+
+        if product_attribute.product_attribute_options.empty?
+          product_attribute_values = product_attribute.product_attribute_values.where(value: value)
+        else
+          product_attribute_values = product_attribute.product_attribute_options.where(label: value).product_attribute_values
+        end
+
+        products = products.joins(:product_attribute_values).where('gemgento_product_attribute_values.value' => product_attribute_values)
+      end
+
+      return products
+    end
+
+    def in_stock?(quantity = 1)
+      if self.magento_type == 'simple'
+        if self.inventory.nil?
+          return true;
+        elsif self.inventory.is_in_stock || quantity.to_f <= self.inventory.quantity.to_f
+          puts quantity.to_f
+          return true;
+        else
+          return false
+        end
+      else
+        self.simple_products.each do |simple_product|
+          return true if simple_product.in_stock?
+        end
+
+        return false
+      end
+    end
+
+    def mark_deleted
+      self.deleted_at = Time.now
+    end
+
+    def mark_deleted!
+      mark_deleted
+      self.save
+    end
+
+    def related(relation_name)
+      relation_type = RelationType.find_by(name: relation_name)
+      raise "Unknown relation type - #{relation_name}" if relation_type.nil?
+
+      return self.relations.where(relation_type: relation_type).collect { |relation| relation.related_to }
+    end
+
+    def self.filter(filters)
+      products = self
+
+      filters.each_with_index do |filter, index|
+        filter[:attribute] = [filter[:attribute]] unless filter[:attribute].is_a? Array
+
+        unless filter[:attribute][0].frontend_input == 'select'
+          products = products.joins(ActiveRecord::Base.escape_sql(
+                                        "INNER JOIN gemgento_product_attribute_values AS value#{index} ON value#{index}.product_id = gemgento_products.id AND value#{index}.value IN (?)
+                    INNER JOIN gemgento_product_attributes AS attribute#{index} ON attribute#{index}.id = value#{index}.product_attribute_id AND attribute#{index}.id IN (?)",
+                                        filter[:value],
+                                        filter[:attribute].map { |a| a.id }
+                                    ))
+        else
+          products = products.joins(ActiveRecord::Base.escape_sql(
+                                        "INNER JOIN gemgento_product_attribute_values AS value#{index} ON value#{index}.product_id = gemgento_products.id
+                    INNER JOIN gemgento_product_attributes AS attribute#{index} ON attribute#{index}.id = value#{index}.product_attribute_id AND attribute#{index}.id IN (?)
+                    INNER JOIN gemgento_product_attribute_options AS option#{index} ON option#{index}.product_attribute_id = attribute#{index}.id AND option#{index}.label IN (?)",
+                                        filter[:attribute].map { |a| a.id },
+                                        filter[:value]
+                                    ))
+        end
+      end
+
+      return products
+    end
+
+    def self.order_by_attribute(attribute, direction = 'ASC')
+      raise 'Direction must be equivalent to ASC or DESC' if direction != 'ASC' and direction != 'DESC'
+
+      products = self
+
+      unless attribute.frontend_input = 'select'
+        products = products.joins(
+            ActiveRecord::Base.escape_sql(
+                'INNER JOIN gemgento_product_attribute_values ON gemgento_product_attribute_values.product_id = gemgento_products.id AND gemgento_product_attribute_values.product_attribute_id = ? ' +
+                    'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ',
+                attribute.id
+            )).
+            order("gemgento_product_attribute_values.value #{direction}")
+      else
+        products = products.joins(
+            ActiveRecord::Base.escape_sql(
+                'INNER JOIN gemgento_product_attribute_values ON gemgento_product_attribute_values.product_id = gemgento_products.id AND gemgento_product_attribute_values.product_attribute_id = ? ' +
+                    'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ' +
+                    'INNER JOIN gemgento_product_attribute_options ON gemgento_product_attribute_options.product_attribute_id = gemgento_product_attributes.id AND gemgento_product_attribute_options.value = gemgento_product_attribute_values.value',
+                attribute.id
+            )).
+            order("gemgento_product_attribute_options.order #{direction}")
+      end
+
+      return products
+    end
+
+    def swatches
+      swatches = []
+
+      self.simple_products.each do |p|
+        swatches << p.swatch unless p.swatch.nil? || swatches.include?(p.swatch)
+      end
+
+      return swatches
     end
 
     private
@@ -53,6 +235,7 @@ module Gemgento
     # Push local product changes to magento
     def sync_local_to_magento
       if self.sync_needed
+
         if !self.magento_id
           API::SOAP::Catalog::Product.create(self)
         else
@@ -63,6 +246,29 @@ module Gemgento
         self.save
       end
     end
+
+    def delete_associations
+      self.categories.clear
+      self.configurable_attributes.clear
+      self.relations.clear
+
+      unless self.simple_products.nil?
+        self.simple_products.each do |simple_product|
+          simple_product.configurable_products.clear
+          simple_product.save
+        end
+      end
+    end
+
+    def touch_categories
+      self.categories.update_all(updated_at: Time.now) if self.changed?
+    end
+
+    def to_ary
+      nil
+    end
+
+    alias :to_a :to_ary
 
   end
 end

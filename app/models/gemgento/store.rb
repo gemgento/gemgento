@@ -3,12 +3,9 @@ module Gemgento
     has_many :products
     has_many :users
 
-    def self.index
-      if Store.find(:all).size == 0
-        API::SOAP::Miscellaneous::Store.fetch_all
-      end
-
-      Store.find(:all)
+    def self.current
+      return Store.first
     end
+
   end
 end

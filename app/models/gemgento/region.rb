@@ -3,11 +3,11 @@ module Gemgento
     belongs_to :country
 
     def self.index
-      if Region.find(:all).size == 0
+      if Region.all.size == 0
         API::SOAP::Directory::Region.fetch_all
       end
 
-      Region.find(:all)
+      Region.all
     end
 
   end

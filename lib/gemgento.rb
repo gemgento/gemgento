@@ -1,24 +1,31 @@
-require "gemgento/version"
-require "gemgento/engine"
-require 'exception_notifier'
+require 'devise'
 require 'savon'
+require 'exception_notifier'
 require 'builder'
+require 'paperclip'
+require 'gemgento/version'
+require 'gemgento/engine'
+require 'gemgento/controller_helpers/order.rb'
 
 module Gemgento
   class Magento
 
     # Log into the Magento API and setup the session and client
-    def self.api_login
+    def self.api_login(force_new_session = false)
       @api_url = "http://#{Gemgento::Config[:magento][:url]}/index.php/api/v#{Gemgento::Config[:magento][:api_version]}_#{Gemgento::Config[:magento][:api_type]}/index/wsdl/1"
       @client = Savon.client(
           wsdl: @api_url,
           log: Gemgento::Config[:magento][:debug],
-          basic_auth: [Gemgento::Config[:magento][:auth_username].to_s, Gemgento::Config[:magento][:auth_password].to_s]
+          raise_errors: false,
+          basic_auth: [Gemgento::Config[:magento][:auth_username].to_s, Gemgento::Config[:magento][:auth_password].to_s],
+          open_timeout: 300,
+          read_timeout: 300
       )
-      if Gemgento::Session.last.nil?
-        response = @client.call(:login, message: { :username => Gemgento::Config[:magento][:username], :apiKey => Gemgento::Config[:magento][:api_key] })
 
-        unless response
+      if Gemgento::Session.last.nil? || force_new_session
+        response = @client.call(:login, message: {:username => Gemgento::Config[:magento][:username], :apiKey => Gemgento::Config[:magento][:api_key]})
+
+        unless response.success?
           puts 'Login Failed - Check Session'
           exit
         end
@@ -41,19 +48,48 @@ module Gemgento
       api_login if !defined? @client
 
       message[:sessionId] = @session
-      puts "Making Call - #{function}"
-      begin
-        response = @client.call(function, message: message)
-        response = response.body[:"#{function}_response"]
-        puts '^^^ Success ^^^'
-      rescue
-        response = nil
-        puts '^^^ Failure ^^^'
+      Rails.logger.debug "Making Call - #{function}"
+
+      magento_response = MagentoResponse.new
+
+      # don't save some messages because they are just too big!
+      if [:catalog_product_attribute_media_create].include? function
+        magento_response.request = {function: function, message: ''}
+      else
+        magento_response.request = {function: function, message: message}
       end
 
-      puts '-------------------'
+      response = @client.call(function, message: message)
 
-      return response
+      if response.success?
+        magento_response.success = true
+
+        if [:customer_customer_list, :sales_order_list, :catalog_product_list].include? function
+          magento_response.body = response.body[:"body_too_big"]
+          magento_response.body_overflow = response.body[:"#{function}_response"]
+        else
+          magento_response.body = response.body[:"#{function}_response"]
+        end
+
+        # only save successful responses if debugging is enabled
+        magento_response.save if Gemgento::Config[:magento][:debug]
+
+        Rails.logger.debug '^^^ Success ^^^'
+      else
+        magento_response.success = false
+        magento_response.body = response.body[:fault]
+        Rails.logger.warn '^^^ Failure ^^^'
+
+        if !magento_response.body[:faultcode].nil? && magento_response.body[:faultcode].to_i == 5
+          Rails.logger.debug '--- Attempting To Start New Session ---'
+          api_login(true)
+          create_call(function, message)
+        end
+
+        magento_response.save
+      end
+
+      return magento_response
     end
 
     def self.enforce_savon_string(subject)

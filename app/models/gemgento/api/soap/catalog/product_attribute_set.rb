@@ -13,11 +13,13 @@ module Gemgento
           def self.list
             response = Gemgento::Magento.create_call(:catalog_product_attribute_set_list)
 
-            unless response[:result][:item].is_a? Array
-              response[:result][:item] = [response[:result][:item]]
-            end
+            if response.success?
+              unless response.body[:result][:item].is_a? Array
+                response.body[:result][:item] = [response.body[:result][:item]]
+              end
 
-            response[:result][:item]
+              response.body[:result][:item]
+            end
           end
 
           # Create a new product attribute set in Magento
@@ -54,7 +56,7 @@ module Gemgento
 
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source)
-            product_attribute_set = Gemgento::ProductAttributeSet.find_or_initialize_by(magento_id: source[:set_id])
+            product_attribute_set = Gemgento::ProductAttributeSet.where(magento_id: source[:set_id]).first_or_initialize
             product_attribute_set.magento_id = source[:set_id]
             product_attribute_set.name = source[:name]
             product_attribute_set.sync_needed = false
