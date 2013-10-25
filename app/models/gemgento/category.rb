@@ -6,6 +6,7 @@ module Gemgento
 
     belongs_to :parent, foreign_key: 'parent_id', class_name: 'Category'
 
+    has_attached_file :image
 
     after_save :sync_local_to_magento
 
