@@ -230,6 +230,34 @@ module Gemgento
       return swatches
     end
 
+    def price
+      if self.has_special?
+        return self.special_price
+      else
+        return self.attribute_value 'price'
+      end
+    end
+
+    def has_special?
+      if self.special_price.nil? # no special price
+        return false
+      elsif self.special_from_date.nil? && self.special_to_date.nil? # no start or end date
+        return true
+      elsif self.special_from_date.nil? && Date.parse(special_to_date) >= Date.today # no start date and end date is in the future
+        return true
+      elsif self.special_to_date.nil? && Date.parse(special_from_date) <= Date.today # no end date and start date is in the past
+        return true
+      elsif Date.parse(self.special_from_date) <= Date.today && Date.parse(self.special_to_date) >= Date.today # start date is in the past and end date is in the future
+        return true
+      else
+        return false
+      end
+    end
+
+    def original_price
+      return self.attribute_value('price')
+    end
+
     private
 
     # Push local product changes to magento
