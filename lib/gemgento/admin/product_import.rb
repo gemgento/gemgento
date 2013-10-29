@@ -1,7 +1,7 @@
 if defined?(ActiveAdmin)
   module Gemgento
     ActiveAdmin.register ProductImport do
-      menu :priority => 1, :parent => 'Gemgento'
+      menu priority: 1, parent: 'Gemgento', label: 'Product Import'
 
       index do
         column :created_at
