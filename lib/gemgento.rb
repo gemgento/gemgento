@@ -22,21 +22,7 @@ module Gemgento
           read_timeout: 300
       )
 
-      if Gemgento::Session.last.nil? || force_new_session
-        response = @client.call(:login, message: {:username => Gemgento::Config[:magento][:username], :apiKey => Gemgento::Config[:magento][:api_key]})
-
-        unless response.success?
-          puts 'Login Failed - Check Session'
-          exit
-        end
-
-        @session = response.body[:login_response][:login_return];
-        s = Gemgento::Session.new
-        s.session_id = @session
-        s.save
-      else
-        @session = Gemgento::Session.last.session_id
-      end
+      @session = Gemgento::Session.get(@client, force_new_session)
     end
 
     # Make an API call to Magento and get the response
