@@ -12,6 +12,29 @@ module Gemgento
 
     scope :top_level, lambda { where(:parent_id => 2) }
 
+    def save
+      # Dirty dirty dirty(S3Bug)..
+      begin
+        super
+      rescue Exception => e
+        puts "Upload Failed once.."
+
+        begin
+          super
+        rescue Exception => e
+          puts "Upload Failed twice.."
+
+          begin
+            super
+          rescue Exception => e
+            puts "Upload Failed three times.."
+
+            super
+          end
+        end
+      end
+    end
+
     def self.index
       if Category.all.size == 0
         API::SOAP::Catalog::Category.fetch_all
