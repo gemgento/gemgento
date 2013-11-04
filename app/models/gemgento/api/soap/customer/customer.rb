@@ -119,7 +119,12 @@ module Gemgento
 
           # Save a Magento customer as local users
           def self.sync_magento_to_local(source)
-            user = Gemgento::User.where(magento_id: source[:customer_id]).first_or_initialize
+            user = Gemgento::User.find_by(magento_id: source[:customer_id])
+
+            if user.nil?
+              user = Gemgento::User.where(email: source[:email]).first_or_initialize
+            end
+
             user.magento_id = source[:customer_id]
             user.increment_id = source[:increment_id]
             user.store = Store.find_by(magento_id: source[:store_id])
