@@ -223,7 +223,7 @@ module Gemgento
           Rails.logger.info file_name
           next unless File.exist?(file_name)
 
-          types = Gemgento::AssetType.find_by(product_attribute_set: product_attribute_set)
+          types = Gemgento::AssetType.where(product_attribute_set: product_attribute_set)
 
           unless types.is_a? Array
             types = [types]
