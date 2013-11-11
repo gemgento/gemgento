@@ -92,7 +92,7 @@ module Gemgento
                 product = Gemgento::Product.find_by(magento_id: item[:product_id])
                 next if product.nil?
 
-                products_ids << item[:product_id]
+                product_ids << item[:product_id]
                 pairing = Gemgento::ProductCategory.where(category: category, product: product).first_or_initialize
                 pairing.position = item[:position].nil? ? 1 : item[:position]
                 pairing.save
