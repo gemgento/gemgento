@@ -98,7 +98,7 @@ module Gemgento
                 pairing.save
               end
 
-              category.products.destroy(category.products.where("product_id NOT IN (?)", product_ids))
+              #category.products.destroy(category.products.where("product_id NOT IN (?)", product_ids))
             end
           end
 
