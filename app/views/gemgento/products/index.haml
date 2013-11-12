@@ -1,7 +1,0 @@
-#products
-  - @products.each_with_index do |product, i|
-    - if product.assets.first
-      %a{ href: '/shop/'+product.attribute_value('url_key') }
-        .grid-product
-          %img{ src: product.assets.first.url }
-          = product.attribute_value('name') + ' $' + product.attribute_value('price')

@@ -1,10 +1,6 @@
 module Gemgento
   class ProductsController < BaseController
 
-    def index
-      @products = Product.index
-    end
-
     def show
       if (params[:id])
         @product = Product.find(params[:id])
