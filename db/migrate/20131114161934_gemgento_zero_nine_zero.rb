@@ -1,4 +1,4 @@
-class GemgentoZeroSevenZero < ActiveRecord::Migration
+class GemgentoZeroNineZero < ActiveRecord::Migration
   def change
 
     create_table "gemgento_addresses", force: true do |t|
@@ -57,8 +57,8 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
     end
 
     create_table "gemgento_attribute_set_attributes", id: false, force: true do |t|
-      t.integer "product_attribute_set_id", default: 0, null: false
-      t.integer "product_attribute_id", default: 0, null: false
+      t.integer "attribute_set_id", default: 0, null: false
+      t.integer "attribute_id", default: 0, null: false
     end
 
     create_table "gemgento_categories", force: true do |t|
@@ -71,13 +71,16 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
       t.datetime "created_at", null: false
       t.datetime "updated_at", null: false
       t.text "all_children"
-      t.string "children"
       t.integer "children_count"
       t.boolean "sync_needed", default: true, null: false
       t.boolean "include_in_menu", default: true, null: false
+      t.string "image_file_name"
+      t.string "image_content_type"
+      t.integer "image_file_size"
+      t.datetime "image_updated_at"
     end
 
-    add_index "gemgento_categories", ["magento_id"], name: "index_gemgento_categories_on_magento_id", unique: true
+    add_index "gemgento_categories", ["magento_id"], name: "index_gemgento_categories_on_magento_id", unique: true, using: :btree
 
     create_table "gemgento_categories_products", id: false, force: true do |t|
       t.integer "product_id", default: 0, null: false
@@ -223,10 +226,10 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
       t.string "cc_number_enc"
       t.string "cc_last4"
       t.string "cc_owner"
-      t.integer "cc_exp_month"
-      t.integer "cc_exp_year"
-      t.integer "cc_ss_start_month"
-      t.integer "cc_ss_start_year"
+      t.string "cc_exp_month"
+      t.string "cc_exp_year"
+      t.string "cc_ss_start_month"
+      t.string "cc_ss_start_year"
       t.datetime "created_at"
       t.datetime "updated_at"
     end
@@ -318,6 +321,7 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
       t.boolean "sync_needed", default: true, null: false
       t.datetime "created_at", null: false
       t.datetime "updated_at", null: false
+      t.integer "order"
     end
 
     create_table "gemgento_product_attribute_sets", force: true do |t|
@@ -356,6 +360,14 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
       t.text "default_value"
     end
 
+    create_table "gemgento_product_categories", force: true do |t|
+      t.integer "category_id"
+      t.integer "product_id"
+      t.integer "position", default: 0, null: false
+      t.datetime "created_at"
+      t.datetime "updated_at"
+    end
+
     create_table "gemgento_product_imports", force: true do |t|
       t.text "import_errors"
       t.datetime "created_at"
@@ -366,7 +378,6 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
       t.datetime "spreadsheet_updated_at"
       t.boolean "include_images"
       t.string "image_path"
-      t.string "image_file_extension"
       t.text "image_labels"
       t.integer "store_id"
       t.integer "root_category_id"
@@ -375,6 +386,7 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
       t.integer "count_updated"
       t.integer "simple_product_visibility"
       t.integer "configurable_product_visibility"
+      t.text "image_file_extensions"
     end
 
     create_table "gemgento_product_imports_configurable_attributes", id: false, force: true do |t|
@@ -389,9 +401,7 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
       t.datetime "updated_at", null: false
       t.string "sku"
       t.string "product_attribute_set_id"
-      t.integer "position"
       t.string "store_id"
-      t.integer "swatch_id"
       t.boolean "sync_needed", default: true, null: false
       t.boolean "status", default: true
       t.integer "visibility", default: 4
@@ -442,7 +452,16 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
       t.datetime "updated_at"
     end
 
-    add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true
+    add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true, using: :btree
+
+    create_table "gemgento_swatches", force: true do |t|
+      t.string "name"
+      t.string "description"
+      t.string "image_file_name"
+      t.string "image_content_type"
+      t.integer "image_file_size"
+      t.datetime "image_updated_at"
+    end
 
     create_table "gemgento_syncs", force: true do |t|
       t.string "subject"
@@ -490,33 +509,9 @@ class GemgentoZeroSevenZero < ActiveRecord::Migration
       t.string "type"
     end
 
-    add_index "gemgento_users", ["email"], name: "index_gemgento_users_on_email", unique: true
-    add_index "gemgento_users", ["magento_id"], name: "index_gemgento_users_on_magento_id", unique: true
-    add_index "gemgento_users", ["reset_password_token"], name: "index_gemgento_users_on_reset_password_token", unique: true
-
-    create_table "gemgento_swatches", force: true do |t|
-      t.string "name"
-      t.string "description"
-      t.string "image_file_name"
-      t.string "image_content_type"
-      t.integer "image_file_size"
-      t.datetime "image_updated_at"
-    end
-
-    create_table "gemgento_subscribers", force: true do |t|
-      t.string "name"
-      t.string "email"
-      t.datetime "created_at"
-      t.datetime "updated_at"
-    end
-
-    create_table "gemgento_product_categories", force: true do |t|
-      t.integer "category_id"
-      t.integer "product_id"
-      t.integer "position", default: 1, null: false
-      t.datetime "created_at"
-      t.datetime "updated_at"
-    end
+    add_index "gemgento_users", ["email"], name: "index_gemgento_users_on_email", unique: true, using: :btree
+    add_index "gemgento_users", ["magento_id"], name: "index_gemgento_users_on_magento_id", unique: true, using: :btree
+    add_index "gemgento_users", ["reset_password_token"], name: "index_gemgento_users_on_reset_password_token", unique: true, using: :btree
 
   end
 end

@@ -9,4 +9,4 @@ gem 'mysql2'
 gem 'gemgento', path: '~/Sites/gemgento'
 
 gem 'paperclip'
-gem 'activeadmin', github: 'gregbell/active_admin', branch: 'rails4'
+gem 'activeadmin', github: 'mauinewyork/active_admin'

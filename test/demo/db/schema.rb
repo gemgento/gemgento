@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131016205803) do
+ActiveRecord::Schema.define(version: 20131114161934) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string "namespace"
@@ -117,6 +117,10 @@ ActiveRecord::Schema.define(version: 20131016205803) do
     t.integer "children_count"
     t.boolean "sync_needed", default: true, null: false
     t.boolean "include_in_menu", default: true, null: false
+    t.string "image_file_name"
+    t.string "image_content_type"
+    t.integer "image_file_size"
+    t.datetime "image_updated_at"
   end
 
   add_index "gemgento_categories", ["magento_id"], name: "index_gemgento_categories_on_magento_id", unique: true, using: :btree
