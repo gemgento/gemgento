@@ -217,18 +217,19 @@ module Gemgento
       images_found = false
       # find the correct image file name and path
       self.image_labels.each_with_index do |label, position|
+
         self.image_file_extensions.each do |extension|
           file_name = self.image_path + @row[@headers.index('image').to_i].to_s.strip + '_' + label + extension
           Rails.logger.info file_name
           next unless File.exist?(file_name)
 
-          types = Gemgento::AssetType.find_by(product_attribute_set: product_attribute_set)
+          types = Gemgento::AssetType.where(product_attribute_set: product_attribute_set)
 
           unless types.is_a? Array
             types = [types]
           end
 
-          product.assets << create_image(product, file_name, types, position, label)
+          create_image(product, file_name, types, position, label)
           images_found = true
         end
       end

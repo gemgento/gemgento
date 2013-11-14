@@ -6,10 +6,34 @@ module Gemgento
 
     belongs_to :parent, foreign_key: 'parent_id', class_name: 'Category'
 
+    has_attached_file :image
 
     after_save :sync_local_to_magento
 
     scope :top_level, lambda { where(:parent_id => 2) }
+
+    def save
+      # Dirty dirty dirty(S3Bug)..
+      begin
+        super
+      rescue Exception => e
+        puts "Upload Failed once.."
+
+        begin
+          super
+        rescue Exception => e
+          puts "Upload Failed twice.."
+
+          begin
+            super
+          rescue Exception => e
+            puts "Upload Failed three times.."
+
+            super
+          end
+        end
+      end
+    end
 
     def self.index
       if Category.all.size == 0
