@@ -1,5 +1,5 @@
 Gemgento::Engine.routes.draw do
-  root :to => 'products#index'
+  root :to => 'categories#index'
 
   if defined?(ActiveAdmin)
     devise_for :admin_users, ActiveAdmin::Devise.config
