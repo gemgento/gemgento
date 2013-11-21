@@ -20,7 +20,6 @@ module Gemgento
       @category.parent = Gemgento::Category.find_by(magento_id: params[:parent_id]) unless params[:parent_id].nil?
       @category.name = data[:name]
       @category.url_key = data[:url_key]
-
       @category.save
 
       render nothing: true
