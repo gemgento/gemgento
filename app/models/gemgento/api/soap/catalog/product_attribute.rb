@@ -28,6 +28,7 @@ module Gemgento
               product_attribute_option.value = value
               product_attribute_option.product_attribute = product_attribute
               product_attribute_option.order = index
+              product_attribute_option.store = Gemgento::Store.current
               product_attribute_option.sync_needed = false
               product_attribute_option.save
             end
@@ -54,7 +55,11 @@ module Gemgento
           end
 
           def self.options(product_attribute_id)
-            response = Gemgento::Magento.create_call(:catalog_product_attribute_options, {attributeId: product_attribute_id})
+            message = {
+                attributeId: product_attribute_id,
+                storeView: Gemgento::Store.current
+            }
+            response = Gemgento::Magento.create_call(:catalog_product_attribute_options, message)
 
             if response.success?
               if response.body[:result][:item].nil?

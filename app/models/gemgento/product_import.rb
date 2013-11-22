@@ -145,7 +145,7 @@ module Gemgento
             value = @row[@headers.index(attribute_code).to_i].to_s.strip
           else # attribute value may have to be associated with an attribute option id
             label = @row[@headers.index(attribute_code).to_i].to_s.strip
-            attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: label)
+            attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: label, store: Gemgento::Store.current)
 
             if attribute_option.nil?
               attribute_option = create_attribute_option(product_attribute, label)
@@ -169,6 +169,7 @@ module Gemgento
       attribute_option = ProductAttributeOption.new
       attribute_option.product_attribute = product_attribute
       attribute_option.label = option_label
+      attribute_option.store = Gemgento::Store.current
       attribute_option.save
 
       attribute_option.sync_local_to_magento

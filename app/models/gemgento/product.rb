@@ -92,7 +92,7 @@ module Gemgento
           value = false
         end
       elsif product_attribute.frontend_input == 'select'
-        option = product_attribute.product_attribute_options.find_by(value: value)
+        option = product_attribute.product_attribute_options.find_by(store: Gemgento::Store.current, value: value)
         value = option.nil? ? nil : option.label
       end
 
@@ -122,7 +122,7 @@ module Gemgento
         if product_attribute.product_attribute_options.empty?
           product_attribute_values = product_attribute.product_attribute_values.where(value: value)
         else
-          product_attribute_values = product_attribute.product_attribute_options.where(label: value).product_attribute_values
+          product_attribute_values = product_attribute.product_attribute_options.where(label: value, store: Gemgento::Store.current).product_attribute_values
         end
 
         products = products.joins(:product_attribute_values).where('gemgento_product_attribute_values.value' => product_attribute_values)
@@ -183,10 +183,11 @@ module Gemgento
           products = products.joins(ActiveRecord::Base.escape_sql(
                                         "INNER JOIN gemgento_product_attribute_values AS value#{index} ON value#{index}.product_id = gemgento_products.id
                     INNER JOIN gemgento_product_attributes AS attribute#{index} ON attribute#{index}.id = value#{index}.product_attribute_id AND attribute#{index}.id IN (?)
-                    INNER JOIN gemgento_product_attribute_options AS option#{index} ON option#{index}.product_attribute_id = attribute#{index}.id AND option#{index}.label IN (?)",
+                    INNER JOIN gemgento_product_attribute_options AS option#{index} ON option#{index}.product_attribute_id = attribute#{index}.id AND option#{index}.store_id = ? AND option#{index}.label IN (?)",
                                         filter[:attribute].map { |a| a.id },
-                                        filter[:value]
-                                    ))
+                                        Gemgento::Store.current.id
+          filter[:value]
+          ))
         end
       end
 
@@ -211,8 +212,10 @@ module Gemgento
             ActiveRecord::Base.escape_sql(
                 'INNER JOIN gemgento_product_attribute_values ON gemgento_product_attribute_values.product_id = gemgento_products.id AND gemgento_product_attribute_values.product_attribute_id = ? ' +
                     'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ' +
-                    'INNER JOIN gemgento_product_attribute_options ON gemgento_product_attribute_options.product_attribute_id = gemgento_product_attributes.id AND gemgento_product_attribute_options.value = gemgento_product_attribute_values.value',
-                attribute.id
+                    'INNER JOIN gemgento_product_attribute_options ON gemgento_product_attribute_options.product_attribute_id = gemgento_product_attributes.id AND gemgento_product_attribute_options.value = gemgento_product_attribute_values.value' +
+                    'AND gemgento_product_attribute_options.store_id = ?',
+                attribute.id,
+                Gemgento::Store.current.id
             )).
             order("gemgento_product_attribute_options.order #{direction}")
       end

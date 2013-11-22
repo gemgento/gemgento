@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131114161934) do
+ActiveRecord::Schema.define(version: 20131122133642) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string "namespace"
@@ -365,6 +365,7 @@ ActiveRecord::Schema.define(version: 20131114161934) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "order"
+    t.integer "store_id"
   end
 
   create_table "gemgento_product_attribute_sets", force: true do |t|

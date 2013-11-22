@@ -309,7 +309,7 @@ module Gemgento
             product.configurable_attributes.each do |configurable_attribute|
               options = []
 
-              configurable_attribute.product_attribute_options.each do |attribute_option|
+              configurable_attribute.product_attribute_options.where(store: Gemgento::Store.current).each do |attribute_option|
                 options << {key: attribute_option.label, value: ''}
               end
 
