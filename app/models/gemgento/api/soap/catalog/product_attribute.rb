@@ -57,7 +57,7 @@ module Gemgento
           def self.options(product_attribute_id)
             message = {
                 attributeId: product_attribute_id,
-                storeView: Gemgento::Store.current
+                storeView: Gemgento::Store.current.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_product_attribute_options, message)
 

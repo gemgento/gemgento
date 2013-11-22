@@ -185,9 +185,9 @@ module Gemgento
                     INNER JOIN gemgento_product_attributes AS attribute#{index} ON attribute#{index}.id = value#{index}.product_attribute_id AND attribute#{index}.id IN (?)
                     INNER JOIN gemgento_product_attribute_options AS option#{index} ON option#{index}.product_attribute_id = attribute#{index}.id AND option#{index}.store_id = ? AND option#{index}.label IN (?)",
                                         filter[:attribute].map { |a| a.id },
-                                        Gemgento::Store.current.id
-          filter[:value]
-          ))
+                                        Gemgento::Store.current.id,
+                                        filter[:value]
+                                    ))
         end
       end
 
