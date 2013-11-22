@@ -19,18 +19,20 @@ module Gemgento
 
           def self.fetch_all_options(product_attribute)
             # add attribute options if there are any
-            options(product_attribute.magento_id).each_with_index do |attribute_option, index|
-              label = Gemgento::Magento.enforce_savon_string(attribute_option[:label])
-              value = Gemgento::Magento.enforce_savon_string(attribute_option[:value])
+            Gemgento::Store.where(is_active: true).each do |store|
+              options(product_attribute.magento_id, store).each_with_index do |attribute_option, index|
+                label = Gemgento::Magento.enforce_savon_string(attribute_option[:label])
+                value = Gemgento::Magento.enforce_savon_string(attribute_option[:value])
 
-              product_attribute_option = Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: label, value: value).first_or_initialize
-              product_attribute_option.label = label
-              product_attribute_option.value = value
-              product_attribute_option.product_attribute = product_attribute
-              product_attribute_option.order = index
-              product_attribute_option.store = Gemgento::Store.current
-              product_attribute_option.sync_needed = false
-              product_attribute_option.save
+                product_attribute_option = Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: label, value: value).first_or_initialize
+                product_attribute_option.label = label
+                product_attribute_option.value = value
+                product_attribute_option.product_attribute = product_attribute
+                product_attribute_option.order = index
+                product_attribute_option.store = store
+                product_attribute_option.sync_needed = false
+                product_attribute_option.save
+              end
             end
           end
 
@@ -54,10 +56,10 @@ module Gemgento
             end
           end
 
-          def self.options(product_attribute_id)
+          def self.options(product_attribute_id, store)
             message = {
                 attributeId: product_attribute_id,
-                storeView: Gemgento::Store.current.magento_id
+                storeView: store.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_product_attribute_options, message)
 
@@ -92,6 +94,7 @@ module Gemgento
                 order: '0',
                 'is_default' => '0'
             }}
+
             response = Gemgento::Magento.create_call(:catalog_product_attribute_add_option, message)
             fetch_all_options(product_attribute) if response.success?
           end
