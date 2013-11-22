@@ -88,7 +88,7 @@ module Gemgento
 
           def self.add_option(product_attribute_option, product_attribute)
             message = {attribute: product_attribute.magento_id, data: {
-                label: {item: [{'store_id' => {item: [0, 1]}, value: product_attribute_option.label}]},
+                label: {item: [{'store_id' => {item: Gemgento::Store.all.map { |s| s.magento_id }}, value: product_attribute_option.label}]},
                 order: '0',
                 'is_default' => '0'
             }}
