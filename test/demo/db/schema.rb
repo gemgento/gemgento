@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131122145637) do
+ActiveRecord::Schema.define(version: 20131122183133) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string "namespace"
@@ -494,6 +494,7 @@ ActiveRecord::Schema.define(version: 20131122145637) do
     t.boolean "is_active", default: true, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer "website_id"
   end
 
   add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true, using: :btree
