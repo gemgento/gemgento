@@ -6,7 +6,7 @@ module Gemgento
       data = params[:data]
 
       @product_attribute.magento_id = data[:attribute_id]
-      @product_attribute.code = data[:atribute_code]
+      @product_attribute.code = data[:attribute_code]
       @product_attribute.frontend_input = data[:frontend_input]
       @product_attribute.default_value = data[:default_value]
       @product_attribute.scope = data[:scope]
@@ -21,26 +21,31 @@ module Gemgento
       @product_attribute.used_in_product_listing = data[:used_in_product_listing].to_i == 1 ? true : false
       @product_attribute.save
 
-      data[:options].each do |store_options|
-        @store = Gemgento::Store.find_by(magento_id: store_options[:store_id])
-
-        if @store
-          store_options[:options].each do |option|
-            @product_attribute_option = Gemgento::ProductAttributeOption.find_or_initialize_by(value: option[:value], store: @store)
-            @product_attribute_option.value = option[:value]
-            @product_attribute_option.label = option[:label]
-            @product_attribute_option.store = @store
-            @product_attribute_option.save
-          end
-        end
-      end
+      set_options(@product_attribute, data[:options])
 
       render nothing: true
     end
 
     private
 
-    def self.
+    def set_options(product_attribute, options)
+      options.each do |store_options|
+        store = Gemgento::Store.find_by(magento_id: store_options[:store_id])
 
+        if store
+          store_options[:options].each_with_index do |option, index|
+            product_attribute_option = Gemgento::ProductAttributeOption.find_or_initialize_by(value: option[:value], product_attribute: product_attribute, store: store)
+            product_attribute_option.product_attribute = product_attribute
+            product_attribute_option.value = option[:value]
+            product_attribute_option.label = option[:label]
+            product_attribute_option.order = index
+            product_attribute_option.store = store
+            product_attribute_option.sync_needed = false
+            product_attribute_option.save
+          end
         end
+      end
     end
+
+  end
+end
