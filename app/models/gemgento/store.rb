@@ -4,7 +4,7 @@ module Gemgento
     has_many :users
 
     def self.current
-      return Store.first
+      return Store.find_by(code: 'default')
     end
 
   end
