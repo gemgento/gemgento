@@ -29,6 +29,12 @@ module Gemgento
       set_categories(data[:categories], @product) unless data[:categories].nil?
       set_attribute_values_from_magento(data[:additional_attributes], @product) unless data[:additional_attributes].nil?
 
+      if !data[:additional_attributes][:media_gallery].nil? && !data[:additional_attributes][:media_gallery][:images].nil?
+        set_assets(data[:additional_attributes][:media_gallery][:images], @product)
+      else
+        @product.assets.destroy_all
+      end
+
       render nothing: true
     end
 
@@ -63,6 +69,42 @@ module Gemgento
 
         end
 
+      end
+    end
+
+    def set_assets(source_assets, product)
+      source_assets.each do |source|
+        asset = Gemgento::Asset.find_or_initialize_by(product_id: product.id, file: source[:file])
+        puts asset.inspect
+        if !source[:removed].nil? && source[:removed] == 0
+
+          if source[:new_file].nil?
+            url = source[:url]
+            file = source[:file]
+          else
+            url = "http://#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:new_file]}"
+            file = source[:new_file]
+          end
+
+          if asset.id.nil? || asset.attachment.nil? || !FileUtils.compare_file(asset.attachment.path(:original), open(url))
+            begin
+              asset.attachment = open(url)
+            rescue
+              asset.attachment = nil
+            end
+          end
+
+          asset.url = url
+          asset.position = source[:position]
+          asset.label = source[:label]
+          asset.file = file
+          asset.product = product
+          asset.sync_needed = false
+          asset.save
+
+        elsif !source[:removed].nil? && source[:removed] == 1
+          asset.destroy
+        end
       end
     end
 
