@@ -1,6 +1,6 @@
 module Gemgento
   class UsersController < BaseController
-    before_filter :auth_user
+    before_filter :auth_user, except: :update
 
     ssl_required :show, :update
 
@@ -9,18 +9,28 @@ module Gemgento
     end
 
     def update
-      @user = User.find(current_user.id)
+      @user = Gemgento::User.find_or_initialize_by(magento_id: params[:id])
+      data = params[:data]
 
-      if @user.update_attributes(user_params)
-        sign_in @user, :bypass => true
-        redirect_to @user
-      else
-        render 'edit'
-      end
-    end
+      @user.magento_id = params[:id]
+      @user.increment_id = data[:increment_id]
+      @user.store = Store.find_by(magento_id: data[:store_id])
+      @user.created_in = data[:created_in]
+      @user.email = data[:email]
+      @user.fname = data[:firstname]
+      @user.mname = data[:middlename]
+      @user.lname = data[:lastname]
+      @user.user_group = UserGroup.where(magento_id: data[:group_id]).first
+      @user.prefix = data[:prefix]
+      @user.suffix = data[:suffix]
+      @user.dob = data[:dob]
+      @user.taxvat = data[:taxvat]
+      @user.confirmation = data[:confirmation]
+      @user.magento_password = data[:password_hash]
+      @user.sync_needed = false
+      @user.save(validate: false)
 
-    def edit
-      @user = current_user
+      render nothing: true
     end
 
     private
