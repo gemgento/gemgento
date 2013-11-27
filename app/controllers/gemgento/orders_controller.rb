@@ -25,80 +25,77 @@ module Gemgento
     end
 
     def update
-      @order = Gemgento::Order.find_by(order_id: params[:id])
+      @order = Gemgento::Order.find_or_initialize_by(order_id: params[:id])
+      data = params[:data]
 
-      unless @order.nil?
-        data = params[:data]
+      @order.order_id = data[:order_id]
+      @order.is_active = data[:is_active]
+      @order.user = Gemgento::User.where(magento_id: data[:customer_id]).first
+      @order.tax_amount = data[:tax_amount]
+      @order.shipping_amount = data[:shipping_amount]
+      @order.discount_amount = data[:discount_amount]
+      @order.subtotal = data[:subtotal]
+      @order.grand_total = data[:grand_total]
+      @order.total_paid = data[:total_paid]
+      @order.total_refunded = data[:total_refunded]
+      @order.total_qty_ordered = data[:total_qty_ordered]
+      @order.total_canceled = data[:total_canceled]
+      @order.total_invoiced = data[:total_invoiced]
+      @order.total_online_refunded = data[:total_online_refunded]
+      @order.total_offline_refunded = data[:total_offline_refunded]
+      @order.base_tax_amount = data[:base_tax_amount]
+      @order.base_shipping_amount = data[:base_shipping_amount]
+      @order.base_discount_amount = data[:base_discount_amount]
+      @order.base_subtotal = data[:base_subtotal]
+      @order.base_grand_total = data[:base_grand_total]
+      @order.base_total_paid = data[:base_total_paid]
+      @order.base_total_refunded = data[:base_total_refunded]
+      @order.base_total_qty_ordered = data[:base_total_qty_ordered]
+      @order.base_total_canceled = data[:base_total_canceled]
+      @order.base_total_invoiced = data[:base_total_invoiced]
+      @order.base_total_online_refunded = data[:base_total_online_refunded]
+      @order.base_total_offline_refunded = data[:base_total_offline_refunded]
+      @order.store_to_base_rate = data[:store_to_base_rate]
+      @order.store_to_order_rate = data[:store_to_order_rate]
+      @order.base_to_global_rate = data[:base_to_global_rate]
+      @order.base_to_order_rate = data[:base_to_order_rate]
+      @order.weight = data[:weight]
+      @order.store_name = data[:store_name]
+      @order.remote_ip = data[:remote_ip]
+      @order.status = data[:status]
+      @order.state = data[:state]
+      @order.applied_rule_ids = data[:applied_rule_ids]
+      @order.global_currency_code = data[:global_currency_code]
+      @order.base_currency_code = data[:base_currency_code]
+      @order.store_currency_code = data[:store_currency_code]
+      @order.order_currency_code = data[:order_currency_code]
+      @order.shipping_method = data[:shipping_method]
+      @order.shipping_description = data[:shipping_description]
+      @order.customer_email = data[:customer_email]
+      @order.customer_firstname = data[:customer_firstname]
+      @order.customer_lastname = data[:customer_lastname]
+      @order.magento_quote_id = data[:quote_id]
+      @order.is_virtual = data[:is_virtual]
+      @order.user_group = Gemgento::UserGroup.find_by(magento_id: data[:customer_group_id])
+      @order.customer_note_notify = data[:customer_note_notify]
+      @order.customer_is_guest = data[:customer_is_guest]
+      @order.email_sent = data[:email_sent]
+      @order.increment_id = data[:increment_id]
+      @order.store = Gemgento::Store.find_by(magento_id: data[:store_id])
+      @order.save
 
-        @order.order_id = data[:order_id]
-        @order.is_active = data[:is_active]
-        @order.user = Gemgento::User.where(magento_id: data[:customer_id]).first
-        @order.tax_amount = data[:tax_amount]
-        @order.shipping_amount = data[:shipping_amount]
-        @order.discount_amount = data[:discount_amount]
-        @order.subtotal = data[:subtotal]
-        @order.grand_total = data[:grand_total]
-        @order.total_paid = data[:total_paid]
-        @order.total_refunded = data[:total_refunded]
-        @order.total_qty_ordered = data[:total_qty_ordered]
-        @order.total_canceled = data[:total_canceled]
-        @order.total_invoiced = data[:total_invoiced]
-        @order.total_online_refunded = data[:total_online_refunded]
-        @order.total_offline_refunded = data[:total_offline_refunded]
-        @order.base_tax_amount = data[:base_tax_amount]
-        @order.base_shipping_amount = data[:base_shipping_amount]
-        @order.base_discount_amount = data[:base_discount_amount]
-        @order.base_subtotal = data[:base_subtotal]
-        @order.base_grand_total = data[:base_grand_total]
-        @order.base_total_paid = data[:base_total_paid]
-        @order.base_total_refunded = data[:base_total_refunded]
-        @order.base_total_qty_ordered = data[:base_total_qty_ordered]
-        @order.base_total_canceled = data[:base_total_canceled]
-        @order.base_total_invoiced = data[:base_total_invoiced]
-        @order.base_total_online_refunded = data[:base_total_online_refunded]
-        @order.base_total_offline_refunded = data[:base_total_offline_refunded]
-        @order.store_to_base_rate = data[:store_to_base_rate]
-        @order.store_to_order_rate = data[:store_to_order_rate]
-        @order.base_to_global_rate = data[:base_to_global_rate]
-        @order.base_to_order_rate = data[:base_to_order_rate]
-        @order.weight = data[:weight]
-        @order.store_name = data[:store_name]
-        @order.remote_ip = data[:remote_ip]
-        @order.status = data[:status]
-        @order.state = data[:state]
-        @order.applied_rule_ids = data[:applied_rule_ids]
-        @order.global_currency_code = data[:global_currency_code]
-        @order.base_currency_code = data[:base_currency_code]
-        @order.store_currency_code = data[:store_currency_code]
-        @order.order_currency_code = data[:order_currency_code]
-        @order.shipping_method = data[:shipping_method]
-        @order.shipping_description = data[:shipping_description]
-        @order.customer_email = data[:customer_email]
-        @order.customer_firstname = data[:customer_firstname]
-        @order.customer_lastname = data[:customer_lastname]
-        @order.magento_quote_id = data[:quote_id]
-        @order.is_virtual = data[:is_virtual]
-        @order.user_group = Gemgento::UserGroup.find_by(magento_id: data[:customer_group_id])
-        @order.customer_note_notify = data[:customer_note_notify]
-        @order.customer_is_guest = data[:customer_is_guest]
-        @order.email_sent = data[:email_sent]
-        @order.increment_id = data[:increment_id]
-        @order.store = Gemgento::Store.find_by(magento_id: source[:store_id])
-        @order.save
+      sync_magento_address_to_local(data[:shipping_address], @order, @order.shipping_address)
+      sync_magento_address_to_local(data[:billing_address], @order, @order.billing_address)
 
-        sync_magento_address_to_local(data[:shipping_address], @order, order.shipping_address)
-        sync_magento_address_to_local(data[:billing_address], @order, order.billing_address)
-
-        unless data[:items].nil?
-          data[:items].each do |item|
-            sync_magento_order_item_to_local(item, @order)
-          end
+      unless data[:items].nil?
+        data[:items].each do |item|
+          sync_magento_order_item_to_local(item, @order)
         end
+      end
 
-        unless data[:status_history].nil?
-          data[:status_history].each do |status|
-            sync_magento_order_status_to_local(status, @order)
-          end
+      unless data[:status_history].nil?
+        data[:status_history].each do |status|
+          sync_magento_order_status_to_local(status, @order)
         end
       end
 
@@ -108,8 +105,8 @@ module Gemgento
     private
 
     def sync_magento_address_to_local(source, order, address = nil)
-      address = Gemgento::Address.where(order_address_id: source[:address_id].to_i).first_or_initialize if address.nil?
-      address.order_address_id = source[:address_id]
+      address = Gemgento::Address.where(order_address_id: source[:entity_id].to_i).first_or_initialize if address.nil?
+      address.order_address_id = source[:entity_id].to_i
       address.order = order
       address.increment_id = source[:increment_id]
       address.city = source[:city]
@@ -139,7 +136,7 @@ module Gemgento
       order_status.order = order
       order_status.status = source[:status]
       order_status.is_active = source[:is_active]
-      order_status.is_customer_notified = source[:is_customer_notified].to_i
+      order_status.is_customer_notified = source[:is_customer_notified] == 2 ? nil : source[:is_customer_notified]
       order_status.comment = source[:comment]
       order_status.created_at = source[:created_at]
       order_status.save
