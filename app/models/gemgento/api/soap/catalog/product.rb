@@ -285,7 +285,7 @@ module Gemgento
               unless product_attribute_value.value.nil?
                 attributes << {
                     'key' => product_attribute_value.product_attribute.code,
-                    'value' => product_attribute_value.value
+                    'value' => product.attribute_value(product_attribute_value.product_attribute.code)
                 }
               end
             end
