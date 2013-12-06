@@ -237,11 +237,11 @@ module Gemgento
           end
 
           def self.sync_magento_order_item_to_local(source, order)
-            order_item = Gemgento::OrderItem.find_or_initialize_by(magento_id: source[:item_id])
+            order_item = Gemgento::OrderItem.where(magento_id: source[:item_id]).first_or_initialize
             order_item.order = order
             order_item.magento_id = source[:item_id]
             order_item.quote_item_id = source[:quote_item_id]
-            order_item.product = Gemgento::Product.find_by(magento_id: source[:product_id])
+            order_item.product = Product.where(magento_id: source[:product_id]).first
             order_item.product_type = source[:product_type]
             order_item.product_options = source[:product_options]
             order_item.weight = source[:weight]

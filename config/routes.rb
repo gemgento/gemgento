@@ -1,5 +1,5 @@
 Gemgento::Engine.routes.draw do
-  root :to => 'categories#index'
+  root :to => 'products#index'
 
   if defined?(ActiveAdmin)
     devise_for :admin_users, ActiveAdmin::Devise.config
@@ -54,7 +54,7 @@ Gemgento::Engine.routes.draw do
     resources :orders, :addresses
   end
 
-  resources :products, :categories, :orders, :subscribers, :users, :inventory, :product_attributes, :product_attribute_sets
+  resources :products, :categories, :orders, :subscribers, :users
 
   patch '/orders', to: 'orders#update'
 

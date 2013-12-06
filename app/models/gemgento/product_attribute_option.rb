@@ -1,7 +1,6 @@
 module Gemgento
   class ProductAttributeOption < ActiveRecord::Base
     belongs_to :product_attribute
-    belongs_to :store
 
     default_scope -> { order(:order) }
 

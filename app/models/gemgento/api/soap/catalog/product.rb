@@ -285,7 +285,7 @@ module Gemgento
               unless product_attribute_value.value.nil?
                 attributes << {
                     'key' => product_attribute_value.product_attribute.code,
-                    'value' => product.attribute_value(product_attribute_value.product_attribute.code)
+                    'value' => product_attribute_value.value
                 }
               end
             end
@@ -309,7 +309,7 @@ module Gemgento
             product.configurable_attributes.each do |configurable_attribute|
               options = []
 
-              configurable_attribute.product_attribute_options.where(store: Gemgento::Store.current).each do |attribute_option|
+              configurable_attribute.product_attribute_options.each do |attribute_option|
                 options << {key: attribute_option.label, value: ''}
               end
 

@@ -19,20 +19,17 @@ module Gemgento
 
           def self.fetch_all_options(product_attribute)
             # add attribute options if there are any
-            Gemgento::Store.where(is_active: true).each do |store|
-              options(product_attribute.magento_id, store).each_with_index do |attribute_option, index|
-                label = Gemgento::Magento.enforce_savon_string(attribute_option[:label])
-                value = Gemgento::Magento.enforce_savon_string(attribute_option[:value])
+            options(product_attribute.magento_id).each_with_index do |attribute_option, index|
+              label = Gemgento::Magento.enforce_savon_string(attribute_option[:label])
+              value = Gemgento::Magento.enforce_savon_string(attribute_option[:value])
 
-                product_attribute_option = Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: label, value: value).first_or_initialize
-                product_attribute_option.label = label
-                product_attribute_option.value = value
-                product_attribute_option.product_attribute = product_attribute
-                product_attribute_option.order = index
-                product_attribute_option.store = store
-                product_attribute_option.sync_needed = false
-                product_attribute_option.save
-              end
+              product_attribute_option = Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: label, value: value).first_or_initialize
+              product_attribute_option.label = label
+              product_attribute_option.value = value
+              product_attribute_option.product_attribute = product_attribute
+              product_attribute_option.order = index
+              product_attribute_option.sync_needed = false
+              product_attribute_option.save
             end
           end
 
@@ -56,12 +53,8 @@ module Gemgento
             end
           end
 
-          def self.options(product_attribute_id, store)
-            message = {
-                attributeId: product_attribute_id,
-                storeView: store.magento_id
-            }
-            response = Gemgento::Magento.create_call(:catalog_product_attribute_options, message)
+          def self.options(product_attribute_id)
+            response = Gemgento::Magento.create_call(:catalog_product_attribute_options, {attributeId: product_attribute_id})
 
             if response.success?
               if response.body[:result][:item].nil?
@@ -90,11 +83,10 @@ module Gemgento
 
           def self.add_option(product_attribute_option, product_attribute)
             message = {attribute: product_attribute.magento_id, data: {
-                label: {item: [{'store_id' => {item: Gemgento::Store.all.map { |s| s.magento_id }}, value: product_attribute_option.label}]},
+                label: {item: [{'store_id' => {item: [0, 1]}, value: product_attribute_option.label}]},
                 order: '0',
                 'is_default' => '0'
             }}
-
             response = Gemgento::Magento.create_call(:catalog_product_attribute_add_option, message)
             fetch_all_options(product_attribute) if response.success?
           end
@@ -107,7 +99,7 @@ module Gemgento
 
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source, product_attribute_set)
-            product_attribute = Gemgento::ProductAttribute.find_or_initialize_by(magento_id: source[:attribute_id])
+            product_attribute = Gemgento::ProductAttribute.where(magento_id: source[:attribute_id]).first_or_initialize
             product_attribute.magento_id = source[:attribute_id]
             product_attribute.product_attribute_sets << product_attribute_set unless product_attribute.product_attribute_sets.include? product_attribute_set
             product_attribute.code = source[:attribute_code]
