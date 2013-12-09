@@ -30,13 +30,43 @@ production:
     url:  yourshop.com
 
   magento:
-    url:  magento.yourshop.com 
+    url:  magento.yourshop.com
+    auth_username:  ''
+    auth_password:  ''
     username:  gemgento
     api_key:  XXXXXXXXXXXXX
     api_type: soap
     api_version:  2
     debug: false
     encryption: 4de6a444ff58bf44013f3bc05256f1b3
+````
+
+The Magento database connection information must also be added to database.yml
+
+````
+magento_development:
+  adapter: 
+  database: 
+  username: 
+  password: 
+  host: 
+  port: 
+
+magento_beta:
+  adapter: 
+  database: 
+  username: 
+  password: 
+  host: 
+  port: 
+
+magento_production:
+  adapter: 
+  database: 
+  username: 
+  password: 
+  host: 
+  port:  
 ````
 
 ##TODO:  Add these sections:
