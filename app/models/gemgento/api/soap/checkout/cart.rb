@@ -6,7 +6,8 @@ module Gemgento
 
           def self.create(cart)
             message = {
-                store_id: Gemgento::Store.current.magento_id
+                store_id: Gemgento::Store.current.magento_id,
+                gemgento_id: cart.id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_create, message)
 
