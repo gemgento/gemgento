@@ -114,6 +114,13 @@ module Gemgento
             return response.success?
           end
 
+          def self.delete(product)
+            message = { product: product.magento_id, product_identifier_type: 'id' }
+            response = Gemgento::Magento.create_call(:catalog_product_delete, message)
+
+            return response.success?
+          end
+
           def self.check_magento(identifier, identifier_type, attribute_set)
             additional_attributes = []
             attribute_set.product_attributes.each do |attribute|

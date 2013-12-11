@@ -38,6 +38,16 @@ module Gemgento
       render nothing: true
     end
 
+    def destroy
+      data = params[:data]
+
+      if Gemgento::Product.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).count > 0
+        @product = Gemgento::Product.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).first.mark_deleted!
+      end
+
+      render nothing: true
+    end
+
     private
 
     def set_categories(magento_categories, product)
