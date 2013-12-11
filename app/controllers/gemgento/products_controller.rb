@@ -15,9 +15,9 @@ module Gemgento
     end
 
     def update
-      @product = Gemgento::Product.find_or_initialize(params[:id])
       data = params[:data]
 
+      @product = Gemgento::Product.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).first_or_initialize
       @product.magento_id = data[:product_id]
       @product.magento_type = data[:type]
       @product.sku = data[:sku]

@@ -25,9 +25,9 @@ module Gemgento
     end
 
     def update
-      @order = Gemgento::Order.find_or_initialize(params[:id])
       data = params[:data]
 
+      @order = Gemgento::Order.where('id = ? OR order_id = ?', params[:id], data[:order_id]).first_or_initialize
       @order.order_id = data[:order_id]
       @order.is_active = data[:is_active]
       @order.user = Gemgento::User.where(magento_id: data[:customer_id]).first
