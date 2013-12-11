@@ -290,6 +290,11 @@ module Gemgento
               end
             end
 
+            attributes << {
+                key: 'gemgento_id',
+                value: product.id
+            }
+
             attributes
           end
 
