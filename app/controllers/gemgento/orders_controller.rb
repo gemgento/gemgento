@@ -25,7 +25,7 @@ module Gemgento
     end
 
     def update
-      @order = Gemgento::Order.find_or_initialize_by(order_id: params[:id])
+      @order = Gemgento::Order.find_or_initialize(params[:id])
       data = params[:data]
 
       @order.order_id = data[:order_id]

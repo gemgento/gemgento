@@ -15,7 +15,7 @@ module Gemgento
     end
 
     def update
-      @product = Gemgento::Product.find_or_initialize_by(magento_id: params[:id])
+      @product = Gemgento::Product.find_or_initialize(params[:id])
       data = params[:data]
 
       @product.magento_id = data[:product_id]
