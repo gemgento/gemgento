@@ -11,6 +11,10 @@ module Gemgento
 
     after_save :sync_local_to_magento
 
+    def self.ignored
+      %w[sku gemgento_id]
+    end
+
     private
 
     # Push local product attribute set changes to Magento

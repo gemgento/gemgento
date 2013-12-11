@@ -107,26 +107,28 @@ module Gemgento
 
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source, product_attribute_set)
-            product_attribute = Gemgento::ProductAttribute.find_or_initialize_by(magento_id: source[:attribute_id])
-            product_attribute.magento_id = source[:attribute_id]
-            product_attribute.product_attribute_sets << product_attribute_set unless product_attribute.product_attribute_sets.include? product_attribute_set
-            product_attribute.code = source[:attribute_code]
-            product_attribute.frontend_input = source[:frontend_input]
-            product_attribute.scope = source[:scope]
-            product_attribute.default_value = source[:default_value] == {:'@xsi:type' => 'xsd:string'} ? nil : source[:default_value]
-            product_attribute.is_unique = source[:is_unique]
-            product_attribute.is_required = source[:is_required]
-            product_attribute.is_configurable = source[:is_configurable]
-            product_attribute.is_searchable = source[:is_searchable]
-            product_attribute.is_visible_in_advanced_search = source[:is_visible_in_advanced_search]
-            product_attribute.is_comparable = source[:is_comparable]
-            product_attribute.is_used_for_promo_rules = source[:is_used_for_promo_rules]
-            product_attribute.is_visible_on_front = source[:is_visible_on_front]
-            product_attribute.used_in_product_listing = source[:used_in_product_listing]
-            product_attribute.sync_needed = false
-            product_attribute.save
+            unless Gemgento::ProductAttribute.ignored.include?(source[:attribute_code])
+              product_attribute = Gemgento::ProductAttribute.find_or_initialize_by(magento_id: source[:attribute_id])
+              product_attribute.magento_id = source[:attribute_id]
+              product_attribute.product_attribute_sets << product_attribute_set unless product_attribute.product_attribute_sets.include? product_attribute_set
+              product_attribute.code = source[:attribute_code]
+              product_attribute.frontend_input = source[:frontend_input]
+              product_attribute.scope = source[:scope]
+              product_attribute.default_value = source[:default_value] == {:'@xsi:type' => 'xsd:string'} ? nil : source[:default_value]
+              product_attribute.is_unique = source[:is_unique]
+              product_attribute.is_required = source[:is_required]
+              product_attribute.is_configurable = source[:is_configurable]
+              product_attribute.is_searchable = source[:is_searchable]
+              product_attribute.is_visible_in_advanced_search = source[:is_visible_in_advanced_search]
+              product_attribute.is_comparable = source[:is_comparable]
+              product_attribute.is_used_for_promo_rules = source[:is_used_for_promo_rules]
+              product_attribute.is_visible_on_front = source[:is_visible_on_front]
+              product_attribute.used_in_product_listing = source[:used_in_product_listing]
+              product_attribute.sync_needed = false
+              product_attribute.save
 
-            fetch_all_options(product_attribute) if product_attribute.frontend_input == 'select'
+              fetch_all_options(product_attribute) if product_attribute.frontend_input == 'select'
+            end
           end
         end
       end
