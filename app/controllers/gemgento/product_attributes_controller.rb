@@ -2,10 +2,10 @@ module Gemgento
   class ProductAttributesController < BaseController
 
     def update
-      unless Gemgento::ProductAttribute.ignored.include?(params[:attribute_code])
-        @product_attribute = Gemgento::ProductAttribute.find_or_initialize_by(magento_id: params[:id])
-        data = params[:data]
+      data = params[:data]
 
+      unless Gemgento::ProductAttribute.ignored.include?(data[:attribute_code])
+        @product_attribute = Gemgento::ProductAttribute.find_or_initialize_by(magento_id: params[:id])
         @product_attribute.magento_id = data[:attribute_id]
         @product_attribute.code = data[:attribute_code]
         @product_attribute.frontend_input = data[:frontend_input]
