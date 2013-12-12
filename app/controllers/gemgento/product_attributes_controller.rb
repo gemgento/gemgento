@@ -18,9 +18,9 @@ module Gemgento
         @product_attribute.is_visible_in_advanced_search = data[:is_visible_in_advanced_search].to_i == 1 ? true : false
         @product_attribute.is_comparable = data[:is_comparable].to_i == 1 ? true : false
         @product_attribute.is_used_for_promo_rules = data[:is_used_for_promo_rules].to_i == 1 ? true : false
-        @product_attribute.is_visible_on_front = data[:is_visible_on_front].to_i == 1 ? true : false
         @product_attribute.used_in_product_listing = data[:used_in_product_listing].to_i == 1 ? true : false
         @product_attribute.save
+
 
         set_options(@product_attribute, data[:options])
       end
@@ -32,6 +32,8 @@ module Gemgento
 
     def set_options(product_attribute, options)
       options.each do |store_options|
+        next if store_options[:options].nil?
+
         store = Gemgento::Store.find_by(magento_id: store_options[:store_id])
 
         if store
