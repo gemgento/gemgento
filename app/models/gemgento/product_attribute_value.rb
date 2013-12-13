@@ -2,6 +2,7 @@ module Gemgento
   class ProductAttributeValue < ActiveRecord::Base
     belongs_to :product
     belongs_to :product_attribute
+    belongs_to :store
 
     default_scope -> { includes(:product_attribute) }
 
