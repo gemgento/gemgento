@@ -24,7 +24,7 @@ module Gemgento
                 label = Gemgento::Magento.enforce_savon_string(attribute_option[:label])
                 value = Gemgento::Magento.enforce_savon_string(attribute_option[:value])
 
-                product_attribute_option = Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: label, value: value).first_or_initialize
+                product_attribute_option = Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: label, value: value, store: store).first_or_initialize
                 product_attribute_option.label = label
                 product_attribute_option.value = value
                 product_attribute_option.product_attribute = product_attribute
@@ -90,7 +90,7 @@ module Gemgento
 
           def self.add_option(product_attribute_option, product_attribute)
             message = {attribute: product_attribute.magento_id, data: {
-                label: {item: [{'store_id' => {item: Gemgento::Store.all.map { |s| s.magento_id }}, value: product_attribute_option.label}]},
+                label: {item: [{'store_id' => {item: Gemgento::Store.all.map { |s| s.magento_id.to_s }}, value: product_attribute_option.label}]},
                 order: '0',
                 'is_default' => '0'
             }}

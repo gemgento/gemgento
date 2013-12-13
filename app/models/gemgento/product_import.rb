@@ -115,7 +115,7 @@ module Gemgento
       product.magento_type = 'simple'
       product.sku = sku
       product.product_attribute_set = product_attribute_set
-      product.store = store
+      product.store = self.store
       product.status = @row[@headers.index('status').to_i].to_i
 
       unless product.magento_id
@@ -169,13 +169,15 @@ module Gemgento
       attribute_option = ProductAttributeOption.new
       attribute_option.product_attribute = product_attribute
       attribute_option.label = option_label
-      attribute_option.store = Gemgento::Store.current
+      attribute_option.store = self.store
+      attribute_option.sync_needed = false
       attribute_option.save
 
+      attribute_option.sync_needed = true
       attribute_option.sync_local_to_magento
-      attribute_option.destroy #option values are not unique, search for newly fetched option for Magento
+      attribute_option.destroy
 
-      return Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: option_label).first
+      return Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: option_label, store: self.store).first
     end
 
     def set_default_attribute_values(product)
