@@ -12,7 +12,7 @@ module Gemgento
     has_many :product_categories, -> { distinct }, dependent: :destroy
     has_many :categories, -> { distinct }, through: :product_categories
 
-    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_products_stores', class_name: 'Store'
+    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_products', class_name: 'Store'
     has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
     has_and_belongs_to_many :configurable_products, -> { distinct },
                             join_table: 'gemgento_configurable_simple_relations',
@@ -50,12 +50,15 @@ module Gemgento
       Product.all
     end
 
-    def set_attribute_value(code, value)
+    def set_attribute_value(code, value, store = nil)
+      store = Gemgento::Store.current if store.nil?
+
       product_attribute = Gemgento::ProductAttribute.where(code: code).first
       product_attribute_value = Gemgento::ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id).first_or_initialize
       product_attribute_value.product = self
       product_attribute_value.product_attribute = product_attribute
       product_attribute_value.value = value
+      product_attribute_value.store = store
       product_attribute_value.save
 
       self.product_attribute_values << product_attribute_value unless self.product_attribute_values.include?(product_attribute_value)

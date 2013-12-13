@@ -145,7 +145,7 @@ module Gemgento
             value = @row[@headers.index(attribute_code).to_i].to_s.strip
           else # attribute value may have to be associated with an attribute option id
             label = @row[@headers.index(attribute_code).to_i].to_s.strip
-            attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: label, store: Gemgento::Store.current)
+            attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: label, store: self.store)
 
             if attribute_option.nil?
               attribute_option = create_attribute_option(product_attribute, label)
@@ -154,7 +154,7 @@ module Gemgento
             value = attribute_option.value
           end
 
-          product.set_attribute_value(product_attribute.code, value)
+          product.set_attribute_value(product_attribute.code, value, self.store)
         elsif product_attribute.nil? && attribute_code != 'sku' && attribute_code != 'magento_type' && attribute_code != 'category'
           self.import_errors << "ERROR - row #{@row.index} - Unknown attribute code, '#{attribute_code}'"
         end

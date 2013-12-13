@@ -8,20 +8,22 @@ module Gemgento
           def self.fetch_all(last_updated = nil, skip_existing = false)
             updates_made = false
 
-            list(last_updated).each do |store_view|
-              unless store_view == empty_product_list
-                updates_made = true
+            Gemgento::Store.all.each do |store|
+              list(store, last_updated).each do |store_view|
+                unless store_view == empty_product_list
+                  updates_made = true
 
-                # enforce array
-                unless store_view[:item].is_a? Array
-                  store_view[:item] = [store_view[:item]]
-                end
+                  # enforce array
+                  unless store_view[:item].is_a? Array
+                    store_view[:item] = [store_view[:item]]
+                  end
 
-                store_view[:item].each do |basic_product_info|
-                  next if skip_existing && Gemgento::Product.where(magento_id: basic_product_info[:product_id]).present?
+                  store_view[:item].each do |basic_product_info|
+                    next if skip_existing && Gemgento::Product.where(magento_id: basic_product_info[:product_id]).present?
 
-                  attribute_set = Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
-                  fetch(basic_product_info[:product_id], attribute_set)
+                    attribute_set = Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
+                    fetch(basic_product_info[:product_id], attribute_set, store)
+                  end
                 end
               end
             end
@@ -29,19 +31,20 @@ module Gemgento
             associate_simple_products_to_configurable_products if updates_made
           end
 
-          def self.fetch(product_id, attribute_set)
-            product_info = info(product_id, attribute_set)
+          def self.fetch(product_id, attribute_set, store)
+            product_info = info(product_id, attribute_set, store)
 
             # update the product and grab the images
-            product = sync_magento_to_local(product_info)
+            product = sync_magento_to_local(product_info, store)
             Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch(product)
           end
 
-          def self.list(last_updated = nil)
+          def self.list(store, last_updated = nil)
             if last_updated.nil?
               message = {}
             else
               message = {
+                  store_view: store.magento_id,
                   'filters' => {
                       'complex_filter' => {item: [
                           key: 'updated_at',
@@ -68,7 +71,7 @@ module Gemgento
             end
           end
 
-          def self.info(product_id, attribute_set)
+          def self.info(product_id, attribute_set, store)
             additional_attributes = []
             attribute_set.product_attributes.each do |attribute|
               additional_attributes << attribute.code
@@ -79,7 +82,8 @@ module Gemgento
                 productIdentifierType: 'id',
                 attributes: {
                     'additional_attributes' => {'item' => additional_attributes}
-                }
+                },
+                store_view: store.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_product_info, message)
 
@@ -174,36 +178,36 @@ module Gemgento
 
           private
 
-          def self.sync_magento_to_local(subject)
+          def self.sync_magento_to_local(subject, store)
             product = Gemgento::Product.where(magento_id: subject[:product_id]).not_deleted.first_or_initialize
             product.magento_id = subject[:product_id]
             product.magento_type = subject[:type]
             product.sku = subject[:sku]
             product.sync_needed = false
             product.product_attribute_set = Gemgento::ProductAttributeSet.where(magento_id: subject[:set]).first
-            product.store = Gemgento::Store.current
+            product.stores << store
             product.save
 
-            product.set_attribute_value('name', subject[:name])
-            product.set_attribute_value('description', subject[:description])
-            product.set_attribute_value('short_description', subject[:short_description])
-            product.set_attribute_value('weight', subject[:weight])
-            product.set_attribute_value('url_key', subject[:url_key])
-            product.set_attribute_value('url_path', subject[:url_path])
-            product.set_attribute_value('has_options', subject[:has_options])
-            product.set_attribute_value('gift_message_available', subject[:gift_message_available])
-            product.set_attribute_value('price', subject[:price])
-            product.set_attribute_value('special_price', subject[:special_price])
-            product.set_attribute_value('special_from_date', subject[:special_from_date])
-            product.set_attribute_value('special_to_date', subject[:special_to_date])
-            product.set_attribute_value('tax_class_id', subject[:tax_class_id])
-            product.set_attribute_value('meta_title', subject[:meta_title])
-            product.set_attribute_value('meta_keyword', subject[:meta_keyword])
-            product.set_attribute_value('meta_description', subject[:meta_description])
-            product.set_attribute_value('custom_design', subject[:custom_design])
-            product.set_attribute_value('custom_layout_update', subject[:custom_layout_update])
-            product.set_attribute_value('options_container', subject[:options_container])
-            product.set_attribute_value('enable_googlecheckout', subject[:enable_googlecheckout])
+            product.set_attribute_value('name', subject[:name], store)
+            product.set_attribute_value('description', subject[:description], store)
+            product.set_attribute_value('short_description', subject[:short_description], store)
+            product.set_attribute_value('weight', subject[:weight], store)
+            product.set_attribute_value('url_key', subject[:url_key], store)
+            product.set_attribute_value('url_path', subject[:url_path], store)
+            product.set_attribute_value('has_options', subject[:has_options], store)
+            product.set_attribute_value('gift_message_available', subject[:gift_message_available], store)
+            product.set_attribute_value('price', subject[:price], store)
+            product.set_attribute_value('special_price', subject[:special_price], store)
+            product.set_attribute_value('special_from_date', subject[:special_from_date], store)
+            product.set_attribute_value('special_to_date', subject[:special_to_date], store)
+            product.set_attribute_value('tax_class_id', subject[:tax_class_id], store)
+            product.set_attribute_value('meta_title', subject[:meta_title], store)
+            product.set_attribute_value('meta_keyword', subject[:meta_keyword], store)
+            product.set_attribute_value('meta_description', subject[:meta_description], store)
+            product.set_attribute_value('custom_design', subject[:custom_design], store)
+            product.set_attribute_value('custom_layout_update', subject[:custom_layout_update], store)
+            product.set_attribute_value('options_container', subject[:options_container], store)
+            product.set_attribute_value('enable_googlecheckout', subject[:enable_googlecheckout], store)
 
             set_categories(subject[:categories][:item], product) if subject[:categories][:item]
             set_attribute_values_from_magento(subject[:additional_attributes][:item], product) if (subject[:additional_attributes] and subject[:additional_attributes][:item])

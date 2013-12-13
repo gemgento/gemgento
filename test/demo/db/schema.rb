@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131213163410) do
+ActiveRecord::Schema.define(version: 20131213172603) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string "namespace"
@@ -125,9 +125,9 @@ ActiveRecord::Schema.define(version: 20131213163410) do
 
   add_index "gemgento_categories", ["magento_id"], name: "index_gemgento_categories_on_magento_id", unique: true, using: :btree
 
-  create_table "gemgento_categories_products", id: false, force: true do |t|
-    t.integer "product_id", default: 0, null: false
-    t.integer "category_id", default: 0, null: false
+  create_table "gemgento_categories_stores", force: true do |t|
+    t.integer "category_id"
+    t.integer "store_id"
   end
 
   create_table "gemgento_configurable_attributes", id: false, force: true do |t|
@@ -411,6 +411,7 @@ ActiveRecord::Schema.define(version: 20131213163410) do
     t.integer "position", default: 0, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer "store_id"
   end
 
   create_table "gemgento_product_imports", force: true do |t|

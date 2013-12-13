@@ -6,26 +6,35 @@ module Gemgento
 
           # Synchronize local database with Magento database
           def self.fetch_all
-            sync_magento_tree_to_local(tree)
+            Gemgento::Store.all.each do |store|
+              sync_magento_tree_to_local(tree(store), store)
+            end
           end
 
-          def self.tree
-            response = Gemgento::Magento.create_call(:catalog_category_tree)
+          def self.tree(store)
+            message = {
+              store_view: store.magento_id
+            }
+            response = Gemgento::Magento.create_call(:catalog_category_tree, message)
 
             if response.success?
               return response.body[:tree]
             end
           end
 
-          def self.info(category_id)
-            response = Gemgento::Magento.create_call(:catalog_category_info, {category_id: category_id})
+          def self.info(category_id, store)
+            message = {
+                category_id: category_id,
+                store_view: store.magento_id
+            }
+            response = Gemgento::Magento.create_call(:catalog_category_info, store)
 
             if response.success?
               return response.body[:info]
             end
           end
 
-          def self.create(category)
+          def self.create(category, store)
             data = {
                 name: self.name,
                 'is_active' => category.is_active ? 1 : 0,
@@ -36,7 +45,11 @@ module Gemgento
                 'position' => category.position,
                 'is_anchor' => 1
             }
-            message = {parentId: category.parent.magento_id, categoryData: data}
+            message = {
+                parentId: category.parent.magento_id,
+                category_data: data,
+                store_view: store.magento_id
+            }
             response = Gemgento::Magento.create_call(:catalog_category_create, message)
 
             if response.success?
@@ -46,7 +59,7 @@ module Gemgento
             end
           end
 
-          def self.update(category)
+          def self.update(category, store)
             data = {
                 name: category.name,
                 'is_active' => category.is_active ? 1 : 0,
@@ -54,15 +67,19 @@ module Gemgento
                 'url_key' => category.url_key,
                 'position' => category.position
             }
-            message = {categoryId: category.magento_id, categoryData: data}
+            message = {
+                categoryId: category.magento_id,
+                categoryData: data,
+                store_view: store.magento_id
+            }
             response = Gemgento::Magento.create_call(:catalog_category_update, message)
             response.body
           end
 
-          def self.assigned_products(category)
+          def self.assigned_products(category, store)
             message = {
-                categoryId: category.magento_id,
-                storeId: Gemgento::Store.current.magento_id
+                category_id: category.magento_id,
+                store_id: store.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_category_assigned_products, message)
 
@@ -80,25 +97,28 @@ module Gemgento
             Gemgento::Category.all.each do |category|
               next if category.products.empty?
 
-              result = assigned_products(category)
+              category.stores.each do |store|
+                result = assigned_products(category, store)
 
-              if result.nil? || result == false || result.empty?
-                category.products.clear
-                next
+                if result.nil? || result == false || result.empty?
+                  category.products.clear
+                  next
+                end
+
+                product_ids = []
+                result.each do |item|
+                  product = Gemgento::Product.find_by(magento_id: item[:product_id])
+                  next if product.nil?
+
+                  product_ids << product.id
+                  pairing = Gemgento::ProductCategory.where(category: category, product: product).first_or_initialize
+                  pairing.position = item[:position].nil? ? 1 : item[:position]
+                  pairing.store = store
+                  pairing.save
+                end
+
+                category.products.destroy(category.products.where("product_id NOT IN (?) AND store_id = ?", product_ids, store.id))
               end
-
-              product_ids = []
-              result.each do |item|
-                product = Gemgento::Product.find_by(magento_id: item[:product_id])
-                next if product.nil?
-
-                product_ids << product.id
-                pairing = Gemgento::ProductCategory.where(category: category, product: product).first_or_initialize
-                pairing.position = item[:position].nil? ? 1 : item[:position]
-                pairing.save
-              end
-
-              category.products.destroy(category.products.where("product_id NOT IN (?)", product_ids))
             end
           end
 
@@ -107,13 +127,13 @@ module Gemgento
           # Traverse Magento category tree while synchronizing with local category tree
           #
           # @param [Hash] category  The returned item of Magento API call
-          def self.sync_magento_tree_to_local(category)
-            sync_magento_to_local(info(category[:category_id]))
+          def self.sync_magento_tree_to_local(category, store)
+            sync_magento_to_local(info(category[:category_id], store), store)
 
             if category[:children][:item]
               category[:children][:item] = [category[:children][:item]] unless category[:children][:item].is_a? Array
               category[:children][:item].each do |child|
-                sync_magento_tree_to_local(child)
+                sync_magento_tree_to_local(child, store)
               end
             end
           end
@@ -121,7 +141,7 @@ module Gemgento
           # Synchronize the response of a catalogCategoryInfo API call to local database
           #
           # @param [Hash] subject The returned item of Magento API call
-          def self.sync_magento_to_local(subject)
+          def self.sync_magento_to_local(subject, store)
             category = Gemgento::Category.where(magento_id: subject[:category_id]).first_or_initialize
             category.magento_id = subject[:category_id]
             category.name = subject[:name]
@@ -131,6 +151,7 @@ module Gemgento
             category.is_active = subject[:is_active]
             category.include_in_menu = subject[:include_in_menu] == 1 ? true : false
             category.children_count = subject[:children_count]
+            category.stores << store unless category.stores.include?(store)
 
             if category.children_count > 0
               category.all_children = subject[:all_children]
