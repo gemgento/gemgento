@@ -1,7 +1,6 @@
 module Gemgento
   class Product < ActiveRecord::Base
 
-    belongs_to :store
     belongs_to :product_attribute_set
     belongs_to :swatch
 
@@ -13,6 +12,7 @@ module Gemgento
     has_many :product_categories, -> { distinct }, dependent: :destroy
     has_many :categories, -> { distinct }, through: :product_categories
 
+    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_products_stores', class_name: 'Store'
     has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
     has_and_belongs_to_many :configurable_products, -> { distinct },
                             join_table: 'gemgento_configurable_simple_relations',

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131122183133) do
+ActiveRecord::Schema.define(version: 20131213161143) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string "namespace"
@@ -445,7 +445,6 @@ ActiveRecord::Schema.define(version: 20131122183133) do
     t.datetime "updated_at", null: false
     t.string "sku"
     t.string "product_attribute_set_id"
-    t.string "store_id"
     t.boolean "sync_needed", default: true, null: false
     t.boolean "status", default: true
     t.integer "visibility", default: 4
@@ -498,6 +497,11 @@ ActiveRecord::Schema.define(version: 20131122183133) do
   end
 
   add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true, using: :btree
+
+  create_table "gemgento_stores_products", force: true do |t|
+    t.integer "product_id"
+    t.integer "store_id"
+  end
 
   create_table "gemgento_swatches", force: true do |t|
     t.string "name"

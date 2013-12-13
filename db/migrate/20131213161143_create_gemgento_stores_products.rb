@@ -1,0 +1,15 @@
+class CreateGemgentoStoresProducts < ActiveRecord::Migration
+  def up
+    create_table :gemgento_stores_products do |t|
+      t.integer :product_id
+      t.integer :store_id
+    end
+
+    remove_column :gemgento_products, :store_id
+  end
+
+  def down
+    drop_table :gemgento_stores_products
+    add_column :gemgento_products, :store_id, :integer
+  end
+end
