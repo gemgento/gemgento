@@ -115,7 +115,7 @@ module Gemgento
       product.magento_type = 'simple'
       product.sku = sku
       product.product_attribute_set = product_attribute_set
-      product.store = self.store
+      product.stores << self.store unless products.stores.include?(self.store)
       product.status = @row[@headers.index('status').to_i].to_i
 
       unless product.magento_id
@@ -279,7 +279,7 @@ module Gemgento
 
       configurable_product.product_attribute_set = product_attribute_set
       configurable_product.status = @row[@headers.index('status').to_i].to_i
-      configurable_product.store = store
+      configurable_product.stores << store unless configurable_product.stores.include?(store)
       configurable_product.sync_needed = false
       configurable_product.save
 
