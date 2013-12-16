@@ -87,7 +87,7 @@ module Gemgento
             response = Gemgento::Magento.create_call(:customer_customer_update, message)
 
             if response.success?
-              unless customer.magento_password.include? ':'
+              if customer.magento_password.nil? || !customer.magento_password.include?(':')
                 # pull customer information to get the password
                 sync_magento_to_local(info(customer.magento_id))
               end
@@ -154,14 +154,14 @@ module Gemgento
                 lastname: customer.lname,
                 'store_id' => customer.store.magento_id,
                 'group_id' => customer.user_group.magento_id,
-                'website_id' => '1',
+                'website_id' => customer.store.website_id,
                 prefix: customer.prefix,
                 suffix: customer.suffix,
                 dob: customer.dob,
                 taxvat: customer.taxvat
             }
 
-            unless customer.magento_password.include? ':'
+            unless customer.magento_password.nil? || customer.magento_password.include?(':')
               customer_data[:password] = customer.magento_password # pass plain text password, magento needs to encrypt it (stupid magento)
             end
 
