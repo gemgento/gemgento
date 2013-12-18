@@ -19,17 +19,17 @@ module Gemgento
       begin
         super
       rescue Exception => e
-        puts "Upload Failed once.."
+        puts 'Upload Failed once..'
 
         begin
           super
         rescue Exception => e
-          puts "Upload Failed twice.."
+          puts 'Upload Failed twice..'
 
           begin
             super
           rescue Exception => e
-            puts "Upload Failed three times.."
+            puts 'Upload Failed three times..'
 
             super
           end
