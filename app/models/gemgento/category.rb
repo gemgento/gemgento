@@ -50,9 +50,9 @@ module Gemgento
     def sync_local_to_magento
       if self.sync_needed
         if !self.magento_id
-          API::SOAP::Catalog::Category.create(self)
+          API::SOAP::Catalog::Category.create(self, Gemgento::Store.current)
         else
-          API::SOAP::Catalog::Category.update(self)
+          API::SOAP::Catalog::Category.update(self, Gemgento::Store.current)
         end
       end
     end
