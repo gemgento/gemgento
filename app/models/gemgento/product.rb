@@ -58,14 +58,18 @@ module Gemgento
       product_attribute_value.product = self
       product_attribute_value.product_attribute = product_attribute
       product_attribute_value.value = value
-      product_attribute_value.store = store
+      product_attribute_value.store = Gemgento::Store.current
       product_attribute_value.save
 
       self.product_attribute_values << product_attribute_value unless self.product_attribute_values.include?(product_attribute_value)
     end
 
-    def attribute_value(code)
-      product_attribute_value = self.product_attribute_values.select { |value| value.product_attribute.code == code.to_s }.first
+    def attribute_value(code, store = nil)
+      if store.nil?
+        store = Gemgento::Store.current
+      end
+
+      product_attribute_value = self.product_attribute_values.where('gemgento_product_attribute_values.store_id = ?', store.id).select { |value| value.product_attribute.code == code.to_s }.first
 
       ## if the attribute is not currently associated with the product, check if it exists
       if product_attribute_value.nil?
@@ -103,7 +107,7 @@ module Gemgento
     end
 
     def self.check_magento(identifier, identifier_type, attribute_set)
-      API::SOAP::Catalog::Product.check_magento(identifier, identifier_type, attribute_set)
+      API::SOAP::Catalog::Product.check_magento(identifier, identifier_type, attribute_set, Gemgento::Store.current)
     end
 
     # Attempts to return relations before method missing response
@@ -269,11 +273,10 @@ module Gemgento
     # Push local product changes to magento
     def sync_local_to_magento
       if self.sync_needed
-
         if !self.magento_id
-          API::SOAP::Catalog::Product.create(self)
+          API::SOAP::Catalog::Product.create(self, Gemgento::Store.current)
         else
-          API::SOAP::Catalog::Product.update(self)
+          API::SOAP::Catalog::Product.update(self, Gemgento::Store.current)
         end
 
         self.sync_needed = false

@@ -93,13 +93,13 @@ module Gemgento
           end
 
           # Create a new Product in Magento and set out magento_id
-          def self.create(product)
+          def self.create(product, store)
             message = {
                 type: product.magento_type,
                 set: product.product_attribute_set.magento_id,
                 sku: product.sku,
                 product_data: compose_product_data(product),
-                store_view: product.store.magento_id
+                store_view: store.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_product_create, message)
 
@@ -111,8 +111,13 @@ module Gemgento
           end
 
           # Update existing Magento Product
-          def self.update(product)
-            message = {product: product.magento_id, product_identifier_type: 'id', product_data: compose_product_data(product)}
+          def self.update(product, store)
+            message = {
+                product: product.magento_id,
+                product_identifier_type: 'id',
+                product_data: compose_product_data(product),
+                store_view: store.magento_id
+            }
             response = Gemgento::Magento.create_call(:catalog_product_update, message)
 
             return response.success?
@@ -125,7 +130,7 @@ module Gemgento
             return response.success?
           end
 
-          def self.check_magento(identifier, identifier_type, attribute_set)
+          def self.check_magento(identifier, identifier_type, attribute_set, store)
             additional_attributes = []
             attribute_set.product_attributes.each do |attribute|
               additional_attributes << attribute.code
@@ -144,7 +149,7 @@ module Gemgento
             unless response.success?
               return Gemgento::Product.new
             else
-              return sync_magento_to_local(response.body[:info])
+              return sync_magento_to_local(response.body[:info], store)
             end
           end
 

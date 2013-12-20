@@ -21,6 +21,7 @@ module Gemgento
     after_commit :process
 
     def process
+      Gemgento::Store.current = self.store
       # create a fake sync record, so products are not synced during the import
       sync_buffer = Gemgento::Sync.new
       sync_buffer.subject = 'products'
@@ -115,7 +116,7 @@ module Gemgento
       product.magento_type = 'simple'
       product.sku = sku
       product.product_attribute_set = product_attribute_set
-      product.stores << self.store unless products.stores.include?(self.store)
+      product.stores << self.store unless product.stores.include?(self.store)
       product.status = @row[@headers.index('status').to_i].to_i
 
       unless product.magento_id
@@ -154,7 +155,7 @@ module Gemgento
             value = attribute_option.value
           end
 
-          product.set_attribute_value(product_attribute.code, value, self.store)
+          product.set_attribute_value(product_attribute.code, value)
         elsif product_attribute.nil? && attribute_code != 'sku' && attribute_code != 'magento_type' && attribute_code != 'category'
           self.import_errors << "ERROR - row #{@row.index} - Unknown attribute code, '#{attribute_code}'"
         end
