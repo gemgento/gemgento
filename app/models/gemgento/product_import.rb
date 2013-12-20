@@ -245,9 +245,9 @@ module Gemgento
     def create_image(product, file_name, types, position, label)
       image = Gemgento::Asset.new
       image.product = product
-      image.attachment = File.open(file_name)
       image.position = position
       image.label = label
+      image.set_file(File.open(file_name))
 
       types.each do |type|
         image.asset_types << type

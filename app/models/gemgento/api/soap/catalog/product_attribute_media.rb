@@ -13,14 +13,13 @@ module Gemgento
           end
 
           def self.fetch(product)
-            Gemgento::Asset.skip_callback(:destroy, :before, :delete_magento)
-            product.assets.destroy_all
+            product.stores.each do |store|
+              media_list = list(product, store)
 
-            media_list = list(product.magento_id)
-
-            unless media_list.nil?
-              media_list.each do |product_attribute_media|
-                sync_magento_to_local(product_attribute_media, product)
+              unless media_list.nil?
+                media_list.each do |product_attribute_media|
+                  sync_magento_to_local(product_attribute_media, product, store)
+                end
               end
             end
           end
@@ -33,10 +32,11 @@ module Gemgento
             end
           end
 
-          def self.list(product_id)
+          def self.list(product, store)
             message = {
-                product: product_id,
-                identifier_type: 'id'
+                product: product.magento_id,
+                identifier_type: 'id',
+                store_view: store.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_product_attribute_media_list, message)
 
@@ -58,7 +58,12 @@ module Gemgento
           end
 
           def self.create(asset)
-            message = {product: asset.product.magento_id, data: compose_asset_entity_data(asset), identifier_type: 'id'}
+            message = {
+                product: asset.product.magento_id,
+                data: compose_asset_entity_data(asset),
+                identifier_type: 'id',
+                store_view: asset.store.magento_id
+            }
             response = Gemgento::Magento.create_call(:catalog_product_attribute_media_create, message)
 
             if response.success?
@@ -96,21 +101,16 @@ module Gemgento
           private
 
           # Save Magento product attribute set to local
-          def self.sync_magento_to_local(source, product)
-            asset = Gemgento::Asset.where(product_id: product.id, url: source[:url]).first_or_initialize
-
-            begin
-              asset.attachment = open(source[:url])
-            rescue
-              asset.attachment = nil
-            end
-
+          def self.sync_magento_to_local(source, product, store)
+            asset = Gemgento::Asset.where(product: product, file: source[:file], store: store).first_or_initialize
             asset.url = source[:url]
             asset.position = source[:position]
             asset.label = Gemgento::Magento.enforce_savon_string(source[:label])
             asset.file = source[:file]
             asset.product = product
             asset.sync_needed = false
+            asset.set_file(open(source[:url]))
+
             asset.save
 
             set_types(source[:types][:item], asset)
@@ -143,7 +143,7 @@ module Gemgento
 
           def self.compose_asset_entity_data(asset)
             asset_entity = {
-                file: compose_file_entity(asset),
+                file: compose_file_entity(asset.asset_file),
                 label: asset.label,
                 position: asset.position,
                 types: {item: compose_types(asset)},
@@ -153,16 +153,16 @@ module Gemgento
             asset_entity
           end
 
-          def self.compose_file_entity(asset)
-            if asset.attachment.url(:original) =~ URI::regexp
-              content = open(asset.attachment.url(:original)).read
+          def self.compose_file_entity(asset_file)
+            if asset_file.file.url(:original) =~ URI::regexp
+              content = open(asset_file.file.url(:original)).read
             else
-              content = File.open(asset.attachment.path(:original)).read
+              content = File.open(asset_file.file.path(:original)).read
             end
 
             file_entity = {
                 content: Base64.encode64(content),
-                mime: asset.attachment_content_type
+                mime: asset_file.file_content_type
             }
 
             file_entity

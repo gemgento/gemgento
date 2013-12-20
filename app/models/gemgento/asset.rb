@@ -1,43 +1,43 @@
+require 'open-uri'
+
 module Gemgento
   class Asset < ActiveRecord::Base
     belongs_to :product
+    belongs_to :store
+    belongs_to :asset_file
 
-    has_and_belongs_to_many :asset_types, -> { uniq }, :join_table => 'gemgento_assets_asset_types'
+    has_and_belongs_to_many :asset_types, -> { uniq }, join_table: 'gemgento_assets_asset_types'
 
     after_save :sync_local_to_magento
     after_save :touch_product
 
     before_destroy :delete_magento
 
-    has_attached_file :attachment,
-                      :styles => {:mini => '32x32>', :normal => '172x172>'},
-                      :default_style => :normal,
-                      :url => "/system/assets/products/:id/:style/:filename",
-                      :path => ":rails_root/public/system/assets/products/:id/:style/:filename"
-
     default_scope -> { order(:position) }
 
-    def save
-      # Dirty dirty dirty(S3Bug)..
-      begin
-        super
-      rescue Exception => e
-        puts "Upload Failed once.."
+    def set_file(file)
+      raise 'Asset does not have an associated product.' if self.product.nil?
 
-        begin
-          super
-        rescue Exception => e
-          puts "Upload Failed twice.."
+      matching_file = nil
 
-          begin
-            super
-          rescue Exception => e
-            puts "Upload Failed three times.."
-
-            super
-          end
+      self.product.assets.each do |asset|
+        if !asset.asset_file.nil? && FileUtils.compare_file(asset.asset_file.file.path(:original), file)
+          matching_file = asset.asset_file
+          break
         end
       end
+
+      if matching_file.nil?
+        begin
+          matching_file = AssetFile.new
+          matching_file.file = open(file_path)
+          matching_file.save
+        rescue
+          matching_file = nil
+        end
+      end
+
+      self.asset_file = matching_file
     end
 
     private

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131220141725) do
+ActiveRecord::Schema.define(version: 20131220160544) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string "namespace"
@@ -71,6 +71,13 @@ ActiveRecord::Schema.define(version: 20131220141725) do
     t.boolean "is_default", default: false
   end
 
+  create_table "gemgento_asset_files", force: true do |t|
+    t.string "file_file_name"
+    t.string "file_content_type"
+    t.integer "file_file_size"
+    t.datetime "file_updated_at"
+  end
+
   create_table "gemgento_asset_types", force: true do |t|
     t.integer "product_attribute_set_id"
     t.string "code"
@@ -88,10 +95,8 @@ ActiveRecord::Schema.define(version: 20131220141725) do
     t.string "file"
     t.string "label"
     t.boolean "sync_needed", default: true, null: false
-    t.string "attachment_file_name"
-    t.string "attachment_content_type"
-    t.integer "attachment_file_size"
-    t.datetime "attachment_updated_at"
+    t.integer "store_id"
+    t.integer "asset_file_id"
   end
 
   create_table "gemgento_assets_asset_types", id: false, force: true do |t|

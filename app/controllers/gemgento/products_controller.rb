@@ -85,7 +85,7 @@ module Gemgento
     def set_assets(source_assets, product)
       source_assets.each do |source|
         asset = Gemgento::Asset.find_or_initialize_by(product_id: product.id, file: source[:file])
-        puts asset.inspect
+
         if !source[:removed].nil? && source[:removed] == 0
 
           if source[:new_file].nil?
@@ -96,20 +96,13 @@ module Gemgento
             file = source[:new_file]
           end
 
-          if asset.id.nil? || asset.attachment.nil? || !FileUtils.compare_file(asset.attachment.path(:original), open(url))
-            begin
-              asset.attachment = open(url)
-            rescue
-              asset.attachment = nil
-            end
-          end
-
           asset.url = url
           asset.position = source[:position]
           asset.label = source[:label]
           asset.file = file
           asset.product = product
           asset.sync_needed = false
+          asset.set_file(open(url))
           asset.save
 
         elsif !source[:removed].nil? && source[:removed] == 1
