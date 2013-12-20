@@ -37,6 +37,7 @@ module Gemgento
             store = Gemgento::Store.where(magento_id: source[:store_id]).first_or_initialize
             store.magento_id = source[:store_id]
             store.code = source[:code]
+            store.website_id = source[:website_id]
             store.group_id = source[:group_id]
             store.name = source[:name]
             store.sort_order = source[:sort_order]
