@@ -8,7 +8,7 @@ module Gemgento
     has_many :users
 
     has_and_belongs_to_many :products, -> { distinct }, join_table: 'gemgento_stores_products', class_name: 'Product'
-    has_and_belongs_to_many :categories, -> { distinct }, join_table: 'gemgento_stores_categories', class_name: 'Category'
+    has_and_belongs_to_many :categories, -> { distinct }, join_table: 'gemgento_categories_stores', class_name: 'Category'
     has_and_belongs_to_many :users, ->{ distinct }, join_table: 'gemgento_stores_users', class_name: 'User'
 
     def self.current

@@ -6,7 +6,7 @@ module Gemgento
 
     belongs_to :parent, foreign_key: 'parent_id', class_name: 'Category'
 
-    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_categories', class_name: 'Store'
+    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_categories_stores', class_name: 'Store'
 
     has_attached_file :image
 

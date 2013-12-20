@@ -7,7 +7,8 @@ module Gemgento
           # Synchronize local database with Magento database
           def self.fetch_all
             Gemgento::Store.all.each do |store|
-              sync_magento_tree_to_local(tree(store), store)
+              category_tree = tree(store)
+              sync_magento_tree_to_local(category_tree, store) unless category_tree.nil?
             end
           end
 
@@ -27,7 +28,7 @@ module Gemgento
                 category_id: category_id,
                 store_view: store.magento_id
             }
-            response = Gemgento::Magento.create_call(:catalog_category_info, store)
+            response = Gemgento::Magento.create_call(:catalog_category_info, message)
 
             if response.success?
               return response.body[:info]
@@ -126,13 +127,13 @@ module Gemgento
 
           # Traverse Magento category tree while synchronizing with local category tree
           #
-          # @param [Hash] category  The returned item of Magento API call
-          def self.sync_magento_tree_to_local(category, store)
-            sync_magento_to_local(info(category[:category_id], store), store)
+          # @param [Hash] category_tree  The returned item of Magento API call
+          def self.sync_magento_tree_to_local(category_tree, store)
+            sync_magento_to_local(info(category_tree[:category_id], store), store)
 
-            if category[:children][:item]
-              category[:children][:item] = [category[:children][:item]] unless category[:children][:item].is_a? Array
-              category[:children][:item].each do |child|
+            if category_tree[:children][:item]
+              category_tree[:children][:item] = [category_tree[:children][:item]] unless category_tree[:children][:item].is_a? Array
+              category_tree[:children][:item].each do |child|
                 sync_magento_tree_to_local(child, store)
               end
             end
