@@ -44,7 +44,7 @@ module Gemgento
             end
 
             response = Gemgento::Magento.create_call(:customer_customer_list, message)
-
+            puts response.inspect
             if response.success?
               # enforce array
               unless response.body_overflow[:store_view].is_a? Array
@@ -127,7 +127,7 @@ module Gemgento
 
             user.magento_id = source[:customer_id]
             user.increment_id = source[:increment_id]
-            user.store = Store.find_by(magento_id: source[:store_id])
+            user.stores << Store.find_by(magento_id: source[:store_id]) unless user.stores.include? Store.find_by(magento_id: source[:store_id])
             user.created_in = source[:created_in]
             user.email = source[:email]
             user.fname = source[:firstname]
@@ -152,9 +152,9 @@ module Gemgento
                 firstname: customer.fname,
                 middlename: customer.mname,
                 lastname: customer.lname,
-                'store_id' => customer.store.magento_id,
+                'store_id' => Gemgento::Store.current.magento_id,
                 'group_id' => customer.user_group.magento_id,
-                'website_id' => customer.store.website_id,
+                'website_id' => Gemgento::Store.current.website_id,
                 prefix: customer.prefix,
                 suffix: customer.suffix,
                 dob: customer.dob,
