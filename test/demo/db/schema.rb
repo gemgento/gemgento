@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131213172603) do
+ActiveRecord::Schema.define(version: 20131220141725) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string "namespace"
@@ -505,6 +505,11 @@ ActiveRecord::Schema.define(version: 20131213172603) do
     t.integer "store_id"
   end
 
+  create_table "gemgento_stores_users", force: true do |t|
+    t.integer "store_id"
+    t.integer "user_id"
+  end
+
   create_table "gemgento_swatches", force: true do |t|
     t.string "name"
     t.string "description"
@@ -530,7 +535,6 @@ ActiveRecord::Schema.define(version: 20131213172603) do
 
   create_table "gemgento_users", force: true do |t|
     t.integer "magento_id"
-    t.integer "store_id"
     t.string "created_in"
     t.string "email", default: "", null: false
     t.string "fname"
