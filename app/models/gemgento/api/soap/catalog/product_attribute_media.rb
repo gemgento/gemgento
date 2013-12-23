@@ -134,7 +134,7 @@ module Gemgento
           end
 
           def self.sync_magento_media_type_to_local(source, product_attribute_set)
-            asset_type = Gemgento::AssetType.where(product_attribute_set_id: product_attribute_set.id, code: source[:url]).first_or_initialize
+            asset_type = Gemgento::AssetType.where(product_attribute_set_id: product_attribute_set.id, code: source[:code]).first_or_initialize
             asset_type.code = source[:code]
             asset_type.scope = source[:scope]
             asset_type.product_attribute_set = product_attribute_set
