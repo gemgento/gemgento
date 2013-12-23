@@ -269,7 +269,8 @@ module Gemgento
                 'short_description' => product.attribute_value('short_description'),
                 'weight' => product.attribute_value('weight'),
                 'status' => product.status ? 1 : 2,
-                'categories' => {'item' => compose_categories(product)},
+                'categories' => { 'item' => compose_categories(product) },
+                'websites' => { 'item' => compose_websites(product) },
                 'url_key' => product.attribute_value('url_key'),
                 'price' => product.attribute_value('price'),
                 'tax_class_id' => '2',
@@ -292,6 +293,16 @@ module Gemgento
             end
 
             categories
+          end
+
+          def self.compose_websites(product)
+            websites = []
+
+            product.stores.each do |store|
+              websites << "#{store.website_id}"
+            end
+
+            websites
           end
 
           def self.compose_attribute_values(product)
