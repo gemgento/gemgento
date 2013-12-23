@@ -30,7 +30,7 @@ module Gemgento
       if matching_file.nil?
         begin
           matching_file = AssetFile.new
-          matching_file.file = open(file_path)
+          matching_file.file = file
           matching_file.save
         rescue
           matching_file = nil

@@ -41,6 +41,7 @@ if defined?(ActiveAdmin)
           f.input :image_path
           f.input :image_file_extensions_raw, as: :string, label: 'Image File Extensions', hint: 'Enter expected image file extensions. Separate extensions with a comma.  E.g. .jpg, .png, .gif'
           f.input :image_labels_raw, as: :text, label: 'Image Labels', hint: 'Enter image labels in order of appearance.  Separate labels with line breaks (hit enter)'
+          f.input :image_types_raw, as: :text, label: 'Image Types', hint: 'The default image types are: small_image, image, thumbnail.  Each line corresponds to labels above, multiple types can be separated by a comma'
         end
 
         f.actions
@@ -82,7 +83,8 @@ if defined?(ActiveAdmin)
                   :image_file_extensions,
                   :image_file_extensions_raw,
                   :image_labels,
-                  :image_labels_raw
+                  :image_labels_raw,
+                  :image_types_raw
               ])
         end
       end

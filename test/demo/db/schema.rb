@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131220160544) do
+ActiveRecord::Schema.define(version: 20131223181709) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string "namespace"
@@ -438,6 +438,7 @@ ActiveRecord::Schema.define(version: 20131220160544) do
     t.integer "simple_product_visibility"
     t.integer "configurable_product_visibility"
     t.text "image_file_extensions"
+    t.text "image_types"
   end
 
   create_table "gemgento_product_imports_configurable_attributes", id: false, force: true do |t|

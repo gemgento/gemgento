@@ -14,9 +14,11 @@ module Gemgento
     serialize :import_errors, Array
     serialize :image_labels, Array
     serialize :image_file_extensions, Array
+    serialize :image_types, Array
 
     attr_accessor :image_labels_raw
     attr_accessor :image_file_extensions_raw
+    attr_accessor :image_types_raw
 
     after_commit :process
 
@@ -77,6 +79,15 @@ module Gemgento
     def image_file_extensions_raw=(values)
       self.image_file_extensions = []
       self.image_file_extensions = values.gsub(' ', '').split(',')
+    end
+
+    def image_types_raw
+      self.image_types.join("\n") unless self.image_types.nil?
+    end
+
+    def image_types_raw=(values)
+      self.image_types = []
+      self.image_types = values.gsub("\r", '').split("\n")
     end
 
     def image_path=(path)
@@ -216,7 +227,7 @@ module Gemgento
     end
 
     def create_images(product)
-      product.assets.destroy_all
+      product.assets.where(store: self.store).destroy_all
 
       images_found = false
       # find the correct image file name and path
@@ -227,7 +238,11 @@ module Gemgento
           Rails.logger.info file_name
           next unless File.exist?(file_name)
 
-          types = Gemgento::AssetType.where(product_attribute_set: product_attribute_set)
+          types = []
+
+          unless self.image_types[position].nil?
+            types = Gemgento::AssetType.where('product_attribute_set_id = ? AND code IN (?)', self.product_attribute_set.id, self.image_types[position].split(',').map(&:strip))
+          end
 
           unless types.is_a? Array
             types = [types]
@@ -246,6 +261,7 @@ module Gemgento
     def create_image(product, file_name, types, position, label)
       image = Gemgento::Asset.new
       image.product = product
+      image.store = self.store
       image.position = position
       image.label = label
       image.set_file(File.open(file_name))
@@ -310,13 +326,14 @@ module Gemgento
     end
 
     def create_configurable_images(configurable_product)
-      configurable_product.assets.destroy_all
+      configurable_product.assets.where(store: self.store).destroy_all
       default_product = configurable_product.simple_products.first
 
-      default_product.assets.each do |asset|
+      default_product.assets.where(store: self.store).each do |asset|
         asset_copy = Gemgento::Asset.new
         asset_copy.product = configurable_product
-        asset_copy.attachment = File.open(asset.attachment.path(:original))
+        asset_copy.store = self.store
+        asset_copy.set_file(File.open(asset.asset_file.file.path(:original)))
         asset_copy.label = asset.label
         asset_copy.position = asset.position
         asset_copy.asset_types = asset.asset_types
