@@ -31,8 +31,6 @@ module Gemgento
 
       if !data[:additional_attributes][:media_gallery].nil? && !data[:additional_attributes][:media_gallery][:images].nil?
         set_assets(data[:additional_attributes][:media_gallery][:images], @product)
-      else
-        @product.assets.destroy_all
       end
 
       render nothing: true
