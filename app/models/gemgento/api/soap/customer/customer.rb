@@ -127,7 +127,7 @@ module Gemgento
 
             user.magento_id = source[:customer_id]
             user.increment_id = source[:increment_id]
-            user.stores << Gemgento::Store.find_by(magento_id: source[:store_id]) unless user.stores.include? Store.find_by(magento_id: source[:store_id])
+            user.stores << Gemgento::Store.find_by(magento_id: source[:store_id]) unless source[:store_id] == '0' || user.stores.include?(Gemgento::Store.find_by(magento_id: source[:store_id]))
             user.created_in = source[:created_in]
             user.email = source[:email]
             user.fname = source[:firstname]
