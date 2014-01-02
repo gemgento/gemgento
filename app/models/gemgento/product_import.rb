@@ -61,6 +61,7 @@ module Gemgento
       sync_buffer.is_complete = true
       sync_buffer.created_at = Time.now
       sync_buffer.save
+      ProductImport.set_callback(:commit, :after, :process)
     end
 
     def image_labels_raw
