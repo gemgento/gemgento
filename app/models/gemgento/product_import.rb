@@ -154,9 +154,7 @@ module Gemgento
         # apply the attribute value if the attribute exists
         if !product_attribute.nil? && attribute_code != 'sku' && attribute_code != 'status'
 
-          if product_attribute.product_attribute_options.empty?
-            value = @row[@headers.index(attribute_code).to_i].to_s.strip
-          else # attribute value may have to be associated with an attribute option id
+          if product_attribute.frontend_input == 'select'
             label = @row[@headers.index(attribute_code).to_i].to_s.strip
             attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: label, store: self.store)
 
@@ -165,6 +163,8 @@ module Gemgento
             end
 
             value = attribute_option.value
+          else # attribute value may have to be associated with an attribute option id
+            value = @row[@headers.index(attribute_code).to_i].to_s.strip
           end
 
           product.set_attribute_value(product_attribute.code, value)
