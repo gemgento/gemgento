@@ -308,7 +308,7 @@ module Gemgento
           def self.compose_attribute_values(product)
             attributes = []
 
-            product.product_attribute_values.each do |product_attribute_value|
+            product.product_attribute_values.where(store: Gemgento::Store.current).each do |product_attribute_value|
               unless product_attribute_value.value.nil?
                 attributes << {
                     'key' => product_attribute_value.product_attribute.code,
