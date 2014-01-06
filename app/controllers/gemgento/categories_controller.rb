@@ -1,13 +1,17 @@
 module Gemgento
   class CategoriesController < BaseController
 
+    respond_to :json, :html
+
     def index
-      @categories = Gemgento::Category.all
+      respond_with @categories = Gemgento::Category.all
     end
 
     def show
-      @category = Gemgento::Category.where(params[:id]).first
-      @products = @category.products.catalog_visibile.active.order('gemgento_product_categories.position ASC')
+      respond_with(
+        @category = Gemgento::Category.find(params[:id]),
+        @products = @category.products.order('gemgento_product_categories.position ASC')
+      )
     end
 
     def update
