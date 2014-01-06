@@ -267,10 +267,11 @@ module Gemgento
     end
 
     def as_json
+      # TODO: calls store too many times and goes through all stores
       current_store = Gemgento::Store.current
       result = super
 
-      self.product_attribute_values.select{|av| av.store == current_store }.each do |attribute_value|
+      self.product_attribute_values.select{ |av| av.store == current_store }.each do |attribute_value|
         attribute = attribute_value.product_attribute
         result[attribute.code] = self.attribute_value(attribute.code, current_store)
       end
