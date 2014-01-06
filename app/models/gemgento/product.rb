@@ -7,6 +7,7 @@ module Gemgento
     has_one :inventory
 
     has_many :product_attribute_values, dependent: :destroy
+    has_many :product_attributes, through: :product_attribute_values
     has_many :assets, dependent: :destroy
     has_many :relations, -> { distinct }, as: :relatable, :class_name => 'Relation'
     has_many :product_categories, -> { distinct }, dependent: :destroy
@@ -25,7 +26,7 @@ module Gemgento
                             association_foreign_key: 'simple_product_id',
                             class_name: 'Product'
 
-    default_scope -> { includes([{product_attribute_values: :product_attribute}, :assets, :inventory, :swatch]) }
+    default_scope -> { includes([{product_attribute_values: :product_attribute}, {assets: [:asset_file, :asset_types]}, :inventory, :swatch]) }
 
     scope :configurable, -> { where(magento_type: 'configurable') }
     scope :simple, -> { where(magento_type: 'simple') }
@@ -66,7 +67,7 @@ module Gemgento
 
     def attribute_value(code, store = nil)
       store = Gemgento::Store.current if store.nil?
-      product_attribute_value = self.product_attribute_values.where('gemgento_product_attribute_values.store_id = ?', store.id).select { |value| value.product_attribute.code == code.to_s }.first
+      product_attribute_value = self.product_attribute_values.select { |value| value.product_attribute.code == code.to_s && value.store == store }.first
 
       ## if the attribute is not currently associated with the product, check if it exists
       if product_attribute_value.nil?
@@ -96,7 +97,7 @@ module Gemgento
           value = false
         end
       elsif product_attribute.frontend_input == 'select'
-        option = product_attribute.product_attribute_options.find_by(store: Gemgento::Store.current, value: value)
+        option = product_attribute.product_attribute_options.find_by(store: store, value: value)
         value = option.nil? ? nil : option.label
       end
 
@@ -263,6 +264,32 @@ module Gemgento
 
     def original_price
       return self.attribute_value('price')
+    end
+
+    def as_json
+      current_store = Gemgento::Store.current
+      result = super
+
+      self.product_attribute_values.select{|av| av.store == current_store }.each do |attribute_value|
+        attribute = attribute_value.product_attribute
+        result[attribute.code] = self.attribute_value(attribute.code, current_store)
+      end
+
+      result['assets'] = []
+      self.assets.where(store: current_store).each do |asset|
+        styles = ['original' => asset.asset_file.file.url(:original)]
+
+        asset.asset_file.file.styles.keys.to_a.each do |style|
+          styles[style] = asset.asset_file.file.url(style.to_sym)
+        end
+
+        result['assets'] << [
+            'label' => asset.label,
+            'styles' => styles
+        ]
+      end
+
+      return result
     end
 
     private
