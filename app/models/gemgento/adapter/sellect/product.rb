@@ -2,7 +2,7 @@ module Gemgento::Adapter::Sellect
   class Product < ActiveRecord::Base
     establish_connection("sellect_#{Rails.env}".to_sym)
 
-    def self.import
+    def self.import(currency = 'usd')
       #TODO: Unmapped attributes - color, hex_color, available_on, tax_category_id, shipping_category_id, on_sale, sale_price, model_name, size_pictured, product_details, count_on_hand, style_color, is_representative_color, season_id
       self.table_name = 'sellect_products'
 
@@ -21,8 +21,10 @@ module Gemgento::Adapter::Sellect
         product.sync_needed = false
         product.save
 
-        import_simple_products(sellect_product.id, product)
         set_assets(sellect_product.id, product)
+        set_categories(sellect_product.id, product)
+        import_simple_products(sellect_product.id, product, currency)
+
 
         # push configurable product to Magento
         product.sync_needed = true
@@ -30,7 +32,7 @@ module Gemgento::Adapter::Sellect
       end
     end
 
-    def self.import_simple_products(sellect_id, configurable_product)
+    def self.import_simple_products(sellect_id, configurable_product, currency = 'usd')
       self.table_name = 'sellect_variants'
 
       self.where('product_id = ?', sellect_id).each do |sellect_variant|
@@ -47,11 +49,13 @@ module Gemgento::Adapter::Sellect
         product.set_attribute_value('style_code', configurable_product.style)
         product.set_attribute_value('upc', sellect_variant.upc)
         product.configurable_product = configurable_product
+        product.categories = configurable_product.categories
         product.sync_needed = false
         product.save
 
         set_option_values(sellect_variant.id, product)
         set_assets(sellect_variant.id, product)
+        set_price(sellect_variant.id, product, currency)
 
         product.sync_needed = true
         product.save
@@ -76,12 +80,14 @@ module Gemgento::Adapter::Sellect
       end
     end
 
-    def self.get_option_label(option, sellect_id)
-      option_value = query('sellect_option_values').joins(ActiveRecord::Base.escape_sql(
-                                                              'INNER JOIN sellect_option_values_variants ON sellect_option_values_variants.option_value_id = sellect_option_values.id ' +
-                                                                  'AND sellect_option_values.option_type_id = ? AND sellect_option_values_variants.variant_id = ?',
-                                                              option.id
-                                                          )).first
+    def self.get_option_label(option, variant_id)
+      option_value = query('sellect_option_values').
+          joins(ActiveRecord::Base.escape_sql(
+                    'INNER JOIN sellect_option_values_variants ON sellect_option_values_variants.option_value_id = sellect_option_values.id ' +
+                        'AND sellect_option_values.option_type_id = ? AND sellect_option_values_variants.variant_id = ?',
+                    option.id,
+                    variant_id
+                )).first
 
       return option_value.name
     end
@@ -105,8 +111,26 @@ module Gemgento::Adapter::Sellect
       #TODO: Import assets from Sellect
     end
 
-    def self.set_price(sellect_id, product, currency)
-      #TODO: fetch price for currency from Sellect
+    def self.set_price(variant_id, product, currency)
+      self.table_name = 'sellect_pricings'
+
+      self.where('variant_id = ? AND currency LIKE ?', variant_id, currency).each do |pricing|
+        product.attribute_value('price', pricing.price)
+        product.sync_needed = false
+        product.save
+      end
+    end
+
+    def self.set_categories(product_id, product)
+      query('sellect_product_categories').
+          joins(ActiveRecord::Base.escape_sql(
+                    'INNER JOIN sellect_product_categories_products ON sellect_product_categories_products.product_category_id = sellect_product_categories.id ' +
+                        'AND sellect_product_categories_products.product_id = ?',
+                    product_id
+                )).each do |sellect_category|
+        category = Gemgento::Category.find_by(url_key: sellect_category.permalink)
+        product.categories << category unless product.categories.include? category
+      end
     end
   end
 end
