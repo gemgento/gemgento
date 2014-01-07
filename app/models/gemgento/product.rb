@@ -172,6 +172,7 @@ module Gemgento
     end
 
     def self.filter(filters)
+      filters = [filters] unless filters.is_a? Array
       products = self
 
       filters.each_with_index do |filter, index|
