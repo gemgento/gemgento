@@ -21,8 +21,8 @@ module Gemgento::Adapter::Sellect
         product.sync_needed = false
         product.save
 
-        import_variants(sellect_product.id, product)
-        import_assets(sellect_product.id, product)
+        import_simple_products(sellect_product.id, product)
+        set_assets(sellect_product.id, product)
 
         # push configurable product to Magento
         product.sync_needed = true
@@ -30,7 +30,7 @@ module Gemgento::Adapter::Sellect
       end
     end
 
-    def self.import_variants(sellect_id, configurable_product)
+    def self.import_simple_products(sellect_id, configurable_product)
       self.table_name = 'sellect_variants'
 
       self.where('product_id = ?', sellect_id).each do |sellect_variant|
@@ -51,7 +51,7 @@ module Gemgento::Adapter::Sellect
         product.save
 
         set_option_values(sellect_variant.id, product)
-        import_assets(sellect_variant.id, product)
+        set_assets(sellect_variant.id, product)
 
         product.sync_needed = true
         product.save
@@ -63,7 +63,7 @@ module Gemgento::Adapter::Sellect
 
       self.all.each do |option|
         attribute = Gemgento::ProductAttribute.find_by(code: option.name.downcase)
-        label = option_label(option, sellect_id)
+        label = get_option_label(option, sellect_id)
         attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: attribute.id, label: label)
 
         if attribute_option.nil?
@@ -76,7 +76,7 @@ module Gemgento::Adapter::Sellect
       end
     end
 
-    def self.option_label(option, sellect_id)
+    def self.get_option_label(option, sellect_id)
       option_value = query('sellect_option_values').joins(ActiveRecord::Base.escape_sql(
                                                               'INNER JOIN sellect_option_values_variants ON sellect_option_values_variants.option_value_id = sellect_option_values.id ' +
                                                                   'AND sellect_option_values.option_type_id = ? AND sellect_option_values_variants.variant_id = ?',
@@ -101,8 +101,12 @@ module Gemgento::Adapter::Sellect
       return Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: option_label, store: self.store).first
     end
 
-    def self.import_assets(sellect_id, product)
-      #TODO: Import assets
+    def self.set_assets(sellect_id, product)
+      #TODO: Import assets from Sellect
+    end
+
+    def self.set_price(sellect_id, product, currency)
+      #TODO: fetch price for currency from Sellect
     end
   end
 end
