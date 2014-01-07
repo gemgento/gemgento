@@ -7,7 +7,7 @@ module Gemgento::Adapter::Sellect
       self.table_name = 'sellect_products'
 
       self.all.each do |sellect_product|
-        product = Gemgento::Product.find_or_initialize_by(sku: sellect_product.sku)
+        product = Gemgento::Product.find_or_initialize_by(sku: sellect_product.sku, magento_type: 'configurable')
         product.magento_type = 'configurable'
         product.sku = sellect_product.sku
         product.status = sellect_product.is_private
@@ -34,9 +34,10 @@ module Gemgento::Adapter::Sellect
 
     def self.import_simple_products(sellect_id, configurable_product, currency = 'usd')
       self.table_name = 'sellect_variants'
+      upc = Gemgento::ProductAttribute.find_by(code: upc)
 
       self.where('product_id = ?', sellect_id).each do |sellect_variant|
-        product = Gemgento::Product.by_attributes(['upc' => sellect_variant.upc]).first_or_initialize
+        product = Gemgento::Product.where(magento_type: 'simple').filter({ attribute: upc, value: sellect_variant.upc }).first_or_initialize
         product.magento_type = 'simple'
         product.status = configurable_product.is_private
         product.set_attribute_value('name', configurable_product.name)
