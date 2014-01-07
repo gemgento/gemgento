@@ -36,9 +36,8 @@ module Gemgento::Adapter::Sellect
       self.table_name = 'sellect_variants'
 
       self.where('product_id = ?', sellect_id).each do |sellect_variant|
-        product = Gemgento::Product.find_or_initialize_by(sku, sellect_variant.sku)
+        product = Gemgento::Product.by_attributes(['upc' => sellect_variant.upc]).first_or_initialize
         product.magento_type = 'simple'
-        product.sku = sellect_variant.sku
         product.status = configurable_product.is_private
         product.set_attribute_value('name', configurable_product.name)
         product.set_attribute_value('short_description', configurable_product.description)
@@ -56,6 +55,8 @@ module Gemgento::Adapter::Sellect
         set_option_values(sellect_variant.id, product)
         set_assets(sellect_variant.id, product)
         set_price(sellect_variant.id, product, currency)
+
+        product.sku = "#{sellect_variant.sku}_#{product.size}"
 
         product.sync_needed = true
         product.save
