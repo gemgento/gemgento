@@ -7,8 +7,9 @@ module Gemgento::Adapter
       return self
     end
 
-    def self.import
-      Gemgento::Adapter::Sellect::Product.import
+    def self.import(store, currency)
+      Gemgento::Store.current = store
+      Gemgento::Adapter::Sellect::Product.import(currency)
     end
 
   end
