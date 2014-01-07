@@ -266,7 +266,7 @@ module Gemgento
       return self.attribute_value('price')
     end
 
-    def as_json
+    def as_json(options = nil)
       # TODO: calls store too many times and goes through all stores
       current_store = Gemgento::Store.current
       result = super
@@ -277,7 +277,7 @@ module Gemgento
       end
 
       result['assets'] = []
-      self.assets.where(store: current_store).each do |asset|
+      self.assets.select{ |a| a.store == current_store}.each do |asset|
         styles = ['original' => asset.asset_file.file.url(:original)]
 
         asset.asset_file.file.styles.keys.to_a.each do |style|

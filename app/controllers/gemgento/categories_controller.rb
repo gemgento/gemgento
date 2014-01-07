@@ -10,7 +10,7 @@ module Gemgento
     def show
       respond_with(
         @category = Gemgento::Category.find(params[:id]),
-        @products = @category.products.order('gemgento_product_categories.position ASC')
+        @products = @category.products.active.catalog_visible.order('gemgento_product_categories.position ASC')
       )
     end
 
