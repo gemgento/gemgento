@@ -44,7 +44,7 @@ module Gemgento
             end
 
             response = Gemgento::Magento.create_call(:customer_customer_list, message)
-            puts response.inspect
+
             if response.success?
               # enforce array
               unless response.body_overflow[:store_view].is_a? Array
