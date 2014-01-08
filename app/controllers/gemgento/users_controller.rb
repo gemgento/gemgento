@@ -14,7 +14,7 @@ module Gemgento
 
       @user.magento_id = params[:id]
       @user.increment_id = data[:increment_id]
-      @user.store = Store.find_by(magento_id: data[:store_id])
+
       @user.created_in = data[:created_in]
       @user.email = data[:email]
       @user.fname = data[:firstname]
@@ -29,6 +29,9 @@ module Gemgento
       @user.magento_password = data[:password_hash]
       @user.sync_needed = false
       @user.save(validate: false)
+
+      store = Store.find_by(magento_id: data[:store_id])
+      @user.stores << store unless @user.stores.include?(store)
 
       render nothing: true
     end
