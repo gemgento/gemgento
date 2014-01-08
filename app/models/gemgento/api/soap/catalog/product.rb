@@ -260,6 +260,8 @@ module Gemgento
               configurable_product.simple_products.clear
               configurable_product.simple_products = Gemgento::MagentoDB.associated_simple_products(configurable_product)
             end
+
+            Gemgento::Product.set_callback(:save, :after, :sync_local_to_magento)
           end
 
           def self.compose_product_data(product)

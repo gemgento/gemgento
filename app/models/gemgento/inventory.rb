@@ -21,6 +21,7 @@ module Gemgento
     def touch_product
       Gemgento::Product.skip_callback(:save, :after, :sync_local_to_magento)
       self.product.update(updated_at: Time.now) if self.changed?
+      Gemgento::Product.set_callback(:save, :after, :sync_local_to_magento)
     end
 
   end
