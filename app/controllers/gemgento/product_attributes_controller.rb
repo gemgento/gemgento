@@ -22,7 +22,7 @@ module Gemgento
         @product_attribute.save
 
 
-        set_options(@product_attribute, data[:options])
+        set_options(@product_attribute, data[:options]) unless data[:options].nil?
       end
 
       render nothing: true
