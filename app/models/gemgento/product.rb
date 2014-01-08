@@ -293,6 +293,17 @@ module Gemgento
       return result
     end
 
+    def configurable_options(attribute)
+      raise 'Product not configurable' if self.magento_type != 'configurable'
+      options = []
+
+      self.simple_products.active.order_by_attribute(attribute).each do |p|
+        options << p.attribute_value(attribute.code)
+      end
+
+      return options
+    end
+
     private
 
     # Push local product changes to magento
