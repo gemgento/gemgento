@@ -37,7 +37,7 @@ module Gemgento
     scope :not_deleted, -> { where(deleted_at: nil) }
     scope :active, -> { where(deleted_at: nil, status: true) }
 
-    after_commit :sync_local_to_magento
+    after_save :sync_local_to_magento
     after_save :touch_categories
 
     before_destroy :delete_associations
@@ -184,7 +184,7 @@ module Gemgento
                     INNER JOIN gemgento_product_attributes AS attribute#{index} ON attribute#{index}.id = value#{index}.product_attribute_id AND attribute#{index}.id IN (?)",
                                         filter[:value],
                                         filter[:attribute].map { |a| a.id }
-                                    ))
+                                    )).readonly(false)
         else
           products = products.joins(ActiveRecord::Base.escape_sql(
                                         "INNER JOIN gemgento_product_attribute_values AS value#{index} ON value#{index}.product_id = gemgento_products.id
@@ -193,7 +193,7 @@ module Gemgento
                                         filter[:attribute].map { |a| a.id },
                                         Gemgento::Store.current.id,
                                         filter[:value]
-                                    ))
+                                    )).readonly(false)
         end
       end
 
@@ -212,7 +212,8 @@ module Gemgento
                     'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ',
                 attribute.id
             )).
-            order("gemgento_product_attribute_values.value #{direction}")
+            order("gemgento_product_attribute_values.value #{direction}").
+            readonly(false)
       else
         products = products.joins(
             ActiveRecord::Base.escape_sql(
@@ -223,7 +224,8 @@ module Gemgento
                 attribute.id,
                 Gemgento::Store.current.id
             )).
-            order("gemgento_product_attribute_options.order #{direction}")
+            order("gemgento_product_attribute_options.order #{direction}").
+            readonly(false)
       end
 
       return products

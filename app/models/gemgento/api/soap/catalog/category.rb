@@ -95,7 +95,7 @@ module Gemgento
           end
 
           def self.set_product_categories
-            Gemgento::Category.all.each do |category|
+            Gemgento::Category.unscoped.each do |category|
               next if category.products.empty?
 
               category.stores.each do |store|
@@ -143,7 +143,7 @@ module Gemgento
           #
           # @param [Hash] subject The returned item of Magento API call
           def self.sync_magento_to_local(subject, store)
-            category = Gemgento::Category.where(magento_id: subject[:category_id]).first_or_initialize
+            category = Gemgento::Category.unscoped.where(magento_id: subject[:category_id]).first_or_initialize
             category.magento_id = subject[:category_id]
             category.name = subject[:name]
             category.url_key = subject[:url_key]

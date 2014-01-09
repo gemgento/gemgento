@@ -6,11 +6,14 @@ module Gemgento::Adapter::Sellect
       #TODO: Unmapped attributes - color, hex_color, available_on, tax_category_id, shipping_category_id, on_sale, sale_price, model_name, size_pictured, product_details, count_on_hand, style_color, is_representative_color, season_id
       self.table_name = 'sellect_products'
 
-      self.all.each do |sellect_product|
-        product = Gemgento::Product.find_or_initialize_by(sku: sellect_product.sku, magento_type: 'configurable')
+      self.where('deleted_at IS NULL').each do |sellect_product|
+        product = Gemgento::Product.active.find_or_initialize_by(sku: sellect_product.sku, magento_type: 'configurable')
+
         product.magento_type = 'configurable'
         product.sku = sellect_product.sku
         product.status = sellect_product.is_private
+        product.product_attribute_set = Gemgento::ProductAttributeSet.first
+        product.visibility = 4
         product.sync_needed = false
         product.save
 
@@ -24,24 +27,39 @@ module Gemgento::Adapter::Sellect
 
         set_assets(sellect_product.id, product)
         set_categories(sellect_product.id, product)
-        import_simple_products(sellect_product.id, product, currency)
 
+        simple_products = import_simple_products(sellect_product.id, product, currency)
 
-        # push configurable product to Magento
-        product.sync_needed = true
-        product.save
+        if simple_products.size <= 1 # if one or less simple products, the configurable is not needed
+          product.destroy
+        else # configurable is needed, set configurable attrbitues and simple products
+          set_configurable_attribute(product, 'size')
+          set_configurable_attribute(product, 'color')
+
+          simple_products.each do |simple_product|
+            product.simple_products << simple_product unless product.simple_products.include?(simple_product)
+          end
+
+          product.sync_needed = true
+          product.save
+        end
       end
     end
 
     def self.import_simple_products(sellect_id, configurable_product, currency = 'usd')
       self.table_name = 'sellect_variants'
+
+      simple_products = []
       upc = Gemgento::ProductAttribute.find_by(code: 'upc')
       raise "Missing required product attribute 'UPC'" if upc.nil?
 
-      self.where('product_id = ?', sellect_id).each do |sellect_variant|
+      sellect_variants = self.where('product_id = ?', sellect_id)
+
+      sellect_variants.each do |sellect_variant|
         product = Gemgento::Product.where(magento_type: 'simple').filter({ attribute: upc, value: sellect_variant.upc }).first_or_initialize
         product.magento_type = 'simple'
         product.status = configurable_product.status
+        product.product_attribute_set = configurable_product.product_attribute_set
         product.set_attribute_value('name', configurable_product.name)
         product.set_attribute_value('short_description', configurable_product.description)
         product.set_attribute_value('url_key', configurable_product.url_key)
@@ -50,11 +68,11 @@ module Gemgento::Adapter::Sellect
         product.set_attribute_value('description', configurable_product.description)
         product.set_attribute_value('style_code', configurable_product.style_code)
         product.set_attribute_value('upc', sellect_variant.upc)
+        product.set_attribute_value('weight', sellect_variant.weight.nil? ? 0 : sellect_variant.weight)
         product.categories = configurable_product.categories
+        product.visibility = sellect_variants.size > 1 ? 1 : 4
         product.sync_needed = false
         product.save
-
-        product.configurable_products << configurable_product unless product.configurable_products.include? configurable_product
 
         set_option_values(sellect_variant.id, product)
         set_assets(sellect_variant.id, product)
@@ -64,7 +82,10 @@ module Gemgento::Adapter::Sellect
 
         product.sync_needed = true
         product.save
+        simple_products << product
       end
+
+      return simple_products
     end
 
     def self.set_option_values(sellect_id, product)
@@ -73,6 +94,8 @@ module Gemgento::Adapter::Sellect
       self.all.each do |option|
         attribute = Gemgento::ProductAttribute.find_by(code: option.name.downcase)
         label = get_option_label(option, sellect_id)
+        label = '' if label.nil?
+
         attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: attribute.id, label: label)
 
         if attribute_option.nil?
@@ -119,11 +142,12 @@ module Gemgento::Adapter::Sellect
     def self.set_price(variant_id, product, currency)
       self.table_name = 'sellect_pricings'
 
-      self.where('variant_id = ? AND currency LIKE ?', variant_id, currency).each do |pricing|
-        product.attribute_value('price', pricing.price)
-        product.sync_needed = false
-        product.save
-      end
+      pricing = self.where('variant_id = ? AND currency LIKE ?', variant_id, currency).first
+      return if pricing.nil?
+
+      product.set_attribute_value('price', pricing.price)
+      product.sync_needed = false
+      product.save
     end
 
     def self.set_categories(product_id, product)
@@ -136,6 +160,11 @@ module Gemgento::Adapter::Sellect
         category = Gemgento::Category.find_by(url_key: sellect_category.permalink)
         product.categories << category unless product.categories.include? category
       end
+    end
+
+    def self.set_configurable_attribute(product, attribute_code)
+      attribute = Gemgento::ProductAttribute.find_by(code: attribute_code)
+      product.configurable_attributes << attribute unless product.configurable_attributes.include?(attribute)
     end
   end
 end
