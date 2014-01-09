@@ -278,7 +278,7 @@ module Gemgento
 
       result['assets'] = []
       self.assets.select{ |a| a.store == current_store}.each do |asset|
-        styles = ['original' => asset.asset_file.file.url(:original)]
+        styles = { 'original' => asset.asset_file.file.url(:original) }
 
         asset.asset_file.file.styles.keys.to_a.each do |style|
           styles[style] = asset.asset_file.file.url(style.to_sym)
