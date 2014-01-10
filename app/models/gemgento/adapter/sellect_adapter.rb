@@ -1,6 +1,6 @@
 module Gemgento::Adapter
   class SellectAdapter < ActiveRecord::Base
-    establish_connection("sellect_#{Rails.env}".to_sym)
+    establish_connection("sellect_#{Rails.env}".to_sym) if Gemgento::Config[:sellect]
 
     def self.query(table_name)
       self.table_name = table_name

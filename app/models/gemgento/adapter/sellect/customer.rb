@@ -1,6 +1,6 @@
 module Gemgento::Adapter::Sellect
   class Customer < ActiveRecord::Base
-    establish_connection("sellect_#{Rails.env}".to_sym)
+    establish_connection("sellect_#{Rails.env}".to_sym) if Gemgento::Config[:sellect]
 
     def self.import
       self.table_name = 'sellect_users'
