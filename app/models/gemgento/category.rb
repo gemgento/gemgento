@@ -12,8 +12,6 @@ module Gemgento
 
     after_save :sync_local_to_magento
 
-    default_scope -> { where('parent_id IS NOT NULL') }
-
     scope :top_level, lambda { where(:parent_id => 2) }
 
     def save

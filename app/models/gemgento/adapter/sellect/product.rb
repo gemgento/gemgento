@@ -179,13 +179,17 @@ module Gemgento::Adapter::Sellect
 
     def self.set_categories(product_id, product)
       self.table_name = 'sellect_product_categories'
+
       self.joins(ActiveRecord::Base.escape_sql(
-                'INNER JOIN sellect_product_categories_products ON sellect_product_categories_products.product_category_id = sellect_product_categories.id ' +
-                    'AND sellect_product_categories_products.product_id = ?',
+                'INNER JOIN sellect_product_positions ON sellect_product_positions.product_category_id = sellect_product_categories.id ' +
+                    'AND sellect_product_positions.product_id = ?',
                 product_id
             )).each do |sellect_category|
-        category = Gemgento::Category.find_by(url_key: sellect_category.permalink)
-        product.categories << category unless product.categories.include? category
+        categories = Gemgento::Category.where(url_key: sellect_category.permalink)
+
+        categories.each do |category|
+          product.categories << category unless product.categories.include? category
+        end
       end
     end
 
