@@ -23,6 +23,7 @@ module Gemgento
       self.product.assets.each do |asset|
         if !asset.asset_file.nil? && FileUtils.compare_file(asset.asset_file.file.path(:original), file)
           matching_file = asset.asset_file
+          self.file = asset.file
           break
         end
       end
@@ -44,7 +45,12 @@ module Gemgento
 
     def sync_local_to_magento
       if self.sync_needed
-        API::SOAP::Catalog::ProductAttributeMedia.create(self)
+        if self.file.nil? || self.file == ''
+          API::SOAP::Catalog::ProductAttributeMedia.create(self)
+        else
+          API::SOAP::Catalog::ProductAttributeMedia.update(self)
+        end
+
         self.sync_needed = false
         self.save
       end

@@ -60,11 +60,26 @@ module Gemgento
           def self.create(asset)
             message = {
                 product: asset.product.magento_id,
-                data: compose_asset_entity_data(asset),
+                data: compose_asset_entity_data(asset, true),
                 identifier_type: 'id',
                 store_view: asset.store.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_product_attribute_media_create, message)
+
+            if response.success?
+              asset.file = response.body[:result]
+            end
+          end
+
+          def self.update(asset)
+            message = {
+                product: asset.product.magento_id,
+                file: asset.file,
+                data: compose_asset_entity_data(asset, false),
+                identifier_type: 'id',
+                store_view: asset.store.magento_id
+            }
+            response = Gemgento::Magento.create_call(:catalog_product_attribute_media_update, message)
 
             if response.success?
               asset.file = response.body[:result]
@@ -141,14 +156,17 @@ module Gemgento
             asset_type.save
           end
 
-          def self.compose_asset_entity_data(asset)
+          def self.compose_asset_entity_data(asset, include_file = true)
             asset_entity = {
-                file: compose_file_entity(asset.asset_file),
                 label: asset.label,
                 position: asset.position,
                 types: {item: compose_types(asset)},
                 exclude: '0'
             }
+
+            if include_file
+              asset_entity[:file] = compose_file_entity(asset.asset_file)
+            end
 
             asset_entity
           end
