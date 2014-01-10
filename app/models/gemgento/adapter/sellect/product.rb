@@ -1,6 +1,6 @@
 module Gemgento::Adapter::Sellect
   class Product < ActiveRecord::Base
-    establish_connection("sellect_#{Rails.env}".to_sym)
+    establish_connection("sellect_#{Rails.env}".to_sym) if Gemgento::Config[:sellect]
 
     def self.import(currency = 'usd', app_root = '/Users/Kevin/Sites/victoria_beckham_sites/vb_old/')
       #TODO: Unmapped attributes - color, hex_color, available_on, tax_category_id, shipping_category_id, on_sale, sale_price, model_name, size_pictured, product_details, count_on_hand, style_color, is_representative_color, season_id
