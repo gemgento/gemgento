@@ -2,7 +2,7 @@ module Gemgento::Adapter::Sellect
   class Product < ActiveRecord::Base
     establish_connection("sellect_#{Rails.env}".to_sym)
 
-    def self.import(currency = 'usd')
+    def self.import(currency = 'usd', app_root = '/Users/Kevin/Sites/victoria_beckham_sites/vb_old/')
       #TODO: Unmapped attributes - color, hex_color, available_on, tax_category_id, shipping_category_id, on_sale, sale_price, model_name, size_pictured, product_details, count_on_hand, style_color, is_representative_color, season_id
       self.table_name = 'sellect_products'
 
@@ -25,10 +25,9 @@ module Gemgento::Adapter::Sellect
         product.set_attribute_value('description', sellect_product.detail_description)
         product.set_attribute_value('style_code', sellect_product.style)
 
-        set_assets(sellect_product.id, product)
         set_categories(sellect_product.id, product)
 
-        simple_products = import_simple_products(sellect_product.id, product, currency)
+        simple_products = import_simple_products(sellect_product.id, product, app_root, currency)
 
         if simple_products.size <= 1 # if one or less simple products, the configurable is not needed
           product.destroy
@@ -42,11 +41,13 @@ module Gemgento::Adapter::Sellect
 
           product.sync_needed = true
           product.save
+
+          create_configurable_images(product)
         end
       end
     end
 
-    def self.import_simple_products(sellect_id, configurable_product, currency = 'usd')
+    def self.import_simple_products(sellect_id, configurable_product, app_root, currency = 'usd')
       self.table_name = 'sellect_variants'
 
       simple_products = []
@@ -75,13 +76,15 @@ module Gemgento::Adapter::Sellect
         product.save
 
         set_option_values(sellect_variant.id, product)
-        set_assets(sellect_variant.id, product)
         set_price(sellect_variant.id, product, currency)
 
         product.sku = "#{sellect_variant.sku}_#{product.size}"
 
         product.sync_needed = true
         product.save
+
+        set_assets(sellect_variant, product, app_root)
+
         simple_products << product
       end
 
@@ -135,8 +138,32 @@ module Gemgento::Adapter::Sellect
       return Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: option_label).first
     end
 
-    def self.set_assets(sellect_id, product)
-      #TODO: Import assets from Sellect
+    def self.set_assets(sellect_product, gemgento_product, app_root)
+      self.inheritance_column = :_type_disabled
+      self.table_name = 'sellect_assets'
+
+      gemgento_product.assets.destroy_all
+
+      self.where(viewable_id: sellect_product.id, viewable_type: 'Sellect::Variant').each do |sellect_asset|
+        path = "#{app_root}/public/system/assets/products/#{sellect_asset.id}/original/#{sellect_asset.attachment_file_name}"
+
+        if File.exist?(path)
+          image = Gemgento::Asset.new
+          image.product = gemgento_product
+          image.store = Gemgento::Store.current
+          image.position = sellect_asset.position
+          image.label = sellect_asset.alt
+          image.set_file(File.open(path))
+          image.asset_types << Gemgento::AssetType.all
+          image.sync_needed = false
+          image.save
+
+          image.sync_needed = true
+          image.save
+
+          image
+        end
+      end
     end
 
     def self.set_price(variant_id, product, currency)
@@ -166,5 +193,27 @@ module Gemgento::Adapter::Sellect
       attribute = Gemgento::ProductAttribute.find_by(code: attribute_code)
       product.configurable_attributes << attribute unless product.configurable_attributes.include?(attribute)
     end
+
+    def self.create_configurable_images(configurable_product)
+      configurable_product.assets.where(store: self.store).destroy_all
+      default_product = configurable_product.simple_products.first
+
+      default_product.assets.where(store: self.store).each do |asset|
+        asset_copy = Gemgento::Asset.new
+        asset_copy.product = configurable_product
+        asset_copy.store = Gemgento::Store.current
+        asset_copy.set_file(File.open(asset.asset_file.file.path(:original)))
+        asset_copy.label = asset.label
+        asset_copy.position = asset.position
+        asset_copy.asset_types = asset.asset_types
+
+        asset_copy.sync_needed = false
+        asset_copy.save
+
+        asset_copy.sync_needed = true
+        asset_copy.save
+      end
+    end
+
   end
 end
