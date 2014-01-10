@@ -195,10 +195,10 @@ module Gemgento::Adapter::Sellect
     end
 
     def self.create_configurable_images(configurable_product)
-      configurable_product.assets.where(store: self.store).destroy_all
+      configurable_product.assets.destroy_all
       default_product = configurable_product.simple_products.first
 
-      default_product.assets.where(store: self.store).each do |asset|
+      default_product.assets.where(store: Gemgento::Store.current).each do |asset|
         asset_copy = Gemgento::Asset.new
         asset_copy.product = configurable_product
         asset_copy.store = Gemgento::Store.current
