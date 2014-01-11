@@ -12,7 +12,9 @@ module Gemgento
 
     after_save :sync_local_to_magento
 
-    scope :top_level, lambda { where(:parent_id => 2) }
+    default_scope -> { order(:position) }
+
+    scope :top_level, -> { where(:parent_id => 2) }
 
     def save
       # Dirty dirty dirty(S3Bug)..
