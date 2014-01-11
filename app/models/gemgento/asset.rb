@@ -17,6 +17,9 @@ module Gemgento
 
     validates :asset_file, presence: true
     validates :product, presence: true
+    validates :store, presence: true
+
+    validates_uniqueness_of :product, :scope => [:asset_file, :store]
 
     def set_file(file)
       raise 'Asset does not have an associated product.' if self.product.nil?
