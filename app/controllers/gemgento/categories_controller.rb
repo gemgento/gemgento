@@ -4,8 +4,7 @@ module Gemgento
     respond_to :json, :html
 
     def index
-      root_category = Gemgento::Category.where(parent_id: nil)
-      respond_with @categories = Gemgento::Category.where(parent: root_category)
+      respond_with @categories = Gemgento::Category.all
     end
 
     def show
