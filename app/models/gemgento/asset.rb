@@ -15,6 +15,8 @@ module Gemgento
 
     default_scope -> { order(:position) }
 
+    validates :asset_file, presence: true
+
     def set_file(file)
       raise 'Asset does not have an associated product.' if self.product.nil?
 
@@ -39,6 +41,14 @@ module Gemgento
       end
 
       self.asset_file = matching_file
+    end
+
+    def file
+      if self.asset_file.nil?
+        nil
+      else
+        self.asset_file.file
+      end
     end
 
     private

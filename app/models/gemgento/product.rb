@@ -14,7 +14,7 @@ module Gemgento
     has_many :categories, -> { distinct }, through: :product_categories
 
     has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_products', class_name: 'Store'
-    has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute', dependent: :destroy
+    has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
     has_and_belongs_to_many :configurable_products, -> { distinct },
                             join_table: 'gemgento_configurable_simple_relations',
                             foreign_key: 'simple_product_id',
@@ -39,6 +39,8 @@ module Gemgento
 
     after_save :sync_local_to_magento
     after_save :touch_categories
+
+    before_destroy :delete_associations
 
     validates_uniqueness_of :sku, :scope => [:deleted_at]
 
@@ -278,15 +280,15 @@ module Gemgento
       end
 
       result['assets'] = []
-      self.assets.select{ |a| a.store == current_store }.each do |asset|
-        styles = { 'original' => asset.asset_file.file.url(:original) }
+      self.images.each do |image|
+        styles = { 'original' => image.file.url(:original) }
 
-        asset.asset_file.file.styles.keys.to_a.each do |style|
-          styles[style] = asset.asset_file.file.url(style.to_sym)
+        image.file.styles.keys.to_a.each do |style|
+          styles[style] = image.file.url(style.to_sym)
         end
 
         result['assets'] << [
-            'label' => asset.label,
+            'label' => image.label,
             'styles' => styles
         ]
       end
@@ -306,6 +308,10 @@ module Gemgento
       return options
     end
 
+    def images
+      self.assets.select{ |a| a.store == Gemgento::Store.current }
+    end
+
     private
 
     # Push local product changes to magento
@@ -320,6 +326,10 @@ module Gemgento
         self.sync_needed = false
         self.save
       end
+    end
+
+    def delete_associations
+      self.configurable_attributes.destroy_all
     end
 
     def touch_categories
