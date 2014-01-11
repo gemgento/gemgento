@@ -16,6 +16,7 @@ module Gemgento
     default_scope -> { order(:position) }
 
     validates :asset_file, presence: true
+    validates :product, presence: true
 
     def set_file(file)
       raise 'Asset does not have an associated product.' if self.product.nil?
