@@ -4,7 +4,7 @@ module Gemgento
     respond_to :json, :html
 
     def index
-      respond_with @categories = Gemgento::Category.all
+      respond_with @categories = Gemgento::Category.where(include_in_menu: true)
     end
 
     def show
@@ -24,6 +24,7 @@ module Gemgento
       @category.parent = Gemgento::Category.find_by(magento_id: params[:parent_id]) unless params[:parent_id].nil?
       @category.name = data[:name]
       @category.url_key = data[:url_key]
+      @category.include_in_menu = data[:include_in_menu]
       @category.sync_needed = false
       @category.save
 
