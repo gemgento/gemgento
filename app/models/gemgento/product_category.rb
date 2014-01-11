@@ -4,6 +4,6 @@ module Gemgento
     belongs_to :category
     belongs_to :store
 
-    default_scope -> { order(:position) }
+    default_scope -> { where(store: Gemgento::Store.current).order(:position) }
   end
 end
