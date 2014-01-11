@@ -95,7 +95,7 @@ module Gemgento
           end
 
           def self.set_product_categories
-            Gemgento::Category.each do |category|
+            Gemgento::Category.all.each do |category|
               next if category.products.empty?
 
               category.stores.each do |store|
