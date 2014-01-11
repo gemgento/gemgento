@@ -112,8 +112,8 @@ module Gemgento
                   next if product.nil?
 
                   product_ids << product.id
-                  pairing = Gemgento::ProductCategory.where(category: category, product: product).first_or_initialize
-                  pairing.position = item[:position].nil? ? 1 : item[:position]
+                  pairing = Gemgento::ProductCategory.where(category: category, product: product, store: store).first_or_initialize
+                  pairing.position = item[:position].nil? ? 1 : item[:position][0]
                   pairing.store = store
                   pairing.save
                 end
