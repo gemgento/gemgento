@@ -43,7 +43,7 @@ module Gemgento
       self.asset_file = matching_file
     end
 
-    def file
+    def image
       if self.asset_file.nil?
         nil
       else
