@@ -80,10 +80,6 @@ module Gemgento
                 store_view: asset.store.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_product_attribute_media_update, message)
-
-            if response.success?
-              asset.file = response.body[:result]
-            end
           end
 
           def self.remove(asset)
