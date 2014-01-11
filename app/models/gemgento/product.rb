@@ -9,12 +9,12 @@ module Gemgento
     has_many :product_attribute_values, dependent: :destroy
     has_many :product_attributes, through: :product_attribute_values
     has_many :assets, dependent: :destroy
-    has_many :relations, -> { distinct }, as: :relatable, :class_name => 'Relation'
+    has_many :relations, -> { distinct }, as: :relatable, :class_name => 'Relation', dependent: :destroy
     has_many :product_categories, -> { distinct }, dependent: :destroy
     has_many :categories, -> { distinct }, through: :product_categories
 
     has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_products', class_name: 'Store'
-    has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
+    has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute', dependent: :destroy
     has_and_belongs_to_many :configurable_products, -> { distinct },
                             join_table: 'gemgento_configurable_simple_relations',
                             foreign_key: 'simple_product_id',
@@ -39,8 +39,6 @@ module Gemgento
 
     after_save :sync_local_to_magento
     after_save :touch_categories
-
-    before_destroy :delete_associations
 
     validates_uniqueness_of :sku, :scope => [:deleted_at]
 
@@ -321,19 +319,6 @@ module Gemgento
 
         self.sync_needed = false
         self.save
-      end
-    end
-
-    def delete_associations
-      self.categories.clear
-      self.configurable_attributes.clear
-      self.relations.clear
-
-      unless self.simple_products.nil?
-        self.simple_products.each do |simple_product|
-          simple_product.configurable_products.clear
-          simple_product.save
-        end
       end
     end
 
