@@ -67,7 +67,7 @@ module Gemgento
 
     def attribute_value(code, store = nil)
       store = Gemgento::Store.current if store.nil?
-      product_attribute_value = self.product_attribute_values.select { |value| value.product_attribute.code == code.to_s && value.store == store }.first
+      product_attribute_value = self.product_attribute_values.select { |value| value.product_attribute.code == code.to_s && value.store_id == store.id }.first
 
       ## if the attribute is not currently associated with the product, check if it exists
       if product_attribute_value.nil?
@@ -271,20 +271,20 @@ module Gemgento
 
     def as_json(options = nil)
       # TODO: calls store too many times and goes through all stores
-      current_store = Gemgento::Store.current
+      store = Gemgento::Store.current
       result = super
 
-      self.product_attribute_values.select{ |av| av.store == current_store }.each do |attribute_value|
+      self.product_attribute_values.select{ |av| av.store_id == store.id }.each do |attribute_value|
         attribute = attribute_value.product_attribute
-        result[attribute.code] = self.attribute_value(attribute.code, current_store)
+        result[attribute.code] = self.attribute_value(attribute.code, store)
       end
 
       result['assets'] = []
       self.images.each do |image|
-        styles = { 'original' => image.file.url(:original) }
+        styles = { 'original' => image.image.url(:original) }
 
-        image.file.styles.keys.to_a.each do |style|
-          styles[style] = image.file.url(style.to_sym)
+        image.image.styles.keys.to_a.each do |style|
+          styles[style] = image.image.url(style.to_sym)
         end
 
         result['assets'] << [
@@ -309,7 +309,7 @@ module Gemgento
     end
 
     def images
-      self.assets.select{ |a| a.store == Gemgento::Store.current }
+      self.assets.select{ |a| a.store_id == Gemgento::Store.current.id }
     end
 
     private
