@@ -1,6 +1,8 @@
 module Gemgento
   class ProductsController < BaseController
 
+    respond_to :json, :html
+
     def show
       if (params[:id])
         @product = Product.find(params[:id])
@@ -12,6 +14,13 @@ module Gemgento
 
         @product.product_attribute_values.reload
       end
+
+      @simple_products = @product.simple_products
+
+      respond_with(
+          @product,
+          @simple_products
+      )
     end
 
     def update
