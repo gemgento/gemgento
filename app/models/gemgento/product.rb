@@ -293,6 +293,14 @@ module Gemgento
         ]
       end
 
+      if self.simple_products.loaded?
+        result['simple_products'] = []
+
+        self.simple_products.each do |simple_product|
+          result['simple_products'] << simple_product
+        end
+      end
+
       return result
     end
 

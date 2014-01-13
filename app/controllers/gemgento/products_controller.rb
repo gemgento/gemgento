@@ -5,7 +5,7 @@ module Gemgento
 
     def show
       if (params[:id])
-        @product = Product.find(params[:id])
+        @product = Product.includes(:simple_products).find(params[:id])
       else
         @product = Product.active.where(
             gemgento_product_attributes: {code: 'url_key'},
@@ -15,12 +15,7 @@ module Gemgento
         @product.product_attribute_values.reload
       end
 
-      @simple_products = @product.simple_products
-
-      respond_with(
-          @product,
-          @simple_products
-      )
+      respond_with @product
     end
 
     def update
