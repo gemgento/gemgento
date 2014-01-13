@@ -25,6 +25,8 @@ module Gemgento::Adapter::Sellect
         product.set_attribute_value('description', sellect_product.detail_description)
         product.set_attribute_value('style_code', sellect_product.style)
 
+        product.stores << Gemgento::Store.current unless product.stores.include? Gemgento::Store.current
+
         set_categories(sellect_product.id, product)
 
         simple_products = import_simple_products(sellect_product.id, product, app_root, currency)
@@ -60,7 +62,11 @@ module Gemgento::Adapter::Sellect
         product = Gemgento::Product.where(magento_type: 'simple').filter({ attribute: upc, value: sellect_variant.upc }).first_or_initialize
         product.magento_type = 'simple'
         product.status = configurable_product.status
+        product.visibility = sellect_variants.size > 1 ? 1 : 4
         product.product_attribute_set = configurable_product.product_attribute_set
+        product.sync_needed = false
+        product.save
+
         product.set_attribute_value('name', configurable_product.name)
         product.set_attribute_value('short_description', configurable_product.description)
         product.set_attribute_value('url_key', configurable_product.url_key)
@@ -70,8 +76,8 @@ module Gemgento::Adapter::Sellect
         product.set_attribute_value('style_code', configurable_product.style_code)
         product.set_attribute_value('upc', sellect_variant.upc)
         product.set_attribute_value('weight', sellect_variant.weight.nil? ? 0 : sellect_variant.weight)
+        product.stores << Gemgento::Store.current unless product.stores.include? Gemgento::Store.current
         product.categories = configurable_product.categories
-        product.visibility = sellect_variants.size > 1 ? 1 : 4
         product.sync_needed = false
         product.save
 
@@ -211,8 +217,8 @@ module Gemgento::Adapter::Sellect
 
         asset_copy = Gemgento::Asset.new
 
-        configurable_product.assets.where(store: Gemgento::Store.current).each do |existing_asset|
-          if !existing_asset.asset_file.nil? && FileUtils.compare_file(existing_asset.asset_file.file.path(:original), asset.asset_file.file.path(:original))
+        configurable_product.assets.where(store: Gemgento::Store.current).each do |existing_configurable_asset|
+          if !existing_configurable_asset.asset_file.nil? && FileUtils.compare_file(existing_configurable_asset.asset_file.file.path(:original), asset.asset_file.file.path(:original))
             asset_copy = existing_asset
             break
           end

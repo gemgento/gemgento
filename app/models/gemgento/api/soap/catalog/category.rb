@@ -96,7 +96,6 @@ module Gemgento
 
           def self.set_product_categories
             Gemgento::Category.all.each do |category|
-              next if category.products.empty?
 
               category.stores.each do |store|
                 result = assigned_products(category, store)
@@ -112,7 +111,7 @@ module Gemgento
                   next if product.nil?
 
                   product_ids << product.id
-                  pairing = Gemgento::ProductCategory.where(category: category, product: product, store: store).first_or_initialize
+                  pairing = Gemgento::ProductCategory.unscoped.find_or_initialize_by(category: category, product: product, store: store)
                   pairing.position = item[:position].nil? ? 1 : item[:position][0]
                   pairing.store = store
                   pairing.save
