@@ -52,7 +52,7 @@ module Gemgento
       result = super
 
       if self.includes_category_products
-        result['products'] = self.products.active.category_visible
+        result['products'] = self.products.active.catalog_visible
       end
 
       return result

@@ -11,6 +11,7 @@ module Gemgento
 
     def show
       @category = Gemgento::Category.find(params[:id])
+      @category.includes_category_products = true
 
       respond_with @category
     end
