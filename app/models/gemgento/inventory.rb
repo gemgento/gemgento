@@ -16,6 +16,14 @@ module Gemgento
       Gemgento::API::SOAP::CatalogInventory::StockItem.update(self.product);
     end
 
+    def in_stock?(quantity)
+      if self.is_in_stock || quantity.to_f <= self.quantity.to_f
+        return true
+      else
+        return false
+      end
+    end
+
     private
 
     def touch_product

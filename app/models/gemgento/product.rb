@@ -138,20 +138,23 @@ module Gemgento
 
     def in_stock?(quantity = 1)
       if self.magento_type == 'simple'
-        if self.inventory.nil?
-          return true;
-        elsif self.inventory.is_in_stock || quantity.to_f <= self.inventory.quantity.to_f
-          puts quantity.to_f
+        if self.inventory.nil? # no inventory means inventory is not tracked
           return true;
         else
+          return self.inventory.in_stock?
+        end
+      else # check configurable product inventory
+        inventories = Gemgento::Inventory.where(product_id: self.simple_products.select(:id))
+
+        if inventories.empty? # no inventories means inventory is not tracked
+          return true
+        else
+          inventories.each do |inventory|
+            return true if inventory.in_stock?
+          end
+
           return false
         end
-      else
-        self.simple_products.each do |simple_product|
-          return true if simple_product.in_stock?
-        end
-
-        return false
       end
     end
 
@@ -287,10 +290,10 @@ module Gemgento
           styles[style] = image.image.url(style.to_sym)
         end
 
-        result['assets'] << [
-            'label' => image.label,
-            'styles' => styles
-        ]
+        result['assets'] << {
+            label: image.label,
+            styles: styles
+        }
       end
 
       # include simple products
