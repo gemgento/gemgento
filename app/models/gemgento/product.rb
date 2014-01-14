@@ -279,6 +279,10 @@ module Gemgento
         result[attribute.code] = self.attribute_value(attribute.code, store)
       end
 
+      # inventory flag
+      result['is_in_stock'] = self.in_stock?
+
+      # product assets
       result['assets'] = []
       self.images.each do |image|
         styles = { 'original' => image.image.url(:original) }
@@ -293,6 +297,7 @@ module Gemgento
         ]
       end
 
+      # include simple products
       if self.simple_products.loaded?
         result['simple_products'] = []
 
