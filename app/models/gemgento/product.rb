@@ -144,6 +144,7 @@ module Gemgento
           return self.inventory.in_stock?
         end
       else # check configurable product inventory
+        # load inventories with out completely loading the associated simple products
         inventories = Gemgento::Inventory.where(product_id: self.simple_products.select(:id))
 
         if inventories.empty? # no inventories means inventory is not tracked
