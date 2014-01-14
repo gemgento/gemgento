@@ -16,31 +16,31 @@ module Gemgento::Adapter::Sellect
 
     def self.order_export_headers
       %w[
-          order_id, website, email, password, group_id, store_id, payment_method, shipping_method, 
-          billing_prefix, billing_firstname, billing_middlename, billing_lastname, billing_suffix, 
-          billing_street_full, billing_city, billing_region, billing_country, billing_postcode, 
-          billing_telephone, billing_company, billing_fax, shipping_prefix, shipping_firstname, 
-          shipping_middlename, shipping_lastname, shipping_suffix, shipping_street_full, shipping_city, 
-          shipping_region, shipping_country, shipping_postcode, shipping_telephone, shipping_company, 
-          shipping_fax, created_in, is_subscribed, customer_id, created_at, updated_at, tax_amount, 
-          shipping_amount, discount_amount, subtotal, grand_total, total_paid, total_refunded, 
-          total_qty_ordered, total_canceled, total_invoiced, total_online_refunded, total_offline_refunded, 
-          base_tax_amount, base_shipping_amount, base_discount_amount, base_subtotal, base_grand_total, 
-          base_total_paid, base_total_refunded, base_total_qty_ordered, base_total_canceled, base_total_invoiced, 
-          base_total_online_refunded, base_total_offline_refunded, subtotal_refunded, subtotal_canceled, 
-          discount_refunded, discount_invoiced, tax_refunded, tax_canceled, shipping_refunded, shipping_canceled, 
-          base_subtotal_refunded, base_subtotal_canceled, base_discount_refunded, base_discount_canceled, 
-          base_discount_invoiced, base_tax_refunded, base_tax_canceled, base_shipping_refunded, 
-          base_shipping_canceled, subtotal_invoiced, tax_invoiced, shipping_invoiced, base_subtotal_invoiced, 
-          base_tax_invoiced, base_shipping_invoiced, shipping_tax_amount, base_shipping_tax_amount, 
-          shipping_tax_refunded, base_shipping_tax_refunded, products_ordered, order_status
+          order_id website email password group_id store_id payment_method shipping_method 
+          billing_prefix billing_firstname billing_middlename billing_lastname billing_suffix 
+          billing_street_full billing_city billing_region billing_country billing_postcode 
+          billing_telephone billing_company billing_fax shipping_prefix shipping_firstname 
+          shipping_middlename shipping_lastname shipping_suffix shipping_street_full shipping_city 
+          shipping_region shipping_country shipping_postcode shipping_telephone shipping_company 
+          shipping_fax created_in is_subscribed customer_id created_at updated_at tax_amount 
+          shipping_amount discount_amount subtotal grand_total total_paid total_refunded 
+          total_qty_ordered total_canceled total_invoiced total_online_refunded total_offline_refunded 
+          base_tax_amount base_shipping_amount base_discount_amount base_subtotal base_grand_total 
+          base_total_paid base_total_refunded base_total_qty_ordered base_total_canceled base_total_invoiced 
+          base_total_online_refunded base_total_offline_refunded subtotal_refunded subtotal_canceled 
+          discount_refunded discount_invoiced tax_refunded tax_canceled shipping_refunded shipping_canceled 
+          base_subtotal_refunded base_subtotal_canceled base_discount_refunded base_discount_canceled 
+          base_discount_invoiced base_tax_refunded base_tax_canceled base_shipping_refunded 
+          base_shipping_canceled subtotal_invoiced tax_invoiced shipping_invoiced base_subtotal_invoiced 
+          base_tax_invoiced base_shipping_invoiced shipping_tax_amount base_shipping_tax_amount 
+          shipping_tax_refunded base_shipping_tax_refunded products_ordered order_status
       ]
     end
 
     def self.completed_orders
       self.table_name = 'sellect_orders'
 
-      return self.where(state: %w[complete, returned, challenged, challenged_canceled]).order('created_at ASC')
+      return self.where(state: %w[complete returned challenged challenged_canceled]).order('created_at ASC')
     end
 
     def self.order_row(order)
@@ -157,7 +157,7 @@ module Gemgento::Adapter::Sellect
         when 'eur'
           store = Gemgento::Store.find_by(code: 'eu')
         when 'gbp'
-          store = Gemgento::Store.find_by(code: 'eu')
+          store = Gemgento::Store.find_by(code: 'uk')
         when 'usd'
           store = Gemgento::Store.find_by(code: 'us')
         else
@@ -204,39 +204,78 @@ module Gemgento::Adapter::Sellect
     end
 
     def self.totals(order, payment)
-      self.inheritance_column = :_type_disabled
-      self.table_name = 'sellect_adjustments'
-
       totals = {}
-      totals[:grand] = order.total
+      totals[:grand] = order.total.to_f
       totals[:shipping] = shipping_cost(order)
       totals[:tax] = tax(order)
-      totals[:subtotal] = subtotal(order)
-      totals[:paid] = order.total_paid
+      totals[:subtotal] = totals[:grand] - totals[:shipping] - totals[:tax]
+      totals[:paid] = order.payment_total
       totals[:refunded] = total_refunded(order)
       totals[:canceled] = total_canceled(order)
 
-      self.find_by(source_type: 'Sellect::Order', source_id: order.id)
+      return totals
     end
 
     def self.shipping_cost(order)
-      # TODO: get order shipping cost
+      self.inheritance_column = :_type_disabled
+      self.table_name = 'sellect_adjustments'
+      cost = self.find_by(
+          source_type: 'Sellect::Order',
+          source_id: order.id,
+          originator_type: 'Sellect::ShippingMethod'
+      )
+
+      if cost.nil?
+        return 0
+      else
+        return cost.amount.to_f
+      end
     end
 
     def self.tax(order)
-      # TODO: get order tax total
+      self.inheritance_column = :_type_disabled
+      self.table_name = 'sellect_adjustments'
+      tax = self.find_by(
+          source_type: 'Sellect::Order',
+          source_id: order.id,
+          originator_type: 'Sellect::TaxRate'
+      )
+
+      if tax.nil?
+        return 0
+      else
+        return tax.amount.to_f
+      end
     end
 
     def self.subtotal(order)
-      # TODO: get order subtotal
+      self.inheritance_column = :_type_disabled
+      self.table_name = 'sellect_adjustments'
+      self.find_by(source_type: 'Sellect::Order', source_id: order.id)
     end
 
     def self.total_refunded(order)
-      # TODO: get order refund total
+      self.inheritance_column = :_type_disabled
+      self.table_name = 'sellect_adjustments'
+      refunds = self.where(
+          source_type: 'Sellect::Order',
+          source_id: order.id,
+          originator_type: nil,
+          label: 'Refund Credit'
+      )
+
+      total = 0
+      refunds.each { |r| total+= r.amount.to_f }
+
+      return total
     end
 
     def self.total_canceled(order)
-      # TODO: get order canceled total
+      if order.state == 'challenged_canceled'
+        order.payment_total
+      else
+        0
+      end
     end
 
     def self.line_items(order_id)
