@@ -12,6 +12,8 @@ module Gemgento
 
     after_save :sync_local_to_magento
 
+    attr_accessor :includes_category_products
+
     default_scope -> { order(:position) }
 
     scope :top_level, -> { where(:parent_id => 2) }
@@ -44,6 +46,16 @@ module Gemgento
         API::SOAP::Catalog::Category.fetch_all
       end
       Category.all
+    end
+
+    def as_json(options = nil)
+      result = super
+
+      if self.includes_category_products
+        result['products'] = self.products.active.category_visible
+      end
+
+      return result
     end
 
     private

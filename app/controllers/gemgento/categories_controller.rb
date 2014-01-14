@@ -4,14 +4,15 @@ module Gemgento
     respond_to :json, :html
 
     def index
-      respond_with @categories = Gemgento::Category.where(include_in_menu: true)
+      @categories = Gemgento::Category.where(include_in_menu: true)
+
+      respond_with @categories
     end
 
     def show
-      respond_with(
-        @category = Gemgento::Category.find(params[:id]),
-        @products = @category.products.active.catalog_visible.order('gemgento_product_categories.position ASC')
-      )
+      @category = Gemgento::Category.find(params[:id])
+
+      respond_with @category
     end
 
     def update
