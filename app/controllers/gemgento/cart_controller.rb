@@ -1,8 +1,10 @@
 module Gemgento
   class CartController < BaseController
 
-    def show
+    respond_to :js, :json, :html
 
+    def show
+      respond_with current_order
     end
 
     def update
@@ -19,8 +21,10 @@ module Gemgento
 
             unless @product
               format.js { render '/gemgento/order/no_inventory', :layout => false }
+              format.json { respond_with false }
             else
               format.js { render '/gemgento/order/add_item', :layout => false }
+              format.json { respond_with current_order }
             end
           end
         when 'update_item'
@@ -31,8 +35,10 @@ module Gemgento
 
             unless @product
               format.js { render '/gemgento/order/no_inventory', :layout => false }
+              format.json { respond_with false }
             else
               format.js { render '/gemgento/order/update_item', :layout => false }
+              format.json { respond_with current_order }
             end
           end
         when 'remove_item'
@@ -41,6 +47,7 @@ module Gemgento
           respond_to do |format|
             format.html { render 'gemgento/checkout/shopping_bag' }
             format.js { render '/gemgento/order/remove_item', :layout => false }
+            format.json { respond_with current_order }
           end
         else
           raise "Unknown action - #{params[:activity]}"
