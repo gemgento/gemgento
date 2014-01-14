@@ -270,7 +270,6 @@ module Gemgento
     end
 
     def as_json(options = nil)
-      # TODO: calls store too many times and goes through all stores
       store = Gemgento::Store.current
       result = super
 
@@ -278,9 +277,6 @@ module Gemgento
         attribute = attribute_value.product_attribute
         result[attribute.code] = self.attribute_value(attribute.code, store)
       end
-
-      # inventory flag
-      result['is_in_stock'] = self.in_stock?
 
       # product assets
       result['assets'] = []
@@ -305,6 +301,9 @@ module Gemgento
           result['simple_products'] << simple_product
         end
       end
+
+      # inventory flag
+      result['is_in_stock'] = self.in_stock?
 
       return result
     end
