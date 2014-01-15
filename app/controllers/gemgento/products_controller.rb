@@ -41,6 +41,7 @@ module Gemgento
       @product.magento_type = data[:type]
       @product.save
 
+      set_stores(data[:stores], @product)
       set_categories(data[:categories], @product) unless data[:categories].nil?
       set_attribute_values_from_magento(data[:additional_attributes], @product) unless data[:additional_attributes].nil?
 
@@ -63,6 +64,16 @@ module Gemgento
 
     private
 
+    def set_stores(magento_stores, product)
+      product.stores.clear
+
+      magento_stores.each do |magento_id|
+        product.stores << Gemgento::Store.find_by(magento_id: magento_id)
+      end
+
+      product.save
+    end
+
     def set_categories(magento_categories, product)
       product.categories.clear
 
@@ -76,22 +87,22 @@ module Gemgento
     end
 
     def set_attribute_values_from_magento(magento_attribute_values, product)
-      magento_attribute_values.each do |code, value|
+      magento_attribute_values.each do |store_id, attribute_values|
+        store = Gemgento::Store.find_by(magento_id: store_id)
 
-        unless Gemgento::ProductAttribute.where(code: code).empty?
+        attribute_values.each do |code, value|
 
-          if code == 'visibility'
-            product.visibility = value.to_i
-            product.save
-          elsif code == 'status'
-            product.status = value.to_i == 1 ? 1 : 0
-            product.save
-          else
-            product.set_attribute_value(code, value)
+          case code
+            when 'visibility'
+              product.visibility = value.to_i
+              product.save
+            when'status'
+              product.status = value.to_i == 1 ? 1 : 0
+              product.save
+            else
+              product.set_attribute_value(code, value, store)
           end
-
         end
-
       end
     end
 

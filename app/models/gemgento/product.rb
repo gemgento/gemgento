@@ -53,15 +53,23 @@ module Gemgento
     def set_attribute_value(code, value, store = nil)
       store = Gemgento::Store.current if store.nil?
 
-      product_attribute = Gemgento::ProductAttribute.where(code: code).first
-      product_attribute_value = Gemgento::ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store).first_or_initialize
-      product_attribute_value.product = self
-      product_attribute_value.product_attribute = product_attribute
-      product_attribute_value.value = value
-      product_attribute_value.store = store
-      product_attribute_value.save
+      product_attribute = Gemgento::ProductAttribute.find_by(code: code)
 
-      self.product_attribute_values << product_attribute_value unless self.product_attribute_values.include?(product_attribute_value)
+      if product_attribute.nil?
+        return false
+      else
+        product_attribute_value = Gemgento::ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store).first_or_initialize
+        product_attribute_value.product = self
+        product_attribute_value.product_attribute = product_attribute
+        product_attribute_value.value = value
+        product_attribute_value.store = store
+        product_attribute_value.save
+
+        self.product_attribute_values << product_attribute_value unless self.product_attribute_values.include?(product_attribute_value)
+
+        return true
+      end
+
     end
 
     def attribute_value(code, store = nil)
@@ -351,7 +359,7 @@ module Gemgento
       self.categories.update_all(updated_at: Time.now) if self.changed?
     end
 
-    def self.touch_configurables
+    def touch_configurables
       self.configurable_products.update_all(updated_at: Time.now) if self.changed?
     end
 
