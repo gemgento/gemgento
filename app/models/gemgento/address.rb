@@ -44,9 +44,7 @@ module Gemgento
     end
 
     def implode_street_address
-      self.street = self.address1 unless self.address1.nil?
-      self.street = "#{self.street}\n#{self.address2}" unless self.address2.nil?
-      self.street = "#{self.street}\n#{self.address3}" unless self.address3.nil?
+      self.street = [self.address1, self.address2, self.address3].join("\n")
     end
 
     def sync_local_to_magento

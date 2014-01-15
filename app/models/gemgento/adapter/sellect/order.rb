@@ -8,8 +8,8 @@ module Gemgento::Adapter::Sellect
       CSV.open("orders.csv", "wb") do |csv|
         csv << order_export_headers
         completed_orders.each_with_index do |order, index|
-          csv << order_row(order)
           puts "Working on row #{index}"
+          csv << order_row(order)
         end
       end
     end
@@ -54,9 +54,9 @@ module Gemgento::Adapter::Sellect
       line_items = line_items(order.id).reload
 
       [
-        order.number,                 # order_id
+        order.number.gsub('R', ''),   # order_id
         store.code,                   # website
-        order.email,                  # email
+        email(order.email),           # email
         '',                           # password
         user_group(user),             # group_id
         store.magento_id,             # store_id
@@ -90,7 +90,7 @@ module Gemgento::Adapter::Sellect
         '',                           # shipping_fax
         store.name,                   # created_in
         0,                            # is_subscribed
-        user_id(user),                # customer_id
+        nil,                          # customer_id
         order.created_at,             # created_at
         order.updated_at,             # updated_at
         totals[:tax],                 # tax_amount
@@ -284,6 +284,14 @@ module Gemgento::Adapter::Sellect
       return self.where(order_id: order_id)
     end
 
+    def self.email(email)
+      if email.nil? || email == ''
+        return 'unknown@sellect.com'
+      else
+        return email
+      end
+    end
+
     def self.user_group(user)
       if user.nil? || user.id.nil?
         return Gemgento::UserGroup.find_by(magento_id: 0).code
@@ -296,7 +304,7 @@ module Gemgento::Adapter::Sellect
       street = address.address1.nil? ? 'NOT PROVIDED' : address.address1
 
       if !address.address2.nil? && address.address2 != ''
-        street+= '\n' + address.address2
+        street+= "\n" + address.address2
       end
 
       return street
@@ -354,7 +362,7 @@ module Gemgento::Adapter::Sellect
       line_items.each do |li|
         p = product(li.variant_id)
         next if p.nil?
-        ordered << "#{p.sku}:#{li.quantity}"
+        ordered << "#{p.sku}:#{li.quantity}:#{p.price}"
       end
 
       return ordered.join('|')
