@@ -37,8 +37,7 @@ module Gemgento
     scope :not_deleted, -> { where(deleted_at: nil) }
     scope :active, -> { where(deleted_at: nil, status: true) }
 
-    after_save :sync_local_to_magento
-    after_save :touch_categories
+    after_save :sync_local_to_magento, :touch_categories, :touch_configurables
 
     before_destroy :delete_associations
 
@@ -350,6 +349,10 @@ module Gemgento
 
     def touch_categories
       self.categories.update_all(updated_at: Time.now) if self.changed?
+    end
+
+    def self.touch_configurables
+      self.configurable_products.update_all(updated_at: Time.now) if self.changed?
     end
 
     def to_ary
