@@ -1,6 +1,7 @@
 module Gemgento
   class Inventory < ActiveRecord::Base
     belongs_to :product
+    belongs_to :store
 
     after_save :touch_product
 
@@ -16,7 +17,7 @@ module Gemgento
       Gemgento::API::SOAP::CatalogInventory::StockItem.update(self.product);
     end
 
-    def in_stock?(quantity)
+    def in_stock?(quantity = 1)
       if self.is_in_stock || quantity.to_f <= self.quantity.to_f
         return true
       else

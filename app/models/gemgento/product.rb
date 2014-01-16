@@ -4,14 +4,13 @@ module Gemgento
     belongs_to :product_attribute_set
     belongs_to :swatch
 
-    has_one :inventory
-
+    has_many :assets, dependent: :destroy
+    has_many :categories, -> { distinct }, through: :product_categories
+    has_many :inventories
     has_many :product_attribute_values, dependent: :destroy
     has_many :product_attributes, through: :product_attribute_values
-    has_many :assets, dependent: :destroy
-    has_many :relations, -> { distinct }, as: :relatable, :class_name => 'Relation', dependent: :destroy
     has_many :product_categories, -> { distinct }, dependent: :destroy
-    has_many :categories, -> { distinct }, through: :product_categories
+    has_many :relations, -> { distinct }, as: :relatable, :class_name => 'Relation', dependent: :destroy
 
     has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_products', class_name: 'Store'
     has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
@@ -26,7 +25,7 @@ module Gemgento
                             association_foreign_key: 'simple_product_id',
                             class_name: 'Product'
 
-    default_scope -> { includes([{product_attribute_values: :product_attribute}, {assets: [:asset_file, :asset_types]}, :inventory, :swatch]) }
+    default_scope -> { includes([{product_attribute_values: :product_attribute}, {assets: [:asset_file, :asset_types]}, :inventories, :swatch]) }
 
     scope :configurable, -> { where(magento_type: 'configurable') }
     scope :simple, -> { where(magento_type: 'simple') }
@@ -143,22 +142,25 @@ module Gemgento
       return products
     end
 
-    def in_stock?(quantity = 1)
+    def in_stock?(quantity = 1, store = nil)
+      store = Gemgento::Store.current if store.nil?
+
       if self.magento_type == 'simple'
-        if self.inventory.nil? # no inventory means inventory is not tracked
+        inventory = self.inventories.find_by(store: store)
+        if inventory.nil? # no inventory means inventory is not tracked
           return true;
         else
-          return self.inventory.in_stock?
+          return inventory.in_stock?(quantity)
         end
       else # check configurable product inventory
         # load inventories with out completely loading the associated simple products
-        inventories = Gemgento::Inventory.where(product_id: self.simple_products.select(:id))
+        inventories = Gemgento::Inventory.where(product_id: self.simple_products.select(:id), store: store)
 
         if inventories.empty? # no inventories means inventory is not tracked
           return true
         else
           inventories.each do |inventory|
-            return true if inventory.in_stock?
+            return true if inventory.in_stock?(quantity)
           end
 
           return false
