@@ -42,7 +42,6 @@ module Gemgento
       @product.save
 
       set_stores(data[:stores], @product) unless data[:stores].nil?
-      set_categories(data[:categories], @product) unless data[:categories].nil?
 
       unless data[:additional_attributes].nil?
         set_assets(data[:additional_attributes], @product)
@@ -74,13 +73,17 @@ module Gemgento
       product.save
     end
 
-    def set_categories(magento_categories, product)
+    def set_categories(magento_categories, product, store)
       product.categories.clear
 
       # loop through each return category and add it to the product if needed
       magento_categories.each do |magento_category|
         category = Gemgento::Category.where(magento_id: magento_category).first
-        product.categories << category unless product.categories.include?(category) # don't duplicate the categories
+        product_category = product.product_categories.find_or_initialize_by(category: category, store: store)
+        product_category.category = category
+        product_category.product = product
+        product_category.store = store
+        product_category.save
       end
 
       product.save
@@ -96,9 +99,11 @@ module Gemgento
             when 'visibility'
               product.visibility = value.to_i
               product.save
-            when'status'
+            when 'status'
               product.status = value.to_i == 1 ? 1 : 0
               product.save
+            when 'category_ids'
+              set_categories(value, product, store)
             else
               product.set_attribute_value(code, value, store)
           end
