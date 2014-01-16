@@ -41,12 +41,15 @@ module Gemgento
       @product.magento_type = data[:type]
       @product.save
 
-      set_stores(data[:stores], @product)
+      set_stores(data[:stores], @product) unless data[:stores].nil?
       set_categories(data[:categories], @product) unless data[:categories].nil?
-      set_attribute_values_from_magento(data[:additional_attributes], @product) unless data[:additional_attributes].nil?
 
-      if !data[:additional_attributes][:media_gallery].nil? && !data[:additional_attributes][:media_gallery][:images].nil?
-        set_assets(data[:additional_attributes][:media_gallery][:images], @product)
+      unless data[:additional_attributes].nil?
+        set_attribute_values_from_magento(data[:additional_attributes], @product)
+
+        if !data[:additional_attributes][:media_gallery].nil? && !data[:additional_attributes][:media_gallery][:images].nil?
+          set_assets(data[:additional_attributes][:media_gallery][:images], @product)
+        end
       end
 
       render nothing: true
