@@ -65,6 +65,7 @@ module Gemgento
 
         products.each do |source|
           product = Gemgento::Product.find_by(magento_id: source[:product_id])
+          product.sync_needed = false
           product_category = product.product_categories.find_or_initialize_by(category: category, store: store)
           product_category.category = category
           product_category.product = product

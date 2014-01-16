@@ -73,22 +73,6 @@ module Gemgento
       product.save
     end
 
-    def set_categories(magento_categories, product, store)
-      product.categories.clear
-
-      # loop through each return category and add it to the product if needed
-      magento_categories.each do |magento_category|
-        category = Gemgento::Category.where(magento_id: magento_category).first
-        product_category = product.product_categories.find_or_initialize_by(category: category, store: store)
-        product_category.category = category
-        product_category.product = product
-        product_category.store = store
-        product_category.save
-      end
-
-      product.save
-    end
-
     def set_attribute_values_from_magento(magento_attribute_values, product)
       magento_attribute_values.each do |store_id, attribute_values|
         store = Gemgento::Store.find_by(magento_id: store_id)
@@ -103,12 +87,32 @@ module Gemgento
               product.status = value.to_i == 1 ? 1 : 0
               product.save
             when 'category_ids'
+              puts value.inspect
               set_categories(value, product, store)
             else
               product.set_attribute_value(code, value, store)
           end
         end
       end
+    end
+
+    def set_categories(magento_categories, product, store)
+      Gemgento::ProductCategory.where(store: store, product: product).destroy_all
+
+      puts magento_categories.inspect
+      # loop through each return category and add it to the product if needed
+      unless magento_categories.nil?
+        magento_categories.each do |magento_category|
+          category = Gemgento::Category.find_by(magento_id: magento_category)
+          product_category = Gemgento::ProductCategory.find_or_initialize_by(category: category, store: store, product: product)
+          product_category.category = category
+          product_category.product = product
+          product_category.store = store
+          product_category.save
+        end
+      end
+
+      product.save
     end
 
     def set_assets(magento_source_assets, product)
