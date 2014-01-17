@@ -293,7 +293,7 @@ module Gemgento
 
       # product assets
       result['assets'] = []
-      self.images.each do |image|
+      self.assets.each do |image|
         styles = { 'original' => image.image.url(:original) }
 
         image.image.styles.keys.to_a.each do |style|
@@ -331,10 +331,6 @@ module Gemgento
       end
 
       return options
-    end
-
-    def images
-      self.assets.select{ |a| a.store_id == Gemgento::Store.current.id }
     end
 
     private
