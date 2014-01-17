@@ -3,8 +3,16 @@ module Gemgento
 
     respond_to :js, :json, :html
 
+    def index
+      @cart = current_order
+
+      respond_with @cart
+    end
+
     def show
-      respond_with current_order
+      @cart = current_order
+
+      respond_with @cart
     end
 
     def update
