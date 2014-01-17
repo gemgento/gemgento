@@ -154,7 +154,7 @@ module Gemgento::Adapter::Sellect
         if File.exist?(file)
           image = Gemgento::Asset.new
 
-          gemgento_product.assets.where(store: Gemgento::Store.current).each do |asset|
+          gemgento_product.assets.each do |asset|
             if !asset.asset_file.nil? && FileUtils.compare_file(asset.asset_file.file.path(:original), file)
               image = asset
               break
@@ -213,7 +213,7 @@ module Gemgento::Adapter::Sellect
     def self.create_configurable_images(configurable_product)
       default_product = configurable_product.simple_products.first
 
-      default_product.assets.where(store: Gemgento::Store.current).each do |asset|
+      default_product.assets.each do |asset|
 
         asset_copy = Gemgento::Asset.new
 
@@ -225,7 +225,7 @@ module Gemgento::Adapter::Sellect
         end
 
         asset_copy.product = configurable_product
-        asset_copy.store = Gemgento::Store.current
+        asset_copy.store = asset.store
         asset_copy.set_file(File.open(asset.asset_file.file.path(:original)))
         asset_copy.label = asset.label
         asset_copy.position = asset.position

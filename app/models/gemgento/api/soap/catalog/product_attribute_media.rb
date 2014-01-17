@@ -120,6 +120,7 @@ module Gemgento
             asset.file = source[:file]
             asset.product = product
             asset.sync_needed = false
+            asset.store = store
             asset.set_file(open(source[:url]))
 
             asset.save

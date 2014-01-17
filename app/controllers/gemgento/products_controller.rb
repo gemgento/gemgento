@@ -123,7 +123,7 @@ module Gemgento
           media_gallery = source_assets[:media_gallery][:images]
 
           media_gallery.each do |source| # cycle through the store specific assets
-            asset = Gemgento::Asset.find_or_initialize_by(product_id: product.id, file: source[:file], store: store)
+            asset = Gemgento::Asset.unscoped.find_or_initialize_by(product_id: product.id, file: source[:file], store: store)
 
             if !source[:removed].nil? && source[:removed] == 0
 

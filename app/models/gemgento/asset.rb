@@ -13,7 +13,7 @@ module Gemgento
 
     before_destroy :delete_magento
 
-    default_scope -> { order(:position) }
+    default_scope -> { includes(:asset_file).where(store: Gemgento::Store.current).order(:position) }
 
     validates :asset_file, presence: true
     validates :product, presence: true
@@ -26,7 +26,7 @@ module Gemgento
 
       matching_file = nil
 
-      self.product.assets.each do |asset|
+      self.product.assets.unscoped.each do |asset|
         if !asset.asset_file.nil? && FileUtils.compare_file(asset.asset_file.file.path(:original), file)
           matching_file = asset.asset_file
           self.file = asset.file
