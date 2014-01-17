@@ -1,5 +1,3 @@
-require 'open-uri'
-
 module Gemgento
   module API
     module SOAP
@@ -7,19 +5,20 @@ module Gemgento
         class ProductAttributeMedia
 
           def self.fetch_all
-            Gemgento::Product.all.each do |product|
-              fetch(product)
+            Gemgento::Store.all.each do |store|
+              Gemgento::Product.all.each do |product|
+                fetch(product, store)
+              end
             end
           end
 
-          def self.fetch(product)
-            product.stores.each do |store|
-              media_list = list(product, store)
+          def self.fetch(product, store = nil)
+            store = Gemgento::Store.current if store.nil?
+            media_list = list(product, store)
 
-              unless media_list.nil?
-                media_list.each do |product_attribute_media|
-                  sync_magento_to_local(product_attribute_media, product, store)
-                end
+            unless media_list.nil?
+              media_list.each do |product_attribute_media|
+                sync_magento_to_local(product_attribute_media, product, store)
               end
             end
           end

@@ -153,13 +153,7 @@ module Gemgento
             category.position = subject[:position]
             category.is_active = subject[:is_active]
             category.include_in_menu = subject[:include_in_menu] == 1 ? true : false
-            category.children_count = subject[:children_count]
-
-            if category.children_count > 0
-              category.all_children = subject[:all_children]
-            else
-              category.all_children = ''
-            end
+            category.all_children = subject[:all_children].nil? ? '' : subject[:all_children]
 
             if subject.key? :image
               begin

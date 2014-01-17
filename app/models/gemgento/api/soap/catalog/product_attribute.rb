@@ -19,7 +19,7 @@ module Gemgento
 
           def self.fetch_all_options(product_attribute)
             # add attribute options if there are any
-            Gemgento::Store.each do |store|
+            Gemgento::Store.all.each do |store|
               options(product_attribute.magento_id, store).each_with_index do |attribute_option, index|
                 label = Gemgento::Magento.enforce_savon_string(attribute_option[:label])
                 value = Gemgento::Magento.enforce_savon_string(attribute_option[:value])

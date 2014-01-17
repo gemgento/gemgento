@@ -26,11 +26,13 @@ module Gemgento
 
       matching_file = nil
 
-      self.product.assets.unscoped.each do |asset|
-        if !asset.asset_file.nil? && FileUtils.compare_file(asset.asset_file.file.path(:original), file)
-          matching_file = asset.asset_file
-          self.file = asset.file
-          break
+      Gemgento::Asset.unscoped do
+        self.product.assets.each do |asset|
+          if !asset.asset_file.nil? && FileUtils.compare_file(asset.asset_file.file.path(:original), file)
+            matching_file = asset.asset_file
+            self.file = asset.file
+            break
+          end
         end
       end
 
