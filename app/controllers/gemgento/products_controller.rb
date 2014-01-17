@@ -89,7 +89,6 @@ module Gemgento
               product.status = value.to_i == 1 ? 1 : 0
               product.save
             when 'category_ids'
-              puts value.inspect
               set_categories(value, product, store)
             else
               product.set_attribute_value(code, value, store)

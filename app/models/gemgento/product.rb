@@ -9,6 +9,7 @@ module Gemgento
     has_many :inventories
     has_many :product_attribute_values, dependent: :destroy
     has_many :product_attributes, through: :product_attribute_values
+    has_many :product_attribute_options, through: :product_attributes
     has_many :product_categories, -> { distinct }, dependent: :destroy
     has_many :relations, -> { distinct }, as: :relatable, :class_name => 'Relation', dependent: :destroy
 

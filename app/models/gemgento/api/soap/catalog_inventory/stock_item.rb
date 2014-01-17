@@ -5,19 +5,21 @@ module Gemgento
         class StockItem
 
           def self.fetch_all(products = nil)
-            products = Gemgento::Product.all if products.nil?
-            magento_product_ids = []
+            Gemgento::Store.all.each do |store|
+              products = store.products if products.nil?
+              magento_product_ids = []
 
-            products.each do |product|
-              magento_product_ids << product.magento_id
-            end
+              products.each do |product|
+                magento_product_ids << product.magento_id
+              end
 
-            list(magento_product_ids).each do |inventory|
-              sync_magento_to_local(inventory)
+              list(magento_product_ids, store).each do |inventory|
+                sync_magento_to_local(inventory, store)
+              end
             end
           end
 
-          def self.list(product_ids)
+          def self.list(product_ids, store)
             response = Gemgento::Magento.create_call(:catalog_inventory_stock_item_list, {products: {item: product_ids}})
 
             if response.success?
@@ -47,12 +49,13 @@ module Gemgento
           private
 
           # Save Magento users inventory to local
-          def self.sync_magento_to_local(source)
+          def self.sync_magento_to_local(source, store)
             product = Gemgento::Product.where(magento_id: source[:product_id]).first_or_initialize
             inventory = Gemgento::Inventory.where(product: product).first_or_initialize
             inventory.product = product
             inventory.quantity = source[:qty]
             inventory.is_in_stock = source[:is_in_stock]
+            inventory.store = store
             inventory.sync_needed = false
             inventory.save
           end
