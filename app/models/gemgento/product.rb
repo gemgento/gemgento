@@ -309,6 +309,7 @@ module Gemgento
 
       # include simple products
       if self.simple_products.loaded?
+        result['configurable_attribute_order'] = self.configurable_attribute_order
         result['simple_products'] = []
 
         self.simple_products.each do |simple_product|
@@ -322,16 +323,25 @@ module Gemgento
       return result
     end
 
-    def configurable_options(attribute_code)
-      raise 'Product not configurable' if self.magento_type != 'configurable'
-      attribute = Gemgento::ProductAttribute.find_by(code: attribute_code)
-      options = []
+    def configurable_attribute_order
+      order = {}
 
-      self.simple_products.active.order_by_attribute(attribute).each do |p|
-        options << p.attribute_value(attribute_code)
+      self.configurable_attributes.each do |attribute|
+        order[attribute.code] = {}
+
+        attribute.product_attribute_options.where(store: Gemgento::Store.current).each do |option|
+
+          self.simple_products.each do |simple_product|
+
+            if simple_product.attribute_value(attribute.code) == option.label
+              order[attribute.code][option.label] = [] if order[attribute.code][option.label].nil?
+              order[attribute.code][option.label] << simple_product.id
+            end
+          end
+        end
       end
 
-      return options
+      return order
     end
 
     private

@@ -4,6 +4,8 @@ module Gemgento
     belongs_to :product_attribute
     belongs_to :store
 
+    has_many :product_attribute_options
+
     default_scope -> { includes(:product_attribute) }
 
     after_save :touch_product
