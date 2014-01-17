@@ -63,16 +63,22 @@ module Gemgento
         next if store_id.to_i == 0 # 0 is the admin store which is not used in Gemgento
         store = Gemgento::Store.find_by(magento_id: store_id)
 
-        products.each do |source|
-          product = Gemgento::Product.find_by(magento_id: source[:product_id])
-          product.sync_needed = false
-          product_category = product.product_categories.find_or_initialize_by(category: category, store: store)
-          product_category.category = category
-          product_category.product = product
-          product_category.store = store
-          product_category.position = source[:position]
-          product_category.save
+        product_category_ids = []
+        products.each do |item|
+          product = Gemgento::Product.find_by(magento_id: item[:product_id])
+          next if product.nil?
+
+          pairing = Gemgento::ProductCategory.unscoped.find_or_initialize_by(category: category, product: product, store: store)
+          pairing.position = item[:position].nil? ? 1 : item[:position][0]
+          pairing.store = store
+          pairing.save
+
+          product_category_ids << pairing.id
         end
+
+        Gemgento::ProductCategory.unscoped.
+            where('store_id = ? AND category_id = ? AND id NOT IN (?)', store.id, category.id, product_category_ids).
+            destroy_all
       end
     end
 

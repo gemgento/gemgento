@@ -97,14 +97,14 @@ module Gemgento
     end
 
     def set_categories(magento_categories, product, store)
-      Gemgento::ProductCategory.where(store: store, product: product).destroy_all
+      Gemgento::ProductCategory.unscoped.where(store: store, product: product).destroy_all
 
       puts magento_categories.inspect
       # loop through each return category and add it to the product if needed
       unless magento_categories.nil?
         magento_categories.each do |magento_category|
           category = Gemgento::Category.find_by(magento_id: magento_category)
-          product_category = Gemgento::ProductCategory.find_or_initialize_by(category: category, store: store, product: product)
+          product_category = Gemgento::ProductCategory.new
           product_category.category = category
           product_category.product = product
           product_category.store = store

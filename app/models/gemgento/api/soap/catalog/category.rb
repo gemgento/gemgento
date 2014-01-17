@@ -101,23 +101,26 @@ module Gemgento
                 result = assigned_products(category, store)
 
                 if result.nil? || result == false || result.empty?
-                  category.products.clear
+                  Gemgento::ProductCategory.unscoped.where(category: category, store: store).destroy_all
                   next
                 end
 
-                product_ids = []
+                product_category_ids = []
                 result.each do |item|
                   product = Gemgento::Product.find_by(magento_id: item[:product_id])
                   next if product.nil?
 
-                  product_ids << product.id
                   pairing = Gemgento::ProductCategory.unscoped.find_or_initialize_by(category: category, product: product, store: store)
                   pairing.position = item[:position].nil? ? 1 : item[:position][0]
                   pairing.store = store
                   pairing.save
+
+                  product_category_ids << pairing.id
                 end
 
-                category.products.destroy(category.products.where("product_id NOT IN (?) AND store_id = ?", product_ids, store.id))
+                Gemgento::ProductCategory.unscoped.
+                    where('store_id = ? AND category_id = ? AND id NOT IN (?)', store.id, category.id, product_category_ids).
+                    destroy_all
               end
             end
           end

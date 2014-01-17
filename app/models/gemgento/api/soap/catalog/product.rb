@@ -9,17 +9,15 @@ module Gemgento
             updates_made = false
 
             Gemgento::Store.all.each do |store|
-              list(store, last_updated).each do |store_view|
-                unless store_view == empty_product_list
+              list(store, last_updated).each do |product_list|
+                unless product_list == empty_product_list
                   updates_made = true
 
                   # enforce array
-                  unless store_view[:item].is_a? Array
-                    store_view[:item] = [store_view[:item]]
-                  end
+                  product_list[:item] = [product_list[:item]] unless product_list[:item].is_a? Array
 
-                  store_view[:item].each do |basic_product_info|
-                    next if skip_existing && Gemgento::Product.where(magento_id: basic_product_info[:product_id]).present?
+                  product_list[:item].each do |basic_product_info|
+                    next if skip_existing && Gemgento::Product.where(magento_id: basic_product_info[:product_id], store: store).present?
 
                     attribute_set = Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
                     fetch(basic_product_info[:product_id], attribute_set, store)
@@ -36,7 +34,7 @@ module Gemgento
 
             # update the product and grab the images
             product = sync_magento_to_local(product_info, store)
-            Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch(product)
+            Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch(product, store)
           end
 
           def self.list(store, last_updated = nil)
@@ -214,30 +212,30 @@ module Gemgento
             product.set_attribute_value('options_container', subject[:options_container], store)
             product.set_attribute_value('enable_googlecheckout', subject[:enable_googlecheckout], store)
 
-            set_categories(subject[:categories][:item], product) if subject[:categories][:item]
-            set_attribute_values_from_magento(subject[:additional_attributes][:item], product) if (subject[:additional_attributes] and subject[:additional_attributes][:item])
+            set_categories(subject[:categories][:item], product, store) if subject[:categories][:item]
+            set_attribute_values_from_magento(subject[:additional_attributes][:item], product, store) if (subject[:additional_attributes] and subject[:additional_attributes][:item])
 
             product
           end
 
-          def self.set_categories(magento_categories, product)
-            product.categories.clear
+          def self.set_categories(magento_categories, product, store)
+            Gemgento::ProductCategory.unscoped.where(product: product, store: store).destroy_all
 
             # if there is only one category, the returned value is not interpreted array
-            unless magento_categories.is_a? Array
-              magento_categories = [magento_categories]
-            end
+            magento_categories = [magento_categories] unless magento_categories.is_a? Array
 
             # loop through each return category and add it to the product if needed
             magento_categories.each do |magento_category|
               category = Gemgento::Category.where(magento_id: magento_category).first
-              product.categories << category unless product.categories.include?(category) # don't duplicate the categories
+              product_category = Gemgento::ProductCategory.new
+              product_category.category = category
+              product_category.product = product
+              product_category.store = store
+              product_category.save
             end
-
-            product.save
           end
 
-          def self.set_attribute_values_from_magento(magento_attribute_values, product)
+          def self.set_attribute_values_from_magento(magento_attribute_values, product, store)
             magento_attribute_values.each do |attribute_value|
 
               if attribute_value[:key] == 'visibility'
@@ -247,7 +245,7 @@ module Gemgento
                 product.status = attribute_value[:value].to_i == 1 ? 1 : 0
                 product.save
               else
-                product.set_attribute_value(attribute_value[:key], attribute_value[:value])
+                product.set_attribute_value(attribute_value[:key], attribute_value[:value], store)
               end
 
             end
@@ -266,10 +264,10 @@ module Gemgento
 
           def self.compose_product_data(product)
             product_data = {
-                'name' => product.attribute_value('name'),
-                'description' => product.attribute_value('description'),
-                'short_description' => product.attribute_value('short_description'),
-                'weight' => product.attribute_value('weight'),
+                'name' => product.name,
+                'description' => product.description,
+                'short_description' => product.short_description,
+                'weight' => product.weight,
                 'status' => product.status ? 1 : 2,
                 'categories' => { 'item' => compose_categories(product) },
                 'websites' => { 'item' => compose_websites(product) },
