@@ -1,25 +1,25 @@
 module Gemgento
   class ApiJob < ActiveRecord::Base
-    attr_accessible :kind
+    attr_accessor :ready, :complete, :error
 
-    belongs_to :source, :polymorphic => true
+    belongs_to :source, polymorphic: true
 
-    state_machine :initial => 'pending', :use_transactions => false do
+    state_machine :state, initial: 'pending', use_transactions: false do
       event :ready do
-        transition :from => 'pending', :to => 'ready'
+        transition from: 'pending', to: 'ready'
       end
       event :complete do
-        transition :from => 'ready', :to => 'complete'
-        transition :from => 'error', :to => 'complete'
+        transition from: 'ready', to: 'complete'
+        transition from: 'error', to: 'complete'
       end
       event :error do
-        transition :from => 'ready', :to => 'error'
+        transition from: 'ready', to: 'error'
       end
 
-      before_transition :to => 'ready', :do => :is_ready!
-      before_transition :to => 'complete', :do => :is_completed!
-      after_transition :to => 'error', :do => :error!
-      after_transition :to => 'complete', :do => :finalize!
+      before_transition to: 'ready', do: :is_ready!
+      before_transition to: 'complete', do: :is_completed!
+      after_transition to: 'error', do: :error!
+      after_transition to: 'complete', do: :finalize!
     end
 
     def is_ready!

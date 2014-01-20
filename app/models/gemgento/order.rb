@@ -150,7 +150,7 @@ module Gemgento
       if !valid_stock?
         return false
       elsif API::SOAP::Checkout::Cart.order(self)
-        decrement_stock
+        finalize
         return true
       else
         return false
@@ -161,6 +161,10 @@ module Gemgento
       magento_cart = API::SOAP::Checkout::Cart.info(self)
       verify_address(self.shipping_address, magento_cart[:shipping_address])
       verify_address(self.billing_address, magento_cart[:billing_address])
+    end
+
+    def finalize
+      # for application defined post order actions
     end
 
     private

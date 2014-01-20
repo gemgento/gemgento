@@ -4,13 +4,13 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'gemgento/version'
 
 Gem::Specification.new do |gem|
-  gem.name = "gemgento"
+  gem.name = 'gemgento'
   gem.version = Gemgento::VERSION
-  gem.authors = ["Philip Vasilevski", "Kevin Pheasey"]
-  gem.email = ["phil@mauinewyork.com"]
+  gem.authors = ['Philip Vasilevski', 'Kevin Pheasey']
+  gem.email = ['phil@mauinewyork.com']
   gem.description = %q{rails based magento bridge for ecommerce}
   gem.summary = %q{gemgento rails magento integration ecommerce platform}
-  gem.homepage = "http://gemgento.com"
+  gem.homepage = 'http://gemgento.com'
 
   gem.files = `git ls-files`.split($/)
   gem.executables = gem.files.grep(%r{^bin/}).map { |f| File.basename(f) }
@@ -26,5 +26,5 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'sass-rails', '~> 4.0.0'
   gem.add_dependency 'savon', '~> 2.2.0'
   gem.add_dependency 'spreadsheet', '~> 0.8.5'
-  gem.add_dependency 'statemachine', '~> 2.2.0'
+  gem.add_dependency 'state_machine', '~> 1.2.0'
 end

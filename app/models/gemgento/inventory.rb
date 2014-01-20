@@ -3,7 +3,7 @@ module Gemgento
     belongs_to :product
     belongs_to :store
 
-    after_save :touch_product
+    after_save :touch_product, :sync_local_to_magento
 
     def self.index
       if Inventory.all.size == 0
@@ -31,6 +31,16 @@ module Gemgento
       Gemgento::Product.skip_callback(:save, :after, :sync_local_to_magento)
       self.product.update(updated_at: Time.now) if self.changed?
       Gemgento::Product.set_callback(:save, :after, :sync_local_to_magento)
+    end
+
+    # Push local product changes to magento
+    def sync_local_to_magento
+      if self.sync_needed
+        API::SOAP::CatalogInventory::StockItem.update(self)
+
+        self.sync_needed = false
+        self.save
+      end
     end
 
   end

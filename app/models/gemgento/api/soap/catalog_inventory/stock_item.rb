@@ -36,10 +36,10 @@ module Gemgento
             end
           end
 
-          def self.update(product)
+          def self.update(inventory)
             message = {
-                product: product.magento_id,
-                data: compose_inventory_data(product.inventory)
+                product: inventory.product.magento_id,
+                data: compose_inventory_data(inventory)
             }
 
             response = Gemgento::Magento.create_call(:catalog_inventory_stock_item_update, message)
@@ -79,11 +79,16 @@ module Gemgento
           end
 
           def self.compose_inventory_data(inventory)
-            {
+            data = {
                 qty: inventory.quantity.to_s,
                 'is_in_stock' => inventory.is_in_stock ? 1 : 0,
-                'manage_stock' => 1
+                'manage_stock' => 1,
+                'use_default_website_stock' => inventory.use_default_website_stock ? 1 : 0
             }
+
+            if !data[:use_default_website_stock]
+              data[:website_id] = inventory.store.website_id
+            end
           end
 
         end

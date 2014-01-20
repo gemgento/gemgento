@@ -59,7 +59,7 @@ module Gemgento::Adapter::Sellect
       sellect_variants = self.where('product_id = ?', sellect_id)
 
       sellect_variants.each do |sellect_variant|
-        product = Gemgento::Product.where(magento_type: 'simple').filter({ attribute: upc, value: sellect_variant.upc }).first_or_initialize
+        product = Gemgento::Product.simple.filter({ attribute: upc, value: sellect_variant.upc }).first_or_initialize
         product.magento_type = 'simple'
         product.status = configurable_product.status
         product.visibility = sellect_variants.size > 1 ? 1 : 4
