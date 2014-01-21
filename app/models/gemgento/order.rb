@@ -181,24 +181,15 @@ module Gemgento
       Rails.logger.info remote_address.inspect
       Rails.logger.info local_address.inspect
       if (
-      local_address.fname != remote_address[:firstname] ||
-          local_address.lname != remote_address[:lastname] ||
-          local_address.street != remote_address[:street] ||
-          local_address.city != remote_address[:city] ||
-          local_address.region != Region.find_by(magento_id: remote_address[:region_id]) ||
-          local_address.country != Country.find_by(magento_id: remote_address[:country_id]) ||
-          local_address.postcode != remote_address[:postcode]
+        local_address.fname != remote_address[:firstname] ||
+        local_address.lname != remote_address[:lastname] ||
+        local_address.street != remote_address[:street] ||
+        local_address.city != remote_address[:city] ||
+        local_address.region != Region.find_by(magento_id: remote_address[:region_id]) ||
+        local_address.country != Country.find_by(magento_id: remote_address[:country_id]) ||
+        local_address.postcode != remote_address[:postcode]
       )
         self.push_addresses
-      end
-    end
-
-    def decrement_stock
-      self.order_items.each do |item|
-        unless item.product.inventory.nil?
-          item.product.inventory.quantity -= item.qty_ordered.to_f
-          item.product.inventory.save
-        end
       end
     end
   end
