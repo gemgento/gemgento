@@ -10,10 +10,11 @@ module Gemgento
     belongs_to :billing_address, foreign_key: 'billing_address_id', class_name: 'Address'
     accepts_nested_attributes_for :billing_address
 
+    has_one :gift_message
     has_one :order_payment
     accepts_nested_attributes_for :order_payment
 
-    has_one :gift_message
+    has_many :api_jobs, class_name: 'Gemgento::ApiJob', as: :source
     has_many :order_items
     has_many :order_statuses
 

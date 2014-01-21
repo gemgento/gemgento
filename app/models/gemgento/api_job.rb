@@ -1,7 +1,5 @@
 module Gemgento
   class ApiJob < ActiveRecord::Base
-    attr_accessor :ready, :complete, :error
-
     belongs_to :source, polymorphic: true
 
     state_machine :state, initial: 'pending', use_transactions: false do
@@ -29,7 +27,7 @@ module Gemgento
     end
 
     def error!
-      Sellect::AlertMailer.alert_api_job_error(self).deliver
+      puts(self.inspect)
     end
 
     def finalize!
