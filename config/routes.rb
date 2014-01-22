@@ -54,7 +54,11 @@ Gemgento::Engine.routes.draw do
     resources :orders, :addresses
   end
 
-  resources :products, :categories, :orders, :subscribers, :users, :inventory, :product_attributes, :product_attribute_sets, :stores, :cart
+  resources :products, :categories, :orders, :subscribers, :users, :inventory, :product_attributes, :product_attribute_sets, :stores
+
+  # - Cart - #
+  get 'cart', to: 'cart#show'
+  put 'cart', to: 'cart#update'
 
   patch '/orders', to: 'orders#update'
 

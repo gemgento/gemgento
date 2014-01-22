@@ -35,11 +35,12 @@ module Gemgento
 
     def self.get_cart(order_id = nil)
       if order_id.nil?
-        cart = Order.new
+        cart = Gemgento::Order.new
         cart.state = 'cart'
-        cart.store = Store.current
+        cart.store = Gemgento::Store.current
+        cart.save
       else
-        cart = Order.find(order_id)
+        cart = Gemgento::Order.find(order_id)
       end
 
       cart
@@ -166,6 +167,12 @@ module Gemgento
 
     def finalize
       # for application defined post order actions
+    end
+
+    def as_json(options = nil)
+      result = super
+      result['order_items'] = self.order_items
+      return result
     end
 
     private

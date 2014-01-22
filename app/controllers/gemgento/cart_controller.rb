@@ -3,12 +3,6 @@ module Gemgento
 
     respond_to :js, :json, :html
 
-    def index
-      @cart = current_order
-
-      respond_with @cart
-    end
-
     def show
       @cart = current_order
 
@@ -28,11 +22,11 @@ module Gemgento
             format.html { render 'gemgento/checkout/shopping_bag' }
 
             unless @product
-              format.js { render '/gemgento/order/no_inventory', :layout => false }
-              format.json { respond_with false }
+              format.js { render '/gemgento/order/no_inventory', layout: false }
+              format.json { render json: { result: false, order: current_order } }
             else
-              format.js { render '/gemgento/order/add_item', :layout => false }
-              format.json { respond_with current_order }
+              format.js { render '/gemgento/order/add_item', layout: false }
+              format.json { render json: { result: true, order: current_order } }
             end
           end
         when 'update_item'
@@ -43,10 +37,10 @@ module Gemgento
 
             unless @product
               format.js { render '/gemgento/order/no_inventory', :layout => false }
-              format.json { respond_with false }
+              format.json { render json: { result: false, order: current_order } }
             else
               format.js { render '/gemgento/order/update_item', :layout => false }
-              format.json { respond_with current_order }
+              format.json { render json: { result: true, order: current_order } }
             end
           end
         when 'remove_item'
@@ -55,7 +49,7 @@ module Gemgento
           respond_to do |format|
             format.html { render 'gemgento/checkout/shopping_bag' }
             format.js { render '/gemgento/order/remove_item', :layout => false }
-            format.json { respond_with current_order }
+            format.json { render json: { result: true, order: current_order } }
           end
         else
           raise "Unknown action - #{params[:activity]}"
@@ -67,11 +61,11 @@ module Gemgento
 
     def add_item
       # validate the parameters
-      raise 'Product not specified' if params[:product].nil?
+      raise 'Product ID not specified' if params[:product_id].nil?
       raise 'Quantity not specified' if params[:quantity].nil?
       raise 'Quantity must be greater than 0' if params[:quantity].to_i <= 0
 
-      product = Gemgento::Product.find(params[:product])
+      product = Gemgento::Product.find(params[:product_id])
       raise 'Product does not exist' if product.nil?
 
       if product.in_stock? params[:quantity]
@@ -84,11 +78,11 @@ module Gemgento
     end
 
     def update_item
-      raise 'Product not specified' if params[:product].nil?
+      raise 'Product not specified' if params[:product_id].nil?
       raise 'Quantity not specified' if params[:quantity].nil?
       raise 'Quantity must be greater than 0' if params[:quantity].to_i <= 0
 
-      product = Gemgento::Product.find(params[:product])
+      product = Gemgento::Product.find(params[:product_id])
       raise 'Product does not exist' if product.nil?
 
       if product.in_stock? params[:quantity]
@@ -101,9 +95,9 @@ module Gemgento
     end
 
     def remove_item
-      raise 'Product not specified' if params[:product].nil?
+      raise 'Product not specified' if params[:product_id].nil?
 
-      product = Gemgento::Product.find(params[:product])
+      product = Gemgento::Product.find(params[:product_id])
       raise 'Product does not exist' if product.nil?
 
       current_order.remove_item(product)

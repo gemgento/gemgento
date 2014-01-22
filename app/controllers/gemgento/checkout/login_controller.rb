@@ -3,8 +3,12 @@ module Gemgento
     before_filter :auth_cart_contents
     before_filter :verify_guest
 
+    respond_to :json, :html
+
     def show
       @user = current_user
+
+      respond_with @user
     end
 
     def update
@@ -40,17 +44,16 @@ module Gemgento
         current_order.user = current_user
         current_order.save
 
-        redirect_to checkout_address_path
+        respond_with current_order, location: checkout_address_path
       else
         flash.now[:error] = 'Invalid username and password'
-        render action: 'show'
+
+        respond_with @user, location: checkout_login_path
       end
     end
 
     def register
       @user = User.new
-      @user.fname = params[:fname]
-      @user.lname = params[:lname]
       @user.email = params[:email]
       @user.store = Gemgento::Store.current
       @user.user_group = Gemgento::UserGroup.where(code: 'General').first
@@ -64,9 +67,9 @@ module Gemgento
         current_order.user = current_user
         current_order.save
 
-        redirect_to checkout_address_path
+        respond_with current_order, location: checkout_address_path
       else
-        render action: 'show'
+        respond_with @user, location: checkout_login_path
       end
     end
 
@@ -77,10 +80,10 @@ module Gemgento
       current_order.customer_email = params[:email]
 
       if Devise::email_regexp.match(params[:email]) && current_order.save
-        redirect_to checkout_address_path
+        respond_with current_order, location: checkout_address_path
       else
         flash.now[:error] = 'Invalid email address'
-        render action: 'show'
+        respond_with @user, location: checkout_login_path
       end
     end
 
