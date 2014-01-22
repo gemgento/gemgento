@@ -3,6 +3,8 @@ module Gemgento
     before_filter :auth_cart_contents
     before_filter :auth_order_user
 
+    respond_to :json, :html
+
     def show
       if current_order.user.nil? && !current_order.customer_is_guest
         current_order.user = current_user
@@ -28,7 +30,8 @@ module Gemgento
         current_order.billing_address = Address.new if current_order.billing_address.nil?
       end
 
-      @same_as_billing = true;
+      @same_as_billing = true
+      respond_with current_order
     end
 
     def update
@@ -71,28 +74,40 @@ module Gemgento
         current_order.billing_address.sync_needed = false
       end
 
-      # attempt to save the addresses and respond appropriately
-      if current_order.shipping_address.save && current_order.billing_address.save
-        current_order.save
+      respond_to do |format|
+        # attempt to save the addresses and respond appropriately
+        if current_order.shipping_address.save && current_order.billing_address.save
+          current_order.save
 
-        # push the order information to Magento
-        if user_signed_in?
-          current_order.shipping_address.push
-          current_order.billing_address.push
+          # push the order information to Magento
+          if user_signed_in?
+            current_order.shipping_address.push
+            current_order.billing_address.push
+          end
+
+          current_order.push_customer
+          current_order.push_addresses
+
+          format.html { render checkout_shipping_path }
+          format.json { render json: { result: true, order: current_order } }
+        else
+          @shipping_address = current_order.shipping_address
+          @billing_address = current_order.billing_address
+
+          current_order.shipping_address.destroy
+          current_order.billing_address.destroy
+
+          format.html { render checkout_address }
+          format.html do
+            render json: {
+                result: false,
+                errors: {
+                    shipping_address: @shipping_address.errors,
+                    billing_address: @billing_address.errors
+                }
+            }
+          end
         end
-
-        current_order.push_customer
-        current_order.push_addresses
-
-        redirect_to checkout_shipping_path
-      else
-        @shipping_address = current_order.shipping_address
-        @billing_address = current_order.billing_address
-
-        current_order.shipping_address.destroy
-        current_order.billing_address.destroy
-
-        render action: 'show'
       end
     end
 

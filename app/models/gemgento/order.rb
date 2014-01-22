@@ -173,6 +173,10 @@ module Gemgento
       result = super
       result['user'] = self.user
       result['order_items'] = self.order_items
+      result['shipping_address'] = self.shipping_address
+      result['billing_address'] = self.billing_address
+      result['payment'] = self.order_payment
+      result['statuses'] = self.order_statuses
       return result
     end
 
