@@ -29,11 +29,15 @@ Gemgento::Engine.routes.draw do
              skip: [:unlocks, :omniauth_callbacks],
              module: :devise
 
+  # - Cart - #
   get '/checkout/shopping_bag', to: 'cart#show'
+  get 'cart', to: 'cart#show'
+  patch 'cart', to: 'cart#update'
 
+  # - Checkout - #
   namespace 'checkout' do
     get 'login', to: 'login#show', as: 'login'
-    post 'login', to: 'login#update', as: 'login_update'
+    put 'login', to: 'login#update', as: 'login_update'
 
     get 'address', to: 'address#show', as: 'address'
     patch 'address', to: 'address#update', as: 'address_update'
@@ -56,9 +60,7 @@ Gemgento::Engine.routes.draw do
 
   resources :products, :categories, :orders, :subscribers, :users, :inventory, :product_attributes, :product_attribute_sets, :stores
 
-  # - Cart - #
-  get 'cart', to: 'cart#show'
-  put 'cart', to: 'cart#update'
+
 
   patch '/orders', to: 'orders#update'
 

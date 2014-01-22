@@ -38,17 +38,28 @@ module Gemgento
     def login_user
       user = User::is_valid_login(params[:email], params[:password])
 
-      unless user.nil?
-        sign_in(:user, user)
-        current_order.customer_is_guest = false
-        current_order.user = current_user
-        current_order.save
+      respond_to do |format|
 
-        respond_with current_order, location: checkout_address_path
-      else
-        flash.now[:error] = 'Invalid username and password'
+        unless user.nil?
+          sign_in(:user, user)
+          current_order.customer_is_guest = false
+          current_order.user = current_user
+          current_order.save
 
-        respond_with @user, location: checkout_login_path
+          format.html { redirect_to checkout_address_path }
+          format.json { render json: { result: true, user: current_user, order: current_order } }
+        else
+          flash.now[:error] = 'Invalid username and password'
+
+          format.html { redirect_to checkout_login_path }
+          format.json do
+            render json: {
+                result: false,
+                errors: 'Invalid username and password',
+                order: current_order
+            }
+          end
+        end
       end
     end
 
@@ -61,15 +72,19 @@ module Gemgento
       @user.password = params[:password]
       @user.password_confirmation = params[:password_confirmation]
 
-      if @user.save
-        sign_in(:user, @user)
-        current_order.customer_is_guest = false
-        current_order.user = current_user
-        current_order.save
+      respond_to do |format|
+        if @user.save
+          sign_in(:user, @user)
+          current_order.customer_is_guest = false
+          current_order.user = current_user
+          current_order.save
 
-        respond_with current_order, location: checkout_address_path
-      else
-        respond_with @user, location: checkout_login_path
+          format.html { redirect_to checkout_address_path }
+          format.json { render json: { result: true, user: @user, order: current_order } }
+        else
+          format.html { redirect_to checkout_login_path }
+          format.json { render json: { result: false, errors: @user.errors, order: current_order } }
+        end
       end
     end
 
@@ -79,11 +94,17 @@ module Gemgento
       current_order.customer_is_guest = true
       current_order.customer_email = params[:email]
 
-      if Devise::email_regexp.match(params[:email]) && current_order.save
-        respond_with current_order, location: checkout_address_path
-      else
-        flash.now[:error] = 'Invalid email address'
-        respond_with @user, location: checkout_login_path
+      respond_to do |format|
+
+        if Devise::email_regexp.match(params[:email]) && current_order.save
+          format.html { redirect_to checkout_address_path }
+          format.json { render json: { result: true, order: current_order } }
+        else
+          flash.now[:error] = 'Invalid email address'
+
+          format.html { redirect_to checkout_login_path }
+          format.json { render json: { result: true, errors: 'Invalid email address', order: current_order } }
+        end
       end
     end
 

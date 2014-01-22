@@ -171,6 +171,7 @@ module Gemgento
 
     def as_json(options = nil)
       result = super
+      result['user'] = self.user
       result['order_items'] = self.order_items
       return result
     end
