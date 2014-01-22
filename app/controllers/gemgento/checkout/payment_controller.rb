@@ -3,9 +3,11 @@ module Gemgento
     before_filter :auth_cart_contents
     before_filter :auth_order_user
 
+    respond_to :json, :html
+
     def show
       set_totals
-      #@payment_methods = current_order.get_payment_methods
+      @payment_methods = current_order.get_payment_methods
 
       @card_types = {
           'Credit card type' => nil,
@@ -26,6 +28,21 @@ module Gemgento
       end
 
       current_order.order_payment = OrderPayment.new if current_order.order_payment.nil?
+
+      respond_to do |format|
+        format.html
+        format.json do
+          render json: {
+              payment_methods: @payment_methods,
+              card_types: @card_types,
+              exp_years: @exp_years,
+              exp_months: @exp_months,
+              total: @total,
+              tax: @tax,
+              shipping: @shipping
+          }
+        end
+      end
     end
 
     def update
@@ -39,11 +56,21 @@ module Gemgento
       current_order.order_payment.cc_last4 = current_order.order_payment.cc_number[-4..-1]
       current_order.order_payment.save
 
-      if current_order.push_payment_method
-        redirect_to checkout_confirm_path
-      else
-        flash[:error] = 'Invalid payment information.  Please review all details and try again.'
-        redirect_to checkout_payment_path
+      respond_to do |format|
+        if current_order.push_payment_method
+          format.html { redirect_to checkout_confirm_path }
+          format.json { render json: { result: true, order: current_order } }
+        else
+          flash[:error] = 'Invalid payment information.  Please review all details and try again.'
+
+          format.html { redirect_to checkout_payment_path }
+          format.json do
+            render json: {
+                result: false,
+                errors: 'Invalid payment information.  Please review all details and try again.'
+            }
+          end
+        end
       end
     end
 
