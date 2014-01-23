@@ -57,6 +57,8 @@ module Gemgento
         order_item.order = self
         order_item.save
 
+        self.push_cart if current_order.magento_quote_id.nil?
+
         unless self.magento_quote_id.nil?
           API::SOAP::Checkout::Product.add(self, [order_item])
         end
