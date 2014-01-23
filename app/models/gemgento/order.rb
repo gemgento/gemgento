@@ -38,7 +38,6 @@ module Gemgento
         cart = Gemgento::Order.new
         cart.state = 'cart'
         cart.store = Gemgento::Store.current
-        cart.save
       else
         cart = Gemgento::Order.find(order_id)
       end
@@ -62,7 +61,7 @@ module Gemgento
           API::SOAP::Checkout::Product.add(self, [order_item])
         end
       else
-        self.update_item(product, order_item.qty_ordered + quantity.to_i)
+        self.update_item(product, order_item.qty_ordered + quantity.to_f)
       end
     end
 
@@ -72,7 +71,7 @@ module Gemgento
       order_item = self.order_items.where(product: product).first
 
       unless order_item.nil?
-        order_item.qty_ordered = quantity.to_i
+        order_item.qty_ordered = quantity.to_f
         order_item.save
 
         unless self.magento_quote_id.nil?
@@ -116,7 +115,7 @@ module Gemgento
         count += order_item.qty_ordered
       end
 
-      return count.to_i
+      return count.to_f
     end
 
     # functions related to processing cart into order
