@@ -104,7 +104,8 @@ module Gemgento
           value = false
         end
       elsif product_attribute.frontend_input == 'select'
-        option = product_attribute.product_attribute_options.find_by(store: store, value: value)
+        option = product_attribute.product_attribute_options.select { |o| o.value == value && o.store_id == store.id }.first
+
         value = option.nil? ? nil : option.label
       end
 
