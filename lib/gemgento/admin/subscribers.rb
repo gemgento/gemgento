@@ -1,7 +1,7 @@
 if defined?(ActiveAdmin)
   module Gemgento
     ActiveAdmin.register Subscriber do
-      menu label: 'Subscribers'
+      menu label: 'Subscribers', priority: 99
 
       index do
         column :email
