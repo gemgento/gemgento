@@ -220,8 +220,8 @@ module Gemgento::Adapter::Sellect
       self.inheritance_column = :_type_disabled
       self.table_name = 'sellect_adjustments'
       cost = self.find_by(
-          source_type: 'Sellect::Order',
-          source_id: order.id,
+          adjustable_type: 'Sellect::Order',
+          adjustable_id: order.id,
           originator_type: 'Sellect::ShippingMethod'
       )
 
@@ -235,17 +235,16 @@ module Gemgento::Adapter::Sellect
     def self.tax(order)
       self.inheritance_column = :_type_disabled
       self.table_name = 'sellect_adjustments'
-      tax = self.find_by(
-          source_type: 'Sellect::Order',
-          source_id: order.id,
+      taxes = self.where(
+          adjustable_type: 'Sellect::Order',
+          adjustable_id: order.id,
           originator_type: 'Sellect::TaxRate'
       )
 
-      if tax.nil?
-        return 0
-      else
-        return tax.amount.to_f
-      end
+      tax = 0
+      taxes.each { |t| tax+= t.amount.to_f }
+
+      return tax
     end
 
     def self.subtotal(order)
@@ -258,16 +257,15 @@ module Gemgento::Adapter::Sellect
       self.inheritance_column = :_type_disabled
       self.table_name = 'sellect_adjustments'
       refunds = self.where(
-          source_type: 'Sellect::Order',
-          source_id: order.id,
-          originator_type: nil,
-          label: 'Refund Credit'
+          adjustable_type: 'Sellect::Order',
+          adjustable_id: order.id,
+          source_type: 'Sellect::Refund'
       )
 
-      total = 0
-      refunds.each { |r| total+= r.amount.to_f }
+      refund = 0
+      refunds.each { |r| refund+= r.amount.to_f.abs }
 
-      return total
+      return refund
     end
 
     def self.total_canceled(order)
