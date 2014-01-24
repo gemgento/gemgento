@@ -95,6 +95,44 @@ namespace :gemgento do
 
         # done
         magento_payment.save
+
+
+        # Invoice Data
+        magento_invoice = Gemgento::MagentoDB.query('sales_flat_invoice').find_by(order_id: magento_order.id)
+
+        if magento_invoice.nil?
+          "ERROR: Could not find Magento invoice for Order ##{order.increment_id}"
+          next
+        end
+
+        # refunded totals
+        magento_invoice.base_total_refunded = totals[:refunded]
+
+        # shipping totals
+        magento_invoice.shipping_amount = totals[:shipping]
+        magento_invoice.base_shipping_amount = totals[:shipping]
+
+        # tax totals
+        magento_invoice.tax_amount = totals[:tax]
+        magento_invoice.base_tax_amount = totals[:tax]
+
+        # grand totals
+        magento_invoice.base_grand_total = totals[:grand]
+        magento_invoice.grand_total = totals[:grand]
+
+        # subtotals
+        magento_invoice.base_subtotal = totals[:subtotal]
+        magento_invoice.subtotal = totals[:subtotal]
+        magento_invoice.subtotal_incl_tax = totals[:subtotal] + totals[:tax]
+        magento_invoice.base_subtotal_incl_tax = totals[:subtotal] + totals[:tax]
+
+        # currency conversion rates
+        magento_invoice.store_to_base_rate = 1
+        magento_invoice.base_to_global_rate = 1
+
+        # done
+        magento_invoice.save
+        
         puts "Update Order Payment ##{order.increment_id}: #{totals}"
       end
 
