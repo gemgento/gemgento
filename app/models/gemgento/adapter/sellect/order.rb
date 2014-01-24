@@ -205,10 +205,10 @@ module Gemgento::Adapter::Sellect
 
     def self.totals(order, payment)
       totals = {}
-      totals[:grand] = order.total.to_f
+      totals[:grand] = order.payment_total
       totals[:shipping] = shipping_cost(order)
       totals[:tax] = tax(order)
-      totals[:subtotal] = totals[:grand] - totals[:shipping] - totals[:tax]
+      totals[:subtotal] = order.item_total
       totals[:paid] = order.payment_total
       totals[:refunded] = total_refunded(order)
       totals[:canceled] = total_canceled(order)
@@ -245,12 +245,6 @@ module Gemgento::Adapter::Sellect
       taxes.each { |t| tax+= t.amount.to_f }
 
       return tax
-    end
-
-    def self.subtotal(order)
-      self.inheritance_column = :_type_disabled
-      self.table_name = 'sellect_adjustments'
-      self.find_by(source_type: 'Sellect::Order', source_id: order.id)
     end
 
     def self.total_refunded(order)
