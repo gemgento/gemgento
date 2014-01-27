@@ -59,6 +59,7 @@ Gemgento::Engine.routes.draw do
   end
 
   resources :products, :categories, :orders, :subscribers, :users, :inventory, :product_attributes, :product_attribute_sets, :stores
+  resources :countries, only: [:index, :show]
 
 
 
