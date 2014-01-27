@@ -293,6 +293,8 @@ module Gemgento
         result[attribute.code] = self.attribute_value(attribute.code, store)
       end
 
+      result['currency_code'] = Gemgento::Store.current.currency_code
+
       # product assets
       result['assets'] = []
       self.assets.each do |image|
