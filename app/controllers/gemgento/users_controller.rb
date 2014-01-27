@@ -2,8 +2,6 @@ module Gemgento
   class UsersController < BaseController
     before_filter :auth_user, except: :update
 
-    ssl_required :show, :update
-
     def show
       @user = current_user
     end
