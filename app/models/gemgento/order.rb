@@ -60,10 +60,15 @@ module Gemgento
         self.push_cart if self.magento_quote_id.nil?
 
         unless self.magento_quote_id.nil?
-          API::SOAP::Checkout::Product.add(self, [order_item])
+          if API::SOAP::Checkout::Product.add(self, [order_item])
+            return true
+          else
+            order_item.destroy
+            return false
+          end
         end
       else
-        self.update_item(product, order_item.qty_ordered + quantity.to_f)
+        return self.update_item(product, order_item.qty_ordered + quantity.to_f)
       end
     end
 
@@ -73,14 +78,22 @@ module Gemgento
       order_item = self.order_items.where(product: product).first
 
       unless order_item.nil?
+        old_quantity = order_item.qty_ordered
         order_item.qty_ordered = quantity.to_f
         order_item.save
 
         unless self.magento_quote_id.nil?
-          API::SOAP::Checkout::Product.update(self, [order_item])
+          if API::SOAP::Checkout::Product.update(self, [order_item])
+            return true
+          else
+            order_item.qty_ordered = old_quantity
+            order_item.save
+
+            return false
+          end
         end
       else
-        self.add_item(product, quantity)
+        return self.add_item(product, quantity)
       end
     end
 

@@ -94,8 +94,11 @@ module Gemgento
 
       if product.in_stock? params[:quantity]
         # add the item to the order
-        current_order.add_item(product, params[:quantity])
-        return product
+        if current_order.add_item(product, params[:quantity])
+          return product
+        else
+          return false
+        end
       else
         return false
       end
@@ -111,8 +114,11 @@ module Gemgento
 
       if product.in_stock? params[:quantity]
         # update the item
-        current_order.update_item(product, params[:quantity])
-        return product
+        if current_order.update_item(product, params[:quantity])
+          return product
+        else
+          return false
+        end
       else
         return false
       end
