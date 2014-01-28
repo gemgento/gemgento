@@ -98,7 +98,7 @@ module Gemgento
           current_order.billing_address.destroy
 
           format.html { render checkout_address }
-          format.html do
+          format.json do
             render json: {
                 result: false,
                 errors: {
