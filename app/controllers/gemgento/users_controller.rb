@@ -24,8 +24,9 @@ module Gemgento
       @user.dob = data[:dob]
       @user.taxvat = data[:taxvat]
       @user.confirmation = data[:confirmation]
-      @user.magento_password = data[:password_hash]
       @user.sync_needed = false
+      @user.encrypted_password = ''
+      @user.magento_password = data[:password_hash]
       @user.save(validate: false)
 
       store = Store.find_by(magento_id: data[:store_id])

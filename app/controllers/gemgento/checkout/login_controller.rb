@@ -12,6 +12,8 @@ module Gemgento
     end
 
     def update
+      raise 'Activity not specified' if params[:activity].nil?
+
       case params[:activity]
         when 'login_user'
           login_user
@@ -66,11 +68,14 @@ module Gemgento
     def register
       @user = User.new
       @user.email = params[:email]
-      @user.store = Gemgento::Store.current
+      @user.stores << Gemgento::Store.current
       @user.user_group = Gemgento::UserGroup.where(code: 'General').first
       @user.magento_password = params[:password]
       @user.password = params[:password]
       @user.password_confirmation = params[:password_confirmation]
+
+      @user.fname = params[:fname] unless params[:fname].nil?
+      @user.lname = params[:lname] unless params[:lname].nil?
 
       respond_to do |format|
         if @user.save
@@ -103,7 +108,7 @@ module Gemgento
           flash.now[:error] = 'Invalid email address'
 
           format.html { redirect_to checkout_login_path }
-          format.json { render json: { result: true, errors: 'Invalid email address', order: current_order } }
+          format.json { render json: { result: false, errors: 'Invalid email address', order: current_order } }
         end
       end
     end
