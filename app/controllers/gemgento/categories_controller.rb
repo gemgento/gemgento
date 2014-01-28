@@ -4,10 +4,11 @@ module Gemgento
     respond_to :json, :html
 
     def index
+      root_category = Gemgento::Category.find_by(parent_id: nil)
+      @categories = Gemgento::Category.where(include_in_menu: true, parent: root_category, is_active: true)
+
       if params[:updated_at] # only grab categories that were updated after specified timestamp
-        @categories = Gemgento::Category.where('updated_at > ?', params[:updated_at]).where(include_in_menu: true)
-      else
-        @categories = Gemgento::Category.where(include_in_menu: true)
+        @categories = Gemgento::Category.where('updated_at > ?', params[:updated_at])
       end
 
       respond_with @categories
