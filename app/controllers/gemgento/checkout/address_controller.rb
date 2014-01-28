@@ -35,35 +35,35 @@ module Gemgento
     end
 
     def update
-      # create/update shipping address
-      if current_order.shipping_address.nil?
-        current_order.shipping_address = Address.new(shipping_address_params)
+      # create/update billing address
+      if current_order.billing_address.nil?
+        current_order.billing_address = Address.new(billing_address_params)
       else
-        current_order.shipping_address.update_attributes(shipping_address_params)
+        current_order.billing_address.update_attributes(billing_address_params)
       end
 
-      current_order.shipping_address.address_type = 'shipping'
+      current_order.billing_address.address_type = 'billing'
 
-      # create/update billing address
+      # create/update shipping address
       if params[:same_as_billing]
         @same_as_billing = true
 
-        if current_order.billing_address.nil?
-          current_order.billing_address = Address.new(shipping_address_params)
+        if current_order.shipping_address.nil?
+          current_order.shipping_address = Address.new(billing_address_params)
         else
-          current_order.billing_address.update_attributes(shipping_address_params)
+          current_order.shipping_address.update_attributes(billing_address_params)
         end
       else
         @same_as_billing = false
 
-        if current_order.billing_address.nil?
-          current_order.billing_address = Address.new(billing_address_params)
+        if current_order.shipping_address.nil?
+          current_order.shipping_address = Address.new(shipping_address_params)
         else
-          current_order.billing_address.update_attributes(billing_address_params)
+          current_order.shipping_address.update_attributes(shipping_address_params)
         end
       end
 
-      current_order.billing_address.address_type = 'billing'
+      current_order.shipping_address.address_type = 'shipping'
 
       # assign the current user if order is not guest checkout
       if user_signed_in?
@@ -76,13 +76,13 @@ module Gemgento
 
       respond_to do |format|
         # attempt to save the addresses and respond appropriately
-        if current_order.shipping_address.save && current_order.billing_address.save
+        if current_order.billing_address.save && current_order.shipping_address.save
           current_order.save
 
           # push the order information to Magento
           if user_signed_in?
-            current_order.shipping_address.push
             current_order.billing_address.push
+            current_order.shipping_address.push
           end
 
           current_order.push_customer
@@ -91,8 +91,8 @@ module Gemgento
           format.html { render checkout_shipping_path }
           format.json { render json: { result: true, order: current_order } }
         else
-          @shipping_address = current_order.shipping_address
           @billing_address = current_order.billing_address
+          @shipping_address = current_order.shipping_address
 
           current_order.shipping_address.destroy
           current_order.billing_address.destroy

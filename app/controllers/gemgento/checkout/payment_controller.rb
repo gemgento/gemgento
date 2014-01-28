@@ -52,7 +52,10 @@ module Gemgento
         current_order.order_payment.update_attributes(order_payment_params)
       end
 
-      current_order.order_payment.cc_owner = "#{current_order.billing_address.fname} #{current_order.billing_address.lname}"
+      if current_order.order_payment.cc_owner.nil?
+        current_order.order_payment.cc_owner = "#{current_order.billing_address.fname} #{current_order.billing_address.lname}"
+      end
+
       current_order.order_payment.cc_last4 = current_order.order_payment.cc_number[-4..-1]
       current_order.order_payment.save
 
@@ -77,7 +80,7 @@ module Gemgento
     private
 
     def order_payment_params
-      params.require(:order).require(:order_payment_attributes).permit(:method, :cc_cid, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month)
+      params.require(:order).require(:order_payment_attributes).permit(:method, :cc_cid, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month, :cc_owner)
     end
 
   end
