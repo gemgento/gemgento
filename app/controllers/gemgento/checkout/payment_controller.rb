@@ -61,6 +61,8 @@ module Gemgento
 
       respond_to do |format|
         if current_order.push_payment_method
+          session[:payment_data] = order_payment_params
+
           format.html { redirect_to checkout_confirm_path }
           format.json { render json: { result: true, order: current_order } }
         else

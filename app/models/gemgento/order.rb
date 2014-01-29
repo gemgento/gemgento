@@ -165,7 +165,7 @@ module Gemgento
     def process
       if !valid_stock?
         return false
-      elsif API::SOAP::Checkout::Cart.order(self)
+      elsif API::SOAP::Checkout::Cart.order(self, self.order_payment)
         finalize
         return true
       else

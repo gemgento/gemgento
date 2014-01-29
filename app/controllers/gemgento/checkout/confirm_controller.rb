@@ -37,9 +37,11 @@ module Gemgento
     def update
       current_order.enforce_cart_data
       @order = current_order
+      @order.order_payment.update(session[:payment_data])
 
       respond_to do |format|
         if current_order.process
+          session.delete :payment_data
           @order.reload
 
           format.html { redirect_to checkout_thank_you_path }
