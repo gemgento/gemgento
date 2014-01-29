@@ -15,12 +15,13 @@ module Gemgento
     end
 
     def show
+      @category = Gemgento::Category.where('id = ? OR url_key = ?', params[:id], params[:url_key])
+
       if params[:updated_at] # only grab the category if it was updated after specified timestamp
-        @category = Gemgento::Category.where('updated_at > ? AND id = ?', params[:updated_at], params[:id]).first
-      else
-        @category = Gemgento::Category.find(params[:id])
+        @category = @category.where('updated_at > ?', params[:updated_at])
       end
 
+      @category = @category.first
       @category.includes_category_products = true unless @category.nil?
 
       respond_with @category
