@@ -18,6 +18,7 @@ module Gemgento
           format.js { render action: 'create', layout: false }
           format.json { render json: { result: true, subscriber: @subscriber } }
         else
+          format.html
           format.js { render action: 'errors', layout: false }
           format.json { render json: { result: false, erros: @subscriber.errors } }
         end
