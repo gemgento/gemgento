@@ -44,6 +44,14 @@ module Gemgento
       set_stores(data[:store_ids], @category)
       set_products(data[:products], @category)
 
+      if data.key? :image
+        begin
+          @category.image = open("http://#{Gemgento::Config[:magento][:url]}/media/catalog/category/#{data[:image][:value]}")
+        rescue
+          @category.image = nil
+        end
+      end
+
       render nothing: true
     end
 
