@@ -47,7 +47,7 @@ module Gemgento
           format.html { redirect_to checkout_thank_you_path }
           format.json { render json: { result: true, order: @order } }
         else
-          flash[:error] =
+          flash[:error] = 'There was a problem processing your order.  Please review order details and try again.'
 
           format.html { redirect_to checkout_confirm_path }
           format.json do

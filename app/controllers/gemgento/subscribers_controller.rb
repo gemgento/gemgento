@@ -1,8 +1,12 @@
 module Gemgento
   class SubscribersController < BaseController
 
+    respond_to :js, :json, :html
+
     def new
       @subscriber = Subscriber.new
+
+      respond_with @subscriber
     end
 
     def create
@@ -10,9 +14,12 @@ module Gemgento
 
       respond_to do |format|
         if @subscriber.save
+          format.html
           format.js { render action: 'create', layout: false }
+          format.json { render json: { result: true, subscriber: @subscriber } }
         else
           format.js { render action: 'errors', layout: false }
+          format.json { render json: { result: false, erros: @subscriber.errors } }
         end
       end
     end
