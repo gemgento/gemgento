@@ -42,7 +42,7 @@ module Gemgento
       @category.save
 
       set_stores(data[:store_ids], @category)
-      set_products(data[:products], @category)
+      set_products(data[:products], @category) unless data[:products].nil?
 
       if data.key? :image
         begin
