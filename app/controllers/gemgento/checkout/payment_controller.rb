@@ -53,26 +53,25 @@ module Gemgento
       end
 
       if current_order.order_payment.cc_owner.nil?
-        current_order.order_payment.cc_owner = "#{current_order.billing_address.first_name} #{current_order.billing_address.last_name}"
+        current_order.order_payment.cc_owner = "#{current_order.billing_address.fname} #{current_order.billing_address.lname}"
       end
 
       current_order.order_payment.cc_last4 = current_order.order_payment.cc_number[-4..-1]
-      current_order.order_payment.save
 
       respond_to do |format|
-        if current_order.push_payment_method
+        if current_order.order_payment.save && current_order.push_payment_method
           session[:payment_data] = order_payment_params
 
           format.html { redirect_to checkout_confirm_path }
           format.json { render json: { result: true, order: current_order } }
         else
-          flash[:error] = 'Invalid payment information.  Please review all details and try again.'
+          flash[:error] = 'Invalid payment information. Please review all details and try again.'
 
           format.html { redirect_to checkout_payment_path }
           format.json do
             render json: {
                 result: false,
-                errors: 'Invalid payment information.  Please review all details and try again.'
+                errors: current_order.order_payment.errors.any? ? current_order.order_payment.errors.full_messages : 'Invalid payment information. Please review all details and try again.'
             }
           end
         end

@@ -212,7 +212,7 @@ module Gemgento
             payment.cc_exp_year = source[:cc_exp_year]
             payment.cc_ss_start_month = source[:cc_ss_start_month]
             payment.cc_ss_start_year = source[:cc_ss_start_year]
-            payment.save
+            payment.save validate: false
 
             payment
           end
