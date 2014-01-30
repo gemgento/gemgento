@@ -7,3 +7,4 @@ en:
         cc_exp_y: Expiration year
         cc_exp_m: Expiration month
         cc_type: Card type
+        cc_cid: CVV code
