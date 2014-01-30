@@ -10,12 +10,13 @@ module Gemgento
       @shipping_address = current_order.shipping_address
       @billing_address = current_order.billing_address
       @payment = current_order.order_payment
-      @cc_types = Gemgento::OrderPayment.cc_types
 
       current_order.get_shipping_methods.each do |shipping_method|
         if shipping_method[:code] == current_order.shipping_method
           @shipping_method = shipping_method
           break
+        else
+          @shipping_method = nil
         end
       end
 
@@ -24,10 +25,9 @@ module Gemgento
         format.json do
           render json: {
               order: current_order,
-              cc_types: Gemgento::OrderPayment.cc_types,
               total: @total,
               tax: @tax,
-              shipping: @shipping
+              shipping: @shipping_method
           }
         end
       end
