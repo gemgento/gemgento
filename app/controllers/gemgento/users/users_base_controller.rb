@@ -2,6 +2,8 @@ module Gemgento
   class Users::UsersBaseController < BaseController
     before_filter :auth_user
 
+    respond_to :json, :html
+
     ssl_required
 
     private
