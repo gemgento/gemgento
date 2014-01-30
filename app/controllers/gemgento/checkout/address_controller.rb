@@ -75,6 +75,8 @@ module Gemgento
       end
 
       respond_to do |format|
+        result = false
+
         # attempt to save the addresses and respond appropriately
         if current_order.billing_address.save && current_order.shipping_address.save
           current_order.save
@@ -85,18 +87,21 @@ module Gemgento
             current_order.shipping_address.push
           end
 
-          current_order.push_customer
-          current_order.push_addresses
-
-          format.html { render checkout_shipping_path }
-          format.json { render json: { result: true, order: current_order } }
+          if current_order.push_customer && current_order.push_addresses
+            result = true
+          end
         else
           @billing_address = current_order.billing_address
           @shipping_address = current_order.shipping_address
 
           current_order.shipping_address.destroy
           current_order.billing_address.destroy
+        end
 
+        if result
+          format.html { render checkout_shipping_path }
+          format.json { render json: { result: true, order: current_order } }
+        else
           format.html { render checkout_address }
           format.json do
             render json: {
