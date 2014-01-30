@@ -28,7 +28,7 @@ module Gemgento
     private
 
     def subscriber_params
-      params.require(:subscriber).permit(:fname, :lname, :email, :country, :city)
+      params.require(:subscriber).permit(:fname, :lname, :email, :country_id, :city)
     end
 
   end

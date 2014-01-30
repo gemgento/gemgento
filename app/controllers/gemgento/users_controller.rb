@@ -1,9 +1,19 @@
 module Gemgento
   class UsersController < BaseController
-    before_filter :auth_user, except: :update
+    before_filter :auth_user, except: [:update, :index]
+
+    respond_to :json, :html
+
+    def index
+      @user = current_user
+
+      respond_with @user
+    end
 
     def show
       @user = current_user
+
+      respond_with @user
     end
 
     def update
