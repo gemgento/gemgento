@@ -34,6 +34,15 @@ module Gemgento
       end
     end
 
+    def as_json(options = nil)
+      result = super
+      result['address1'] = self.address1
+      result['address2'] = self.address2
+      result['address3'] = self.address3
+
+      return result
+    end
+
     private
 
     def explode_street_address
