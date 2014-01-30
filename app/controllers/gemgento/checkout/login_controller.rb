@@ -88,7 +88,7 @@ module Gemgento
           format.json { render json: { result: true, user: @user, order: current_order } }
         else
           format.html { redirect_to checkout_login_path }
-          format.json { render json: { result: false, errors: @user.errors, order: current_order } }
+          format.json { render json: { result: false, errors: @user.errors.full_messages, order: current_order } }
         end
       end
     end

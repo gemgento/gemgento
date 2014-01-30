@@ -107,8 +107,8 @@ module Gemgento
             render json: {
                 result: false,
                 errors: {
-                    shipping_address: @shipping_address.errors.full_messages.to_sentence,
-                    billing_address: @billing_address.errors.full_messages.to_sentence
+                    shipping_address: @shipping_address.errors.full_messages,
+                    billing_address: @billing_address.errors.full_messages
                 }
             }
           end

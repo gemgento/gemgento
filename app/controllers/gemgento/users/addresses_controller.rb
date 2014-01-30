@@ -37,9 +37,9 @@ module Gemgento
           format.js { render '/gemgento/users/addresses/success' }
           format.json { render json: { result: true, address: @address } }
         else
-          format.html { redirect_to '/users/addresses', error: @address.errors.empty? ? 'Error' : @address.errors.full_messages.to_sentence }
+          format.html { redirect_to '/users/addresses', error: @address.errors.empty? ? 'Error' : @address.errors.full_messages }
           format.js { render '/gemgento/users/addresses/errors' }
-          format.json { render json: { result: false, errors: @address.errors } }
+          format.json { render json: { result: false, errors: @address.errors.full_messages } }
         end
       end
     end
@@ -53,9 +53,9 @@ module Gemgento
           format.js { render '/gemgento/users/addresses/success' }
           format.json { render json: { result: true, address: @address } }
         else
-          format.html { redirect_to '/users/addresses', error: @address.errors.empty? ? 'Error' : @address.errors.full_messages.to_sentence }
+          format.html { redirect_to '/users/addresses', error: @address.errors.empty? ? 'Error' : @address.errors.full_messages }
           format.js { render '/gemgento/users/addresses/errors' }
-          format.json { render json: { result: false, errors: @address.errors } }
+          format.json { render json: { result: false, errors: @address.errors.full_messages } }
         end
       end
     end

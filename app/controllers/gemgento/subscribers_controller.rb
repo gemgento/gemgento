@@ -20,7 +20,7 @@ module Gemgento
         else
           format.html
           format.js { render action: 'errors', layout: false }
-          format.json { render json: { result: false, errors: @subscriber.errors } }
+          format.json { render json: { result: false, errors: @subscriber.errors.full_messages } }
         end
       end
     end
