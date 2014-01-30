@@ -107,8 +107,8 @@ module Gemgento
             render json: {
                 result: false,
                 errors: {
-                    shipping_address: @shipping_address.errors,
-                    billing_address: @billing_address.errors
+                    shipping_address: @shipping_address.errors.full_messages.to_sentence,
+                    billing_address: @billing_address.errors.full_messages.to_sentence
                 }
             }
           end
@@ -119,11 +119,11 @@ module Gemgento
     private
 
     def shipping_address_params
-      params.require(:order).require(:shipping_address_attributes).permit(:fname, :lname, :address1, :address2, :country_id, :city, :region_id, :postcode, :telephone, :address_type)
+      params.require(:order).require(:shipping_address_attributes).permit(:first_name, :last_name, :address1, :address2, :country_id, :city, :region_id, :postcode, :telephone, :address_type)
     end
 
     def billing_address_params
-      params.require(:order).require(:billing_address_attributes).permit(:fname, :lname, :address1, :address2, :country_id, :city, :region_id, :postcode, :telephone, :address_type)
+      params.require(:order).require(:billing_address_attributes).permit(:first_name, :last_name, :address1, :address2, :country_id, :city, :region_id, :postcode, :telephone, :address_type)
     end
 
   end

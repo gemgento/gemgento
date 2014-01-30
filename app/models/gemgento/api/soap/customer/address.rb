@@ -82,9 +82,9 @@ module Gemgento
             address.company = source[:company]
             address.country = Country.where(magento_id: source[:country_id]).first
             address.fax = source[:fax]
-            address.fname = source[:firstname]
-            address.mname = source[:middlename]
-            address.lname = source[:lastname]
+            address.first_name = source[:firstname]
+            address.middle_name = source[:middlename]
+            address.last_name = source[:lastname]
             address.postcode = source[:postcode]
             address.prefix = source[:prefix]
             address.region_name = source[:region]
@@ -106,9 +106,9 @@ module Gemgento
                 company: address.company,
                 'country_id' => address.country.magento_id,
                 fax: address.fax,
-                firstname: address.fname,
-                lastname: address.lname,
-                middlename: address.mname,
+                firstname: address.first_name,
+                lastname: address.last_name,
+                middlename: address.middle_name,
                 postcode: address.postcode,
                 prefix: address.prefix,
                 region: address.region_name,

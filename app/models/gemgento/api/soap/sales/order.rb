@@ -174,9 +174,9 @@ module Gemgento
             address.company = source[:company]
             address.country = Country.where(magento_id: source[:country_id]).first
             address.fax = source[:fax]
-            address.fname = source[:firstname]
-            address.mname = source[:middlename]
-            address.lname = source[:lastname]
+            address.first_name = source[:firstname]
+            address.middle_name = source[:middlename]
+            address.last_name = source[:lastname]
             address.postcode = source[:postcode]
             address.prefix = source[:prefix]
             address.region_name = source[:region]

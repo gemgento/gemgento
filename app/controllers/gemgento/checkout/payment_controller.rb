@@ -53,7 +53,7 @@ module Gemgento
       end
 
       if current_order.order_payment.cc_owner.nil?
-        current_order.order_payment.cc_owner = "#{current_order.billing_address.fname} #{current_order.billing_address.lname}"
+        current_order.order_payment.cc_owner = "#{current_order.billing_address.first_name} #{current_order.billing_address.last_name}"
       end
 
       current_order.order_payment.cc_last4 = current_order.order_payment.cc_number[-4..-1]

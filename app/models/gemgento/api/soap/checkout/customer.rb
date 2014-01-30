@@ -10,8 +10,8 @@ module Gemgento
               customer = {
                   mode: 'guest',
                   email: cart.customer_email,
-                  firstname: cart.billing_address.fname,
-                  lastname: cart.billing_address.lname,
+                  firstname: cart.billing_address.first_name,
+                  lastname: cart.billing_address.last_name,
                   'website_id' => '1'
               }
             else
@@ -19,8 +19,8 @@ module Gemgento
                   mode: 'customer',
                   'customer_id' => customer.magento_id,
                   email: customer.email,
-                  firstname: customer.fname,
-                  lastname: customer.lname,
+                  firstname: customer.first_name,
+                  lastname: customer.last_name,
                   password: customer.password,
                   confirmation: true,
                   'group_id' => customer.user_group.magento_id,
@@ -57,8 +57,8 @@ module Gemgento
             addresses.each do |address|
               address_data << {
                   mode: address.address_type,
-                  firstname: address.fname,
-                  lastname: address.lname,
+                  firstname: address.first_name,
+                  lastname: address.last_name,
                   company: address.company,
                   street: address.street,
                   city: address.city,

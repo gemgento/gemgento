@@ -74,8 +74,8 @@ module Gemgento
       @user.password = params[:password]
       @user.password_confirmation = params[:password_confirmation]
 
-      @user.fname = params[:fname] unless params[:fname].nil?
-      @user.lname = params[:lname] unless params[:lname].nil?
+      @user.first_name = params[:first_name] unless params[:first_name].nil?
+      @user.last_name = params[:last_name] unless params[:last_name].nil?
 
       respond_to do |format|
         if @user.save

@@ -25,9 +25,9 @@ module Gemgento
 
       @user.created_in = data[:created_in]
       @user.email = data[:email]
-      @user.fname = data[:firstname]
-      @user.mname = data[:middlename]
-      @user.lname = data[:lastname]
+      @user.first_name = data[:firstname]
+      @user.middle_name = data[:middlename]
+      @user.last_name = data[:lastname]
       @user.user_group = UserGroup.where(magento_id: data[:group_id]).first
       @user.prefix = data[:prefix]
       @user.suffix = data[:suffix]
@@ -52,7 +52,7 @@ module Gemgento
     end
 
     def user_params
-      params.require(:user).permit(:fname, :lname, :email, :mname, :prefix, :suffix, :password, :password_confirmation)
+      params.require(:user).permit(:first_name, :last_name, :email, :middle_name, :prefix, :suffix, :password, :password_confirmation)
     end
 
   end

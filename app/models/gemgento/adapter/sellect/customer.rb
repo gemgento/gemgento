@@ -10,8 +10,8 @@ module Gemgento::Adapter::Sellect
       self.all.each do |sellect_user|
         user = Gemgento::User.find_or_initialize_by(email: sellect_user.email)
         user.email = sellect_user.email
-        user.fname = sellect_user.first_name
-        user.lname = sellect_user.last_name
+        user.first_name = sellect_user.first_name
+        user.last_name = sellect_user.last_name
         user.dob = sellect_user.bday
         user.encrypted_password = sellect_user.encrypted_password
         user.magento_password = (0...8).map { (65 + rand(26)).chr }.join

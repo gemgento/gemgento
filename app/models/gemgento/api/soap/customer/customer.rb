@@ -130,9 +130,9 @@ module Gemgento
             user.stores << Gemgento::Store.find_by(magento_id: source[:store_id]) unless source[:store_id] == '0' || user.stores.include?(Gemgento::Store.find_by(magento_id: source[:store_id]))
             user.created_in = source[:created_in]
             user.email = source[:email]
-            user.fname = source[:firstname]
-            user.mname = source[:middlename]
-            user.lname = source[:lastname]
+            user.first_name = source[:firstname]
+            user.middle_name = source[:middlename]
+            user.last_name = source[:lastname]
             user.user_group = UserGroup.where(magento_id: source[:group_id]).first
             user.prefix = source[:prefix]
             user.suffix = source[:suffix]
@@ -149,9 +149,9 @@ module Gemgento
           def self.compose_customer_data(customer)
             customer_data = {
                 email: customer.email,
-                firstname: customer.fname,
-                middlename: customer.mname,
-                lastname: customer.lname,
+                firstname: customer.first_name,
+                middlename: customer.middle_name,
+                lastname: customer.last_name,
                 'store_id' => Gemgento::Store.current.magento_id,
                 'group_id' => customer.user_group.magento_id,
                 'website_id' => Gemgento::Store.current.website_id,
