@@ -29,25 +29,37 @@ module Gemgento
     private
 
     def verify_guest
-      if user_signed_in? && current_order.user.nil?
+      if user_signed_in? && (current_order.user.nil? || current_order.user == current_user)
+        current_order.customer_is_guest = false
         current_order.user = current_user
-        redirect_to checkout_address_path
-      elsif user_signed_in? && current_order.user == current_user
-        redirect_to checkout_address_path
+        current_order.push_customer
+        current_order.save
+
+        respond_to do |format|
+          format.html { redirect_to checkout_address_path }
+          format.json { render json: { result: true, user: current_user, order: current_order } }
+        end
       end
     end
 
     def login_user
       user = User::is_valid_login(params[:email], params[:password])
 
+      result = false
+
+      unless user.nil?
+        sign_in(:user, user)
+        current_order.customer_is_guest = false
+        current_order.user = current_user
+        current_order.save
+
+        if current_order.push_customer
+          result = true
+        end
+      end
+
       respond_to do |format|
-
-        unless user.nil?
-          sign_in(:user, user)
-          current_order.customer_is_guest = false
-          current_order.user = current_user
-          current_order.save
-
+        if result
           format.html { redirect_to checkout_address_path }
           format.json { render json: { result: true, user: current_user, order: current_order } }
         else
@@ -77,13 +89,23 @@ module Gemgento
       @user.first_name = params[:first_name] unless params[:first_name].nil?
       @user.last_name = params[:last_name] unless params[:last_name].nil?
 
-      respond_to do |format|
-        if @user.save
-          sign_in(:user, @user)
-          current_order.customer_is_guest = false
-          current_order.user = current_user
-          current_order.save
+      result = false
 
+      if @user.save
+        sign_in(:user, @user)
+        current_order.customer_is_guest = false
+        current_order.user = current_user
+        current_order.save
+
+        Gemgento::Subscriber.add_user(@user) if params[:subscribe]
+
+        if current_order.push_customer
+          result = true
+        end
+      end
+
+      respond_to do |format|
+        if result
           format.html { redirect_to checkout_address_path }
           format.json { render json: { result: true, user: @user, order: current_order } }
         else
@@ -99,9 +121,16 @@ module Gemgento
       current_order.customer_is_guest = true
       current_order.customer_email = params[:email]
 
-      respond_to do |format|
+      result = false
 
-        if Devise::email_regexp.match(params[:email]) && current_order.save
+      if Devise::email_regexp.match(params[:email]) && current_order.save
+        if current_order.push_customer
+          result true
+        end
+      end
+
+      respond_to do |format|
+        if result
           format.html { redirect_to checkout_address_path }
           format.json { render json: { result: true, order: current_order } }
         else

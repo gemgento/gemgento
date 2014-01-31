@@ -87,7 +87,7 @@ module Gemgento
             current_order.shipping_address.push
           end
 
-          if current_order.push_customer && current_order.push_addresses
+          if current_order.push_addresses
             result = true
           end
         else
