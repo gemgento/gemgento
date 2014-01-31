@@ -11,7 +11,13 @@ module Gemgento
       @billing_address = current_order.billing_address
       @payment = current_order.order_payment
 
-      current_order.get_shipping_methods.each do |shipping_method|
+      if session[:shipping_methods].nil?
+        shipping_methods = current_order.get_shipping_methods
+      else
+        shipping_methods = session[:shipping_methods]
+      end
+
+      shipping_methods.each do |shipping_method|
         if shipping_method[:code] == current_order.shipping_method
           @shipping_method = shipping_method
           break

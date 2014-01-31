@@ -7,7 +7,7 @@ module Gemgento
 
     def show
       set_totals
-      @shipping_methods = current_order.get_shipping_methods
+      session[:shipping_methods] = @shipping_methods = current_order.get_shipping_methods
 
       respond_to do |format|
         format.html
