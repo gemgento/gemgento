@@ -31,7 +31,6 @@ module Gemgento
           }
         end
       end
-
     end
 
     def update

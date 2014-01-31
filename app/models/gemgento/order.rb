@@ -115,8 +115,6 @@ module Gemgento
       if !result || self.magento_quote_id.nil?
         self.push_cart
       end
-
-      API::SOAP::Checkout::Product.add(self, self.order_items)
     end
 
     def get_totals
