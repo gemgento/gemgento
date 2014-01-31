@@ -4,7 +4,7 @@ module Gemgento
     respond_to :json, :html
 
     def index
-      @countries = Gemgento::Country.all
+      @countries = Gemgento::Country.all.includes(:regions)
 
       respond_with @countries
     end

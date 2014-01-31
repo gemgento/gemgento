@@ -14,7 +14,8 @@ module Gemgento
 
     def as_json(options = nil)
       result = super
-      result[:regions] = self.regions
+
+      result[:regions] = self.regions if self.regions.loaded?
 
       return result
     end
