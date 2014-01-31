@@ -5,13 +5,8 @@ module Gemgento
     belongs_to :region
     belongs_to :order
 
-    validates :first_name, presence: true
-    validates :last_name, presence: true
-    validates :street, presence: true
-    validates :region, presence: true
-    validates :country, presence: true
-    validates :postcode, presence: true
-    validates :telephone, presence: true
+    validates :first_name, :last_name, :street, :country, :postcode, :telephone, presence: true
+    validates :region, presence: true, if: ->{ !self.country.nil? && !self.country.regions.empty? }
 
     attr_accessor :address1, :address2, :address3
 
@@ -47,13 +42,17 @@ module Gemgento
 
     def explode_street_address
       address = self.street.split("\n")
-      self.address1 = address[0] unless address[0].nil?
-      self.address2 = address[1] unless address[1].nil?
-      self.address3 = address[2] unless address[2].nil?
+      self.address1 = address[0] unless address[0].blank?
+      self.address2 = address[1] unless address[1].blank?
+      self.address3 = address[2] unless address[2].blank?
     end
 
     def implode_street_address
-      self.street = [self.address1, self.address2, self.address3].join("\n")
+      street = []
+      street << self.address1 unless self.address1.blank?
+      street << self.address2 unless self.address2.blank?
+      street << self.address3 unless self.address3.blank?
+      self.street = street.join("\n") unless street.blank?
     end
 
     def sync_local_to_magento
