@@ -318,7 +318,11 @@ module Gemgento
         self.simple_products.each do |simple_product|
           result['simple_products'] << simple_product
         end
+      else
+        result['simple_product_ids'] = self.simple_products.pluck(:id)
       end
+
+      result['configurable_product_ids'] = self.configurable_products.pluck(:id)
 
       # inventory flag
       result['is_in_stock'] = self.in_stock?
