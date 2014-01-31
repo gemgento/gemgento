@@ -48,7 +48,7 @@ module Gemgento
     def add_item(product, quantity = 1)
       raise 'Order not in cart state' if self.state != 'cart'
 
-      order_item = self.order_items.where(product: product).first
+      order_item = self.order_items.find_by(product: product)
 
       if order_item.nil?
         order_item = OrderItem.new

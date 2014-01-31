@@ -18,7 +18,8 @@ module Gemgento
     end
 
     def in_stock?(quantity = 1)
-      if self.is_in_stock || quantity.to_f <= self.quantity.to_f
+      puts "#{quantity.to_f} <= #{self.quantity}"
+      if self.is_in_stock && (quantity.to_f <= self.quantity.to_f || quantity.to_f == 0)
         return true
       else
         return false
