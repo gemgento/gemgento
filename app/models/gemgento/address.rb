@@ -34,7 +34,8 @@ module Gemgento
       result['address1'] = self.address1
       result['address2'] = self.address2
       result['address3'] = self.address3
-
+      result['country'] = self.country.name unless self.country.nil?
+      result['region'] = self.region.code unless self.region.nil?
       return result
     end
 

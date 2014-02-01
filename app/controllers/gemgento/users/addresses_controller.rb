@@ -13,12 +13,7 @@ module Gemgento
       respond_to do |format|
         format.html
         format.json do
-          render json: {
-              default_shipping_address: @default_shipping_address,
-              shipping_addresses: @shipping_addresses,
-              default_billing_address: @default_billing_address,
-              billing_addresses: @billing_addresses
-        }
+          render json: current_user.addresses
         end
       end
     end
