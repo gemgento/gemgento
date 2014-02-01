@@ -140,6 +140,7 @@ module Gemgento
             user.taxvat = source[:taxvat]
             user.confirmation = source[:confirmation]
             user.magento_password = source[:password_hash]
+            user.gender = source[:gender]
             user.sync_needed = false
             user.save(validate: false)
 
@@ -157,8 +158,9 @@ module Gemgento
                 'website_id' => Gemgento::Store.current.website_id,
                 prefix: customer.prefix,
                 suffix: customer.suffix,
-                dob: customer.dob,
-                taxvat: customer.taxvat
+                dob: customer.dob.nil? ? nil : "#{customer.dob.inspect} 00:00:00",
+                taxvat: customer.taxvat,
+                gender: customer.gender.nil? ? nil : customer.gender.to_i
             }
 
             unless customer.magento_password.nil? || customer.magento_password.include?(':')

@@ -34,6 +34,7 @@ module Gemgento
       @user.dob = data[:dob]
       @user.taxvat = data[:taxvat]
       @user.confirmation = data[:confirmation]
+      @user.gender = data[:gender]
       @user.sync_needed = false
 
       if @user.magento_password != data[:password_hash]
