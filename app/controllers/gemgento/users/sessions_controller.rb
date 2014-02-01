@@ -6,6 +6,7 @@ module Gemgento
 
     # POST /resource/sign_in
     def create
+      Gemgento::User.is_valid_login params[:user][:email], params[:user][:password]
       self.resource = warden.authenticate!(auth_options)
       set_flash_message(:notice, :signed_in) if is_flashing_format?
       sign_in(resource_name, resource)
@@ -13,7 +14,15 @@ module Gemgento
 
       respond_to do |format|
         format.html { respond_with resource, :location => after_sign_in_path_for(resource) }
-        format.json { render json: { result: true, user: resource } }
+        format.json do
+          render json: {
+              result: true,
+              user: resource,
+              csrfParam: request_forgery_protection_token,
+              csrfToken: form_authenticity_token
+          }
+        end
+
       end
 
     end

@@ -6,12 +6,24 @@ module Gemgento
     validates_presence_of :email
     validates :email, uniqueness: true
 
+    def self.manage(user, subscribe)
+      if subscribe
+        add_user user
+      else
+        remove_user user
+      end
+    end
+
     def self.add_user(user)
       subscriber = Gemgento::Subscriber.new
       subscriber.email = user.email
       subscriber.first_name = user.first_name
       subscriber.last_name = user.last_name
       subscriber.save
+    end
+
+    def self.remove_user(user)
+      Gemgento::Subscriber.where(email: user.email).destroy_all
     end
   end
 end

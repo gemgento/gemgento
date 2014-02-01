@@ -35,8 +35,12 @@ module Gemgento
       @user.taxvat = data[:taxvat]
       @user.confirmation = data[:confirmation]
       @user.sync_needed = false
-      @user.encrypted_password = ''
-      @user.magento_password = data[:password_hash]
+
+      if @user.magento_password != data[:password_hash]
+        @user.encrypted_password = ''
+        @user.magento_password = data[:password_hash]
+      end
+
       @user.save(validate: false)
 
       store = Store.find_by(magento_id: data[:store_id])
