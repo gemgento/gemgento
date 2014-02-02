@@ -34,7 +34,7 @@ module Gemgento
       @category.magento_id = data[:category_id]
       @category.is_active = data[:is_active].to_i == 1 ? true : false
       @category.position = data[:position]
-      @category.parent = Gemgento::Category.find_by(magento_id: params[:parent_id]) unless params[:parent_id].nil?
+      @category.parent = Gemgento::Category.find_by(magento_id: data[:parent_id]) unless data[:parent_id].nil?
       @category.name = data[:name]
       @category.url_key = data[:url_key]
       @category.include_in_menu = data[:include_in_menu]
