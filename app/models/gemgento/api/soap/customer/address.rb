@@ -112,7 +112,7 @@ module Gemgento
                 postcode: address.postcode,
                 prefix: address.prefix,
                 region: address.region_name,
-                'region_id' => address.region.magento_id,
+                'region_id' => address.region.nil? ? nil : address.region.magento_id,
                 street: {'arr:string' => [address.street]},
                 suffix: address.suffix,
                 telephone: address.telephone,
