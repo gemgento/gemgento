@@ -70,10 +70,11 @@ module Gemgento
 
     def set_products(stores_products, category)
       stores_products.each do |store_id, products|
-        next if store_id.to_i == 0 # 0 is the admin store which is not used in Gemgento
+        next if store_id.to_i == 0 || products.nil? # 0 is the admin store which is not used in Gemgento
         store = Gemgento::Store.find_by(magento_id: store_id)
 
         product_category_ids = []
+
         products.each do |item|
           product = Gemgento::Product.find_by(magento_id: item[:product_id])
           next if product.nil?
