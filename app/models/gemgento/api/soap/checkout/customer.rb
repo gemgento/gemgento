@@ -63,7 +63,7 @@ module Gemgento
                   street: address.street,
                   city: address.city,
                   region: address.region_name,
-                  'region_id' => address.region.magento_id,
+                  'region_id' => address.region.nil? ? nil : address.region.magento_id,
                   postcode: address.postcode,
                   'country_id' => address.country.magento_id,
                   telephone: address.telephone,
