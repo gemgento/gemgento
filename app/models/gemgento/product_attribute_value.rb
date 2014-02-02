@@ -13,7 +13,7 @@ module Gemgento
     private
 
     def touch_product
-      self.product.update(updated_at: Time.now) if self.changed?
+      Gemgento::TouchProduct.perform_async([self.product.id]) if self.changed?
     end
   end
 end

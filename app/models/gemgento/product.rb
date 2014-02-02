@@ -372,11 +372,12 @@ module Gemgento
     end
 
     def touch_categories
-      self.categories.update_all(updated_at: Time.now) if self.changed?
+      Gemgento::TouchCategory.perform_async(self.categories.pluck(:id)) if self.changed?
     end
 
     def touch_configurables
       self.configurable_products.update_all(updated_at: Time.now) if self.changed?
+      Gemgento::TouchProduct.perform_async(self.configurable_products.pluck(:id)) if self.changed?
     end
 
     def to_ary
