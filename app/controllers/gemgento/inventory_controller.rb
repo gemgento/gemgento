@@ -6,7 +6,7 @@ module Gemgento
 
       product = Gemgento::Product.find_by(magento_id: data[:product_id])
 
-      unless data[:inventories].nil?
+      if !product.nil? && !data[:inventories].nil?
         data[:inventories].each do |website_id, stock_data|
           store = Gemgento::Store.find_by(website_id: website_id)
           next if store.nil?
