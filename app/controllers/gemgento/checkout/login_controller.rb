@@ -121,13 +121,7 @@ module Gemgento
       current_order.customer_is_guest = true
       current_order.customer_email = params[:email]
 
-      result = false
-
-      if Devise::email_regexp.match(params[:email]) && current_order.save
-        if current_order.push_customer
-          result true
-        end
-      end
+      result = (Devise::email_regexp.match(params[:email]) && current_order.save)
 
       respond_to do |format|
         if result

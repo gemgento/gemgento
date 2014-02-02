@@ -87,6 +87,10 @@ module Gemgento
             current_order.shipping_address.push
           end
 
+          if current_order.customer_is_guest
+            current_order.push_customer
+          end
+
           if current_order.push_addresses
             result = true
           end
