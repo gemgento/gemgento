@@ -102,7 +102,7 @@ module Gemgento::Adapter::Sellect
 
       self.all.each do |option|
         attribute = Gemgento::ProductAttribute.find_by(code: option.name.downcase)
-        label = get_option_label(option, sellect_id)
+        label = get_option_label(option.id, sellect_id)
         label = '' if label.nil?
 
         attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: attribute.id, label: label)
@@ -117,12 +117,12 @@ module Gemgento::Adapter::Sellect
       end
     end
 
-    def self.get_option_label(option, variant_id)
+    def self.get_option_label(option_id, variant_id)
       self.table_name = 'sellect_option_values'
       option_value = self.joins(ActiveRecord::Base.escape_sql(
                     'INNER JOIN sellect_option_values_variants ON sellect_option_values_variants.option_value_id = sellect_option_values.id ' +
                         'AND sellect_option_values.option_type_id = ? AND sellect_option_values_variants.variant_id = ?',
-                    option.id,
+                    option_id,
                     variant_id
                 )).first
 
