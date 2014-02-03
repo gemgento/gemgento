@@ -76,13 +76,13 @@ module Gemgento::Adapter::Sellect
         product.set_attribute_value('style_code', configurable_product.style_code)
         product.set_attribute_value('upc', sellect_variant.upc)
         product.set_attribute_value('weight', sellect_variant.weight.nil? ? 0 : sellect_variant.weight)
+        product.set_attribute_value('price', get_price(sellect_variant.id, currency))
         product.stores << Gemgento::Store.current unless product.stores.include? Gemgento::Store.current
         product.categories = configurable_product.categories
         product.sync_needed = false
         product.save
 
         set_option_values(sellect_variant.id, product)
-        set_price(sellect_variant.id, product, currency)
 
         product.sku = "#{sellect_variant.sku}_#{product.size}"
 
@@ -178,15 +178,16 @@ module Gemgento::Adapter::Sellect
       end
     end
 
-    def self.set_price(variant_id, product, currency)
+    def self.get_price(variant_id, currency)
       self.table_name = 'sellect_pricings'
 
       pricing = self.where('variant_id = ? AND currency LIKE ?', variant_id, currency).first
-      return if pricing.nil?
 
-      product.set_attribute_value('price', pricing.price)
-      product.sync_needed = false
-      product.save
+      if pricing.nil?
+        return nil
+      else
+        return pricing.price
+      end
     end
 
     def self.set_categories(product_id, product)
