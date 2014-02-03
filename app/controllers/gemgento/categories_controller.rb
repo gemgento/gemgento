@@ -70,26 +70,30 @@ module Gemgento
 
     def set_products(stores_products, category)
       stores_products.each do |store_id, products|
-        next if store_id.to_i == 0 || products.nil? # 0 is the admin store which is not used in Gemgento
-        store = Gemgento::Store.find_by(magento_id: store_id)
+        next if store_id.to_i == 0 # 0 is the admin store which is not used in Gemgento
 
-        product_category_ids = []
+        if products.nil?
+          Gemgento::ProductCategory.unscoped.where(store_id: store.id, category_id: category.id).destroy_all
+        else
+          store = Gemgento::Store.find_by(magento_id: store_id)
 
-        products.each do |item|
-          product = Gemgento::Product.find_by(magento_id: item[:product_id])
-          next if product.nil?
+          product_category_ids = []
+          product_ids = products.map{ |p| p[:product_id] }
 
-          pairing = Gemgento::ProductCategory.unscoped.find_or_initialize_by(category: category, product: product, store: store)
-          pairing.position = item[:position].nil? ? 1 : item[:position][0]
-          pairing.store = store
-          pairing.save
+          Gemgento::Product.where(magento_id: product_ids).each do |product|
+            pairing = Gemgento::ProductCategory.unscoped.find_or_initialize_by(category: category, product: product, store: store)
+            item = products.select{ |p| p[:product_id].to_i == product.magento_id }.first
+            pairing.position = item[:position].nil? ? 1 : item[:position][0]
+            pairing.store = store
+            pairing.save
 
-          product_category_ids << pairing.id
+            product_category_ids << pairing.id
+          end
+
+          Gemgento::ProductCategory.unscoped.
+              where('store_id = ? AND category_id = ? AND id NOT IN (?)', store.id, category.id, product_category_ids).
+              destroy_all
         end
-
-        Gemgento::ProductCategory.unscoped.
-            where('store_id = ? AND category_id = ? AND id NOT IN (?)', store.id, category.id, product_category_ids).
-            destroy_all
       end
     end
 
