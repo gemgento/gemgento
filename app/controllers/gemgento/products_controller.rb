@@ -81,7 +81,7 @@ module Gemgento
 
         attribute_values.each do |code, value|
 
-          case code
+          case code.to_s
             when 'visibility'
               product.visibility = value.to_i
               product.save
