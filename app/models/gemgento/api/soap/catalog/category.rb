@@ -125,6 +125,20 @@ module Gemgento
             end
           end
 
+          def self.update_product(product_category)
+            message = {
+                category_id: product_category.category.magento_id,
+                product: product_category.product.magento_id,
+                position: product_category.position,
+                product_identifier_type: 'id'
+            }
+            response = Gemgento::Magento.create_call(:catalog_category_update_product, message)
+
+            if response.success?
+              return response.body[:info]
+            end
+          end
+
           private
 
           # Traverse Magento category tree while synchronizing with local category tree
