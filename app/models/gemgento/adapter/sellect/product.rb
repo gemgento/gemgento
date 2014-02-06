@@ -12,7 +12,7 @@ module Gemgento::Adapter::Sellect
     end
 
     def self.import_configurable_product(sellect_product, currency, app_root)
-      product = Gemgento::Product.not_deleted.configurable.first_or_initialize_by(sku: sellect_product.sku)
+      product = Gemgento::Product.not_deleted.configurable.find_or_initialize_by(sku: sellect_product.sku)
 
       product.magento_type = 'configurable'
       product.sku = sellect_product.sku
