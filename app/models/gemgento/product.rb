@@ -342,7 +342,7 @@ module Gemgento
 
             if simple_product.attribute_value(attribute.code) == option.label
               order[attribute.code][option.label] = [] if order[attribute.code][option.label].nil?
-              order[attribute.code][option.label] << simple_product.id
+              order[attribute.code][option.label] << simple_product.id unless order[attribute.code][option.label].include? simple_product.id
             end
           end
         end
