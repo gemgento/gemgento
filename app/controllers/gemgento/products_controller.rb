@@ -4,7 +4,7 @@ module Gemgento
     respond_to :json, :html
 
     def show
-      if (params[:id])
+      if params[:id]
         if params[:updated_at] # only return the product if it was updated since specified timestamp
           @product = Product.includes(:simple_products).where('updated_at > ? AND id = ?', params[:updated_at], params[:id]).first
         else

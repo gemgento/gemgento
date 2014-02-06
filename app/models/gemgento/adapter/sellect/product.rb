@@ -12,7 +12,7 @@ module Gemgento::Adapter::Sellect
     end
 
     def self.import_configurable_product(sellect_product, currency, app_root)
-      product = Gemgento::Product.active.find_or_initialize_by(sku: sellect_product.sku, magento_type: 'configurable')
+      product = Gemgento::Product.not_deleted.configurable.find_or_intialize_by(sku: sellect_product.sku)
 
       product.magento_type = 'configurable'
       product.sku = sellect_product.sku
@@ -63,7 +63,7 @@ module Gemgento::Adapter::Sellect
       sellect_variants = self.where('product_id = ?', sellect_id)
 
       sellect_variants.each do |sellect_variant|
-        product = Gemgento::Product.simple.filter({ attribute: upc, value: sellect_variant.upc }).first_or_initialize
+        product = Gemgento::Product.not_deleted.simple.filter({ attribute: upc, value: sellect_variant.upc }).first_or_initialize
         product.magento_type = 'simple'
         product.status = 1
         product.visibility = sellect_variants.size > 1 ? 1 : 4
