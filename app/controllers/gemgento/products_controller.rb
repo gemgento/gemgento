@@ -32,7 +32,7 @@ module Gemgento
     def update
       data = params[:data]
 
-      @product = Gemgento::Product.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).first_or_initialize
+      @product = Gemgento::Product.not_deleted.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).first_or_initialize
       @product.magento_id = data[:product_id]
       @product.magento_type = data[:type]
       @product.sku = data[:sku]
@@ -56,7 +56,7 @@ module Gemgento
     def destroy
       data = params[:data]
 
-      if Gemgento::Product.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).count > 0
+      if Gemgento::Product.not_deleted.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).count > 0
         @product = Gemgento::Product.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).first.mark_deleted!
       end
 
