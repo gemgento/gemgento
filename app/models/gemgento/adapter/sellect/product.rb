@@ -7,45 +7,49 @@ module Gemgento::Adapter::Sellect
       self.table_name = 'sellect_products'
 
       self.where('deleted_at IS NULL').each do |sellect_product|
-        product = Gemgento::Product.active.find_or_initialize_by(sku: sellect_product.sku, magento_type: 'configurable')
+        import_configurable_product(currency, app_root, sellect_product)
+      end
+    end
 
-        product.magento_type = 'configurable'
-        product.sku = sellect_product.sku
-        product.status = sellect_product.is_private
-        product.product_attribute_set = Gemgento::ProductAttributeSet.first
-        product.visibility = 4
-        product.sync_needed = false
+    def self.import_configurable_product(sellect_product, currency, app_root)
+      product = Gemgento::Product.active.find_or_initialize_by(sku: sellect_product.sku, magento_type: 'configurable')
+
+      product.magento_type = 'configurable'
+      product.sku = sellect_product.sku
+      product.status = sellect_product.is_private
+      product.product_attribute_set = Gemgento::ProductAttributeSet.first
+      product.visibility = 4
+      product.sync_needed = false
+      product.save
+
+      product.set_attribute_value('name', sellect_product.name)
+      product.set_attribute_value('short_description', sellect_product.description)
+      product.set_attribute_value('url_key', sellect_product.permalink)
+      product.set_attribute_value('meta_description', sellect_product.meta_description)
+      product.set_attribute_value('meta_keyword', sellect_product.meta_keywords)
+      product.set_attribute_value('description', sellect_product.detail_description)
+      product.set_attribute_value('style_code', sellect_product.style)
+
+      product.stores << Gemgento::Store.current unless product.stores.include? Gemgento::Store.current
+
+      set_categories(sellect_product.id, product)
+
+      simple_products = import_simple_products(sellect_product.id, product, app_root, currency)
+
+      if simple_products.size <= 1 # if one or less simple products, the configurable is not needed
+        product.destroy
+      else # configurable is needed, set configurable attrbitues and simple products
+        set_configurable_attribute(product, 'size')
+        set_configurable_attribute(product, 'color')
+
+        simple_products.each do |simple_product|
+          product.simple_products << simple_product unless product.simple_products.include?(simple_product)
+        end
+
+        product.sync_needed = true
         product.save
 
-        product.set_attribute_value('name', sellect_product.name)
-        product.set_attribute_value('short_description', sellect_product.description)
-        product.set_attribute_value('url_key', sellect_product.permalink)
-        product.set_attribute_value('meta_description', sellect_product.meta_description)
-        product.set_attribute_value('meta_keyword', sellect_product.meta_keywords)
-        product.set_attribute_value('description', sellect_product.detail_description)
-        product.set_attribute_value('style_code', sellect_product.style)
-
-        product.stores << Gemgento::Store.current unless product.stores.include? Gemgento::Store.current
-
-        set_categories(sellect_product.id, product)
-
-        simple_products = import_simple_products(sellect_product.id, product, app_root, currency)
-
-        if simple_products.size <= 1 # if one or less simple products, the configurable is not needed
-          product.destroy
-        else # configurable is needed, set configurable attrbitues and simple products
-          set_configurable_attribute(product, 'size')
-          set_configurable_attribute(product, 'color')
-
-          simple_products.each do |simple_product|
-            product.simple_products << simple_product unless product.simple_products.include?(simple_product)
-          end
-
-          product.sync_needed = true
-          product.save
-
-          create_configurable_images(product)
-        end
+        create_configurable_images(product)
       end
     end
 
@@ -154,10 +158,12 @@ module Gemgento::Adapter::Sellect
         if File.exist?(file)
           image = Gemgento::Asset.new
 
-          gemgento_product.assets.each do |asset|
-            if !asset.asset_file.nil? && FileUtils.compare_file(asset.asset_file.file.path(:original), file)
-              image = asset
-              break
+          Gemgento::Asset.unscoped do
+            gemgento_product.assets.reload.each do |asset|
+              if !asset.asset_file.nil? && FileUtils.compare_file(asset.asset_file.file.path(:original), file)
+                image = asset
+                break
+              end
             end
           end
 
