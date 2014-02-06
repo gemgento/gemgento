@@ -226,7 +226,7 @@ module Gemgento::Adapter::Sellect
 
         configurable_product.assets.where(store: Gemgento::Store.current).each do |existing_configurable_asset|
           if !existing_configurable_asset.asset_file.nil? && FileUtils.compare_file(existing_configurable_asset.asset_file.file.path(:original), asset.asset_file.file.path(:original))
-            asset_copy = existing_asset
+            asset_copy = existing_configurable_asset
             break
           end
         end
