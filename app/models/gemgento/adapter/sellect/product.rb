@@ -16,7 +16,7 @@ module Gemgento::Adapter::Sellect
 
       product.magento_type = 'configurable'
       product.sku = sellect_product.sku
-      product.status = sellect_product.is_private
+      product.status = 1
       product.product_attribute_set = Gemgento::ProductAttributeSet.first
       product.visibility = 4
       product.sync_needed = false
@@ -65,7 +65,7 @@ module Gemgento::Adapter::Sellect
       sellect_variants.each do |sellect_variant|
         product = Gemgento::Product.simple.filter({ attribute: upc, value: sellect_variant.upc }).first_or_initialize
         product.magento_type = 'simple'
-        product.status = configurable_product.status
+        product.status = 1
         product.visibility = sellect_variants.size > 1 ? 1 : 4
         product.product_attribute_set = configurable_product.product_attribute_set
         product.sync_needed = false
