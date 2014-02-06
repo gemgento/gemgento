@@ -153,7 +153,7 @@ module Gemgento::Adapter::Sellect
       self.table_name = 'sellect_assets'
 
       self.where(viewable_id: sellect_product.id, viewable_type: 'Sellect::Variant').each do |sellect_asset|
-        file = "#{app_root}/public/system/assets/products/#{sellect_asset.id}/original/#{sellect_asset.attachment_file_name}"
+        file = "#{app_root}/#{sellect_asset.id}/original/#{sellect_asset.attachment_file_name}"
 
         if File.exist?(file)
           image = Gemgento::Asset.new
