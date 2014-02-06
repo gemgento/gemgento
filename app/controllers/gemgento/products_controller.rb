@@ -117,37 +117,39 @@ module Gemgento
     end
 
     def set_assets(magento_source_assets, product)
-      magento_source_assets.each do |store_id, source_assets| # cycle through media galleries for each
+      Gemgento::Asset.unscoped do
+        magento_source_assets.each do |store_id, source_assets| # cycle through media galleries for each
 
-        if !source_assets[:media_gallery].nil? && !source_assets[:media_gallery][:images].nil?
-          store = Gemgento::Store.find_by(magento_id: store_id)
-          media_gallery = source_assets[:media_gallery][:images]
+          if !source_assets[:media_gallery].nil? && !source_assets[:media_gallery][:images].nil?
+            store = Gemgento::Store.find_by(magento_id: store_id)
+            media_gallery = source_assets[:media_gallery][:images]
 
-          media_gallery.each do |source| # cycle through the store specific assets
-            asset = Gemgento::Asset.unscoped.find_or_initialize_by(product_id: product.id, file: source[:file], store: store)
+            media_gallery.each do |source| # cycle through the store specific assets
+              asset = Gemgento::Asset.find_or_initialize_by(product_id: product.id, file: source[:file], store: store)
 
-            if !source[:removed].nil? && source[:removed] == 0
+              if !source[:removed].nil? && source[:removed] == 0
 
-              if source[:new_file].nil?
-                url = source[:url]
-                file = source[:file]
-              else
-                url = "http://#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:new_file]}"
-                file = source[:new_file]
+                if source[:new_file].nil?
+                  url = source[:url]
+                  file = source[:file]
+                else
+                  url = "http://#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:new_file]}"
+                  file = source[:new_file]
+                end
+
+                asset.url = url
+                asset.position = source[:position]
+                asset.label = source[:label]
+                asset.file = file
+                asset.product = product
+                asset.sync_needed = false
+                asset.set_file(open(url))
+                asset.store = store
+                asset.save
+
+              elsif !source[:removed].nil? && source[:removed] == 1
+                asset.destroy
               end
-
-              asset.url = url
-              asset.position = source[:position]
-              asset.label = source[:label]
-              asset.file = file
-              asset.product = product
-              asset.sync_needed = false
-              asset.set_file(open(url))
-              asset.store = store
-              asset.save
-
-            elsif !source[:removed].nil? && source[:removed] == 1
-              asset.destroy
             end
           end
         end
