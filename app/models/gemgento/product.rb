@@ -292,11 +292,13 @@ module Gemgento
     end
 
     def as_json(options = nil)
-      if options.nil? && options[:store].nil?
+      if options.nil? || options[:store].nil?
         store = Gemgento::Store.current
       else
         store = options[:store]
       end
+
+      puts store.inspect
 
       result = super
 
