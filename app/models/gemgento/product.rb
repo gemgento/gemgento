@@ -322,8 +322,6 @@ module Gemgento
         }
       end
 
-      puts self.assets.select{ |a| a.store_id == store.id }.inspect
-
       # include simple products
       if self.simple_products.loaded?
         result['configurable_attribute_order'] = self.configurable_attribute_order
