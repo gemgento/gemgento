@@ -49,10 +49,16 @@ module Gemgento
     end
 
     def as_json(options = nil)
+      if options.nil? && options[:store].nil?
+        store = Gemgento::Store.current
+      else
+        store = options[:store]
+      end
+
       result = super
 
       if self.includes_category_products
-        result['products'] = self.products.active.catalog_visible
+        result['products'] = self.products.active.catalog_visible.as_json({ store: store })
       end
 
       return result
