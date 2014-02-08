@@ -19,6 +19,7 @@ module Gemgento
     attr_accessor :image_labels_raw
     attr_accessor :image_file_extensions_raw
     attr_accessor :image_types_raw
+    attr_accessor :store
 
     after_commit :process
 

@@ -63,9 +63,9 @@ module Gemgento
             end
           end
 
-          def self.create(customer)
+          def self.create(customer, store)
             message = {
-                customer_data: compose_customer_data(customer)
+                customer_data: compose_customer_data(customer, store)
             }
             response = Gemgento::Magento.create_call(:customer_customer_create, message)
 
@@ -79,10 +79,10 @@ module Gemgento
             end
           end
 
-          def self.update(customer)
+          def self.update(customer, store)
             message = {
                 customer_id: customer.magento_id,
-                customer_data: compose_customer_data(customer)
+                customer_data: compose_customer_data(customer, store)
             }
             response = Gemgento::Magento.create_call(:customer_customer_update, message)
 
@@ -147,15 +147,15 @@ module Gemgento
             Gemgento::API::SOAP::Customer::Address.fetch(user)
           end
 
-          def self.compose_customer_data(customer)
+          def self.compose_customer_data(customer, store)
             customer_data = {
                 email: customer.email,
                 firstname: customer.first_name,
                 middlename: customer.middle_name,
                 lastname: customer.last_name,
-                'store_id' => Gemgento::Store.current.magento_id,
+                'store_id' => store.magento_id,
                 'group_id' => customer.user_group.magento_id,
-                'website_id' => Gemgento::Store.current.website_id,
+                'website_id' => store.current.website_id,
                 prefix: customer.prefix,
                 suffix: customer.suffix,
                 dob: customer.dob.nil? ? nil : "#{customer.dob.inspect} 00:00:00",

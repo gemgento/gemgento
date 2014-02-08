@@ -11,7 +11,10 @@ module Gemgento
         @categories = Gemgento::Category.where('updated_at > ?', params[:updated_at])
       end
 
-      respond_with @categories
+      respond_to do |format|
+        format.html
+        format.json { render json: @categories.as_json({ store: current_store })  }
+      end
     end
 
     def show
@@ -24,7 +27,10 @@ module Gemgento
       @category = @category.first
       @category.includes_category_products = true unless @category.nil?
 
-      respond_with @category
+      respond_to do |format|
+        format.html
+        format.json { render json: @category.as_json({ store: current_store })  }
+      end
     end
 
     def update
@@ -73,7 +79,7 @@ module Gemgento
         next if store_id.to_i == 0 # 0 is the admin store which is not used in Gemgento
 
         if products.nil?
-          Gemgento::ProductCategory.unscoped.where(store_id: store.id, category_id: category.id).destroy_all
+          Gemgento::ProductCategory.where(store_id: store.id, category_id: category.id).destroy_all
         else
           store = Gemgento::Store.find_by(magento_id: store_id)
 
@@ -81,7 +87,7 @@ module Gemgento
           product_ids = products.map{ |p| p[:product_id] }
 
           Gemgento::Product.where(magento_id: product_ids).each do |product|
-            pairing = Gemgento::ProductCategory.unscoped.find_or_initialize_by(category: category, product: product, store: store)
+            pairing = Gemgento::ProductCategory.find_or_initialize_by(category: category, product: product, store: store)
             item = products.select{ |p| p[:product_id].to_i == product.magento_id }.first
             pairing.position = item[:position].nil? ? 1 : item[:position][0]
             pairing.store = store

@@ -26,7 +26,10 @@ module Gemgento
         @product.product_attribute_values.reload unless @product.nil?
       end
 
-      respond_with @product
+      respond_to do |format|
+        format.html
+        format.json { render json: @product.as_json({ store: current_store }) }
+      end
     end
 
     def update
@@ -98,60 +101,56 @@ module Gemgento
     end
 
     def set_categories(magento_categories, product, store)
-      Gemgento::ProductCategory.unscoped do
-        category_ids = []
+      category_ids = []
 
-        # loop through each return category and add it to the product if needed
-        unless magento_categories.nil?
-          magento_categories.each do |magento_category|
-            category = Gemgento::Category.find_by(magento_id: magento_category)
-            product_category = Gemgento::ProductCategory.find_or_initialize_by(category: category, product: product, store: store)
-            product_category.save
+      # loop through each return category and add it to the product if needed
+      unless magento_categories.nil?
+        magento_categories.each do |magento_category|
+          category = Gemgento::Category.find_by(magento_id: magento_category)
+          product_category = Gemgento::ProductCategory.find_or_initialize_by(category: category, product: product, store: store)
+          product_category.save
 
-            category_ids << category.id
-          end
+          category_ids << category.id
         end
-
-        Gemgento::ProductCategory.where('store_id = ? AND product_id = ? AND category_id NOT IN (?)', store.id, product.id, category_ids).destroy_all
       end
+
+      Gemgento::ProductCategory.where('store_id = ? AND product_id = ? AND category_id NOT IN (?)', store.id, product.id, category_ids).destroy_all
 
       product.save
     end
 
     def set_assets(magento_source_assets, product)
-      Gemgento::Asset.unscoped do
-        magento_source_assets.each do |store_id, source_assets| # cycle through media galleries for each
+      magento_source_assets.each do |store_id, source_assets| # cycle through media galleries for each
 
-          if !source_assets[:media_gallery].nil? && !source_assets[:media_gallery][:images].nil?
-            store = Gemgento::Store.find_by(magento_id: store_id)
-            media_gallery = source_assets[:media_gallery][:images]
+        if !source_assets[:media_gallery].nil? && !source_assets[:media_gallery][:images].nil?
+          store = Gemgento::Store.find_by(magento_id: store_id)
+          media_gallery = source_assets[:media_gallery][:images]
 
-            media_gallery.each do |source| # cycle through the store specific assets
-              asset = Gemgento::Asset.find_or_initialize_by(product_id: product.id, file: source[:file], store: store)
+          media_gallery.each do |source| # cycle through the store specific assets
+            asset = Gemgento::Asset.find_or_initialize_by(product_id: product.id, file: source[:file], store: store)
 
-              if !source[:removed].nil? && source[:removed] == 0
+            if !source[:removed].nil? && source[:removed] == 0
 
-                if source[:new_file].nil?
-                  url = source[:url]
-                  file = source[:file]
-                else
-                  url = "http://#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:new_file]}"
-                  file = source[:new_file]
-                end
-
-                asset.url = url
-                asset.position = source[:position]
-                asset.label = source[:label]
-                asset.file = file
-                asset.product = product
-                asset.sync_needed = false
-                asset.set_file(open(url))
-                asset.store = store
-                asset.save
-
-              elsif !source[:removed].nil? && source[:removed] == 1
-                asset.destroy
+              if source[:new_file].nil?
+                url = source[:url]
+                file = source[:file]
+              else
+                url = "http://#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:new_file]}"
+                file = source[:new_file]
               end
+
+              asset.url = url
+              asset.position = source[:position]
+              asset.label = source[:label]
+              asset.file = file
+              asset.product = product
+              asset.sync_needed = false
+              asset.set_file(open(url))
+              asset.store = store
+              asset.save
+
+            elsif !source[:removed].nil? && source[:removed] == 1
+              asset.destroy
             end
           end
         end

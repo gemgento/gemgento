@@ -80,7 +80,7 @@ module Gemgento
     def register
       @user = User.new
       @user.email = params[:email]
-      @user.stores << Gemgento::Store.current
+      @user.stores << current_store
       @user.user_group = Gemgento::UserGroup.where(code: 'General').first
       @user.magento_password = params[:password]
       @user.password = params[:password]

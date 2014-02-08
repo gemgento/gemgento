@@ -5,7 +5,7 @@ module Gemgento
 
     def as_json(options = nil)
       result = super
-      result['product'] = self.product
+      result['product'] = self.product.as_json({ store: Gemgento::Store.find(self.order.store.id) })
       return result
     end
   end

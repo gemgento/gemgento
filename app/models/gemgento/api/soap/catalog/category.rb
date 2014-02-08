@@ -35,7 +35,7 @@ module Gemgento
             end
           end
 
-          def self.create(category, store)
+          def self.create(category)
             data = {
                 name: self.name,
                 'is_active' => category.is_active ? 1 : 0,

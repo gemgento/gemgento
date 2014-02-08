@@ -33,11 +33,13 @@ module Gemgento
 
     # CART specific functions
 
-    def self.get_cart(order_id = nil)
+    def self.get_cart(order_id = nil, store = nil)
+      store = Gemgento::Store.current if store.nil?
+
       if order_id.nil?
         cart = Gemgento::Order.new
         cart.state = 'cart'
-        cart.store = Gemgento::Store.current
+        cart.store = store
       else
         cart = Gemgento::Order.find(order_id)
       end

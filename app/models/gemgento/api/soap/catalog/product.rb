@@ -96,7 +96,7 @@ module Gemgento
                 type: product.magento_type,
                 set: product.product_attribute_set.magento_id,
                 sku: product.sku,
-                product_data: compose_product_data(product),
+                product_data: compose_product_data(product, store),
                 store_view: store.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_product_create, message)
@@ -113,7 +113,7 @@ module Gemgento
             message = {
                 product: product.magento_id,
                 product_identifier_type: 'id',
-                product_data: compose_product_data(product),
+                product_data: compose_product_data(product, store),
                 store_view: store.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_product_update, message)
@@ -262,7 +262,7 @@ module Gemgento
             Gemgento::Product.set_callback(:save, :after, :sync_local_to_magento)
           end
 
-          def self.compose_product_data(product)
+          def self.compose_product_data(product, store)
             product_data = {
                 'name' => product.name,
                 'description' => product.description,
@@ -274,12 +274,12 @@ module Gemgento
                 'url_key' => product.attribute_value('url_key'),
                 'price' => product.attribute_value('price'),
                 'tax_class_id' => '2',
-                'additional_attributes' => {'single_data' => {'item' => compose_attribute_values(product)}},
+                'additional_attributes' => {'single_data' => {'item' => compose_attribute_values(product, store)}},
                 'visibility' => product.visibility
             }
 
             unless product.simple_products.empty?
-              product_data.merge!({'associated_skus' => {'item' => compose_associated_skus(product)}, 'price_changes' => compose_price_changes(product)})
+              product_data.merge!({'associated_skus' => {'item' => compose_associated_skus(product)}, 'price_changes' => compose_price_changes(product, store)})
             end
 
             product_data
@@ -305,10 +305,10 @@ module Gemgento
             websites
           end
 
-          def self.compose_attribute_values(product)
+          def self.compose_attribute_values(product, store)
             attributes = []
 
-            product.product_attribute_values.where(store: Gemgento::Store.current).each do |product_attribute_value|
+            product.product_attribute_values.where(store: store).each do |product_attribute_value|
               unless product_attribute_value.value.nil?
                 attributes << {
                     'key' => product_attribute_value.product_attribute.code,
@@ -335,13 +335,13 @@ module Gemgento
             associated_skus
           end
 
-          def self.compose_price_changes(product)
+          def self.compose_price_changes(product, store)
             price_changes = []
 
             product.configurable_attributes.each do |configurable_attribute|
               options = []
 
-              configurable_attribute.product_attribute_options.where(store: Gemgento::Store.current).each do |attribute_option|
+              configurable_attribute.product_attribute_options.where(store: store).each do |attribute_option|
                 options << {key: attribute_option.label, value: ''}
               end
 

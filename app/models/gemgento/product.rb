@@ -112,8 +112,9 @@ module Gemgento
       return value
     end
 
-    def self.check_magento(identifier, identifier_type, attribute_set)
-      API::SOAP::Catalog::Product.check_magento(identifier, identifier_type, attribute_set, Gemgento::Store.current)
+    def self.check_magento(identifier, identifier_type, attribute_set, store = nil)
+      store = Gemgento::Store.current if store.nil?
+      API::SOAP::Catalog::Product.check_magento(identifier, identifier_type, attribute_set, store)
     end
 
     # Attempts to return relations before method missing response
@@ -125,7 +126,8 @@ module Gemgento
       end
     end
 
-    def self.by_attributes(filters)
+    def self.by_attributes(filters, store = nil)
+      store = Gemgento::Store.current if store.nil?
       products = Gemgento::Product.configurable
 
       filters.each do |code, value|
@@ -135,7 +137,7 @@ module Gemgento
         if product_attribute.product_attribute_options.empty?
           product_attribute_values = product_attribute.product_attribute_values.where(value: value)
         else
-          product_attribute_values = product_attribute.product_attribute_options.where(label: value, store: Gemgento::Store.current).product_attribute_values
+          product_attribute_values = product_attribute.product_attribute_options.where(label: value, store: store).product_attribute_values
         end
 
         products = products.joins(:product_attribute_values).where('gemgento_product_attribute_values.value' => product_attribute_values)
@@ -186,7 +188,9 @@ module Gemgento
       return self.relations.where(relation_type: relation_type).collect { |relation| relation.related_to }
     end
 
-    def self.filter(filters)
+    def self.filter(filters, store)
+      store = Gemgento::Store.current if Gemgento::Store.nil?
+
       filters = [filters] unless filters.is_a? Array
       products = self
 
@@ -195,9 +199,10 @@ module Gemgento
 
         unless filter[:attribute][0].frontend_input == 'select'
           products = products.joins(ActiveRecord::Base.escape_sql(
-                                        "INNER JOIN gemgento_product_attribute_values AS value#{index} ON value#{index}.product_id = gemgento_products.id AND value#{index}.value IN (?)
+                                        "INNER JOIN gemgento_product_attribute_values AS value#{index} ON value#{index}.product_id = gemgento_products.id AND value#{index}.value IN (?) AND value#{index}.store_id = ?
                     INNER JOIN gemgento_product_attributes AS attribute#{index} ON attribute#{index}.id = value#{index}.product_attribute_id AND attribute#{index}.id IN (?)",
                                         filter[:value],
+                                        store.id,
                                         filter[:attribute].map { |a| a.id }
                                     )).readonly(false)
         else
@@ -206,7 +211,7 @@ module Gemgento
                     INNER JOIN gemgento_product_attributes AS attribute#{index} ON attribute#{index}.id = value#{index}.product_attribute_id AND attribute#{index}.id IN (?)
                     INNER JOIN gemgento_product_attribute_options AS option#{index} ON option#{index}.product_attribute_id = attribute#{index}.id AND option#{index}.store_id = ? AND option#{index}.label IN (?)",
                                         filter[:attribute].map { |a| a.id },
-                                        Gemgento::Store.current.id,
+                                        store.id,
                                         filter[:value]
                                     )).readonly(false)
         end
@@ -215,7 +220,8 @@ module Gemgento
       return products
     end
 
-    def self.order_by_attribute(attribute, direction = 'ASC')
+    def self.order_by_attribute(attribute, direction = 'ASC', store = nil)
+      store = Gemgento::Store.current if store.nil?
       raise 'Direction must be equivalent to ASC or DESC' if direction != 'ASC' and direction != 'DESC'
 
       products = self
@@ -223,9 +229,10 @@ module Gemgento
       unless attribute.frontend_input = 'select'
         products = products.joins(
             ActiveRecord::Base.escape_sql(
-                'INNER JOIN gemgento_product_attribute_values ON gemgento_product_attribute_values.product_id = gemgento_products.id AND gemgento_product_attribute_values.product_attribute_id = ? ' +
+                'INNER JOIN gemgento_product_attribute_values ON gemgento_product_attribute_values.product_id = gemgento_products.id AND gemgento_product_attribute_values.product_attribute_id = ? AND gemgento_product_attribute_values.store_id = ? ' +
                     'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ',
-                attribute.id
+                attribute.id,
+                store.id
             )).
             order("gemgento_product_attribute_values.value #{direction}").
             readonly(false)
@@ -237,7 +244,7 @@ module Gemgento
                     'INNER JOIN gemgento_product_attribute_options ON gemgento_product_attribute_options.product_attribute_id = gemgento_product_attributes.id AND gemgento_product_attribute_options.value = gemgento_product_attribute_values.value' +
                     'AND gemgento_product_attribute_options.store_id = ?',
                 attribute.id,
-                Gemgento::Store.current.id
+                store.id
             )).
             order("gemgento_product_attribute_options.order #{direction}").
             readonly(false)
@@ -285,7 +292,13 @@ module Gemgento
     end
 
     def as_json(options = nil)
-      store = Gemgento::Store.current
+      puts options.inspect
+      if options.nil?
+        store = Gemgento::Store.current
+      else
+        store = options[:store]
+      end
+
       result = super
 
       self.product_attribute_values.select{ |av| av.store_id == store.id }.each do |attribute_value|
@@ -293,7 +306,7 @@ module Gemgento
         result[attribute.code] = self.attribute_value(attribute.code, store)
       end
 
-      result['currency_code'] = Gemgento::Store.current.currency_code
+      result['currency_code'] = store.currency_code
 
       # product assets
       result['assets'] = []
@@ -330,13 +343,14 @@ module Gemgento
       return result
     end
 
-    def configurable_attribute_order
+    def configurable_attribute_order(store = nil)
+      store = Gemgento::Store.current if store.nil?
       order = {}
 
       self.configurable_attributes.each do |attribute|
         order[attribute.code] = {}
 
-        attribute.product_attribute_options.where(store: Gemgento::Store.current).each do |option|
+        attribute.product_attribute_options.where(store: store).each do |option|
 
           self.simple_products.each do |simple_product|
 
@@ -357,9 +371,16 @@ module Gemgento
     def sync_local_to_magento
       if self.sync_needed
         if !self.magento_id
-          API::SOAP::Catalog::Product.create(self, Gemgento::Store.current)
+          API::SOAP::Catalog::Product.create(self, self.stores.first)
+
+          self.stores.each_with_index do |store, index|
+            next if index == 0
+            API::SOAP::Catalog::Product.update(self, store)
+          end
         else
-          API::SOAP::Catalog::Product.update(self, Gemgento::Store.current)
+          self.stores.each do |store|
+            API::SOAP::Catalog::Product.update(self, store)
+          end
         end
 
         self.sync_needed = false

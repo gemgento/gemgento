@@ -6,7 +6,7 @@ module Gemgento
 
           def self.create(cart)
             message = {
-                store_id: Gemgento::Store.current.magento_id,
+                store_id: cart.store.magento_id,
                 gemgento_id: cart.id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_create, message)
@@ -23,7 +23,7 @@ module Gemgento
           def self.order(cart, payment)
             message = {
                 quote_id: cart.magento_quote_id,
-                store_id: Gemgento::Store.current.magento_id,
+                store_id: cart.store.magento_id,
                 payment_data: {
                     'po_number' => payment.po_number,
                     method: payment.method,
@@ -50,7 +50,7 @@ module Gemgento
           def self.info(cart)
             message = {
                 quote_id: cart.magento_quote_id,
-                store_id: Gemgento::Store.current.magento_id
+                store_id: cart.store.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_info, message)
 
@@ -64,7 +64,7 @@ module Gemgento
           def self.totals(cart)
             message = {
                 quote_id: cart.magento_quote_id,
-                store_id: Gemgento::Store.current.magento_id
+                store_id: cart.store.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_totals, message)
 
@@ -76,7 +76,7 @@ module Gemgento
           def self.license(cart)
             message = {
                 quote_id: cart.magento_quote_id,
-                store_id: Gemgento::Store.current.magento_id
+                store_id: cart.store.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_license, message)
 

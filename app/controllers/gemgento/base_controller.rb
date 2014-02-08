@@ -2,6 +2,8 @@ module Gemgento
   class BaseController < ActionController::Base
     include SslRequirement
 
+    before_filter :set_store
+
     layout :set_layout
 
     def set_layout(html_layout = 'application', pjax_layout = false)
@@ -15,6 +17,15 @@ module Gemgento
         html_layout
       end
     end
+
+    def set_store
+      session[:store_id] = Gemgento::Store.current.id
+    end
+
+    def current_store
+      Gemgento::Store.find(session[:store_id])
+    end
+
   end
 end
 

@@ -13,7 +13,7 @@ module Gemgento
 
     before_destroy :delete_magento
 
-    default_scope -> { includes(:asset_file).where(store: Gemgento::Store.current).order(:position) }
+    default_scope -> { includes(:asset_file).order(:position) }
 
     validates :asset_file, presence: true
     validates :product, presence: true

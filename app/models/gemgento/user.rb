@@ -65,9 +65,16 @@ module Gemgento
       # Password needs to be past as plain text.  It will be encrypted by Magento and updated.
       if self.sync_needed
         if !self.magento_id
-          API::SOAP::Customer::Customer.create(self)
+          API::SOAP::Customer::Customer.create(self, self.stores.first)
+
+          self.stores.each_with_index do |store, index|
+            next if index == 0
+            API::SOAP::Customer::Customer.update(self, store)
+          end
         else
-          API::SOAP::Customer::Customer.update(self)
+          self.stores.each do |store|
+            API::SOAP::Customer::Customer.update(self, store)
+          end
         end
 
         self.sync_needed = false

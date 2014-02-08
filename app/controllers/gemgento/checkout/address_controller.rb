@@ -9,6 +9,7 @@ module Gemgento
       if current_order.user.nil? && !current_order.customer_is_guest
         current_order.user = current_user
         current_order.save
+        current_order.push_customer
       end
 
       current_order.push_cart if current_order.magento_quote_id.nil?
@@ -31,6 +32,7 @@ module Gemgento
       end
 
       @same_as_billing = true
+
       respond_with current_order
     end
 

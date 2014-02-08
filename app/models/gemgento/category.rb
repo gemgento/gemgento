@@ -58,18 +58,5 @@ module Gemgento
       return result
     end
 
-    private
-
-    # Synchronize the category with Magento
-    def sync_local_to_magento
-      if self.sync_needed
-        if !self.magento_id
-          API::SOAP::Catalog::Category.create(self, Gemgento::Store.current)
-        else
-          API::SOAP::Catalog::Category.update(self, Gemgento::Store.current)
-        end
-      end
-    end
-
   end
 end

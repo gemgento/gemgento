@@ -7,13 +7,19 @@ module Gemgento
     def index
       @user = current_user
 
-      respond_with @user
+      respond_to do |format|
+        format.html
+        format.json { render json: @user.as_json({ store: current_store }) }
+      end
     end
 
     def show
       @user = current_user
 
-      respond_with @user
+      respond_to do |format|
+        format.html
+        format.json { render json: @user.as_json({ store: current_store }) }
+      end
     end
 
     def update

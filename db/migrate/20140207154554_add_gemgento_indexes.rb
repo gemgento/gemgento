@@ -1,6 +1,7 @@
 class AddGemgentoIndexes < ActiveRecord::Migration
   def change
     add_index :gemgento_assets, :product_id
+    add_index :gemgento_assets, :store_id
 
     add_index :gemgento_attribute_set_attributes, [:product_attribute_set_id, :product_attribute_id], unique: true, name: 'attribute_set_attributes_index'
     add_index :gemgento_attribute_set_attributes, :product_attribute_id
@@ -18,7 +19,7 @@ class AddGemgentoIndexes < ActiveRecord::Migration
     add_index :gemgento_order_payments, :order_id
     add_index :gemgento_order_statuses, :order_id
 
-    add_index :gemgento_product_attribute_options, [:product_attribute_id, :store_id] , name: 'attribute_options_index'
+    add_index :gemgento_product_attribute_options, [:product_attribute_id, :store_id], name: 'attribute_options_index'
     add_index :gemgento_product_attribute_options, :store_id
 
     add_index :gemgento_product_attribute_values, :product_id

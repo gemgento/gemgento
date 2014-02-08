@@ -4,7 +4,7 @@ module Gemgento
     belongs_to :category
     belongs_to :store
 
-    default_scope -> { where(store: Gemgento::Store.current).order(:position) }
+    default_scope -> { order(:position) }
 
     after_save :touch_product
     after_update :sync_local_to_magento
