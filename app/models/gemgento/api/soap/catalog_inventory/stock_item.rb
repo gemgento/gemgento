@@ -86,7 +86,7 @@ module Gemgento
                 'use_default_website_stock' => inventory.use_default_website_stock ? 1 : 0
             }
 
-            if !data[:use_default_website_stock]
+            if !inventory.use_default_website_stock
               data[:website_id] = inventory.store.website_id
             end
           end
