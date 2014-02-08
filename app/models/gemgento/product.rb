@@ -310,7 +310,7 @@ module Gemgento
 
       # product assets
       result['assets'] = []
-      self.assets.each do |image|
+      self.assets.select{ |a| a.store_id == store.id }.each do |image|
         styles = { 'original' => image.image.url(:original) }
 
         image.image.styles.keys.to_a.each do |style|
@@ -322,6 +322,8 @@ module Gemgento
             styles: styles
         }
       end
+
+      puts self.assets.select{ |a| a.store_id == store.id }.inspect
 
       # include simple products
       if self.simple_products.loaded?
