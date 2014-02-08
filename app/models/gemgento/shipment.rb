@@ -1,5 +1,5 @@
 module Gemgento
-  class OrderShipment < ActiveRecord::Base
+  class Shipment < ActiveRecord::Base
     belongs_to :order
   end
 end

@@ -1,6 +1,6 @@
-class CreateGemgentoOrderShipment < ActiveRecord::Migration
+class CreateGemgentoShipment < ActiveRecord::Migration
   def up
-    create_table :gemgento_order_shipments do |t|
+    create_table :gemgento_shipments do |t|
       t.integer :magento_id
       t.integer :order_id
       t.string :increment_id
@@ -14,6 +14,6 @@ class CreateGemgentoOrderShipment < ActiveRecord::Migration
   end
 
   def down
-    drop_table :gemgento_order_shipments
+    drop_table :gemgento_shipments
   end
 end
