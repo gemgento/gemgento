@@ -49,7 +49,6 @@ module Gemgento::Adapter::Sellect
       shipping_addres = address(order.ship_address_id)
       billing_address = address(order.bill_address_id)
       payment = payment(order.id)
-      shipment = shipment(order.id)
       totals = totals(order, payment)
       line_items = line_items(order.id).reload
 
@@ -144,7 +143,7 @@ module Gemgento::Adapter::Sellect
         0,                            # base_shipping_tax_amount
         0,                            # shipping_tax_refunded
         0,                            # base_shipping_tax_refunded
-        products_ordered(line_items), # products_ordered
+        products_ordered(line_items, store), # products_ordered
         order_status(order.state)     # order_status
       ]
     end
@@ -338,26 +337,26 @@ module Gemgento::Adapter::Sellect
       return quantity
     end
 
-    def self.product(variant_id)
+    def self.products_ordered(line_items, store)
+      ordered = []
+
+      line_items.each do |li|
+        p = product(li.variant_id, store)
+        next if p.nil?
+        ordered << "#{p.sku}:#{li.quantity}:#{p.price}"
+      end
+
+      return ordered.join('|')
+    end
+
+    def self.product(variant_id, store)
       self.table_name = 'sellect_variants'
       variant = self.find_by(id: variant_id)
       return nil if variant.nil?
 
       upc = Gemgento::ProductAttribute.find_by(code: 'upc')
 
-      return Gemgento::Product.where(magento_type: 'simple').filter({ attribute: upc, value: variant.upc }).first
-    end
-
-    def self.products_ordered(line_items)
-      ordered = []
-
-      line_items.each do |li|
-        p = product(li.variant_id)
-        next if p.nil?
-        ordered << "#{p.sku}:#{li.quantity}:#{p.price}"
-      end
-
-      return ordered.join('|')
+      return Gemgento::Product.where(magento_type: 'simple').filter({ attribute: upc, value: variant.upc }, store).first
     end
 
     def self.order_status(state)

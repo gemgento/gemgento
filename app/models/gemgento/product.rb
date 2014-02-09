@@ -187,11 +187,11 @@ module Gemgento
       relation_type = RelationType.find_by(name: relation_name)
       raise "Unknown relation type - #{relation_name}" if relation_type.nil?
 
-      return self.relations.where(relation_type: relation_type).collect { |relation| relation.related_to }
+      return self.relations.where(relation_type: relation_type).collect { |relation| relation.relatedxzz_to }
     end
 
-    def self.filter(filters, store)
-      store = Gemgento::Store.current if Gemgento::Store.nil?
+    def self.filter(filters, store = nil)
+      store = Gemgento::Store.current if store.nil?
 
       filters = [filters] unless filters.is_a? Array
       products = self
