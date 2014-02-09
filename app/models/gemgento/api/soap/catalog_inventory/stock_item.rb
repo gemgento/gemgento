@@ -87,7 +87,7 @@ module Gemgento
             }
 
             if !inventory.use_default_website_stock
-              data[:website_id] = inventory.store.website_id
+              data['website_id'] = inventory.store.website_id
             end
 
             return data
