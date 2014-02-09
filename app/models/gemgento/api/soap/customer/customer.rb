@@ -155,7 +155,7 @@ module Gemgento
                 lastname: customer.last_name,
                 'store_id' => store.magento_id,
                 'group_id' => customer.user_group.magento_id,
-                'website_id' => store.current.website_id,
+                'website_id' => store.website_id,
                 prefix: customer.prefix,
                 suffix: customer.suffix,
                 dob: customer.dob.nil? ? nil : "#{customer.dob.inspect} 00:00:00",
