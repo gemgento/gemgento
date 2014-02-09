@@ -18,6 +18,7 @@ module Gemgento
     has_many :order_items
     has_many :order_statuses
     has_many :shipments
+    has_many :shipment_tracks
 
     attr_accessor :tax, :total
 

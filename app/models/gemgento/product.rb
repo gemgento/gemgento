@@ -7,11 +7,13 @@ module Gemgento
     has_many :assets, dependent: :destroy
     has_many :categories, -> { distinct }, through: :product_categories
     has_many :inventories
+    has_many :order_items
     has_many :product_attribute_values, dependent: :destroy
     has_many :product_attributes, through: :product_attribute_values
     has_many :product_attribute_options, through: :product_attributes
     has_many :product_categories, -> { distinct }, dependent: :destroy
     has_many :relations, -> { distinct }, as: :relatable, :class_name => 'Relation', dependent: :destroy
+    has_many :shipment_items
 
     has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_products', class_name: 'Store'
     has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
