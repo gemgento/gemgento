@@ -12,6 +12,8 @@ module Gemgento
           next if store.nil? || stock_data[:qty].nil?
 
           inventory = Gemgento::Inventory.find_or_initialize_by(store: store, product: product)
+          next if !inventory.id.nil? && inventory.quantity == stock_data[:qty] && inventory.is_in_stock == stock_data[:is_in_stock]
+
           inventory.product = product
           inventory.store = store
           inventory.quantity = stock_data[:qty]
