@@ -139,6 +139,8 @@ module Gemgento
 
             order.shipping_address = sync_magento_address_to_local(source[:shipping_address], order, order.shipping_address)
             order.billing_address = sync_magento_address_to_local(source[:billing_address], order, order.billing_address)
+            order.save
+
             sync_magento_payment_to_local(source[:payment], order)
 
             unless source[:gift_message_id].nil?
