@@ -18,14 +18,6 @@ module Gemgento
       end
     end
 
-    def set_store
-      session[:store_id] = Gemgento::Store.current.id
-    end
-
-    def current_store
-      Gemgento::Store.find(session[:store_id])
-    end
-
   end
 end
 
