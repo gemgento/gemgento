@@ -9,15 +9,30 @@ module Gemgento
 
     initializer :gemgento do
 
+      # use ActiveAdmin if host application supports it
       if defined?(ActiveAdmin)
         ActiveAdmin.application.load_paths << File.dirname(__FILE__) + '/admin/'
       end
 
+      # allow custom queries to sanitize inputs
       class ActiveRecord::Base
         def self.escape_sql(clause, *rest)
           self.send(:sanitize_sql_array, rest.empty? ? clause : ([clause] + rest))
         end
       end
+
     end
+
+    # filter logging of sensitive fields
+    initializer 'gemgento.params.filter' do |app|
+      app.config.filter_parameters += [
+          :cc_owner,
+          :cc_number,
+          :cc_cid,
+          :cc_exp_month,
+          :cc_exp_year
+      ]
+    end
+
   end
 end
