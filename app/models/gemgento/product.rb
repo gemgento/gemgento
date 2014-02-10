@@ -347,7 +347,7 @@ module Gemgento
     def configurable_attribute_order(store = nil)
       store = Gemgento::Store.current if store.nil?
       order = {}
-      puts self.configurable_attributes.inspect
+
       self.configurable_attributes.each do |attribute|
         order[attribute.code] = {}
         attribute.product_attribute_options.where(store: store).each do |option|
