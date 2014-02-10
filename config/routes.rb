@@ -61,8 +61,7 @@ Gemgento::Engine.routes.draw do
   resources :products, :categories, :orders, :subscribers, :users, :inventory, :product_attributes, :product_attribute_sets, :stores
   resources :countries, only: [:index, :show]
 
-
-
   patch '/orders', to: 'orders#update'
+  put '/orders', to: 'orders#update'
 
 end
