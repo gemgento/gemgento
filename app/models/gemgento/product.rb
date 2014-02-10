@@ -328,7 +328,7 @@ module Gemgento
 
       # include simple products
       if self.simple_products.loaded?
-        result['configurable_attribute_order'] = self.configurable_attribute_order
+        result['configurable_attribute_order'] = self.configurable_attribute_order(store)
         result['simple_products'] = []
 
         self.simple_products.each do |simple_product|
