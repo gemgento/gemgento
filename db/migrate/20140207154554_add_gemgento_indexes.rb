@@ -30,7 +30,7 @@ class AddGemgentoIndexes < ActiveRecord::Migration
     add_index :gemgento_product_categories, :category_id
     add_index :gemgento_product_categories, :product_id
 
-    add_index :gemgento_stores_products, [:product_id, :store_id], name: 'stores_products_index'
+    add_index :gemgento_stores_products, [:product_id, :store_id], unique: true, name: 'stores_products_index'
     add_index :gemgento_stores_products, :store_id
   end
 end
