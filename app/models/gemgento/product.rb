@@ -300,8 +300,6 @@ module Gemgento
         store = options[:store]
       end
 
-      puts store.inspect
-
       result = super
 
       self.product_attribute_values.select{ |av| av.store_id == store.id }.each do |attribute_value|
@@ -349,15 +347,14 @@ module Gemgento
     def configurable_attribute_order(store = nil)
       store = Gemgento::Store.current if store.nil?
       order = {}
-
+      puts self.configurable_attributes.inspect
       self.configurable_attributes.each do |attribute|
         order[attribute.code] = {}
-
         attribute.product_attribute_options.where(store: store).each do |option|
 
           self.simple_products.each do |simple_product|
 
-            if simple_product.attribute_value(attribute.code) == option.label
+            if simple_product.attribute_value(attribute.code, store) == option.label
               order[attribute.code][option.label] = [] if order[attribute.code][option.label].nil?
               order[attribute.code][option.label] << simple_product.id unless order[attribute.code][option.label].include? simple_product.id
             end
