@@ -45,7 +45,7 @@ module Gemgento
       @order.order_payment.update(session[:payment_data])
 
       respond_to do |format|
-        if current_order.process
+        if current_order.process(request.remote_ip)
           session.delete :payment_data
           @order.reload
 

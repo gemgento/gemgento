@@ -20,7 +20,7 @@ module Gemgento
             end
           end
 
-          def self.order(cart, payment)
+          def self.order(cart, payment, remote_ip)
             message = {
                 quote_id: cart.magento_quote_id,
                 store_id: cart.store.magento_id,
@@ -33,7 +33,8 @@ module Gemgento
                     'cc_type' => payment.cc_type,
                     'cc_exp_year' => payment.cc_exp_year,
                     'cc_exp_month' => payment.cc_exp_month
-                }
+                },
+                remote_ip: remote_ip
             }
             response = Gemgento::Magento.create_call(:shopping_cart_order, message)
 
