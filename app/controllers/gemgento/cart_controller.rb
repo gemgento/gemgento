@@ -1,6 +1,8 @@
 module Gemgento
   class CartController < BaseController
 
+    ssl_allowed
+
     respond_to :js, :json, :html
 
     def show
