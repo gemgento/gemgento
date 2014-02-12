@@ -39,6 +39,8 @@ Gemgento::Engine.routes.draw do
     get 'login', to: 'login#show', as: 'login'
     put 'login', to: 'login#update', as: 'login_update'
 
+    put 'gift', to: 'gift#update', as: 'gift_update'    
+
     get 'address', to: 'address#show', as: 'address'
     patch 'address', to: 'address#update', as: 'address_update'
 
