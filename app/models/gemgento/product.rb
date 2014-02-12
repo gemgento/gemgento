@@ -294,49 +294,43 @@ module Gemgento
     end
 
     def as_json(options = nil)
-      if options.nil? || options[:store].nil?
-        store = Gemgento::Store.current
-      else
-        store = options[:store]
-      end
+      options = {} if options.nil?
+      options.reverse_merge!(
+          store: Gemgento::Store.current,
+          active_only: true
+      )
 
       result = super
 
-      self.product_attribute_values.select{ |av| av.store_id == store.id }.each do |attribute_value|
+      self.product_attribute_values.select{ |av| av.store_id == options[:store].id }.each do |attribute_value|
         attribute = attribute_value.product_attribute
-        result[attribute.code] = self.attribute_value(attribute.code, store)
+        result[attribute.code] = self.attribute_value(attribute.code, options[:store])
       end
 
-      result['currency_code'] = store.currency_code
+      result['currency_code'] = options[:store].currency_code
 
       # product assets
-      result['assets'] = []
-      self.assets.select{ |a| a.store_id == store.id }.each do |image|
-        styles = { 'original' => image.image.url(:original) }
-
-        image.image.styles.keys.to_a.each do |style|
-          styles[style] = image.image.url(style.to_sym)
-        end
-
-        result['assets'] << {
-            label: image.label,
-            styles: styles
-        }
-      end
+      result['assets'] = self.assets_as_json(options[:store])
 
       # include simple products
       if self.simple_products.loaded?
-        result['configurable_attribute_order'] = self.configurable_attribute_order(store)
+        result['configurable_attribute_order'] = self.configurable_attribute_order(options[:store])
         result['simple_products'] = []
 
-        self.simple_products.each do |simple_product|
+        if options[:active_only]
+          simple_products = self.simple_products.active
+        else
+          simple_products = self.simple_products
+        end
+
+        simple_products.each do |simple_product|
           result['simple_products'] << simple_product
         end
       else
-        result['simple_product_ids'] = self.simple_products.pluck(:id)
+        result['simple_product_ids'] = self.simple_products.active.pluck(:id)
       end
 
-      result['configurable_product_ids'] = self.configurable_products.pluck(:id)
+      result['configurable_product_ids'] = self.configurable_products.active.pluck(:id)
 
       # inventory flag
       result['is_in_stock'] = self.in_stock?
@@ -344,15 +338,40 @@ module Gemgento
       return result
     end
 
-    def configurable_attribute_order(store = nil)
+    def assets_as_json(store)
+      result = []
+
+      self.assets.select{ |a| a.store_id == store.id }.each do |image|
+        styles = { 'original' => image.image.url(:original) }
+
+        image.image.styles.keys.to_a.each do |style|
+          styles[style] = image.image.url(style.to_sym)
+        end
+
+        result << {
+            label: image.label,
+            styles: styles
+        }
+      end
+
+      return result
+    end
+
+    def configurable_attribute_order(store = nil, active_only = true)
       store = Gemgento::Store.current if store.nil?
       order = {}
+
+      if active_only
+        simple_products = self.simple_products.active
+      else
+        simple_products = self.simple_products
+      end
 
       self.configurable_attributes.each do |attribute|
         order[attribute.code] = {}
         attribute.product_attribute_options.where(store: store).each do |option|
 
-          self.simple_products.each do |simple_product|
+          simple_products.each do |simple_product|
 
             if simple_product.attribute_value(attribute.code, store) == option.label
               order[attribute.code][option.label] = [] if order[attribute.code][option.label].nil?
