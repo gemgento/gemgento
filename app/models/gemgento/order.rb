@@ -164,10 +164,10 @@ module Gemgento
       API::SOAP::Checkout::Shipping.method(self, self.shipping_method)
     end
 
-    def process
+    def process(remote_ip = nil)
       if !valid_stock?
         return false
-      elsif API::SOAP::Checkout::Cart.order(self, self.order_payment)
+      elsif API::SOAP::Checkout::Cart.order(self, self.order_payment, remote_ip)
         finalize
         return true
       else
