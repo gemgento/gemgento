@@ -3,6 +3,7 @@ require 'open-uri'
 
 module Gemgento
   class ProductImport < ActiveRecord::Base
+    include ActiveModel::Validations
     belongs_to :product_attribute_set
     belongs_to :root_category, foreign_key: 'root_category_id', class_name: 'Category'
     belongs_to :store
@@ -19,12 +20,13 @@ module Gemgento
     attr_accessor :image_labels_raw
     attr_accessor :image_file_extensions_raw
     attr_accessor :image_types_raw
-    attr_accessor :store
+
+    validates_with Gemgento::ProductImportValidator
 
     after_commit :process
 
     def process
-      Gemgento::Store.current = self.store
+      puts self.store.inspect
       # create a fake sync record, so products are not synced during the import
       sync_buffer = Gemgento::Sync.new
       sync_buffer.subject = 'products'
@@ -57,7 +59,7 @@ module Gemgento
       end
 
       ProductImport.skip_callback(:commit, :after, :process)
-      self.save
+      self.save validate: false
 
       sync_buffer.is_complete = true
       sync_buffer.created_at = Time.now
@@ -128,7 +130,7 @@ module Gemgento
 
       product.magento_type = 'simple'
       product.sku = sku
-      product.product_attribute_set = product_attribute_set
+      product.product_attribute_set = self.product_attribute_set
       product.stores << self.store unless product.stores.include?(self.store)
       product.status = @row[@headers.index('status').to_i].to_i
 
@@ -156,7 +158,8 @@ module Gemgento
         if !product_attribute.nil? && attribute_code != 'sku' && attribute_code != 'status'
 
           if product_attribute.frontend_input == 'select'
-            label = @row[@headers.index(attribute_code).to_i].to_s.strip
+            label = @row[@headers.index(attribute_code).to_i].to_s.strip.gsub('.0', '')
+            label = label.gsub('.0', '') if label.end_with? '.0'
             attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: label, store: self.store)
 
             if attribute_option.nil?
@@ -166,9 +169,10 @@ module Gemgento
             value = attribute_option.value
           else # attribute value may have to be associated with an attribute option id
             value = @row[@headers.index(attribute_code).to_i].to_s.strip
+            value = value.gsub('.0', '') if value.end_with? '.0'
           end
 
-          product.set_attribute_value(product_attribute.code, value)
+          product.set_attribute_value(product_attribute.code, value, self.store)
         elsif product_attribute.nil? && attribute_code != 'sku' && attribute_code != 'magento_type' && attribute_code != 'category'
           self.import_errors << "ERROR - row #{@row.index} - Unknown attribute code, '#{attribute_code}'"
         end

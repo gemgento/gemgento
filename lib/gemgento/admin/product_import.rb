@@ -71,6 +71,10 @@ if defined?(ActiveAdmin)
         def permitted_params
           params.permit(
               :gemgento_product_import => [
+                  :configurable_attribute_ids,
+                  :utf8,
+                  :authenticity_token,
+                  :commit,
                   :spreadsheet,
                   :product_attribute_set_id,
                   :root_category_id,
