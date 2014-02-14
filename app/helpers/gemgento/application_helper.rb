@@ -1,6 +1,12 @@
 module Gemgento
   module ApplicationHelper
 
+    def set_store
+      if session[:store_id].nil?
+        session[:store_id] = Gemgento::Store.current.id
+      end
+    end
+
     def current_store
       @current_store ||= begin
         if session[:store_id].nil?
