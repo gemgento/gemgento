@@ -10,8 +10,6 @@ module Gemgento
 
     has_attached_file :image
 
-    after_save :sync_local_to_magento
-
     attr_accessor :includes_category_products
 
     default_scope -> { order(:position) }
