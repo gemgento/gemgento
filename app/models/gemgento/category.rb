@@ -16,6 +16,18 @@ module Gemgento
 
     scope :top_level, -> { where(parent: Gemgento::Category.find_by(parent_id: nil), is_active: true) }
 
+    def tree_path
+      path = self.name
+
+      parent = self.parent
+      while parent != nil? && parent.parent != nil do
+        path = "#{parent.name} > #{path}"
+        parent = parent.parent
+      end
+
+      return path
+    end
+
     def save
       # Dirty dirty dirty(S3Bug)..
       begin
