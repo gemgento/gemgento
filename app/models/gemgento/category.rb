@@ -28,6 +28,22 @@ module Gemgento
       return path
     end
 
+    def self.grouped_options
+      options = []
+
+      Gemgento::Category.top_level.each do |parent|
+
+        child_options = [["#{parent.name} (parent)", parent.id]]
+        parent.children.each do |child|
+          child_options << [child.name, child.id]
+        end
+
+        options << [parent.name, child_options]
+      end
+
+      return options
+    end
+
     def save
       # Dirty dirty dirty(S3Bug)..
       begin
