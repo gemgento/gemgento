@@ -14,7 +14,7 @@ module Gemgento
 
     default_scope -> { order(:position) }
 
-    scope :top_level, -> { where(:parent_id => 2) }
+    scope :top_level, -> { where(parent: Gemgento::Category.find_by(parent_id: nil)) }
 
     def save
       # Dirty dirty dirty(S3Bug)..
