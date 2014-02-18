@@ -200,7 +200,7 @@ module Gemgento
 
     def valid_stock?
       self.order_items.each do |item|
-        return false unless item.product.in_stock? item.qty_ordered
+        return false unless item.product.in_stock? item.qty_ordered, self.store
       end
 
       return true

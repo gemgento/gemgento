@@ -324,7 +324,7 @@ module Gemgento
         end
 
         simple_products.each do |simple_product|
-          result['simple_products'] << simple_product
+          result['simple_products'] << simple_product.as_json(options)
         end
       else
         result['simple_product_ids'] = self.simple_products.active.pluck(:id)
@@ -333,7 +333,7 @@ module Gemgento
       result['configurable_product_ids'] = self.configurable_products.active.pluck(:id)
 
       # inventory flag
-      result['is_in_stock'] = self.in_stock?
+      result['is_in_stock'] = self.in_stock?(1, options[:store])
 
       return result
     end
