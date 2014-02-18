@@ -384,6 +384,10 @@ module Gemgento
       return order
     end
 
+    def is_catalog_visible?
+      return [2, 4].include?(self.visibility)
+    end
+
     private
 
     # Push local product changes to magento
