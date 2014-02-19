@@ -126,7 +126,7 @@ module Gemgento
       address.is_default = source[:is_default_billing] || source[:is_default_shipping] ? 1 : 0
       address.address_type = source[:address_type]
       address.sync_needed = false
-      address.save
+      address.save validate: false
 
       address
     end
