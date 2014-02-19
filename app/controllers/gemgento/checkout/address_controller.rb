@@ -37,86 +37,118 @@ module Gemgento
     end
 
     def update
-      # create/update billing address
-      if current_order.billing_address.nil?
-        current_order.billing_address = Address.new(billing_address_params)
-      else
-        current_order.billing_address.update_attributes(billing_address_params)
-      end
-
-      current_order.billing_address.address_type = 'billing'
-
-      # create/update shipping address
-      if params[:same_as_billing]
-        @same_as_billing = true
-
-        if current_order.shipping_address.nil?
-          current_order.shipping_address = Address.new(billing_address_params)
-        else
-          current_order.shipping_address.update_attributes(billing_address_params)
-        end
-      else
-        @same_as_billing = false
-
-        if current_order.shipping_address.nil?
-          current_order.shipping_address = Address.new(shipping_address_params)
-        else
-          current_order.shipping_address.update_attributes(shipping_address_params)
-        end
-      end
-
-      current_order.shipping_address.address_type = 'shipping'
-
-      # assign the current user if order is not guest checkout
-      if user_signed_in?
-        current_order.shipping_address.user = current_user
-        current_order.billing_address.user = current_user
-      else # don't push customer addresses if this is a guest checkout
-        current_order.shipping_address.sync_needed = false
-        current_order.billing_address.sync_needed = false
-      end
-
-      respond_to do |format|
-        result = false
-
-        # attempt to save the addresses and respond appropriately
-        if current_order.billing_address.save && current_order.shipping_address.save
-          current_order.save
-
-          # push the order information to Magento
-          if user_signed_in?
-            current_order.billing_address.push
-            current_order.shipping_address.push
-          end
-
-          if current_order.customer_is_guest
-            current_order.push_customer
-          end
-
-          if current_order.push_addresses
-            result = true
-          end
-        else
-          @billing_address = current_order.billing_address
-          @shipping_address = current_order.shipping_address
-
-          current_order.shipping_address.destroy
-          current_order.billing_address.destroy
-        end
-
-        if result
-          format.html { render checkout_shipping_path }
-          format.json { render json: { result: true, order: current_order } }
-        else
+      # validate addresses before continuing
+      if params[:same_as_billing] && !Address.new(billing_address_params).valid?
+        @billing_address = Address.create(billing_address_params)
+        respond_to do |format|
           format.html { render checkout_address }
           format.json do
             render json: {
                 result: false,
                 errors: {
-                    shipping_address: @shipping_address.errors.full_messages,
                     billing_address: @billing_address.errors.full_messages
                 }
             }
+          end
+        end
+      elsif !Address.new(billing_address_params).valid? || !Address.new(shipping_address_params).valid?
+        @billing_address = Address.create(billing_address_params)
+        @shipping_address = Address.create(shipping_address_params)
+        respond_to do |format|
+          format.html { render checkout_address }
+          format.json do
+            render json: {
+                result: false,
+                errors: {
+                    billing_address: @billing_address.errors.full_messages,
+                    shipping_address: @shipping_address.errors.full_messages
+                }
+            }
+          end
+        end
+      else # addresses are valid
+
+        # create/update billing address
+        if current_order.billing_address.nil?
+          current_order.billing_address = Address.new(billing_address_params)
+        else
+          current_order.billing_address.update_attributes(billing_address_params)
+        end
+
+        current_order.billing_address.address_type = 'billing'
+
+        # create/update shipping address
+        if params[:same_as_billing]
+          @same_as_billing = true
+
+          if current_order.shipping_address.nil?
+            current_order.shipping_address = Address.new(billing_address_params)
+          else
+            current_order.shipping_address.update_attributes(billing_address_params)
+          end
+        else
+          @same_as_billing = false
+
+          if current_order.shipping_address.nil?
+            current_order.shipping_address = Address.new(shipping_address_params)
+          else
+            current_order.shipping_address.update_attributes(shipping_address_params)
+          end
+        end
+
+        current_order.shipping_address.address_type = 'shipping'
+
+        # assign the current user if order is not guest checkout
+        if user_signed_in?
+          current_order.shipping_address.user = current_user
+          current_order.billing_address.user = current_user
+        else # don't push customer addresses if this is a guest checkout
+          current_order.shipping_address.sync_needed = false
+          current_order.billing_address.sync_needed = false
+        end
+
+        respond_to do |format|
+          result = false
+
+          # attempt to save the addresses and respond appropriately
+          if current_order.billing_address.save && current_order.shipping_address.save
+            current_order.save
+
+            # push the order information to Magento
+            if user_signed_in?
+              current_order.billing_address.push
+              current_order.shipping_address.push
+            end
+
+            if current_order.customer_is_guest
+              current_order.push_customer
+            end
+
+            if current_order.push_addresses
+              result = true
+            end
+          else
+            @billing_address = current_order.billing_address
+            @shipping_address = current_order.shipping_address
+
+            current_order.shipping_address.destroy
+            current_order.billing_address.destroy
+          end
+
+          if result
+            format.html { render checkout_shipping_path }
+            format.json { render json: { result: true, order: current_order } }
+          else
+            format.html { render checkout_address }
+            format.json do
+              render json: {
+                  result: false,
+                  errors: {
+                      billing_address: @billing_address.errors.full_messages,
+                      shipping_address: @shipping_address.errors.full_messages
+                  }
+              }
+            end
           end
         end
       end
