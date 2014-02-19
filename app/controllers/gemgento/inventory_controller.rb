@@ -14,11 +14,10 @@ module Gemgento
 
           if store.nil?
             default_values = stock_data
+            next
           end
 
           inventory = Gemgento::Inventory.find_or_initialize_by(store: store, product: product)
-          next if !inventory.id.nil? && inventory.quantity == stock_data[:qty] && inventory.is_in_stock == stock_data[:is_in_stock]
-
           inventory.product = product
           inventory.store = store
           inventory.quantity = stock_data[:qty]
@@ -30,7 +29,7 @@ module Gemgento
 
         # loop through to set default values
         unless default_values.nil?
-          product.inventories.where(user_default_website_stock: true).each do |inventory|
+          product.inventories.where(use_default_website_stock: true).each do |inventory|
             inventory.quantity = default_values[:qty]
             inventory.is_in_stock = default_values[:is_in_stock]
             inventory.sync_needed = false
