@@ -11,9 +11,11 @@ module Gemgento
       end
       event :complete do
         transition from: 'active', to: 'complete'
+        transition from: 'ready', to: 'complete'
         transition from: 'error', to: 'complete'
       end
       event :error do
+        transition from: 'active', to: 'error'
         transition from: 'ready', to: 'error'
       end
 
