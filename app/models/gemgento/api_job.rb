@@ -6,8 +6,11 @@ module Gemgento
       event :ready do
         transition from: 'pending', to: 'ready'
       end
+      event :active do
+        transition from: 'ready', to: 'active'
+      end
       event :complete do
-        transition from: 'ready', to: 'complete'
+        transition from: 'active', to: 'complete'
         transition from: 'error', to: 'complete'
       end
       event :error do
@@ -35,6 +38,8 @@ module Gemgento
     end
 
     def activate(payload)
+      self.active
+      # perform action here
       self.complete
     end
 
