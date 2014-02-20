@@ -69,10 +69,13 @@ module Gemgento
             products_data = []
 
             order_items.each do |order_item|
+              qty = order_item.qty_ordered
+              qty = qty.to_i if qty.to_i == qty # use an integer to avoid issue with decimals and 1 remaining item
+
               products_data << {
                   'product_id' => order_item.product.magento_id,
                   sku: order_item.product.sku,
-                  qty: order_item.qty_ordered,
+                  qty: qty,
                   options: nil,
                   'bundle_option' => nil,
                   'bundle_option_qty' => nil,
