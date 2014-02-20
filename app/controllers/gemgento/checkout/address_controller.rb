@@ -51,7 +51,7 @@ module Gemgento
             }
           end
         end
-      elsif !Address.new(billing_address_params).valid? || !Address.new(shipping_address_params).valid?
+      elsif !params[:same_as_billing] && (!Address.new(billing_address_params).valid? || !Address.new(shipping_address_params).valid?)
         @billing_address = Address.create(billing_address_params)
         @shipping_address = Address.create(shipping_address_params)
         respond_to do |format|
