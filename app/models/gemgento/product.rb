@@ -265,24 +265,24 @@ module Gemgento
       return swatches
     end
 
-    def price
-      if self.has_special?
-        return self.special_price
+    def price(store = nil)
+      if self.has_special?(store)
+        return self.attribute_value('special_price', store)
       else
-        return self.attribute_value 'price'
+        return self.attribute_value('price', store)
       end
     end
 
-    def has_special?
-      if self.special_price.nil? # no special price
+    def has_special?(store = nil)
+      if self.attribute_value('special_price', store).nil? # no special price
         return false
-      elsif self.special_from_date.nil? && self.special_to_date.nil? # no start or end date
+      elsif self.attribute_value('special_from_date', store).nil? && self.attribute_value('special_to_date', store).nil? # no start or end date
         return true
-      elsif self.special_from_date.nil? && Date.parse(special_to_date) >= Date.today # no start date and end date is in the future
+      elsif self.attribute_value('special_from_date', store).nil? && !self.attribute_value('special_to_date', store) && Date.parse(self.attribute_value('special_to_date', store)) >= Date.today # no start date and end date is in the future
         return true
-      elsif self.special_to_date.nil? && Date.parse(special_from_date) <= Date.today # no end date and start date is in the past
+      elsif self.attribute_value('special_to_date', store).nil? && !self.attribute_value('special_from_date', store).nil? && Date.parse(special_from_date) <= Date.today # no end date and start date is in the past
         return true
-      elsif Date.parse(self.special_from_date) <= Date.today && Date.parse(self.special_to_date) >= Date.today # start date is in the past and end date is in the future
+      elsif Date.parse(self.attribute_value('special_from_date', store).nil?) <= Date.today && Date.parse(self.attribute_value('special_to_date', store)) >= Date.today # start date is in the past and end date is in the future
         return true
       else
         return false
