@@ -167,7 +167,7 @@ module Gemgento
 
       magento_ids.each do |magento_id|
         simple_product = Gemgento::Product.find_by(magento_id: magento_id)
-        next if product.nil?
+        next if simple_product.nil?
 
         product.simple_products << simple_product unless product.simple_products.include? simple_product
         simple_product_ids << simple_product.id
@@ -181,7 +181,7 @@ module Gemgento
 
       magento_ids.each do |magento_id|
         configurable_product = Gemgento::Product.find_by(magento_id: magento_id)
-        next if product.nil?
+        next if configurable_product.nil?
 
         product.configurable_products << configurable_product unless product.configurable_products.include? configurable_product
         configurable_product_ids << configurable_product.id
