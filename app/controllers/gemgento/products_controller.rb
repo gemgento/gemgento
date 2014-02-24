@@ -101,6 +101,7 @@ module Gemgento
     end
 
     def set_categories(magento_categories, product, store)
+      puts 'start categories'
       category_ids = []
 
       # loop through each return category and add it to the product if needed
@@ -120,6 +121,8 @@ module Gemgento
     end
 
     def set_assets(magento_source_assets, product)
+      assets_to_keep = []
+
       magento_source_assets.each do |store_id, source_assets| # cycle through media galleries for each
 
         if !source_assets[:media_gallery].nil? && !source_assets[:media_gallery][:images].nil?
@@ -149,12 +152,18 @@ module Gemgento
               asset.store = store
               asset.save
 
+              assets_to_keep << asset.id
+
             elsif !source[:removed].nil? && source[:removed] == 1
               asset.destroy
             end
           end
         end
       end
+
+      # destroy any assets that were not in the media gallery for each store
+      # this is a failsafe for image deletions that were not registered
+      product.assets.where('gemgento_assets.id NOT IN (?)', assets_to_keep).destroy_all
     end
 
     def set_associated_products(simple_magento_product_ids, configurable_magento_product_ids, product)
