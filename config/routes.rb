@@ -64,6 +64,7 @@ Gemgento::Engine.routes.draw do
     resource :categories, only: :update
     resource :inventory, only: :update
     resource :orders, only: :update
+    resource :products, only: [:update, :destroy]
     resource :product_attribute_sets, only: :update
     resource :product_attributes, only: :update
     resource :stores, only: :update
