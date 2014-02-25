@@ -7,6 +7,13 @@ module Gemgento
 
     config.autoload_paths += %W(#{config.root}/lib)
 
+    # load decorators
+    config.to_prepare do
+      Dir.glob(Rails.root + 'app/decorators/**/*_decorator*.rb').each do |c|
+        require_dependency(c)
+      end
+    end
+
     initializer :gemgento do
 
       # use ActiveAdmin if host application supports it
