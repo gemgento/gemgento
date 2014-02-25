@@ -18,7 +18,7 @@ config_defaults = {
   sellect: false
 }
 
-Gemgento::Config = HashWithIndifferentAccess.new(yaml[Rails.env]).reverse_merge config_defaults
+Gemgento::Config = HashWithIndifferentAccess.new(config_defaults).deep_merge HashWithIndifferentAccess.new(yaml[Rails.env])
 
 # Don't open files as StringIO
 OpenURI::Buffer.send :remove_const, 'StringMax' if OpenURI::Buffer.const_defined?('StringMax')
