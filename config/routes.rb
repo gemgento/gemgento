@@ -12,7 +12,7 @@ Gemgento::Engine.routes.draw do
 
   get '/order_export', to: 'order_export#index'
 
-  get '/shop', to: 'categories#index'
+  get '/shop', to: 'categories#index', as: 'categories'
   get '/shop/search', to: 'search#index'
   get '/search', to: 'search#index'
 
@@ -33,13 +33,13 @@ Gemgento::Engine.routes.draw do
 
   # - Checkout - #
   namespace :checkout do
-    resource :login, only: [:show, :update], controller: 'gemgento/checkout/login'
-    resource :gift, only: :update, controller: 'gemgento/checkout/gift'
-    resource :address, only: [:show, :update], controller: 'gemgento/checkout/address'
-    resource :shipping, only: [:show, :update], controller: 'gemgento/checkout/shipping'
-    resource :payment, only: [:show, :update], controller: 'gemgento/checkout/payment'
-    resource :confirm, only: [:show, :update], controller: 'gemgento/checkout/confirm'
-    resource :thank_you, only: [:show], controller: 'gemgento/checkout/thank_you'
+    resource :login, only: [:show, :update], controller: 'login'
+    resource :gift, only: :update, controller: 'gift'
+    resource :address, only: [:show, :update], controller: 'address'
+    resource :shipping, only: [:show, :update], controller: 'shipping'
+    resource :payment, only: [:show, :update], controller: 'payment'
+    resource :confirm, only: [:show, :update], controller: 'confirm'
+    resource :thank_you, only: [:show], controller: 'thank_you'
   end
 
   # - User Account Actions - #
@@ -63,6 +63,7 @@ Gemgento::Engine.routes.draw do
   # - Gemgento Resources - #
   resources :products, :categories, :orders, :subscribers, :users, :inventory, :product_attributes, :product_attribute_sets, :stores
   resources :countries, only: [:index, :show]
+  resource :search, only: [:show], controller: 'gemgento/search'
 
   patch '/orders', to: 'orders#update'
   put '/orders', to: 'orders#update'
