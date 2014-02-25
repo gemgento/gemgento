@@ -35,7 +35,7 @@ Gemgento::Engine.routes.draw do
   patch 'cart', to: 'cart#update'
 
   # - Checkout - #
-  namespace 'checkout' do
+  namespace :checkout do
     get 'login', to: 'login#show', as: 'login'
     put 'login', to: 'login#update', as: 'login_update'
 
@@ -56,8 +56,18 @@ Gemgento::Engine.routes.draw do
     get 'thank_you', to: 'thank_you#show', as: 'thank_you'
   end
 
-  namespace 'users' do
+  namespace :users do
     resources :orders, :addresses
+  end
+
+  namespace :magento do
+    resource :categories, only: :update
+    resource :inventory, only: :update
+    resource :orders, only: :update
+    resource :product_attribute_sets, only: :update
+    resource :product_attributes, only: :update
+    resource :stores, only: :update
+    resource :users, only: :update
   end
 
   resources :products, :categories, :orders, :subscribers, :users, :inventory, :product_attributes, :product_attribute_sets, :stores
