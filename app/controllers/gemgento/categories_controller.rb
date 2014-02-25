@@ -4,12 +4,9 @@ module Gemgento
     respond_to :json, :html
 
     def index
-      root_category = Gemgento::Category.find_by(parent_id: nil)
-      @categories = Gemgento::Category.where(include_in_menu: true, parent: root_category, is_active: true)
-
-      if params[:updated_at] # only grab categories that were updated after specified timestamp
-        @categories = Gemgento::Category.where('updated_at > ?', params[:updated_at])
-      end
+      @current_category = Gemgento::Category.root
+      @categories = Gemgento::Category.top_level
+      @products = Gemgento::Product.all
 
       respond_to do |format|
         format.html
@@ -18,18 +15,12 @@ module Gemgento
     end
 
     def show
-      @category = Gemgento::Category.where('id = ? OR url_key = ?', params[:id], params[:url_key])
-
-      if params[:updated_at] # only grab the category if it was updated after specified timestamp
-        @category = @category.where('updated_at > ?', params[:updated_at])
-      end
-
-      @category = @category.first
-      @category.includes_category_products = true unless @category.nil?
+      @current_category = Gemgento::Category.where('id = ? OR url_key = ?', params[:id], params[:url_key]).first
+      current_category.includes_category_products = true unless current_category.nil?
 
       respond_to do |format|
         format.html
-        format.json { render json: @category.as_json({ store: current_store })  }
+        format.json { render json: current_category.as_json({ store: current_store })  }
       end
     end
 

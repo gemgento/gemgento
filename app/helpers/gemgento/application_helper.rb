@@ -31,5 +31,9 @@ module Gemgento
       @current_order = Gemgento::Order.get_cart(nil, current_store)
     end
 
+    def current_category
+      @current_category ||= Gemgento::Category.root
+    end
+
   end
 end

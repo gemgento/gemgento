@@ -14,6 +14,7 @@ module Gemgento
 
     default_scope -> { order(:position) }
 
+    scope :root, -> { find_by(parent_id: nil) }
     scope :top_level, -> { where(parent: Gemgento::Category.find_by(parent_id: nil), is_active: true) }
 
     def tree_path
