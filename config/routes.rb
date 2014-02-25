@@ -1,5 +1,5 @@
 Gemgento::Engine.routes.draw do
-  root :to => 'categories#index'
+  root to: 'categories#index'
 
   if defined?(ActiveAdmin)
     devise_for :admin_users, ActiveAdmin::Devise.config
@@ -12,7 +12,7 @@ Gemgento::Engine.routes.draw do
 
   get '/order_export', to: 'order_export#index'
 
-  get '/shop', to: 'categories#index'
+  get '/shop', to: 'categories#index', as: 'categories'
   get '/shop/search', to: 'search#index'
   get '/search', to: 'search#index'
 
@@ -21,7 +21,7 @@ Gemgento::Engine.routes.draw do
   get '/sync/orders', to: 'sync#orders'
   get '/sync/busy', to: 'sync#busy'
 
-  devise_for :users, class_name: 'Gemgento::User',
+  devise_for :users, class_name:  'Gemgento::User',
              controllers: {:sessions => 'gemgento/users/sessions', :registrations => 'gemgento/users/registrations', :passwords => 'gemgento/users/passwords'},
              skip: [:unlocks, :omniauth_callbacks],
              module: :devise
@@ -32,33 +32,38 @@ Gemgento::Engine.routes.draw do
   patch 'cart', to: 'cart#update'
 
   # - Checkout - #
-  namespace 'checkout' do
-    get 'login', to: 'login#show', as: 'login'
-    put 'login', to: 'login#update', as: 'login_update'
-
-    put 'gift', to: 'gift#update', as: 'gift_update'    
-
-    get 'address', to: 'address#show', as: 'address'
-    patch 'address', to: 'address#update', as: 'address_update'
-
-    get 'shipping', to: 'shipping#show', as: 'shipping'
-    patch 'shipping', to: 'shipping#update', as: 'shipping_update'
-
-    get 'payment', to: 'payment#show', as: 'payment'
-    patch 'payment', to: 'payment#update', as: 'payment_update'
-
-    get 'confirm', to: 'confirm#show', as: 'confirm'
-    patch 'confirm', to: 'confirm#update', as: 'confirm_update'
-
-    get 'thank_you', to: 'thank_you#show', as: 'thank_you'
+  namespace :checkout do
+    resource :login, only: [:show, :update], controller: 'login'
+    resource :gift, only: :update, controller: 'gift'
+    resource :address, only: [:show, :update], controller: 'address'
+    resource :shipping, only: [:show, :update], controller: 'shipping'
+    resource :payment, only: [:show, :update], controller: 'payment'
+    resource :confirm, only: [:show, :update], controller: 'confirm'
+    resource :thank_you, only: [:show], controller: 'thank_you'
   end
 
-  namespace 'users' do
-    resources :orders, :addresses
+  # - User Account Actions - #
+  namespace :users do
+    resources :orders, only: [:index, :show]
+    resources :addresses, only: [:index, :show, :create, :destroy]
   end
 
+  # - Magento Push Actions - #
+  namespace :magento do
+    resources :categories, only: :update
+    resources :inventory, only: :update
+    resources :orders, only: :update
+    resources :products, only: [:update, :destroy]
+    resources :product_attribute_sets, only: :update
+    resources :product_attributes, only: :update
+    resources :stores, only: :update
+    resources :users, only: :update
+  end
+
+  # - Gemgento Resources - #
   resources :products, :categories, :orders, :subscribers, :users, :inventory, :product_attributes, :product_attribute_sets, :stores
   resources :countries, only: [:index, :show]
+  resource :search, only: [:show], controller: 'gemgento/search'
 
   patch '/orders', to: 'orders#update'
   put '/orders', to: 'orders#update'
