@@ -13,7 +13,7 @@ config_defaults = {
     encryption:       '',
     debug:            false,
     root:             '/var/www/magento/public',
-    ip_whitelist:     '127.0.0.01'
+    ip_whitelist:     '127.0.0.1'
   },
   sellect: false
 }
