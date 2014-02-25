@@ -1,6 +1,10 @@
 module Gemgento
   class Magento::ProductsController < Magento::MagentoBaseController
 
+    def new
+      @product = Product.new
+    end
+
     def update
       data = params[:data]
 

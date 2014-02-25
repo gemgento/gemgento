@@ -1,5 +1,5 @@
 Gemgento::Engine.routes.draw do
-  root :to => 'categories#index'
+  root to: 'categories#index'
 
   if defined?(ActiveAdmin)
     devise_for :admin_users, ActiveAdmin::Devise.config
@@ -24,7 +24,7 @@ Gemgento::Engine.routes.draw do
   get '/sync/orders', to: 'sync#orders'
   get '/sync/busy', to: 'sync#busy'
 
-  devise_for :users, class_name: 'Gemgento::User',
+  devise_for :users, class_name:  'Gemgento::User',
              controllers: {:sessions => 'gemgento/users/sessions', :registrations => 'gemgento/users/registrations', :passwords => 'gemgento/users/passwords'},
              skip: [:unlocks, :omniauth_callbacks],
              module: :devise
@@ -36,41 +36,34 @@ Gemgento::Engine.routes.draw do
 
   # - Checkout - #
   namespace :checkout do
-    get 'login', to: 'login#show', as: 'login'
-    put 'login', to: 'login#update', as: 'login_update'
-
-    put 'gift', to: 'gift#update', as: 'gift_update'    
-
-    get 'address', to: 'address#show', as: 'address'
-    patch 'address', to: 'address#update', as: 'address_update'
-
-    get 'shipping', to: 'shipping#show', as: 'shipping'
-    patch 'shipping', to: 'shipping#update', as: 'shipping_update'
-
-    get 'payment', to: 'payment#show', as: 'payment'
-    patch 'payment', to: 'payment#update', as: 'payment_update'
-
-    get 'confirm', to: 'confirm#show', as: 'confirm'
-    patch 'confirm', to: 'confirm#update', as: 'confirm_update'
-
-    get 'thank_you', to: 'thank_you#show', as: 'thank_you'
+    resource :login, only: [:show, :update], controller: 'gemgento/checkout/login'
+    resource :gift, only: :update, controller: 'gemgento/checkout/gift'
+    resource :address, only: [:show, :update], controller: 'gemgento/checkout/address'
+    resource :shipping, only: [:show, :update], controller: 'gemgento/checkout/shipping'
+    resource :payment, only: [:show, :update], controller: 'gemgento/checkout/payment'
+    resource :confirm, only: [:show, :update], controller: 'gemgento/checkout/confirm'
+    resource :thank_you, only: [:show], controller: 'gemgento/checkout/thank_you'
   end
 
+  # - User Account Actions - #
   namespace :users do
-    resources :orders, :addresses
+    resources :orders, only: [:index, :show]
+    resources :addresses, only: [:index, :show, :create, :destroy]
   end
 
+  # - Magento Push Actions - #
   namespace :magento do
-    resource :categories, only: :update
-    resource :inventory, only: :update
-    resource :orders, only: :update
-    resource :products, only: [:update, :destroy]
-    resource :product_attribute_sets, only: :update
-    resource :product_attributes, only: :update
-    resource :stores, only: :update
-    resource :users, only: :update
+    resources :categories, only: :update
+    resources :inventory, only: :update
+    resources :orders, only: :update
+    resources :products, only: [:update, :destroy]
+    resources :product_attribute_sets, only: :update
+    resources :product_attributes, only: :update
+    resources :stores, only: :update
+    resources :users, only: :update
   end
 
+  # - Gemgento Resources - #
   resources :products, :categories, :orders, :subscribers, :users, :inventory, :product_attributes, :product_attribute_sets, :stores
   resources :countries, only: [:index, :show]
 
