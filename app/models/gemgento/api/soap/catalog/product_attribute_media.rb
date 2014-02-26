@@ -138,17 +138,17 @@ module Gemgento
             # loop through each return category and add it to the product if needed
             asset_type_codes.each do |asset_type_code|
               unless (asset_type_code.empty?)
-                asset_type = Gemgento::AssetType.where(product_attribute_set_id: asset.product.product_attribute_set_id, code: asset_type_code).first
+                asset_type = Gemgento::AssetType.find_by(product_attribute_set_id: asset.product.product_attribute_set, code: asset_type_code)
+                next if asset_type.nil?
+
                 asset.asset_types << asset_type unless asset.asset_types.include?(asset_type) # don't duplicate the asset types
               end
             end
           end
 
           def self.sync_magento_media_type_to_local(source, product_attribute_set)
-            asset_type = Gemgento::AssetType.where(product_attribute_set_id: product_attribute_set.id, code: source[:code]).first_or_initialize
-            asset_type.code = source[:code]
+            asset_type = Gemgento::AssetType.find_or_initialize_by(product_attribute_set: product_attribute_set, code: source[:code])
             asset_type.scope = source[:scope]
-            asset_type.product_attribute_set = product_attribute_set
             asset_type.save
           end
 
