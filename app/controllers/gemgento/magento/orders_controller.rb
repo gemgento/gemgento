@@ -58,6 +58,7 @@ module Gemgento
       @order.customer_is_guest = data[:customer_is_guest]
       @order.email_sent = data[:email_sent]
       @order.increment_id = data[:increment_id]
+      @order.placed_at = data[:created_at]
       @order.store = Gemgento::Store.find_by(magento_id: data[:store_id])
       @order.save
 

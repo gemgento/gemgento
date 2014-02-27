@@ -134,6 +134,7 @@ module Gemgento
             order.customer_is_guest = source[:customer_is_guest]
             order.email_sent = source[:email_sent]
             order.increment_id = source[:increment_id]
+            order.placed_at = source[:created_at]
             order.store = Gemgento::Store.find_by(magento_id: source[:store_id])
             order.save
 
