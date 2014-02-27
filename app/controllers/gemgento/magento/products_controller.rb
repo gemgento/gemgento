@@ -105,15 +105,13 @@ module Gemgento
           media_gallery.each do |source| # cycle through the store specific assets
             asset = Gemgento::Asset.find_or_initialize_by(product_id: product.id, file: source[:file], store: store)
 
-            if !source[:removed].nil? && source[:removed] == 0
+            if !source[:removed].nil? && source[:removed] == 1
+              asset.destroy
+            else
+              url, file = get_url_and_file(source)
 
-              if source[:new_file].nil?
-                url = source[:url]
-                file = source[:file]
-              else
-                url = "http://#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:new_file]}"
-                file = source[:new_file]
-              end
+              puts url.inspect
+              puts file.inspect
 
               asset.url = url
               asset.position = source[:position]
@@ -125,10 +123,8 @@ module Gemgento
               asset.store = store
               asset.save
 
+              asset.set_types_by_codes(source[:types])
               assets_to_keep << asset.id
-
-            elsif !source[:removed].nil? && source[:removed] == 1
-              asset.destroy
             end
           end
         end
@@ -170,6 +166,20 @@ module Gemgento
       end
 
       product.configurable_products.where('configurable_product_id NOT IN (?)', configurable_product_ids).clear
+    end
+
+    def get_url_and_file(source)
+      puts source.inspect
+
+      if source[:new_file].nil?
+        url = "http://#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:file]}"
+        file = source[:file]
+      else
+        url = "http://#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:new_file]}"
+        file = source[:new_file]
+      end
+
+      return url, file
     end
 
   end

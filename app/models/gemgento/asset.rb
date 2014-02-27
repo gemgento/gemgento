@@ -55,6 +55,25 @@ module Gemgento
       end
     end
 
+    def set_types_by_codes(asset_type_codes)
+      puts asset_type_codes.inspect
+      applied_asset_types = []
+
+      # loop through each return category and add it to the product if needed
+      asset_type_codes.each do |asset_type_code|
+        unless (asset_type_code.blank?)
+          asset_type = Gemgento::AssetType.find_by(product_attribute_set: self.product.product_attribute_set, code: asset_type_code)
+          next if asset_type.nil?
+
+          self.asset_types << asset_type unless self.asset_types.include? asset_type # don't duplicate the asset types
+          applied_asset_types << asset_type.id
+        end
+      end
+
+      # destroy any asset type associations that were not in the list
+      self.asset_types.where('asset_type_id NOT IN (?)', applied_asset_types).destroy_all
+    end
+
     private
 
     def sync_local_to_magento
