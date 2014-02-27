@@ -6,7 +6,7 @@ module Gemgento
     belongs_to :store
     belongs_to :asset_file
 
-    has_and_belongs_to_many :asset_types, -> { uniq }, join_table: 'gemgento_assets_asset_types'
+    has_and_belongs_to_many :asset_types, join_table: 'gemgento_assets_asset_types'
 
     after_save :sync_local_to_magento
     after_save :touch_product

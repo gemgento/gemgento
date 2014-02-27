@@ -128,7 +128,7 @@ module Gemgento
           end
 
           def self.set_types(asset_type_codes, asset)
-            asset.asset_types.destroy_all
+            applied_asset_types = []
 
             # if there is only one category, the returned value is not interpreted array
             unless asset_type_codes.is_a? Array
@@ -137,13 +137,17 @@ module Gemgento
 
             # loop through each return category and add it to the product if needed
             asset_type_codes.each do |asset_type_code|
-              unless (asset_type_code.empty?)
-                asset_type = Gemgento::AssetType.find_by(product_attribute_set_id: asset.product.product_attribute_set, code: asset_type_code)
+              unless (asset_type_code.blank?)
+                asset_type = Gemgento::AssetType.find_by(product_attribute_set: asset.product.product_attribute_set, code: asset_type_code)
                 next if asset_type.nil?
 
-                asset.asset_types << asset_type unless asset.asset_types.include?(asset_type) # don't duplicate the asset types
+                asset.asset_types << asset_type unless asset.asset_types.include? asset_type # don't duplicate the asset types
+                applied_asset_types << asset_type.id
               end
             end
+
+            # destroy any asset type associations that were not in the list
+            asset.asset_types.where('asset_type_id NOT IN (?)', applied_asset_types).destroy_all
           end
 
           def self.sync_magento_media_type_to_local(source, product_attribute_set)

@@ -37,7 +37,9 @@ module Gemgento
             Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch(product, store)
           end
 
-          def self.list(store, last_updated = nil)
+          def self.list(store = nil, last_updated = nil)
+            store = Gemgento::Store.current if store.nil?
+
             if last_updated.nil?
               message = {}
             else
