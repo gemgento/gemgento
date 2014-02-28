@@ -62,8 +62,9 @@ module Gemgento
       @order.store = Gemgento::Store.find_by(magento_id: data[:store_id])
       @order.save
 
-      sync_magento_address_to_local(data[:shipping_address], @order, @order.shipping_address)
-      sync_magento_address_to_local(data[:billing_address], @order, @order.billing_address)
+      @order.shipping_address = sync_magento_address_to_local(data[:shipping_address], @order, @order.shipping_address)
+      @order.billing_address = sync_magento_address_to_local(data[:billing_address], @order, @order.billing_address)
+      @order.save
 
       unless data[:items].nil?
         data[:items].each do |item|
