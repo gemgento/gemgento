@@ -83,7 +83,8 @@ module Gemgento
                 qty: inventory.quantity.to_s,
                 'is_in_stock' => inventory.is_in_stock ? 1 : 0,
                 'manage_stock' => 1,
-                'use_default_website_stock' => inventory.use_default_website_stock ? 1 : 0
+                'use_default_website_stock' => inventory.use_default_website_stock ? 1 : 0,
+                'use_config_manage_stock' => 0
             }
 
             if !inventory.use_default_website_stock
