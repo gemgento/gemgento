@@ -73,7 +73,7 @@ magento_production:
 
 ####Creating Gemgento's API User in Magento:
 
-####Synching:
+####Syncing:
 
 ####Images:
 
