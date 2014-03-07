@@ -19,7 +19,7 @@ module Gemgento
           def self.add_track(shipment_track)
             message = {
                 shipment_increment_id: shipment_track.shipment.increment_id,
-                carrier: shipment_track.carrier,
+                carrier: shipment_track.carrier_code,
                 title: shipment_track.title,
                 track_number: shipment_track.number
             }
