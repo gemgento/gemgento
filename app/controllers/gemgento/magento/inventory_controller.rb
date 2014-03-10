@@ -38,8 +38,6 @@ module Gemgento
         end
       end
 
-
-
       render nothing: true
     end
 
