@@ -12,10 +12,10 @@ module Gemgento
 
     attr_accessor :includes_category_products
 
-    default_scope -> { order(:position) }
+    default_scope -> { where(deleted_at: nil).order(:position) }
 
-    scope :root, -> { find_by(parent_id: nil) }
     scope :top_level, -> { where(parent: Gemgento::Category.find_by(parent_id: nil), is_active: true) }
+    scope :root, -> { find_by(parent_id: nil) }
 
     def tree_path
       path = self.name
@@ -89,6 +89,15 @@ module Gemgento
       end
 
       return result
+    end
+
+    def mark_deleted
+      self.deleted_at = Time.now
+    end
+
+    def mark_deleted!
+      mark_deleted
+      self.save
     end
 
   end

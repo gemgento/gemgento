@@ -21,7 +21,7 @@ Gemgento::Engine.routes.draw do
   get '/sync/orders', to: 'sync#orders'
   get '/sync/busy', to: 'sync#busy'
 
-  devise_for :users, class_name:  'Gemgento::User',
+  devise_for :users, class_name: 'Gemgento::User',
              controllers: {:sessions => 'gemgento/users/sessions', :registrations => 'gemgento/users/registrations', :passwords => 'gemgento/users/passwords'},
              skip: [:unlocks, :omniauth_callbacks],
              module: :devise
@@ -50,7 +50,7 @@ Gemgento::Engine.routes.draw do
 
   # - Magento Push Actions - #
   namespace :magento do
-    resources :categories, only: :update
+    resources :categories, only: [:update, :destroy]
     resources :inventory, only: :update
     resources :orders, only: :update
     resources :products, only: [:update, :destroy]

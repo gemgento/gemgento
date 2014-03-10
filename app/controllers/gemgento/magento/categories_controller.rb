@@ -29,6 +29,13 @@ module Gemgento
       render nothing: true
     end
 
+    def destroy
+      @category = Gemgento::Category.find_by(magento_id: params[:id])
+      @category.mark_deleted! unless @category.nil?
+
+      render nothing: true
+    end
+
     private
 
     def set_stores(magento_store_ids, category)
