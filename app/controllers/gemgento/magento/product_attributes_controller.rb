@@ -28,6 +28,13 @@ module Gemgento
       render nothing: true
     end
 
+    def destroy
+      @product_attribute = Gemgento::ProductAttribute.find_by(magento_id: params[:id])
+      @product_attribute.mark_deleted! unless @product_attribute.nil?
+
+      render nothing: true
+    end
+
     private
 
     def set_options(product_attribute, options)

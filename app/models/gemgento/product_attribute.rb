@@ -11,8 +11,19 @@ module Gemgento
 
     after_save :sync_local_to_magento
 
+    default_scope -> { where(deleted_at: nil) }
+
     def self.ignored
       %w[sku gemgento_id]
+    end
+
+    def mark_deleted
+      self.deleted_at = Time.now
+    end
+
+    def mark_deleted!
+      mark_deleted
+      self.save
     end
 
     private

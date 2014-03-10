@@ -54,8 +54,8 @@ Gemgento::Engine.routes.draw do
     resources :inventory, only: :update
     resources :orders, only: :update
     resources :products, only: [:update, :destroy]
-    resources :product_attribute_sets, only: :update
-    resources :product_attributes, only: :update
+    resources :product_attribute_sets, only: [:update, :destroy]
+    resources :product_attributes, only: [:update, :destroy]
     resources :stores, only: :update
     resources :users, only: [:update, :destroy]
   end
