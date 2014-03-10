@@ -2,8 +2,9 @@
 
 module Gemgento
   class User < ActiveRecord::Base
-    devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable,
-           request_keys: [:deleted_at]
+    devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable
+
+    validates :email, uniqueness: {scope: :deleted_at}, presence: true
 
     belongs_to :user_group
 
@@ -67,10 +68,6 @@ module Gemgento
     def mark_deleted!
       mark_deleted
       self.save
-    end
-
-    def self.find_for_authentication(warden_conditions)
-      where(email: warden_conditions[:email], deleted_at: warden_conditions[:deleted_at]).first
     end
 
     private
