@@ -2,17 +2,19 @@
 
 module Gemgento
   class User < ActiveRecord::Base
-    devise :database_authenticatable, :registerable,
-           :recoverable, :rememberable, :trackable, :validatable
+    devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable,
+           request_keys: [:deleted_at]
 
     belongs_to :user_group
 
     has_many :addresses
     has_many :orders
 
-    has_and_belongs_to_many :stores, ->{ distinct }, join_table: 'gemgento_stores_users', class_name: 'Store'
+    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_users', class_name: 'Store'
 
     after_save :sync_local_to_magento
+
+    default_scope -> { where(deleted_at: nil) }
 
     def self.index
       if User.all.size == 0
@@ -56,6 +58,19 @@ module Gemgento
 
     def is_subscriber?
       return !Subscriber.find_by(email: self.email).nil?
+    end
+
+    def mark_deleted
+      self.deleted_at = Time.now
+    end
+
+    def mark_deleted!
+      mark_deleted
+      self.save
+    end
+
+    def self.find_for_authentication(warden_conditions)
+      where(email: warden_conditions[:email], deleted_at: warden_conditions[:deleted_at]).first
     end
 
     private
