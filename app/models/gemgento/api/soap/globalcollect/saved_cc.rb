@@ -38,6 +38,7 @@ module Gemgento
             saved_cc = Gemgento::SavedCreditCard.find_or_initialize_by(magento_id: token[:token_id])
             saved_cc.user_id = user_id
             saved_cc.token = token[:token]
+            saved_cc.cc_number = token[:cc_number]
             saved_cc.exp_month = token[:expire_date][0..1]
             saved_cc.exp_year = token[:expire_date][2..3]
             saved_cc.cc_type = token[:payment_product_id]

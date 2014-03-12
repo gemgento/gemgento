@@ -10,6 +10,7 @@ module Gemgento
 
     has_many :addresses
     has_many :orders
+    has_many :saved_credit_cards
 
     has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_users', class_name: 'Store'
 

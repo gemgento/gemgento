@@ -27,7 +27,8 @@ module Gemgento
         @exp_months[month] = month_string
       end
 
-      current_order.order_payment = OrderPayment.new if current_order.order_payment.nil?
+      @saved_credit_cards = current_user.saved_credit_cards
+      @order_payment =  current_order.order_payment.nil? ? Gemgento::OrderPayment.new : current_order.order_payment
 
       respond_to do |format|
         format.html
@@ -37,6 +38,7 @@ module Gemgento
               card_types: @card_types,
               exp_years: @exp_years,
               exp_months: @exp_months,
+              saved_credit_cards: @saved_credit_cards,
               total: @total,
               tax: @tax,
               shipping: @shipping
