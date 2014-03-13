@@ -49,19 +49,16 @@ module Gemgento
 
     def update
       if current_order.order_payment.nil?
-        current_order.order_payment = OrderPayment.new(order_payment_params)
+        @order_payment = Gemgento::OrderPayment.new(order_payment_params)
+        @order_payment.order = current_order
       else
-        current_order.order_payment.update_attributes(order_payment_params)
+        @order_payment = current_order.order_payment.update_attributes(order_payment_params)
       end
 
-      if current_order.order_payment.cc_owner.nil?
-        current_order.order_payment.cc_owner = "#{current_order.billing_address.fname} #{current_order.billing_address.lname}"
-      end
-
-      current_order.order_payment.cc_last4 = current_order.order_payment.cc_number[-4..-1]
+      @order_payment.cc_last4 = @order_payment.cc_number[-4..-1]
 
       respond_to do |format|
-        if current_order.order_payment.save && current_order.push_payment_method
+        if @order_payment.save && current_order.push_payment_method
           session[:payment_data] = order_payment_params
 
           format.html { redirect_to checkout_confirm_path }
@@ -73,7 +70,7 @@ module Gemgento
           format.json do
             render json: {
                 result: false,
-                errors: current_order.order_payment.errors.any? ? current_order.order_payment.errors.full_messages : 'Invalid payment information. Please review all details and try again.'
+                errors: @order_payment.errors.any? ? @order_payment.errors.full_messages : 'Invalid payment information. Please review all details and try again.'
             }
           end
         end
