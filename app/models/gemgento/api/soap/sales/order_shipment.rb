@@ -28,7 +28,7 @@ module Gemgento
             return response.success?
           end
 
-          def self.create(order_increment_id, email = nil, comment = nil, include_comment = nil)
+          def self.create(order_increment_id, email = 0, comment = nil, include_comment = nil)
             message = {
                 order_increment_id: order_increment_id,
                 email: email,
@@ -90,6 +90,16 @@ module Gemgento
                 track_id: track_id
             }
             response = Gemgento::Magento.create_call(:sales_order_shipment_remove_track, message)
+
+            return response.success?
+          end
+
+          def self.send_info(shipment_increment_id, comment = '')
+            message = {
+                shipment_increment_id: shipment_increment_id,
+                comment: comment
+            }
+            response = Gemgento::Magento.create_call(:sales_order_shipment_send_info, message)
 
             return response.success?
           end
