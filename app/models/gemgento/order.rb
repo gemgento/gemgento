@@ -153,7 +153,7 @@ module Gemgento
 
     def push_customer
       self.reload
-      raise 'Order user has not been set' if self.user.nil?
+      raise 'Order user has not been set' if self.user.nil? && !self.customer_is_guest
       API::SOAP::Checkout::Customer.set(self, self.user)
     end
 
