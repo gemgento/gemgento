@@ -6,17 +6,10 @@ module Gemgento
     has_many :shipment_items
     has_many :shipment_tracks
 
-    after_create :push_to_magento
-
-    attr_accessor :include_in_email
+    before_create :push_to_magento, unless: :increment_id
 
     def send_email
-      comment = Gemgento::ShipmentComment.new
-      comment.shipment = self
-      comment.comment = 'Sending shipment email from Gemgento'
-      comment.is_customer_notified = true
-      comment.include_in_email = false
-      comment.save
+      Gemgento::API::SOAP::Sales::OrderShipment.send_info(self.increment_id)
     end
 
     private
