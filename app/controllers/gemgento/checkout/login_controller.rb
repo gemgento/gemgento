@@ -32,8 +32,9 @@ module Gemgento
       if user_signed_in? && (current_order.user.nil? || current_order.user == current_user)
         current_order.customer_is_guest = false
         current_order.user = current_user
-        current_order.push_customer
         current_order.save
+
+        current_order.push_customer
 
         respond_to do |format|
           format.html { redirect_to checkout_address_path }
