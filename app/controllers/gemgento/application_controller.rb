@@ -1,5 +1,5 @@
 class Gemgento::ApplicationController < ApplicationController
-  include SslRequirement
+  include Gemgento::SslRequirement
 
   before_filter :set_store
 
