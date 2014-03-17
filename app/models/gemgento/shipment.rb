@@ -12,6 +12,14 @@ module Gemgento
       Gemgento::API::SOAP::Sales::OrderShipment.send_info(self.increment_id)
     end
 
+    def as_json(options = nil)
+      result = super
+      result['comments'] = self.shipment_comments
+      result['tracks'] = self.shipment_tracks
+
+      return result
+    end
+
     private
 
     def push_to_magento

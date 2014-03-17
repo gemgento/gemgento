@@ -144,7 +144,7 @@ module Gemgento
     def get_payment_methods
       API::SOAP::Checkout::Payment.list(self)
     end
-
+                                                                            as_json
     def push_payment_method
       self.reload
       raise 'Order payment method has not been set' if self.order_payment.nil?
@@ -197,6 +197,7 @@ module Gemgento
       result['billing_address'] = self.billing_address
       result['payment'] = self.order_payment
       result['statuses'] = self.order_statuses
+      result['shipments'] = self.shipments
       return result
     end
 
