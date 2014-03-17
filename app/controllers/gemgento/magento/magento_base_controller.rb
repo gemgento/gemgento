@@ -1,5 +1,5 @@
 module Gemgento
-  class Magento::MagentoBaseController < BaseController
+  class Magento::MagentoBaseController < ApplicationController
     before_filter :validate_ip
 
     def validate_ip

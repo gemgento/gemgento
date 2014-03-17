@@ -1,5 +1,5 @@
 module Gemgento
-  class UsersController < BaseController
+  class UsersController < ApplicationController
     before_filter :auth_user, except: [:update, :index]
 
     respond_to :json, :html

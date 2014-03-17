@@ -1,5 +1,5 @@
 module Gemgento
-  class CountriesController < BaseController
+  class CountriesController < ApplicationController
 
     respond_to :json, :html
 

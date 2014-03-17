@@ -1,5 +1,5 @@
 module Gemgento
-  class ProductsController < BaseController
+  class ProductsController < ApplicationController
 
     respond_to :json, :html
 

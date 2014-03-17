@@ -1,5 +1,5 @@
 module Gemgento
-  class SubscribersController < BaseController
+  class SubscribersController < ApplicationController
 
     respond_to :js, :json, :html
 

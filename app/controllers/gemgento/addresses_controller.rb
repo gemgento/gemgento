@@ -1,5 +1,5 @@
 module Gemgento
-  class AddressesController < BaseController
+  class AddressesController < ApplicationController
     ssl_allowed :region_options
 
     layout -> { set_layout false }

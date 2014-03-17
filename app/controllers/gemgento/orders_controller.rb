@@ -1,5 +1,5 @@
 module Gemgento
-  class OrdersController < BaseController
+  class OrdersController < ApplicationController
     ssl_allowed
 
     def show

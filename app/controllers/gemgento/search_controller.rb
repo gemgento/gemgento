@@ -1,5 +1,5 @@
 module Gemgento
-  class SearchController < BaseController
+  class SearchController < ApplicationController
 
     def index
       @results = Gemgento::Search.products(params[:query])
