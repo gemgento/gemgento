@@ -11,9 +11,14 @@ module Gemgento
           end
 
           def self.fetch(user)
+            saved_cards = []
+
             tokens(user.magento_id).each do |token|
-              sync_magento_to_local(token, user.id)
+              saved_cards << sync_magento_to_local(token, user.id)
             end
+
+            # destroy saved cards that were not returned
+            Gemgento::SavedCreditCard.where(user: user).where('id NOT IN (?)', saved_cards.collect(&:id)).delete_all
           end
 
           def self.tokens(customer_id)
@@ -43,6 +48,8 @@ module Gemgento
             saved_cc.exp_year = token[:expire_date][2..3]
             saved_cc.cc_type = token[:payment_product_id]
             saved_cc.save
+
+            return saved_cc
           end
 
         end
