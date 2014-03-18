@@ -1,5 +1,5 @@
 module Gemgento
-  class Magento::ProductsController < Magento::MagentoBaseController
+  class Magento::ProductsController < MagentoController
 
     def new
       @product = Product.new

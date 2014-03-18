@@ -1,5 +1,5 @@
 module Gemgento
-  class Magento::UsersController < Magento::MagentoBaseController
+  class Magento::UsersController < MagentoController
 
     def update
       @user = Gemgento::User.find_or_initialize_by(magento_id: params[:id])

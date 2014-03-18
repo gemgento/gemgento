@@ -1,5 +1,7 @@
 module Gemgento
-  class Magento::MagentoBaseController < ApplicationController
+  class MagentoController < ApplicationController
+
+    skip_before_action :verify_authenticity_token
     before_filter :validate_ip
 
     def validate_ip

@@ -1,5 +1,5 @@
 module Gemgento
-  class Magento::ProductAttributeSetsController < Magento::MagentoBaseController
+  class Magento::ProductAttributeSetsController < MagentoController
 
     def update
       data = params[:data]

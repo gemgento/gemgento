@@ -1,5 +1,5 @@
 module Gemgento
-  class Magento::OrdersController < Magento::MagentoBaseController
+  class Magento::OrdersController < MagentoController
 
     def update
       data = params[:data]

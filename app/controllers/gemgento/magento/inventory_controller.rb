@@ -1,5 +1,5 @@
 module Gemgento
-  class Magento::InventoryController < Magento::MagentoBaseController
+  class Magento::InventoryController < MagentoController
 
     def update
       data = params[:data]

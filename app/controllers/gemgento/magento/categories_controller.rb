@@ -1,5 +1,5 @@
 module Gemgento
-  class Magento::CategoriesController < Magento::MagentoBaseController
+  class Magento::CategoriesController < MagentoController
 
     def update
       @category = Gemgento::Category.find_or_initialize_by(magento_id: params[:id])
