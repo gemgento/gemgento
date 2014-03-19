@@ -52,7 +52,8 @@ module Gemgento
         @order_payment = Gemgento::OrderPayment.new(order_payment_params)
         @order_payment.order = current_order
       else
-        @order_payment = current_order.order_payment.update_attributes(order_payment_params)
+        @order_payment = current_order.order_payment
+        @order_payment.attributes = order_payment_params
       end
 
       @order_payment.cc_last4 = @order_payment.cc_number[-4..-1]
