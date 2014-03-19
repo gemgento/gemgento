@@ -367,7 +367,10 @@ module Gemgento
         simple_products = self.simple_products
       end
 
-      self.configurable_attributes.each do |attribute|
+      configurable_attributes = self.product_attribute_set.product_attributes.
+          where(is_configurable: true, frontend_input: 'select', scope: 'global')
+
+      configurable_attributes.each do |attribute|
         order[attribute.code] = {}
         attribute.product_attribute_options.where(store: store).each do |option|
 
