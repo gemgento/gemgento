@@ -11,10 +11,10 @@ module Gemgento
       @billing_address = current_order.billing_address
       @payment = current_order.order_payment
 
-      if session[:shipping_methods].nil?
+      if cookies[:shipping_methods].nil?
         shipping_methods = current_order.get_shipping_methods
       else
-        shipping_methods = session[:shipping_methods]
+        shipping_methods = cookies[:shipping_methods]
       end
 
       shipping_methods.each do |shipping_method|

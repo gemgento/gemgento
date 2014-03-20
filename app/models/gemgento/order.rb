@@ -144,21 +144,18 @@ module Gemgento
     def get_payment_methods
       API::SOAP::Checkout::Payment.list(self)
     end
-                                                                            as_json
+
     def push_payment_method
-      self.reload
       raise 'Order payment method has not been set' if self.order_payment.nil?
       API::SOAP::Checkout::Payment.method(self, self.order_payment)
     end
 
     def push_customer
-      self.reload
       raise 'Order user has not been set' if self.user.nil? && !self.customer_is_guest
       API::SOAP::Checkout::Customer.set(self, self.user)
     end
 
     def get_shipping_methods
-      self.reload
       raise 'Order shipping address not set' if self.shipping_address.nil?
       return  API::SOAP::Checkout::Shipping.list(self)
     end
