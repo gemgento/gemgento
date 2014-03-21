@@ -14,11 +14,11 @@ module Gemgento
       if cookies[:shipping_methods].nil?
         shipping_methods = current_order.get_shipping_methods
       else
-        shipping_methods = cookies[:shipping_methods]
+        shipping_methods = JSON.parse(cookies[:shipping_methods])
       end
-
+      puts shipping_methods.inspect
       shipping_methods.each do |shipping_method|
-        if shipping_method[:code] == current_order.shipping_method
+        if shipping_method['code'] == current_order.shipping_method
           @shipping_method = shipping_method
           break
         else

@@ -7,7 +7,8 @@ module Gemgento
 
     def show
       set_totals
-      cookies[:shipping_methods] = @shipping_methods = current_order.get_shipping_methods
+      @shipping_methods = current_order.get_shipping_methods
+      cookies[:shipping_methods] = @shipping_methods.to_json
 
       respond_to do |format|
         format.html
