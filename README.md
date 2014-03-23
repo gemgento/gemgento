@@ -12,11 +12,16 @@ Before configuring the Rails app, make sure you are able to access the Magento A
 
 Then, in your Rails 4 app's Gemfile, add:
 
+````
+    source http://gems.gemgento.com
     gem 'gemgento'
+````
 
 Then from your Rails root, run:
 
+````
     bundle install
+````
 
 ##Configuration:
 In config/gemgento_config.yml
@@ -41,8 +46,9 @@ production:
     encryption: 4de6a444ff58bf44013f3bc05256f1b3
 ````
 
-The Magento database connection information must also be added to database.yml
+In version 1.0, the Magento database connection information must also be added to database.yml:
 
+In config/database.yml
 ````
 magento_development:
   adapter: 
@@ -68,16 +74,6 @@ magento_production:
   host: 
   port:  
 ````
-
-##TODO:  Add these sections:
-
-####Creating Gemgento's API User in Magento:
-
-####Syncing:
-
-####Images:
-
-####Active Admin - Gemgento's Rails CMS:
 
 
 
