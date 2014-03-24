@@ -41,7 +41,7 @@ module Gemgento
     end
 
     def update
-      @address = current_user.address_book.find(params[:id]).first
+      @address = current_user.address_book.find(params[:id])
 
       respond_to do |format|
         if @address.update_attributes(address_params)

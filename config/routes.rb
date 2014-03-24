@@ -45,7 +45,7 @@ Gemgento::Engine.routes.draw do
   # - User Account Actions - #
   namespace :users do
     resources :orders, only: [:index, :show]
-    resources :addresses, only: [:index, :show, :create, :destroy]
+    resources :addresses
   end
 
   # - Magento Push Actions - #
