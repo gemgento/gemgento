@@ -169,6 +169,14 @@ module Gemgento
             category.include_in_menu = subject[:include_in_menu] == 1 ? true : false
             category.all_children = subject[:all_children].nil? ? '' : subject[:all_children]
 
+            if subject.key? :image
+              begin
+                category.image = open("http://#{Gemgento::Config[:magento][:url]}/media/catalog/category/#{subject[:image]}")
+              rescue
+                category.image = nil
+              end
+            end
+
             category.sync_needed = false
             category.save
 
