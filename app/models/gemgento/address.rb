@@ -19,6 +19,8 @@ module Gemgento
 
     after_save :sync_local_to_magento
 
+    before_destroy :destroy_magento
+
     def self.index
       if Address.all.size == 0
         API::SOAP::Customer::Address.fetch_all
@@ -75,6 +77,12 @@ module Gemgento
         end
         self.sync_needed = false
         self.save
+      end
+    end
+
+    def destroy_magento
+      unless self.user_address_id.nil?
+        API::SOAP::Customer::Address.delete(self.user_address_id)
       end
     end
   end
