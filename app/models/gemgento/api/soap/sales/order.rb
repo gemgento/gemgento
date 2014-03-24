@@ -80,10 +80,10 @@ module Gemgento
 
           # Save Magento order to local
           def self.sync_magento_to_local(source)
-            order = Gemgento::Order.where(increment_id: source[:increment_id].to_i).first_or_initialize
+            order = Gemgento::Order.where(increment_id: source[:increment_id]).first_or_initialize
             order.order_id = source[:order_id]
             order.is_active = source[:is_active]
-            order.user = User.where(magento_id: source[:customer_id]).first
+            order.user = User.find_by(magento_id: source[:customer_id])
             order.tax_amount = source[:tax_amount]
             order.shipping_amount = source[:shipping_amount]
             order.discount_amount = source[:discount_amount]
@@ -134,18 +134,14 @@ module Gemgento
             order.customer_is_guest = source[:customer_is_guest]
             order.email_sent = source[:email_sent]
             order.increment_id = source[:increment_id]
-
-            store = Gemgento::Store.where(magento_id: source[:store_id]).first
-
-            if store.nil?
-              store = Gemgento::Store.current
-            end
-
-            order.store = store
+            order.placed_at = source[:created_at]
+            order.store = Gemgento::Store.find_by(magento_id: source[:store_id])
             order.save
 
-            sync_magento_address_to_local(source[:shipping_address], order, order.shipping_address)
-            sync_magento_address_to_local(source[:billing_address], order, order.billing_address)
+            order.shipping_address = sync_magento_address_to_local(source[:shipping_address], order, order.shipping_address)
+            order.billing_address = sync_magento_address_to_local(source[:billing_address], order, order.billing_address)
+            order.save
+
             sync_magento_payment_to_local(source[:payment], order)
 
             unless source[:gift_message_id].nil?
@@ -175,14 +171,15 @@ module Gemgento
             address = Gemgento::Address.where(order_address_id: source[:address_id].to_i).first_or_initialize if address.nil?
             address.order_address_id = source[:address_id]
             address.order = order
+            address.user = order.user
             address.increment_id = source[:increment_id]
             address.city = source[:city]
             address.company = source[:company]
             address.country = Country.where(magento_id: source[:country_id]).first
             address.fax = source[:fax]
-            address.fname = source[:firstname]
-            address.mname = source[:middlename]
-            address.lname = source[:lastname]
+            address.first_name = source[:firstname]
+            address.middle_name = source[:middlename]
+            address.last_name = source[:lastname]
             address.postcode = source[:postcode]
             address.prefix = source[:prefix]
             address.region_name = source[:region]
@@ -193,9 +190,9 @@ module Gemgento
             address.is_default = source[:is_default_billing] || source[:is_default_shipping] ? 1 : 0
             address.address_type = source[:address_type]
             address.sync_needed = false
-            address.save
+            address.save validate: false
 
-            address
+            return address
           end
 
           def self.sync_magento_payment_to_local(source, order)
@@ -218,7 +215,7 @@ module Gemgento
             payment.cc_exp_year = source[:cc_exp_year]
             payment.cc_ss_start_month = source[:cc_ss_start_month]
             payment.cc_ss_start_year = source[:cc_ss_start_year]
-            payment.save
+            payment.save validate: false
 
             payment
           end

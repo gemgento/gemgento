@@ -4,12 +4,15 @@ module Gemgento
                             :join_table => 'gemgento_attribute_set_attributes'
     has_many :products
 
-    def self.index
-      if ProductAttributeSet.all.size == 0
-        API::SOAP::Catalog::ProductAttributeSet.fetch_all
-      end
+    default_scope -> { where(deleted_at: nil) }
 
-      ProductAttributeSet.all
+    def mark_deleted
+      self.deleted_at = Time.now
+    end
+
+    def mark_deleted!
+      mark_deleted
+      self.save
     end
 
   end

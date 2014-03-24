@@ -61,7 +61,11 @@ module Gemgento
     private
 
     def ssl_supported?
-      return Rails.env.production?
+      if Gemgento::Config[:require_ssl] == false
+        return false
+      else
+        return Rails.env.production?
+      end
     end
 
     def ensure_proper_protocol

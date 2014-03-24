@@ -1,5 +1,5 @@
 module Gemgento
-  class SyncController < BaseController
+  class SyncController < ApplicationController
     before_filter :ensure_no_active_product_sync, :except => [:busy, :orders, :everything]
     before_filter :ensure_no_active_order_sync, :except => [:busy, :products, :everything]
 

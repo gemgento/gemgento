@@ -63,9 +63,9 @@ module Gemgento
             end
           end
 
-          def self.create(customer)
+          def self.create(customer, store)
             message = {
-                customer_data: compose_customer_data(customer)
+                customer_data: compose_customer_data(customer, store)
             }
             response = Gemgento::Magento.create_call(:customer_customer_create, message)
 
@@ -79,15 +79,15 @@ module Gemgento
             end
           end
 
-          def self.update(customer)
+          def self.update(customer, store)
             message = {
                 customer_id: customer.magento_id,
-                customer_data: compose_customer_data(customer)
+                customer_data: compose_customer_data(customer, store)
             }
             response = Gemgento::Magento.create_call(:customer_customer_update, message)
 
             if response.success?
-              unless customer.magento_password.include? ':'
+              if customer.magento_password.nil? || !customer.magento_password.include?(':')
                 # pull customer information to get the password
                 sync_magento_to_local(info(customer.magento_id))
               end
@@ -127,12 +127,12 @@ module Gemgento
 
             user.magento_id = source[:customer_id]
             user.increment_id = source[:increment_id]
-            user.store = Store.find_by(magento_id: source[:store_id])
+            user.stores << Gemgento::Store.find_by(magento_id: source[:store_id]) unless source[:store_id] == '0' || user.stores.include?(Gemgento::Store.find_by(magento_id: source[:store_id]))
             user.created_in = source[:created_in]
             user.email = source[:email]
-            user.fname = source[:firstname]
-            user.mname = source[:middlename]
-            user.lname = source[:lastname]
+            user.first_name = source[:firstname]
+            user.middle_name = source[:middlename]
+            user.last_name = source[:lastname]
             user.user_group = UserGroup.where(magento_id: source[:group_id]).first
             user.prefix = source[:prefix]
             user.suffix = source[:suffix]
@@ -140,28 +140,30 @@ module Gemgento
             user.taxvat = source[:taxvat]
             user.confirmation = source[:confirmation]
             user.magento_password = source[:password_hash]
+            user.gender = source[:gender]
             user.sync_needed = false
             user.save(validate: false)
 
             Gemgento::API::SOAP::Customer::Address.fetch(user)
           end
 
-          def self.compose_customer_data(customer)
+          def self.compose_customer_data(customer, store)
             customer_data = {
                 email: customer.email,
-                firstname: customer.fname,
-                middlename: customer.mname,
-                lastname: customer.lname,
-                'store_id' => customer.store.magento_id,
+                firstname: customer.first_name,
+                middlename: customer.middle_name,
+                lastname: customer.last_name,
+                'store_id' => store.magento_id,
                 'group_id' => customer.user_group.magento_id,
-                'website_id' => '1',
+                'website_id' => store.website_id,
                 prefix: customer.prefix,
                 suffix: customer.suffix,
-                dob: customer.dob,
-                taxvat: customer.taxvat
+                dob: customer.dob.nil? ? nil : "#{customer.dob.inspect} 00:00:00",
+                taxvat: customer.taxvat,
+                gender: customer.gender.nil? ? nil : customer.gender.to_i
             }
 
-            unless customer.magento_password.include? ':'
+            unless customer.magento_password.nil? || customer.magento_password.include?(':')
               customer_data[:password] = customer.magento_password # pass plain text password, magento needs to encrypt it (stupid magento)
             end
 

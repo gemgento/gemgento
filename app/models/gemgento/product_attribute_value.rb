@@ -2,6 +2,9 @@ module Gemgento
   class ProductAttributeValue < ActiveRecord::Base
     belongs_to :product
     belongs_to :product_attribute
+    belongs_to :store
+
+    has_many :product_attribute_options
 
     default_scope -> { includes(:product_attribute) }
 
@@ -10,7 +13,7 @@ module Gemgento
     private
 
     def touch_product
-      self.product.update(updated_at: Time.now) if self.changed?
+      Gemgento::TouchProduct.perform_async([self.product.id]) if self.changed?
     end
   end
 end

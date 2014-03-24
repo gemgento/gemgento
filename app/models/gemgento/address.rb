@@ -5,18 +5,21 @@ module Gemgento
     belongs_to :region
     belongs_to :order
 
-    validates :fname, presence: {message: 'First name is required'}
-    validates :lname, presence: {message: 'Last name is required'}
-    validates :street, presence: {message: 'Address is required'}
-    validates :region, presence: {message: 'State is required'}
-    validates :country, presence: {message: 'Country is required'}
-    validates :postcode, presence: {message: 'Postal code is required'}
-    validates :telephone, presence: {message: 'Phone number is required'}
+    validates :first_name, :last_name, :street, :country, :postcode, :telephone, presence: true
+    validates :region, presence: true, if: ->{ !self.country.nil? && !self.country.regions.empty? }
+
+    validates_uniqueness_of :user, scope: [:street, :city, :country, :region, :postcode, :telephone, :order],
+                            message: 'address is not unique',
+                            if: ->{ self.order.nil? && !self.user.nil? }
 
     attr_accessor :address1, :address2, :address3
 
     after_find :explode_street_address
     before_validation :implode_street_address
+
+    after_save :sync_local_to_magento
+
+    before_destroy :destroy_magento
 
     def self.index
       if Address.all.size == 0
@@ -34,19 +37,35 @@ module Gemgento
       end
     end
 
+    def as_json(options = nil)
+      result = super
+      result['address1'] = self.address1
+      result['address2'] = self.address2
+      result['address3'] = self.address3
+      result['country'] = self.country.name unless self.country.nil?
+      result['region'] = self.region.code unless self.region.nil?
+      return result
+    end
+
+    def unique_entry
+
+    end
+
     private
 
     def explode_street_address
       address = self.street.split("\n")
-      self.address1 = address[0] unless address[0].nil?
-      self.address2 = address[1] unless address[1].nil?
-      self.address3 = address[2] unless address[2].nil?
+      self.address1 = address[0] unless address[0].blank?
+      self.address2 = address[1] unless address[1].blank?
+      self.address3 = address[2] unless address[2].blank?
     end
 
     def implode_street_address
-      self.street = self.address1 unless self.address1.nil?
-      self.street = "#{self.street}\n#{self.address2}" unless self.address2.nil?
-      self.street = "#{self.street}\n#{self.address3}" unless self.address3.nil?
+      street = []
+      street << self.address1 unless self.address1.blank?
+      street << self.address2 unless self.address2.blank?
+      street << self.address3 unless self.address3.blank?
+      self.street = street.join("\n") unless street.blank?
     end
 
     def sync_local_to_magento
@@ -58,6 +77,12 @@ module Gemgento
         end
         self.sync_needed = false
         self.save
+      end
+    end
+
+    def destroy_magento
+      unless self.user_address_id.nil?
+        API::SOAP::Customer::Address.delete(self.user_address_id)
       end
     end
   end

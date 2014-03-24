@@ -3,9 +3,11 @@ module Gemgento
     before_filter :auth_cart_contents
     before_filter :auth_order_user
 
+    respond_to :json, :html
+
     def show
       set_totals
-      #@payment_methods = current_order.get_payment_methods
+      @payment_methods = current_order.get_payment_methods
 
       @card_types = {
           'Credit card type' => nil,
@@ -25,32 +27,59 @@ module Gemgento
         @exp_months[month] = month_string
       end
 
-      current_order.order_payment = OrderPayment.new if current_order.order_payment.nil?
+      @saved_credit_cards = current_user.saved_credit_cards
+      @order_payment =  current_order.order_payment.nil? ? Gemgento::OrderPayment.new : current_order.order_payment
+
+      respond_to do |format|
+        format.html
+        format.json do
+          render json: {
+              payment_methods: @payment_methods,
+              card_types: @card_types,
+              exp_years: @exp_years,
+              exp_months: @exp_months,
+              saved_credit_cards: @saved_credit_cards,
+              total: @total,
+              tax: @tax,
+              shipping: @shipping
+          }
+        end
+      end
     end
 
     def update
       if current_order.order_payment.nil?
-        current_order.order_payment = OrderPayment.new(order_payment_params)
+        current_order.order_payment = Gemgento::OrderPayment.new(order_payment_params)
       else
-        current_order.order_payment.update_attributes(order_payment_params)
+        current_order.order_payment.attributes = order_payment_params
       end
 
-      current_order.order_payment.cc_owner = "#{current_order.billing_address.fname} #{current_order.billing_address.lname}"
       current_order.order_payment.cc_last4 = current_order.order_payment.cc_number[-4..-1]
-      current_order.order_payment.save
 
-      if current_order.push_payment_method
-        redirect_to checkout_confirm_path
-      else
-        flash[:error] = 'Invalid payment information.  Please review all details and try again.'
-        redirect_to checkout_payment_path
+      respond_to do |format|
+        if current_order.order_payment.save && current_order.push_payment_method
+          session[:payment_data] = order_payment_params
+
+          format.html { redirect_to checkout_confirm_path }
+          format.json { render json: { result: true, order: current_order } }
+        else
+          flash[:error] = 'Invalid payment information. Please review all details and try again.'
+
+          format.html { redirect_to checkout_payment_path }
+          format.json do
+            render json: {
+                result: false,
+                errors: current_order.order_payment.errors.any? ? current_order.order_payment.errors.full_messages : 'Invalid payment information. Please review all details and try again.'
+            }
+          end
+        end
       end
     end
 
     private
 
     def order_payment_params
-      params.require(:order).require(:order_payment_attributes).permit(:method, :cc_cid, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month)
+      params.require(:order).require(:order_payment_attributes).permit(:method, :cc_cid, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month, :cc_owner)
     end
 
   end

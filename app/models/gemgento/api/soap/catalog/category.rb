@@ -6,19 +6,29 @@ module Gemgento
 
           # Synchronize local database with Magento database
           def self.fetch_all
-            sync_magento_tree_to_local(tree)
+            Gemgento::Store.all.each do |store|
+              category_tree = tree(store)
+              sync_magento_tree_to_local(category_tree, store) unless category_tree.nil?
+            end
           end
 
-          def self.tree
-            response = Gemgento::Magento.create_call(:catalog_category_tree)
+          def self.tree(store)
+            message = {
+              store_view: store.magento_id
+            }
+            response = Gemgento::Magento.create_call(:catalog_category_tree, message)
 
             if response.success?
               return response.body[:tree]
             end
           end
 
-          def self.info(category_id)
-            response = Gemgento::Magento.create_call(:catalog_category_info, {category_id: category_id})
+          def self.info(category_id, store)
+            message = {
+                category_id: category_id,
+                store_view: store.magento_id
+            }
+            response = Gemgento::Magento.create_call(:catalog_category_info, message)
 
             if response.success?
               return response.body[:info]
@@ -36,7 +46,11 @@ module Gemgento
                 'position' => category.position,
                 'is_anchor' => 1
             }
-            message = {parentId: category.parent.magento_id, categoryData: data}
+            message = {
+                parentId: category.parent.magento_id,
+                category_data: data,
+                store_view: store.magento_id
+            }
             response = Gemgento::Magento.create_call(:catalog_category_create, message)
 
             if response.success?
@@ -46,7 +60,7 @@ module Gemgento
             end
           end
 
-          def self.update(category)
+          def self.update(category, store)
             data = {
                 name: category.name,
                 'is_active' => category.is_active ? 1 : 0,
@@ -54,15 +68,19 @@ module Gemgento
                 'url_key' => category.url_key,
                 'position' => category.position
             }
-            message = {categoryId: category.magento_id, categoryData: data}
+            message = {
+                categoryId: category.magento_id,
+                categoryData: data,
+                store_view: store.magento_id
+            }
             response = Gemgento::Magento.create_call(:catalog_category_update, message)
             response.body
           end
 
-          def self.assigned_products(category)
+          def self.assigned_products(category, store)
             message = {
-                categoryId: category.magento_id,
-                storeId: Gemgento::Store.current.magento_id
+                category_id: category.magento_id,
+                store_id: store.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_category_assigned_products, message)
 
@@ -78,27 +96,46 @@ module Gemgento
 
           def self.set_product_categories
             Gemgento::Category.all.each do |category|
-              next if category.products.empty?
 
-              result = assigned_products(category)
+              category.stores.each do |store|
+                result = assigned_products(category, store)
 
-              if result.nil? || result == false || result.empty?
-                category.products.clear
-                next
+                if result.nil? || result == false || result.empty?
+                  Gemgento::ProductCategory.unscoped.where(category: category, store: store).destroy_all
+                  next
+                end
+
+                product_category_ids = []
+                result.each do |item|
+                  product = Gemgento::Product.find_by(magento_id: item[:product_id])
+                  next if product.nil?
+
+                  pairing = Gemgento::ProductCategory.unscoped.find_or_initialize_by(category: category, product: product, store: store)
+                  pairing.position = item[:position].nil? ? 1 : item[:position][0]
+                  pairing.store = store
+                  pairing.save
+
+                  product_category_ids << pairing.id
+                end
+
+                Gemgento::ProductCategory.unscoped.
+                    where('store_id = ? AND category_id = ? AND id NOT IN (?)', store.id, category.id, product_category_ids).
+                    destroy_all
               end
+            end
+          end
 
-              product_ids = []
-              result.each do |item|
-                product = Gemgento::Product.find_by(magento_id: item[:product_id])
-                next if product.nil?
+          def self.update_product(product_category)
+            message = {
+                category_id: product_category.category.magento_id,
+                product: product_category.product.magento_id,
+                position: product_category.position,
+                product_identifier_type: 'id'
+            }
+            response = Gemgento::Magento.create_call(:catalog_category_update_product, message)
 
-                product_ids << product.id
-                pairing = Gemgento::ProductCategory.where(category: category, product: product).first_or_initialize
-                pairing.position = item[:position].nil? ? 1 : item[:position]
-                pairing.save
-              end
-
-              category.products.destroy(category.products.where("product_id NOT IN (?)", product_ids))
+            if response.success?
+              return response.body[:info]
             end
           end
 
@@ -106,14 +143,14 @@ module Gemgento
 
           # Traverse Magento category tree while synchronizing with local category tree
           #
-          # @param [Hash] category  The returned item of Magento API call
-          def self.sync_magento_tree_to_local(category)
-            sync_magento_to_local(info(category[:category_id]))
+          # @param [Hash] category_tree  The returned item of Magento API call
+          def self.sync_magento_tree_to_local(category_tree, store)
+            sync_magento_to_local(info(category_tree[:category_id], store), store)
 
-            if category[:children][:item]
-              category[:children][:item] = [category[:children][:item]] unless category[:children][:item].is_a? Array
-              category[:children][:item].each do |child|
-                sync_magento_tree_to_local(child)
+            if category_tree[:children][:item]
+              category_tree[:children][:item] = [category_tree[:children][:item]] unless category_tree[:children][:item].is_a? Array
+              category_tree[:children][:item].each do |child|
+                sync_magento_tree_to_local(child, store)
               end
             end
           end
@@ -121,7 +158,7 @@ module Gemgento
           # Synchronize the response of a catalogCategoryInfo API call to local database
           #
           # @param [Hash] subject The returned item of Magento API call
-          def self.sync_magento_to_local(subject)
+          def self.sync_magento_to_local(subject, store)
             category = Gemgento::Category.where(magento_id: subject[:category_id]).first_or_initialize
             category.magento_id = subject[:category_id]
             category.name = subject[:name]
@@ -130,16 +167,12 @@ module Gemgento
             category.position = subject[:position]
             category.is_active = subject[:is_active]
             category.include_in_menu = subject[:include_in_menu] == 1 ? true : false
-            category.children_count = subject[:children_count]
-
-            if category.children_count > 0
-              category.all_children = subject[:all_children]
-            else
-              category.all_children = ''
-            end
+            category.all_children = subject[:all_children].nil? ? '' : subject[:all_children]
 
             category.sync_needed = false
             category.save
+
+            category.stores << store unless category.stores.include?(store)
           end
         end
       end

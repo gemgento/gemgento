@@ -1,0 +1,15 @@
+.categories-nav
+	- Gemgento::Category.top_level.each do |category|
+		.category
+			= link_to category.name, category_path(category)
+
+.category-show
+	%h1
+		= current_category.name
+
+
+	.product-list
+		- current_category.products.each do |product|
+			.product
+				%p= link_to product.name, product_path(product)
+				

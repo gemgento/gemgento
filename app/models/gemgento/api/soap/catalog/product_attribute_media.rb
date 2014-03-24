@@ -1,5 +1,3 @@
-require 'open-uri'
-
 module Gemgento
   module API
     module SOAP
@@ -7,20 +5,20 @@ module Gemgento
         class ProductAttributeMedia
 
           def self.fetch_all
-            Gemgento::Product.all.each do |product|
-              fetch(product)
+            Gemgento::Store.all.each do |store|
+              Gemgento::Product.all.each do |product|
+                fetch(product, store)
+              end
             end
           end
 
-          def self.fetch(product)
-            Gemgento::Asset.skip_callback(:destroy, :before, :delete_magento)
-            product.assets.destroy_all
-
-            media_list = list(product.magento_id)
+          def self.fetch(product, store = nil)
+            store = Gemgento::Store.current if store.nil?
+            media_list = list(product, store)
 
             unless media_list.nil?
               media_list.each do |product_attribute_media|
-                sync_magento_to_local(product_attribute_media, product)
+                sync_magento_to_local(product_attribute_media, product, store)
               end
             end
           end
@@ -33,10 +31,11 @@ module Gemgento
             end
           end
 
-          def self.list(product_id)
+          def self.list(product, store)
             message = {
-                product: product_id,
-                identifier_type: 'id'
+                product: product.magento_id,
+                identifier_type: 'id',
+                store_view: store.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_product_attribute_media_list, message)
 
@@ -58,12 +57,28 @@ module Gemgento
           end
 
           def self.create(asset)
-            message = {product: asset.product.magento_id, data: compose_asset_entity_data(asset), identifier_type: 'id'}
+            message = {
+                product: asset.product.magento_id,
+                data: compose_asset_entity_data(asset, true),
+                identifier_type: 'id',
+                store_view: asset.store.magento_id
+            }
             response = Gemgento::Magento.create_call(:catalog_product_attribute_media_create, message)
 
             if response.success?
               asset.file = response.body[:result]
             end
+          end
+
+          def self.update(asset)
+            message = {
+                product: asset.product.magento_id,
+                file: asset.file,
+                data: compose_asset_entity_data(asset, false),
+                identifier_type: 'id',
+                store_view: asset.store.magento_id
+            }
+            response = Gemgento::Magento.create_call(:catalog_product_attribute_media_update, message)
           end
 
           def self.remove(asset)
@@ -96,73 +111,80 @@ module Gemgento
           private
 
           # Save Magento product attribute set to local
-          def self.sync_magento_to_local(source, product)
-            asset = Gemgento::Asset.where(product_id: product.id, url: source[:url]).first_or_initialize
+          def self.sync_magento_to_local(source, product, store)
+            asset_file = fetch_asset_file(source[:url])
+            return false if asset_file == false
 
-            begin
-              asset.attachment = open(source[:url])
-            rescue
-              asset.attachment = nil
-            end
-
+            asset = Gemgento::Asset.where(product: product, file: source[:file], store: store).first_or_initialize
             asset.url = source[:url]
             asset.position = source[:position]
             asset.label = Gemgento::Magento.enforce_savon_string(source[:label])
             asset.file = source[:file]
             asset.product = product
             asset.sync_needed = false
+            asset.store = store
+            asset_file = fetch_asset_file(source[:url])
+            asset.set_file asset_file
             asset.save
 
-            set_types(source[:types][:item], asset)
+            # assign AssetTypes
+            asset_type_codes = source[:types][:item]
+            asset_type_codes = [Gemgento::Magento.enforce_savon_string(asset_type_codes)] unless asset_type_codes.is_a? Array
+            asset.set_types_by_codes(asset_type_codes)
           end
 
-          def self.set_types(asset_type_codes, asset)
-            asset.asset_types.destroy_all
-
-            # if there is only one category, the returned value is not interpreted array
-            unless asset_type_codes.is_a? Array
-              asset_type_codes = [Gemgento::Magento.enforce_savon_string(asset_type_codes)]
-            end
-
-            # loop through each return category and add it to the product if needed
-            asset_type_codes.each do |asset_type_code|
-              unless (asset_type_code.empty?)
-                asset_type = Gemgento::AssetType.where(product_attribute_set_id: asset.product.product_attribute_set_id, code: asset_type_code).first
-                asset.asset_types << asset_type unless asset.asset_types.include?(asset_type) # don't duplicate the asset types
+          def self.fetch_asset_file(url)
+            begin
+              open(url)
+            rescue => e
+              case e
+                when OpenURI::HTTPError
+                  false
+                when SocketError
+                  false
+                else
+                  raise e
+              end
+            rescue SystemCallError => e
+              if e === Errno::ECONNRESET
+                false
+              else
+                raise e
               end
             end
           end
 
           def self.sync_magento_media_type_to_local(source, product_attribute_set)
-            asset_type = Gemgento::AssetType.where(product_attribute_set_id: product_attribute_set.id, code: source[:url]).first_or_initialize
-            asset_type.code = source[:code]
+            asset_type = Gemgento::AssetType.find_or_initialize_by(product_attribute_set: product_attribute_set, code: source[:code])
             asset_type.scope = source[:scope]
-            asset_type.product_attribute_set = product_attribute_set
             asset_type.save
           end
 
-          def self.compose_asset_entity_data(asset)
+          def self.compose_asset_entity_data(asset, include_file = true)
             asset_entity = {
-                file: compose_file_entity(asset),
                 label: asset.label,
                 position: asset.position,
                 types: {item: compose_types(asset)},
                 exclude: '0'
             }
 
+            if include_file
+              asset_entity[:file] = compose_file_entity(asset.asset_file)
+            end
+
             asset_entity
           end
 
-          def self.compose_file_entity(asset)
-            if asset.attachment.url(:original) =~ URI::regexp
-              content = open(asset.attachment.url(:original)).read
+          def self.compose_file_entity(asset_file)
+            if asset_file.file.url(:original) =~ URI::regexp
+              content = open(asset_file.file.url(:original)).read
             else
-              content = File.open(asset.attachment.path(:original)).read
+              content = File.open(asset_file.file.path(:original)).read
             end
 
             file_entity = {
                 content: Base64.encode64(content),
-                mime: asset.attachment_content_type
+                mime: asset_file.file_content_type
             }
 
             file_entity

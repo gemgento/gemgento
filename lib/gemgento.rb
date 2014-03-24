@@ -3,9 +3,11 @@ require 'savon'
 require 'exception_notifier'
 require 'builder'
 require 'paperclip'
+require 'open-uri'
+require 'sidekiq'
+require 'state_machine'
 require 'gemgento/version'
 require 'gemgento/engine'
-require 'gemgento/controller_helpers/order.rb'
 
 module Gemgento
   class Magento

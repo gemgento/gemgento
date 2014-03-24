@@ -2,17 +2,13 @@ module Gemgento
   class OrderPayment < ActiveRecord::Base
     belongs_to :order
 
-    attr_accessor :cc_number, :cc_cid
+    validates :cc_owner, presence: true
+    validates :cc_type, presence: true
+    #validates_with Gemgento::Validator::CcNumber, fields: [:cc_number]
+    validates :cc_exp_month, presence: true
+    validates :cc_exp_year, presence: true
+    validates :cc_cid, presence: true
 
-    def self.cc_types
-      {
-          'Credit card type' => nil,
-          VI: 'Visa',
-          MC: 'MasterCard',
-          AE: 'American Express',
-          DI: 'Discover',
-          OT: 'Other'
-      }
-    end
+    attr_accessor :cc_number, :cc_cid
   end
 end

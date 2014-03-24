@@ -1,5 +1,5 @@
 module Gemgento
-  class Checkout::CheckoutBaseController < BaseController
+  class Checkout::CheckoutBaseController < ApplicationController
     ssl_required
 
     private

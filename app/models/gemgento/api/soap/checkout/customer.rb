@@ -10,8 +10,8 @@ module Gemgento
               customer = {
                   mode: 'guest',
                   email: cart.customer_email,
-                  firstname: cart.billing_address.fname,
-                  lastname: cart.billing_address.lname,
+                  firstname: cart.billing_address.first_name,
+                  lastname: cart.billing_address.last_name,
                   'website_id' => '1'
               }
             else
@@ -19,8 +19,8 @@ module Gemgento
                   mode: 'customer',
                   'customer_id' => customer.magento_id,
                   email: customer.email,
-                  firstname: customer.fname,
-                  lastname: customer.lname,
+                  firstname: customer.first_name,
+                  lastname: customer.last_name,
                   password: customer.password,
                   confirmation: true,
                   'group_id' => customer.user_group.magento_id,
@@ -31,7 +31,7 @@ module Gemgento
             message = {
                 quote_id: cart.magento_quote_id,
                 customer: customer,
-                store_id: Gemgento::Store.current.magento_id
+                store_id: cart.store.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_customer_set, message)
 
@@ -42,7 +42,7 @@ module Gemgento
             message = {
                 quote_id: cart.magento_quote_id,
                 customer: {item: compose_address_data([cart.shipping_address, cart.billing_address])},
-                store_id: Gemgento::Store.current.magento_id
+                store_id: cart.store.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_customer_addresses, message)
 
@@ -57,13 +57,13 @@ module Gemgento
             addresses.each do |address|
               address_data << {
                   mode: address.address_type,
-                  firstname: address.fname,
-                  lastname: address.lname,
+                  firstname: address.first_name,
+                  lastname: address.last_name,
                   company: address.company,
                   street: address.street,
                   city: address.city,
                   region: address.region_name,
-                  'region_id' => address.region.magento_id,
+                  'region_id' => address.region.nil? ? nil : address.region.magento_id,
                   postcode: address.postcode,
                   'country_id' => address.country.magento_id,
                   telephone: address.telephone,

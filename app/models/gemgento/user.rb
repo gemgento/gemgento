@@ -2,15 +2,21 @@
 
 module Gemgento
   class User < ActiveRecord::Base
-    devise :database_authenticatable, :registerable,
-           :recoverable, :rememberable, :trackable, :validatable
+    devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable
+
+    validates :email, uniqueness: {scope: :deleted_at}, presence: true
 
     belongs_to :user_group
-    belongs_to :store
+
     has_many :addresses
     has_many :orders
+    has_many :saved_credit_cards
+
+    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_users', class_name: 'Store'
 
     after_save :sync_local_to_magento
+
+    default_scope -> { where(deleted_at: nil) }
 
     def self.index
       if User.all.size == 0
@@ -36,7 +42,7 @@ module Gemgento
       else
         # NOTE: this method is untested, but should replicate the Magento encrypted password
         salt = self.magento_password.split(':')[1]
-        encrypted_password = OpenSSL::HMAC.hexdigest('sha256', salt + password, Gemgento::Config[:magento][:encryption])
+        #encrypted_password = OpenSSL::HMAC.hexdigest('sha256', salt + password, Gemgento::Config[:magento][:encryption])
         encrypted_password = Digest::MD5.hexdigest(salt + password)
         encrypted_password += ':' + salt
 
@@ -56,6 +62,35 @@ module Gemgento
       return !Subscriber.find_by(email: self.email).nil?
     end
 
+    def mark_deleted
+      self.deleted_at = Time.now
+    end
+
+    def mark_deleted!
+      mark_deleted
+      self.save
+    end
+
+    def address_book
+      self.addresses.where('user_address_id IS NOT NULL')
+    end
+
+    def shipping_addresses
+      self.addresses.where('user_address_id IS NOT NULL').where(address_type: 'shipping', is_default: false)
+    end
+
+    def default_shipping_address
+      self.addresses.where('user_address_id IS NOT NULL').where(address_type: 'shipping', is_default: true).first
+    end
+
+    def billing_addresses
+      self.addresses.where('user_address_id IS NOT NULL').where(address_type: 'billing', is_default: false)
+    end
+
+    def default_billing_address
+      self.addresses.where('user_address_id IS NOT NULL').where(address_type: 'billing', is_default: true).first
+    end
+
     private
 
     # Push local users changes to magento
@@ -63,9 +98,16 @@ module Gemgento
       # Password needs to be past as plain text.  It will be encrypted by Magento and updated.
       if self.sync_needed
         if !self.magento_id
-          API::SOAP::Customer::Customer.create(self)
+          API::SOAP::Customer::Customer.create(self, self.stores.first)
+
+          self.stores.each_with_index do |store, index|
+            next if index == 0
+            API::SOAP::Customer::Customer.update(self, store)
+          end
         else
-          API::SOAP::Customer::Customer.update(self)
+          self.stores.each do |store|
+            API::SOAP::Customer::Customer.update(self, store)
+          end
         end
 
         self.sync_needed = false

@@ -7,7 +7,7 @@ module Gemgento
           def self.list(cart)
             message = {
                 quote_id: cart.magento_quote_id,
-                store_id: Gemgento::Store.current.magento_id
+                store_id: cart.store.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_payment_list, message)
 
@@ -29,7 +29,7 @@ module Gemgento
                     'cc_exp_year' => payment.cc_exp_year,
                     'cc_exp_month' => payment.cc_exp_month
                 },
-                store_id: Gemgento::Store.current.magento_id
+                store_id: cart.store.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_payment_method, message)
 

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131114161934) do
+ActiveRecord::Schema.define(version: 20131223181709) do
 
   create_table "active_admin_comments", force: true do |t|
     t.string "namespace"
@@ -71,6 +71,13 @@ ActiveRecord::Schema.define(version: 20131114161934) do
     t.boolean "is_default", default: false
   end
 
+  create_table "gemgento_asset_files", force: true do |t|
+    t.string "file_file_name"
+    t.string "file_content_type"
+    t.integer "file_file_size"
+    t.datetime "file_updated_at"
+  end
+
   create_table "gemgento_asset_types", force: true do |t|
     t.integer "product_attribute_set_id"
     t.string "code"
@@ -88,10 +95,8 @@ ActiveRecord::Schema.define(version: 20131114161934) do
     t.string "file"
     t.string "label"
     t.boolean "sync_needed", default: true, null: false
-    t.string "attachment_file_name"
-    t.string "attachment_content_type"
-    t.integer "attachment_file_size"
-    t.datetime "attachment_updated_at"
+    t.integer "store_id"
+    t.integer "asset_file_id"
   end
 
   create_table "gemgento_assets_asset_types", id: false, force: true do |t|
@@ -100,8 +105,8 @@ ActiveRecord::Schema.define(version: 20131114161934) do
   end
 
   create_table "gemgento_attribute_set_attributes", id: false, force: true do |t|
-    t.integer "attribute_set_id", default: 0, null: false
-    t.integer "attribute_id", default: 0, null: false
+    t.integer "product_attribute_set_id", default: 0, null: false
+    t.integer "product_attribute_id", default: 0, null: false
   end
 
   create_table "gemgento_categories", force: true do |t|
@@ -125,9 +130,9 @@ ActiveRecord::Schema.define(version: 20131114161934) do
 
   add_index "gemgento_categories", ["magento_id"], name: "index_gemgento_categories_on_magento_id", unique: true, using: :btree
 
-  create_table "gemgento_categories_products", id: false, force: true do |t|
-    t.integer "product_id", default: 0, null: false
-    t.integer "category_id", default: 0, null: false
+  create_table "gemgento_categories_stores", force: true do |t|
+    t.integer "category_id"
+    t.integer "store_id"
   end
 
   create_table "gemgento_configurable_attributes", id: false, force: true do |t|
@@ -365,6 +370,7 @@ ActiveRecord::Schema.define(version: 20131114161934) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "order"
+    t.integer "store_id"
   end
 
   create_table "gemgento_product_attribute_sets", force: true do |t|
@@ -381,6 +387,7 @@ ActiveRecord::Schema.define(version: 20131114161934) do
     t.text "value"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "store_id"
   end
 
   create_table "gemgento_product_attributes", force: true do |t|
@@ -409,6 +416,7 @@ ActiveRecord::Schema.define(version: 20131114161934) do
     t.integer "position", default: 0, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer "store_id"
   end
 
   create_table "gemgento_product_imports", force: true do |t|
@@ -430,6 +438,7 @@ ActiveRecord::Schema.define(version: 20131114161934) do
     t.integer "simple_product_visibility"
     t.integer "configurable_product_visibility"
     t.text "image_file_extensions"
+    t.text "image_types"
   end
 
   create_table "gemgento_product_imports_configurable_attributes", id: false, force: true do |t|
@@ -444,7 +453,6 @@ ActiveRecord::Schema.define(version: 20131114161934) do
     t.datetime "updated_at", null: false
     t.string "sku"
     t.string "product_attribute_set_id"
-    t.string "store_id"
     t.boolean "sync_needed", default: true, null: false
     t.boolean "status", default: true
     t.integer "visibility", default: 4
@@ -493,9 +501,20 @@ ActiveRecord::Schema.define(version: 20131114161934) do
     t.boolean "is_active", default: true, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer "website_id"
   end
 
   add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true, using: :btree
+
+  create_table "gemgento_stores_products", force: true do |t|
+    t.integer "product_id"
+    t.integer "store_id"
+  end
+
+  create_table "gemgento_stores_users", force: true do |t|
+    t.integer "store_id"
+    t.integer "user_id"
+  end
 
   create_table "gemgento_swatches", force: true do |t|
     t.string "name"
@@ -522,7 +541,6 @@ ActiveRecord::Schema.define(version: 20131114161934) do
 
   create_table "gemgento_users", force: true do |t|
     t.integer "magento_id"
-    t.integer "store_id"
     t.string "created_in"
     t.string "email", default: "", null: false
     t.string "fname"

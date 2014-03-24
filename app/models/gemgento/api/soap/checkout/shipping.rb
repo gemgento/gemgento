@@ -7,7 +7,7 @@ module Gemgento
           def self.list(cart)
             message = {
                 quote_id: cart.magento_quote_id,
-                store_id: Gemgento::Store.current.magento_id
+                store_id: cart.store.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_shipping_list, message)
 
@@ -22,7 +22,7 @@ module Gemgento
             message = {
                 quote_id: cart.magento_quote_id,
                 method: shipping_method,
-                store_id: Gemgento::Store.current.magento_id
+                store_id: cart.store.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_shipping_method, message)
 

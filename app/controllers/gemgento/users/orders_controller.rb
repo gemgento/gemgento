@@ -3,10 +3,14 @@ module Gemgento
 
     def index
       @orders = current_user.orders.placed.order('created_at DESC')
+
+      respond_with @orders
     end
 
     def show
       @order = Gemgento::Order.find_by(id: params[:id], user: current_user)
+
+      respond_with @order
     end
 
   end

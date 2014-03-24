@@ -1,7 +1,7 @@
 if defined?(ActiveAdmin)
   module Gemgento
     ActiveAdmin.register ProductImport do
-      menu priority: 1, parent: 'Gemgento', label: 'Product Import'
+      menu priority: 100, parent: 'Gemgento', label: 'Product Import'
 
       index do
         column :created_at
@@ -41,6 +41,7 @@ if defined?(ActiveAdmin)
           f.input :image_path
           f.input :image_file_extensions_raw, as: :string, label: 'Image File Extensions', hint: 'Enter expected image file extensions. Separate extensions with a comma.  E.g. .jpg, .png, .gif'
           f.input :image_labels_raw, as: :text, label: 'Image Labels', hint: 'Enter image labels in order of appearance.  Separate labels with line breaks (hit enter)'
+          f.input :image_types_raw, as: :text, label: 'Image Types', hint: 'The default image types are: small_image, image, thumbnail.  Each line corresponds to labels above, multiple types can be separated by a comma'
         end
 
         f.actions
@@ -70,6 +71,10 @@ if defined?(ActiveAdmin)
         def permitted_params
           params.permit(
               :gemgento_product_import => [
+                  :configurable_attribute_ids,
+                  :utf8,
+                  :authenticity_token,
+                  :commit,
                   :spreadsheet,
                   :product_attribute_set_id,
                   :root_category_id,
@@ -82,7 +87,8 @@ if defined?(ActiveAdmin)
                   :image_file_extensions,
                   :image_file_extensions_raw,
                   :image_labels,
-                  :image_labels_raw
+                  :image_labels_raw,
+                  :image_types_raw
               ])
         end
       end
