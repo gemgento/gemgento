@@ -56,6 +56,15 @@ module Gemgento
       end
     end
 
+    def destroy
+      current_user.address_book.find(params[:id]).destroy
+
+      respond_to do |format|
+        format.html
+        format.json { render json: { result: true } }
+      end
+    end
+
     private
 
     def address_params

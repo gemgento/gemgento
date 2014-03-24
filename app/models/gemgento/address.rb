@@ -8,10 +8,16 @@ module Gemgento
     validates :first_name, :last_name, :street, :country, :postcode, :telephone, presence: true
     validates :region, presence: true, if: ->{ !self.country.nil? && !self.country.regions.empty? }
 
+    validates_uniqueness_of :user, scope: [:street, :city, :country, :region, :postcode, :telephone, :order],
+                            message: 'address is not unique',
+                            if: ->{ self.order.nil? && !self.user.nil? }
+
     attr_accessor :address1, :address2, :address3
 
     after_find :explode_street_address
     before_validation :implode_street_address
+
+    after_save :sync_local_to_magento
 
     def self.index
       if Address.all.size == 0
@@ -37,6 +43,10 @@ module Gemgento
       result['country'] = self.country.name unless self.country.nil?
       result['region'] = self.region.code unless self.region.nil?
       return result
+    end
+
+    def unique_entry
+
     end
 
     private
