@@ -42,7 +42,7 @@ module Gemgento
       else
         # NOTE: this method is untested, but should replicate the Magento encrypted password
         salt = self.magento_password.split(':')[1]
-        encrypted_password = OpenSSL::HMAC.hexdigest('sha256', salt + password, Gemgento::Config[:magento][:encryption])
+        #encrypted_password = OpenSSL::HMAC.hexdigest('sha256', salt + password, Gemgento::Config[:magento][:encryption])
         encrypted_password = Digest::MD5.hexdigest(salt + password)
         encrypted_password += ':' + salt
 
@@ -69,6 +69,26 @@ module Gemgento
     def mark_deleted!
       mark_deleted
       self.save
+    end
+
+    def address_book
+      self.addresses.where('user_address_id IS NOT NULL')
+    end
+
+    def shipping_addresses
+      self.addresses.where('user_address_id IS NOT NULL').where(address_type: 'shipping', is_default: false)
+    end
+
+    def default_shipping_address
+      self.addresses.where('user_address_id IS NOT NULL').where(address_type: 'shipping', is_default: true).first
+    end
+
+    def billing_addresses
+      self.addresses.where('user_address_id IS NOT NULL').where(address_type: 'billing', is_default: false)
+    end
+
+    def default_billing_address
+      self.addresses.where('user_address_id IS NOT NULL').where(address_type: 'billing', is_default: true).first
     end
 
     private

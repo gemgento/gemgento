@@ -114,20 +114,12 @@ module Gemgento
           if current_order.billing_address.save && current_order.shipping_address.save
             current_order.save
 
-            # push the order information to Magento
-            if user_signed_in?
-              current_order.billing_address.push
-              current_order.shipping_address.push
-            end
+            current_order.push_customer if current_order.customer_is_guest
+            result = true if current_order.push_addresses
+          end
 
-            if current_order.customer_is_guest
-              current_order.push_customer
-            end
-
-            if current_order.push_addresses
-              result = true
-            end
-          else
+          unless result
+            # the addresses were not saved, so make them instance variables and disassociate them from the order
             @billing_address = current_order.billing_address
             @shipping_address = current_order.shipping_address
 

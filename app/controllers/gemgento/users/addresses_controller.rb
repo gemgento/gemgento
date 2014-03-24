@@ -3,23 +3,24 @@ module Gemgento
 
     def index
       @new_shipping_address = Address.new
-      @default_shipping_address = current_user.addresses.where(address_type: 'shipping', is_default: true).first
-      @shipping_addresses = current_user.addresses.where(address_type: 'shipping', is_default: false)
+      @default_shipping_address = current_user.default_shipping_address
+      @shipping_addresses = current_user.shipping_addresses
 
       @new_billing_address = Address.new
-      @default_billing_address = current_user.addresses.where(address_type: 'billing', is_default: true).first
-      @billing_addresses = current_user.addresses.where(address_type: 'billing', is_default: false)
+      @default_billing_address = current_user.default_billing_address
+      @billing_addresses = current_user.billing_addresses
 
       respond_to do |format|
         format.html
         format.json do
-          render json: current_user.addresses
+          render json: current_user.address_book
         end
       end
     end
 
     def show
-
+      @address = current_user.address_book.find(id: params[:id])
+      respond_with @address
     end
 
     def create
@@ -40,7 +41,7 @@ module Gemgento
     end
 
     def update
-      @address = Address.where(params[:id]).first
+      @address = current_user.address_book.find(params[:id]).first
 
       respond_to do |format|
         if @address.update_attributes(address_params)
