@@ -98,14 +98,8 @@ module Gemgento
 
         current_order.shipping_address.address_type = 'shipping'
 
-        # assign the current user if order is not guest checkout
-        if user_signed_in?
-          current_order.shipping_address.user = current_user
-          current_order.billing_address.user = current_user
-        else # don't push customer addresses if this is a guest checkout
-          current_order.shipping_address.sync_needed = false
-          current_order.billing_address.sync_needed = false
-        end
+        current_order.shipping_address.sync_needed = false
+        current_order.billing_address.sync_needed = false
 
         respond_to do |format|
           result = false
