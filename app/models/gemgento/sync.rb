@@ -30,7 +30,8 @@ module Gemgento
     end
 
     def self.products(skip_existing = false)
-      last_updated = Sync.where('subject IN (?)', %w[products everything]).order('created_at DESC').first.created_at
+      last_updated = Sync.where('subject IN (?) AND is_complete = ?', %w[products everything], 1).order('created_at DESC').first
+      last_updated = last_updated.created_at unless last_updated.nil?
       current = create_current('products')
 
       Gemgento::API::SOAP::Catalog::Product.propagate_magento_deletions
@@ -47,7 +48,8 @@ module Gemgento
     end
 
     def self.customers
-      last_updated = Sync.where('subject IN (?)', %w[customers everything]).order('created_at DESC').first.created_at
+      last_updated = Sync.where('subject IN (?) AND is_complete = ?', %w[customers everything], 1).order('created_at DESC').first
+      last_updated = last_updated.created_at unless last_updated.nil?
       current = create_current('customers')
 
       Gemgento::API::SOAP::Customer::Customer.fetch_all_customer_groups
@@ -57,7 +59,8 @@ module Gemgento
     end
 
     def self.orders
-      last_updated = Sync.where('subject IN (?)', %w[orders everything]).order('created_at DESC').first.created_at
+      last_updated = Sync.where('subject IN (?) AND is_complete = ?', %w[orders everything], 1).order('created_at DESC').first
+      last_updated = last_updated.created_at unless last_updated.nil?
       current = create_current('orders')
 
       Gemgento::API::SOAP::Sales::Order.fetch_all last_updated.to_s(:db)
