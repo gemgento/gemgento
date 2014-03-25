@@ -21,6 +21,7 @@ module Gemgento
     before_validation :implode_street_address
 
     after_save :sync_local_to_magento
+    after_save :enforce_single_default, unless: ->{ self.user.nil? }
 
     before_destroy :destroy_magento
 
@@ -68,7 +69,8 @@ module Gemgento
 
     private
 
-    # Split the street attribute into 3 address line attributes.
+    # Split the street attribute into 3 address line attributes. Magento stores street addresses lines as a
+    # single attribute that uses line breaks to differentiate the lines.
     #
     # @return [void]
     def explode_street_address
@@ -78,7 +80,8 @@ module Gemgento
       self.address3 = address[2] unless address[2].blank?
     end
 
-    # Combine the 3 address line attributes into a single street attribute.
+    # Combine the 3 address line attributes into a single street attribute.  Magento stores street addresses lines as a
+    # single attribute that uses line breaks to differentiate the lines.
     #
     # @return [void]
     def implode_street_address
@@ -108,5 +111,17 @@ module Gemgento
         API::SOAP::Customer::Address.delete(self.user_address_id)
       end
     end
+
+    # Make sure the user has only one default Address for the type (shipping/billing).
+    #
+    # @return [void]
+    def enforce_single_default
+      if self.is_default
+        self.user.address_book.where(address_type: self.address_type).
+            where('id != ?', self.id).
+            update_all(is_default: false)
+      end
+    end
+
   end
 end
