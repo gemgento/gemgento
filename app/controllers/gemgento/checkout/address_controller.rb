@@ -107,7 +107,6 @@ module Gemgento
           # attempt to save the addresses and respond appropriately
           if current_order.billing_address.save && current_order.shipping_address.save
             current_order.save
-
             current_order.push_customer if current_order.customer_is_guest
             result = true if current_order.push_addresses
           end
@@ -122,6 +121,11 @@ module Gemgento
           end
 
           if result
+            if params[:save_address]
+              Gemgento::Address.copy_to_address_book(current_order.shipping_address, current_user)
+              Gemgento::Address.copy_to_address_book(current_order.billing_address, current_user)
+            end
+
             format.html { render checkout_shipping_path }
             format.json { render json: { result: true, order: current_order } }
           else

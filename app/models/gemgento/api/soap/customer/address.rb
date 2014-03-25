@@ -52,6 +52,8 @@ module Gemgento
               address.sync_needed = false
               address.save
             end
+
+            return response.success?
           end
 
           def self.update(address)

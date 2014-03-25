@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class Address < ActiveRecord::Base
     belongs_to :user
     belongs_to :country
@@ -8,7 +10,8 @@ module Gemgento
     validates :first_name, :last_name, :street, :country, :postcode, :telephone, presence: true
     validates :region, presence: true, if: ->{ !self.country.nil? && !self.country.regions.empty? }
 
-    validates_uniqueness_of :user, scope: [:street, :city, :country, :region, :postcode, :telephone, :order],
+    validates_uniqueness_of :user,
+                            scope: [:street, :city, :country, :region, :postcode, :telephone, :order, :address_type],
                             message: 'address is not unique',
                             if: ->{ self.order.nil? && !self.user.nil? }
 
@@ -21,14 +24,10 @@ module Gemgento
 
     before_destroy :destroy_magento
 
-    def self.index
-      if Address.all.size == 0
-        API::SOAP::Customer::Address.fetch_all
-      end
-
-      Address.all
-    end
-
+    # Pushes Address changes to Magento if the address belongs to a User.  Creates a new address if one does not exist
+    # and updates existing addresses.
+    #
+    # @return [Boolean] if the push to Magneto was successful
     def push
       if self.user_address_id.nil?
         API::SOAP::Customer::Address.create(self)
@@ -37,6 +36,10 @@ module Gemgento
       end
     end
 
+    # Return the Address as JSON.
+    #
+    # @param options [Hash] an optional hash of options.
+    # @return [String]
     def as_json(options = nil)
       result = super
       result['address1'] = self.address1
@@ -47,12 +50,27 @@ module Gemgento
       return result
     end
 
-    def unique_entry
+    # Copy an existing address to a user's address book.
+    #
+    # @param source [Gemgento::Address] the existing address that will be copied.
+    # @param user [Gemgento::User] the user who will be associated with the new address.
+    # @param is_default [Boolean] true if the new address will be the default for it's type, false otherwise.
+    # @return [Gemgento::Address] the newly created Address.
+    def self.copy_to_address_book(source, user, is_default = false)
+      address = source.dup
+      address.order = nil
+      address.user = user
+      address.is_default = is_default
+      address.save
 
+      return address
     end
 
     private
 
+    # Split the street attribute into 3 address line attributes.
+    #
+    # @return [void]
     def explode_street_address
       address = self.street.split("\n")
       self.address1 = address[0] unless address[0].blank?
@@ -60,6 +78,9 @@ module Gemgento
       self.address3 = address[2] unless address[2].blank?
     end
 
+    # Combine the 3 address line attributes into a single street attribute.
+    #
+    # @return [void]
     def implode_street_address
       street = []
       street << self.address1 unless self.address1.blank?
@@ -68,18 +89,20 @@ module Gemgento
       self.street = street.join("\n") unless street.blank?
     end
 
+    # If a sync is required, push the address to Magento.  This is the after save callback method.
+    #
+    # @return [void]
     def sync_local_to_magento
       if self.sync_needed
-        if self.user_address_id.nil?
-          API::SOAP::Customer::Address.create(self)
-        else
-          API::SOAP::Customer::Address.update(self)
-        end
+        self.push
         self.sync_needed = false
         self.save
       end
     end
 
+    # Destroy the address in Magento.  This is the before destroy callback.
+    #
+    # @return [void]
     def destroy_magento
       unless self.user_address_id.nil?
         API::SOAP::Customer::Address.delete(self.user_address_id)
