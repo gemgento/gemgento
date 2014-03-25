@@ -1,6 +1,8 @@
 require 'open-uri'
 
 module Gemgento
+
+  # @author Gemgento LLC
   class Asset < ActiveRecord::Base
     belongs_to :product
     belongs_to :store
@@ -21,6 +23,11 @@ module Gemgento
 
     validates_uniqueness_of :product, :scope => [:asset_file, :store]
 
+    # Associate an image file with the Asset.  If the same file is already associated to a related Asset in a
+    # different store, then the Asset will be associated with the existing AssetFile.
+    #
+    # @param file [File, TempFile] a file to be associated with the Asset
+    # @return [void]
     def set_file(file)
       raise 'Asset does not have an associated product.' if self.product.nil?
 
@@ -47,6 +54,9 @@ module Gemgento
       self.asset_file = matching_file
     end
 
+    # Return the image file associated with the Asset.
+    #
+    # @return [Paperclip::Attachment, nil]
     def image
       if self.asset_file.nil?
         nil
@@ -55,6 +65,10 @@ module Gemgento
       end
     end
 
+    # Associate AssetTypes to the Asset.
+    #
+    # @param asset_type_codes [Array(String)] asset type codes
+    # @return [void]
     def set_types_by_codes(asset_type_codes)
       puts asset_type_codes.inspect
       applied_asset_types = []
@@ -76,6 +90,10 @@ module Gemgento
 
     private
 
+    # Push Asset changes to Magento.  Creates the asset in Magento if it's new, or updates existing assets. This is an
+    # after save callback.
+    #
+    # @return [void]
     def sync_local_to_magento
       if self.sync_needed
         if self.file.nil? || self.file == ''
@@ -89,6 +107,9 @@ module Gemgento
       end
     end
 
+    # Destroy the Asset in Magento.  This is a before destroy callback.
+    #
+    # @return [void]
     def delete_magento
       unless self.file.nil?
         API::SOAP::Catalog::ProductAttributeMedia.remove(self)
@@ -97,6 +118,10 @@ module Gemgento
       self.asset_types.clear
     end
 
+    # Set product updated_at to now if the Asset has been changed.  This happens asynchronously using Sidekiq and is
+    # necessary for cache invalidation.  It is called as the after save callback.
+    #
+    # @return [void]
     def touch_product
       Gemgento::TouchProduct.perform_async([self.product.id]) if self.changed?
     end

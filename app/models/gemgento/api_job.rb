@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class ApiJob < ActiveRecord::Base
     belongs_to :source, polymorphic: true
 
@@ -25,20 +27,37 @@ module Gemgento
       after_transition to: 'complete', do: :finalize!
     end
 
+    # Determine if the ApiJob is ready to be activated. This method needs to be overridden in the child class.
+    #
+    # @return [void]
     def is_ready!
     end
 
+    # Determine if the ApiJob is completed.  This method needs to be overridden in the child class.
+    #
+    # @return [void]
     def is_completed!
     end
 
+    # Print the ApiJob details after the ApiJob has transitioned to the error state.
+    #
+    # @return [void]
     def error!
       puts(self.inspect)
     end
 
+    # Lock the ApiJob after it has transitioned to the complete state.
+    #
+    # @return [void]
     def finalize!
       self.update_attribute('locked', true)
     end
 
+    # Perform the ApiJob.  This is meant to be overridden in the child class.  The requirements of overriding this
+    # method are to transition the ApiJob into the active state before doing anything, then upon completion, transition
+    # to either the complete or error state.
+    #
+    # @return [void]
     def activate(payload)
       self.active
       # perform action here
