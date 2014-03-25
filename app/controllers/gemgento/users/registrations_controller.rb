@@ -9,6 +9,7 @@ module Gemgento
       build_resource(sign_up_params)
       resource.stores << current_store unless resource.stores.include? current_store
       resource.user_group = Gemgento::UserGroup.find_by(code: 'General')
+      resource.sync_needed = true
 
       if resource.save
         yield resource if block_given?
@@ -26,5 +27,6 @@ module Gemgento
         respond_with resource
       end
     end
+
   end
 end

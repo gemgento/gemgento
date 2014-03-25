@@ -97,7 +97,7 @@ module Gemgento
     def sync_local_to_magento
       # Password needs to be past as plain text.  It will be encrypted by Magento and updated.
       if self.sync_needed
-        if !self.magento_id
+        if self.magento_id.nil?
           API::SOAP::Customer::Customer.create(self, self.stores.first)
 
           self.stores.each_with_index do |store, index|
