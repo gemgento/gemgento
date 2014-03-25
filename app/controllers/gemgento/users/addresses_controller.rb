@@ -17,7 +17,7 @@ module Gemgento
     end
 
     def show
-      @address = current_user.address_book.find(id: params[:id])
+      @address = current_user.address_book.find(params[:id])
       respond_with @address
     end
 
@@ -26,7 +26,7 @@ module Gemgento
     end
 
     def edit
-      @address = current_user.address_book.find(id: params[:id])
+      @address = current_user.address_book.find(params[:id])
       respond_with @address
     end
 
