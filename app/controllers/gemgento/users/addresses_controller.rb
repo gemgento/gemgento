@@ -23,17 +23,26 @@ module Gemgento
       respond_with @address
     end
 
+    def new
+      @address = Gemgento::Address.new
+    end
+
+    def edit
+      @address = current_user.address_book.find(id: params[:id])
+      respond_with @address
+    end
+
     def create
       @address = Address.new(address_params)
       @address.user = current_user
 
       respond_to do |format|
         if @address.save
-          format.html { redirect_to '/users/addresses', notice: 'The new address was created successfully.' }
+          format.html { redirect_to action: 'index', notice: 'The new address was created successfully.' }
           format.js { render '/gemgento/users/addresses/success' }
           format.json { render json: { result: true, address: @address } }
         else
-          format.html { redirect_to '/users/addresses', error: @address.errors.empty? ? 'Error' : @address.errors.full_messages }
+          format.html { render 'new' }
           format.js { render '/gemgento/users/addresses/errors' }
           format.json { render json: { result: false, errors: @address.errors.full_messages } }
         end
@@ -45,11 +54,11 @@ module Gemgento
 
       respond_to do |format|
         if @address.update_attributes(address_params)
-          format.html { redirect_to '/users/addresses', notice: 'The new address was created successfully.' }
+          format.html { redirect_to action: 'index', notice: 'The new address was created successfully.' }
           format.js { render '/gemgento/users/addresses/success' }
           format.json { render json: { result: true, address: @address } }
         else
-          format.html { redirect_to '/users/addresses', error: @address.errors.empty? ? 'Error' : @address.errors.full_messages }
+          format.html { render 'edit' }
           format.js { render '/gemgento/users/addresses/errors' }
           format.json { render json: { result: false, errors: @address.errors.full_messages } }
         end
@@ -68,7 +77,7 @@ module Gemgento
     private
 
     def address_params
-      params.require(:address).permit(:first_name, :last_name, :address1, :address2, :address3, :country_id, :city, :region_id, :postcode, :telephone)
+      params.require(:address).permit(:first_name, :last_name, :address1, :address2, :address3, :country_id, :city, :region_id, :postcode, :telephone, :is_default, :address_type)
     end
   end
 end

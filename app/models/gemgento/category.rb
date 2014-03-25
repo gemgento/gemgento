@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class Category < ActiveRecord::Base
     has_many :product_categories
     has_many :products, -> { distinct }, through: :product_categories
@@ -17,11 +19,15 @@ module Gemgento
     scope :top_level, -> { where(parent: Gemgento::Category.find_by(parent_id: nil), is_active: true) }
     scope :root, -> { find_by(parent_id: nil) }
 
+    # Create a string representation of the path from the root to the Category.
+    #
+    # @return [String]
     def tree_path
+      root = Gemgento::Category.root
+      parent = self.parent
       path = self.name
 
-      parent = self.parent
-      while parent != nil? && parent.parent != nil do
+      while parent != root do
         path = "#{parent.name} > #{path}"
         parent = parent.parent
       end
@@ -29,12 +35,17 @@ module Gemgento
       return path
     end
 
+    # Create an options array for use in an HTML select input.  Categories are grouped under top level scoped
+    # categories.
+    #
+    # @return [Array(String, Array(Array(String, Integer)))]
     def self.grouped_options
       options = []
 
       Gemgento::Category.top_level.each do |parent|
 
         child_options = [["#{parent.name} (parent)", parent.id]]
+
         parent.children.each do |child|
           child_options << [child.name, child.id]
         end
@@ -45,36 +56,10 @@ module Gemgento
       return options
     end
 
-    def save
-      # Dirty dirty dirty(S3Bug)..
-      begin
-        super
-      rescue Exception => e
-        puts 'Upload Failed once..'
-
-        begin
-          super
-        rescue Exception => e
-          puts 'Upload Failed twice..'
-
-          begin
-            super
-          rescue Exception => e
-            puts 'Upload Failed three times..'
-
-            super
-          end
-        end
-      end
-    end
-
-    def self.index
-      if Category.all.size == 0
-        API::SOAP::Catalog::Category.fetch_all
-      end
-      Category.all
-    end
-
+    # Return the Category as JSON.
+    #
+    # @param options [Hash, nil]
+    # @return [String]
     def as_json(options = nil)
       if options.nil? || options[:store].nil?
         store = Gemgento::Store.current
@@ -91,10 +76,16 @@ module Gemgento
       return result
     end
 
+    # Sets the deleted_at to the current timestamp.
+    #
+    # @return [void]
     def mark_deleted
       self.deleted_at = Time.now
     end
 
+    # Marks the category as deleted as saves.
+    #
+    # @return [void]
     def mark_deleted!
       mark_deleted
       self.save
