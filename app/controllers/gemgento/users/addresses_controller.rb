@@ -33,6 +33,7 @@ module Gemgento
     def create
       @address = Address.new(address_params)
       @address.user = current_user
+      @address.sync_needed = true
 
       respond_to do |format|
         if @address.save
@@ -49,6 +50,7 @@ module Gemgento
 
     def update
       @address = current_user.address_book.find(params[:id])
+      @address.sync_needed = true
 
       respond_to do |format|
         if @address.update_attributes(address_params)
