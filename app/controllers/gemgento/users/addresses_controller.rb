@@ -12,9 +12,7 @@ module Gemgento
 
       respond_to do |format|
         format.html
-        format.json do
-          render json: current_user.address_book
-        end
+        format.json { render json: current_user.address_book }
       end
     end
 
@@ -54,7 +52,7 @@ module Gemgento
 
       respond_to do |format|
         if @address.update_attributes(address_params)
-          format.html { redirect_to action: 'index', notice: 'The new address was created successfully.' }
+          format.html { redirect_to action: 'index', notice: 'The new address was updated successfully.' }
           format.js { render '/gemgento/users/addresses/success' }
           format.json { render json: { result: true, address: @address } }
         else
