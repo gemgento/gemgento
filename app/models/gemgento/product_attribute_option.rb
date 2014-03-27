@@ -3,6 +3,18 @@ module Gemgento
     belongs_to :product_attribute
     belongs_to :store
 
+    has_many :product_attribute_values,
+             foreign_key: 'value',
+             primary_key: 'value',
+             contitions: Proc.new { |join_association|
+               if join_association
+                 'gemgento_product_attribute_values.product_attribute_id = product_attribute_id'
+               else
+                 { product_attribute_id: product_attribute_id }
+               end
+             }
+    has_many :products, through: :product_attribute_values
+
     default_scope -> { order(:order) }
 
     # Push local product changes to magento
