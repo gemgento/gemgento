@@ -6,7 +6,7 @@ module Gemgento
     has_many :product_attribute_values,
              foreign_key: 'value',
              primary_key: 'value',
-             contitions: Proc.new { |join_association|
+             conditions: Proc.new { |join_association|
                if join_association
                  'gemgento_product_attribute_values.product_attribute_id = product_attribute_id'
                else
