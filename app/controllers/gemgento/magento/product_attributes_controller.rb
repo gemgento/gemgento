@@ -23,6 +23,10 @@ module Gemgento
 
 
         set_options(@product_attribute, data[:options]) unless data[:options].nil?
+
+        if @product_attribute.frontend_input == 'media_image'
+          Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch_all_media_types
+        end
       end
 
       render nothing: true

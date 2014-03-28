@@ -74,7 +74,6 @@ module Gemgento
     end
 
     def set_categories(magento_categories, product, store)
-      puts 'start categories'
       category_ids = []
 
       # loop through each return category and add it to the product if needed
@@ -109,9 +108,6 @@ module Gemgento
               asset.destroy
             else
               url, file = get_url_and_file(source)
-
-              puts url.inspect
-              puts file.inspect
 
               asset.url = url
               asset.position = source[:position]
@@ -169,8 +165,6 @@ module Gemgento
     end
 
     def get_url_and_file(source)
-      puts source.inspect
-
       if source[:new_file].nil?
         url = "http://#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:file]}"
         file = source[:file]

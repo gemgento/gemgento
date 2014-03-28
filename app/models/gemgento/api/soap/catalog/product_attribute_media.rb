@@ -115,7 +115,8 @@ module Gemgento
             asset_file = fetch_asset_file(source[:url])
             return false if asset_file == false
 
-            asset = Gemgento::Asset.where(product: product, file: source[:file], store: store).first_or_initialize
+            asset = Gemgento::Asset.find_or_initialize_by(product_id: product.id, file: source[:file], store_id: store.id)
+            puts asset.inspect
             asset.url = source[:url]
             asset.position = source[:position]
             asset.label = Gemgento::Magento.enforce_savon_string(source[:label])
@@ -123,8 +124,7 @@ module Gemgento
             asset.product = product
             asset.sync_needed = false
             asset.store = store
-            asset_file = fetch_asset_file(source[:url])
-            asset.set_file asset_file
+            asset.set_file fetch_asset_file(source[:url])
             asset.save
 
             # assign AssetTypes

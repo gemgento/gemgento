@@ -21,7 +21,7 @@ module Gemgento
     validates :product, presence: true
     validates :store, presence: true
 
-    validates_uniqueness_of :product, :scope => [:asset_file, :store]
+    validates_uniqueness_of :product_id, scope: [:asset_file_id, :store_id, :file]
 
     # Associate an image file with the Asset.  If the same file is already associated to a related Asset in a
     # different store, then the Asset will be associated with the existing AssetFile.
@@ -34,9 +34,10 @@ module Gemgento
       matching_file = nil
 
       self.product.assets.each do |asset|
-        if !asset.asset_file.nil? && FileUtils.compare_file(asset.asset_file.file.path(:original), file)
+        next if asset_file.nil?
+
+        if FileUtils.compare_file(asset.asset_file.file.path(:original), file)
           matching_file = asset.asset_file
-          self.file = asset.file
           break
         end
       end
@@ -70,13 +71,15 @@ module Gemgento
     # @param asset_type_codes [Array(String)] asset type codes
     # @return [void]
     def set_types_by_codes(asset_type_codes)
-      puts asset_type_codes.inspect
       applied_asset_types = []
 
       # loop through each return category and add it to the product if needed
       asset_type_codes.each do |asset_type_code|
         unless (asset_type_code.blank?)
-          asset_type = Gemgento::AssetType.find_by(product_attribute_set: self.product.product_attribute_set, code: asset_type_code)
+          asset_type = Gemgento::AssetType.find_by(
+              product_attribute_set: self.product.product_attribute_set,
+              code: asset_type_code,
+          )
           next if asset_type.nil?
 
           self.asset_types << asset_type unless self.asset_types.include? asset_type # don't duplicate the asset types
@@ -86,6 +89,14 @@ module Gemgento
 
       # destroy any asset type associations that were not in the list
       self.asset_types.where('asset_type_id NOT IN (?)', applied_asset_types).destroy_all
+    end
+
+    def self.find_by_code(product, code, store = nil)
+      store = Gemgento::Store.current if store.nil?
+      asset_type = Gemgento::AssetType.find_by(code: code, product_attribute_set_id: product.product_attribute_set_id)
+      raise "Unknown AssetType code for given product's ProductAttributeSet" if asset_type.nil?
+
+      return asset_type.assets.find_by(product_id: product.id, store_id: store.id)
     end
 
     private
