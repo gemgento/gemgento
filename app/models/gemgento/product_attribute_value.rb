@@ -8,7 +8,7 @@ module Gemgento
                primary_key: 'value',
                conditions: Proc.new { |join_association|
                  if join_association
-                   'gemgento_product_attribute_options.product_attribute_id = product_attribute_id'
+                   'gemgento_product_attribute_options.product_attribute_id = gemgento_product_attribute_values.product_attribute_id'
                  else
                    { product_attribute_id: product_attribute_id }
                  end
