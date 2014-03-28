@@ -13,8 +13,6 @@ module Gemgento
     after_save :sync_local_to_magento
     after_save :touch_product
 
-    before_destroy :delete_magento
-
     default_scope -> { includes(:asset_file).order(:position).references(:asset_file) }
 
     validates :asset_file, presence: true
@@ -122,7 +120,7 @@ module Gemgento
     #
     # @return [void]
     def delete_magento
-      unless self.file.nil?
+      unless self.file.nil? && self.file.assets.where('id != ?', self.id).empty?
         API::SOAP::Catalog::ProductAttributeMedia.remove(self)
       end
 
