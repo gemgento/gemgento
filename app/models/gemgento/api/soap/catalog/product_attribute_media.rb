@@ -6,7 +6,7 @@ module Gemgento
 
           def self.fetch_all
             Gemgento::Store.all.each do |store|
-              Gemgento::Product.all.each do |product|
+              Gemgento::Product.active.each do |product|
                 fetch(product, store)
               end
             end
