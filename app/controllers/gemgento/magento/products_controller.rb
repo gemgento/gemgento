@@ -119,7 +119,7 @@ module Gemgento
               asset.store = store
               asset.save
 
-              asset.set_types_by_codes(source[:types])
+              asset.set_types_by_codes(source[:types]) unless source[:types].nil?
               assets_to_keep << asset.id
             end
           end
