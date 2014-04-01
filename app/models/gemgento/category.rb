@@ -48,6 +48,12 @@ module Gemgento
 
         parent.children.each do |child|
           child_options << [child.name, child.id]
+
+          if child.children
+            child.children.each do |second_child|
+              child_options << [second_child.name, second_child.id]
+            end
+          end
         end
 
         options << [parent.name, child_options]
