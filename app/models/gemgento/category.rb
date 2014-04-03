@@ -46,8 +46,14 @@ module Gemgento
 
         child_options = [["#{parent.name} (parent)", parent.id]]
 
-        parent.children.each do |child|
+        parent.children.where(is_active: true).each do |child|
           child_options << [child.name, child.id]
+
+          if child.children.where(is_active: true)
+            child.children.where(is_active: true).each do |second_child|
+              child_options << [second_child.name, second_child.id]
+            end
+          end
         end
 
         options << [parent.name, child_options]
