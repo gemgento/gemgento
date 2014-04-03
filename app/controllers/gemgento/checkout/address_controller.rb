@@ -37,9 +37,11 @@ module Gemgento
     end
 
     def update
+      @billing_address = Address.new(billing_address_params)
+      @shipping_address = Address.new(shipping_address_params)
+
       # validate addresses before continuing
-      if params[:same_as_billing] && !Address.new(billing_address_params).valid?
-        @billing_address = Address.create(billing_address_params)
+      if params[:same_as_billing] && !@billing_address.valid?
         respond_to do |format|
           format.html { render checkout_address }
           format.json do
@@ -51,9 +53,7 @@ module Gemgento
             }
           end
         end
-      elsif !params[:same_as_billing] && (!Address.new(billing_address_params).valid? || !Address.new(shipping_address_params).valid?)
-        @billing_address = Address.create(billing_address_params)
-        @shipping_address = Address.create(shipping_address_params)
+      elsif !params[:same_as_billing] && (!@billing_address.valid? || !@shipping_address.valid?)
         respond_to do |format|
           format.html { render checkout_address }
           format.json do
