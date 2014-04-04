@@ -8,7 +8,7 @@ module Gemgento
 
     desc 'Add the Gemgento routes'
     def add_routes
-      route "mount Gemgento::Engine, :at => '/'"
+      route "mount Gemgento::Engine, at: '/'"
     end
 
     desc 'Include the Gemgento::ApplicationHelper'
