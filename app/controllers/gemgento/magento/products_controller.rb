@@ -108,6 +108,7 @@ module Gemgento
               asset.destroy
             else
               url, file = get_url_and_file(source)
+              next unless valid_url(url)
 
               asset.url = url
               asset.position = source[:position]
@@ -174,6 +175,14 @@ module Gemgento
       end
 
       return url, file
+    end
+
+    def valid_url(url)
+      url = URI.parse(url)
+      req = Net::HTTP.new(url.host, url.port)
+      res = req.request_head(url.path)
+
+      return res == '200'
     end
 
   end
