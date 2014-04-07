@@ -52,12 +52,11 @@ module Gemgento
     def set_products(stores_products, category)
       stores_products.each do |store_id, products|
         next if store_id.to_i == 0 # 0 is the admin store which is not used in Gemgento
+        store = Gemgento::Store.find_by(magento_id: store_id)
 
         if products.nil?
           Gemgento::ProductCategory.where(store_id: store.id, category_id: category.id).destroy_all
         else
-          store = Gemgento::Store.find_by(magento_id: store_id)
-
           product_category_ids = []
           product_ids = products.map{ |p| p[:product_id] }
 
