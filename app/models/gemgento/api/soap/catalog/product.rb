@@ -6,12 +6,9 @@ module Gemgento
 
           # Synchronize local database with Magento database
           def self.fetch_all(last_updated = nil, skip_existing = false)
-            updates_made = false
-
             Gemgento::Store.all.each do |store|
               list(store, last_updated).each do |product_list|
                 unless product_list == empty_product_list
-                  updates_made = true
 
                   # enforce array
                   product_list[:item] = [product_list[:item]] unless product_list[:item].is_a? Array
@@ -25,8 +22,6 @@ module Gemgento
                 end
               end
             end
-
-            associate_simple_products_to_configurable_products if updates_made
           end
 
           def self.fetch(product_id, attribute_set, store)
@@ -216,6 +211,7 @@ module Gemgento
 
             set_categories(subject[:categories][:item], product, store) if subject[:categories][:item]
             set_attribute_values_from_magento(subject[:additional_attributes][:item], product, store) if (subject[:additional_attributes] and subject[:additional_attributes][:item])
+            set_associated_products(subject[:simple_product_ids], subject[:configurable_product_ids], product)
 
             product
           end
@@ -251,17 +247,6 @@ module Gemgento
               end
 
             end
-          end
-
-          def self.associate_simple_products_to_configurable_products
-            Gemgento::Product.skip_callback(:save, :after, :sync_local_to_magento)
-
-            Gemgento::Product.where(magento_type: 'configurable').each do |configurable_product|
-              configurable_product.simple_products.clear
-              configurable_product.simple_products = Gemgento::MagentoDB.associated_simple_products(configurable_product)
-            end
-
-            Gemgento::Product.set_callback(:save, :after, :sync_local_to_magento)
           end
 
           def self.compose_product_data(product, store)
@@ -375,6 +360,18 @@ module Gemgento
             end
 
             return magento_product_ids
+          end
+
+          def self.set_associated_products(simple_magento_product_ids, configurable_magento_product_ids, product)
+            if !simple_magento_product_ids.nil? && !simple_magento_product_ids[:item].nil?
+              ids = Gemgento::Magento.enforce_savon_array(simple_magento_product_ids[:item])
+              product.set_simple_products_by_magento_ids(ids)
+            end
+
+            unless configurable_magento_product_ids[:item].nil?
+              ids = Gemgento::Magento.enforce_savon_array(configurable_magento_product_ids[:item])
+              product.set_configurable_products_by_magento_ids(ids)
+            end
           end
 
         end

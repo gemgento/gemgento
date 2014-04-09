@@ -391,6 +391,42 @@ module Gemgento
       return [2, 4].include?(self.visibility)
     end
 
+    # Set the associated simple products, using an array of Magento product IDs.
+    #
+    # @param magento_ids [Array(Integer)] Magento IDs of the associated simple products
+    # @return [void]
+    def set_simple_products_by_magento_ids(magento_ids)
+      simple_product_ids = []
+
+      magento_ids.each do |magento_id|
+        simple_product = Gemgento::Product.find_by(magento_id: magento_id)
+        next if simple_product.nil?
+
+        self.simple_products << simple_product unless self.simple_products.include? simple_product
+        simple_product_ids << simple_product.id
+      end
+
+      self.simple_products.where('simple_product_id NOT IN (?)', simple_product_ids).clear
+    end
+
+    # Set the associated configurable products, using an array of Magento product IDs.
+    #
+    # @param magento_ids [Array(Integer)] Magento IDs of the associated configurable products
+    # @return [void]
+    def set_configurable_products_by_magento_ids(magento_ids)
+      configurable_product_ids = []
+
+      magento_ids.each do |magento_id|
+        configurable_product = Gemgento::Product.find_by(magento_id: magento_id)
+        next if configurable_product.nil?
+
+        self.configurable_products << configurable_product unless self.configurable_products.include? configurable_product
+        configurable_product_ids << configurable_product.id
+      end
+
+      self.configurable_products.where('configurable_product_id NOT IN (?)', configurable_product_ids).clear
+    end
+
     private
 
     # Push local product changes to magento

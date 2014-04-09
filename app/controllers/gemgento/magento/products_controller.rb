@@ -108,12 +108,7 @@ module Gemgento
               asset.destroy
             else
               url, file = get_url_and_file(source)
-
-              puts url
-
               next unless valid_url(url)
-
-              puts 'here'
 
               asset.url = url
               asset.position = source[:position]
@@ -138,36 +133,13 @@ module Gemgento
     end
 
     def set_associated_products(simple_magento_product_ids, configurable_magento_product_ids, product)
-      set_simple_products(simple_magento_product_ids, product) unless simple_magento_product_ids.nil?
-      set_configurable_products(configurable_magento_product_ids, product) unless configurable_magento_product_ids.nil?
-    end
-
-    def set_simple_products(magento_ids, product)
-      simple_product_ids = []
-
-      magento_ids.each do |magento_id|
-        simple_product = Gemgento::Product.find_by(magento_id: magento_id)
-        next if simple_product.nil?
-
-        product.simple_products << simple_product unless product.simple_products.include? simple_product
-        simple_product_ids << simple_product.id
+      unless simple_magento_product_ids.nil?
+        product.set_simple_products_by_magento_ids(simple_magento_product_ids)
       end
 
-      product.simple_products.where('simple_product_id NOT IN (?)', simple_product_ids).clear
-    end
-
-    def set_configurable_products(magento_ids, product)
-      configurable_product_ids = []
-
-      magento_ids.each do |magento_id|
-        configurable_product = Gemgento::Product.find_by(magento_id: magento_id)
-        next if configurable_product.nil?
-
-        product.configurable_products << configurable_product unless product.configurable_products.include? configurable_product
-        configurable_product_ids << configurable_product.id
+      unless configurable_magento_product_ids.nil?
+        product.set_configurable_products_by_magento_ids(configurable_magento_product_ids)
       end
-
-      product.configurable_products.where('configurable_product_id NOT IN (?)', configurable_product_ids).clear
     end
 
     def get_url_and_file(source)

@@ -87,6 +87,14 @@ module Gemgento
         ''
       end
     end
+
+    def self.enforce_savon_array(subject)
+      if subject.is_a? Array
+        subject
+      else
+        [subject]
+      end
+    end
   end
 
 end
