@@ -7,7 +7,7 @@ module Gemgento
     belongs_to :region
     belongs_to :order
 
-    validates :first_name, :last_name, :street, :country, :postcode, :telephone, presence: true
+    validates :first_name, :last_name, :street, :city, :country, :postcode, :telephone, presence: true
     validates :region, presence: true, if: ->{ !self.country.nil? && !self.country.regions.empty? }
 
     validates_uniqueness_of :user,
