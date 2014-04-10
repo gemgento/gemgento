@@ -361,8 +361,14 @@ module Gemgento
       store = Gemgento::Store.current if store.nil?
       order = {}
 
+      if self.magento_type != 'configurable' && !self.configurable_products.empty?
+        configurable_product = self.configurable_products.first
+      else
+        configurable_product = self
+      end
+
       if active_only
-        simple_products = self.simple_products.active
+        simple_products = configurable_product.simple_products.active
       else
         simple_products = self.simple_products
       end
