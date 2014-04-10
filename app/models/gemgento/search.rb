@@ -2,11 +2,8 @@ module Gemgento
   class Search
 
     def self.products(term)
-      products = []
-
-      Gemgento::API::SOAP::Catalog::Search.results(term).each do |magento_id|
-        products << Gemgento::Product.find_by(magento_id: magento_id)
-      end
+      magento_ids = Gemgento::API::SOAP::Catalog::Search.results(term)
+      products = Gemgento::Product.where(magento_id: magento_ids)
 
       return products
     end
