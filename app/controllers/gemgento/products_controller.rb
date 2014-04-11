@@ -26,6 +26,8 @@ module Gemgento
         @product.product_attribute_values.reload unless @product.nil?
       end
 
+      not_found if @product.nil?
+
       respond_to do |format|
         format.html
         format.json { render json: @product.as_json({ store: current_store }) }

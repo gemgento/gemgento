@@ -35,5 +35,9 @@ module Gemgento
       @current_category ||= Gemgento::Category.root
     end
 
+    def not_found
+      raise ActionController::RoutingError.new('Not Found')
+    end
+
   end
 end
