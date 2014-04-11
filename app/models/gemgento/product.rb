@@ -341,16 +341,22 @@ module Gemgento
     def assets_as_json(store)
       result = []
 
-      self.assets.select{ |a| a.store_id == store.id }.each do |image|
-        styles = { 'original' => image.image.url(:original) }
+      self.assets.select{ |a| a.store_id == store.id }.each do |asset|
+        styles = { 'original' => asset.image.url(:original) }
 
-        image.image.styles.keys.to_a.each do |style|
-          styles[style] = image.image.url(style.to_sym)
+        asset.image.styles.keys.to_a.each do |style|
+          styles[style] = asset.image.url(style.to_sym)
+        end
+
+        types = []
+        asset.asset_types.each do |asset_type|
+          types << asset_type.code
         end
 
         result << {
-            label: image.label,
-            styles: styles
+            label: asset.label,
+            styles: styles,
+            types: types
         }
       end
 
