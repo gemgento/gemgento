@@ -36,6 +36,7 @@ module Gemgento
     scope :disabled, -> { where(status: false) }
     scope :catalog_visible, -> { where(visibility: [2, 4]) }
     scope :search_visible, -> { where(visibility: [3, 4]) }
+    scope :visible, -> { where(visibility: [2,3,4]) }
     scope :not_deleted, -> { where(deleted_at: nil) }
     scope :active, -> { where(deleted_at: nil, status: true) }
 
