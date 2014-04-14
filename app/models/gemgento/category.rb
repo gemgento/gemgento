@@ -19,6 +19,8 @@ module Gemgento
     scope :top_level, -> { where(parent: Gemgento::Category.find_by(parent_id: nil), is_active: true) }
     scope :root, -> { find_by(parent_id: nil) }
 
+    after_save :enforce_positioning, if: :position_changed?
+
     # Create a string representation of the path from the root to the Category.
     #
     # @return [String]
@@ -95,6 +97,27 @@ module Gemgento
     def mark_deleted!
       mark_deleted
       self.save
+    end
+
+    # Increment the position on all categories that come after.  Used to ensure correct positioning after changing the
+    # position of a single category.
+    #
+    # @return [void]
+    def enforce_positioning
+      Gemgento::Category.skip_callback(:save, :after, :enforce_positioning)
+
+      last_position = self.position
+      categories = Gemgento::Category.where('parent_id = ? AND position >= ? AND id != ?', self.parent_id, self.position, self.id)
+      categories.each do |category|
+        break if category.position != last_position
+
+        category.position = category.position + 1
+        category.save
+
+        last_position = category.position
+      end
+
+      Gemgento::Category.set_callback(:save, :after, :enforce_positioning)
     end
 
   end
