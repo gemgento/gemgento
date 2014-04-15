@@ -36,6 +36,7 @@ module Gemgento
       @errors = []
 
       if current_order.id.nil?
+        current_order.user = current_user
         current_order.save
         cookies[:cart] = current_order.id
       end

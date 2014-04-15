@@ -18,10 +18,15 @@ module Gemgento
     end
 
     def current_order
-      @current_order = Gemgento::Order.get_cart(cookies[:cart]) if @current_order.nil?
+      @current_order = Gemgento::Order.get_cart(cookies[:cart], current_store, current_user) if @current_order.nil?
 
       if @current_order.state != 'cart'
-        @current_order = Gemgento::Order.get_cart(nil, current_store)
+        cookies[:cart] = nil
+        @current_order = Gemgento::Order.get_cart(nil, current_store, current_user)
+
+        unless @current_order.id.nil?
+          cookies[:cart] = @current_order.id
+        end
       end
 
       @current_order
