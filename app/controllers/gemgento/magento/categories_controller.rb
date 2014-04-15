@@ -13,18 +13,20 @@ module Gemgento
       @category.url_key = data[:url_key]
       @category.include_in_menu = data[:include_in_menu]
       @category.sync_needed = false
-      @category.save
-
-      set_stores(data[:store_ids], @category)
-      set_products(data[:products], @category) unless data[:products].nil?
 
       if data.key? :image
         begin
+          puts "http://#{Gemgento::Config[:magento][:url]}/media/catalog/category/#{data[:image][:value]}"
           @category.image = open("http://#{Gemgento::Config[:magento][:url]}/media/catalog/category/#{data[:image][:value]}")
         rescue
           @category.image = nil
         end
       end
+
+      @category.save
+
+      set_stores(data[:store_ids], @category)
+      set_products(data[:products], @category) unless data[:products].nil?
 
       render nothing: true
     end

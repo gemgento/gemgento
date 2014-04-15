@@ -89,6 +89,12 @@ module Gemgento
       self.asset_types.where('asset_type_id NOT IN (?)', applied_asset_types).destroy_all
     end
 
+    # Find a products asset by the AssetType code
+    #
+    # @param product [Gemgento::Product]
+    # @param code [String]
+    # @param store [Integer, nil]
+    # @return [Gemgento::Asset, nil]
     def self.find_by_code(product, code, store = nil)
       store = Gemgento::Store.current if store.nil?
       asset_type = Gemgento::AssetType.find_by(code: code, product_attribute_set_id: product.product_attribute_set_id)
