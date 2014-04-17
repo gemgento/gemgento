@@ -25,7 +25,7 @@ module Gemgento
 
     def update
       current_order.shipping_method = params[:shipping_method]
-      current_order.shipping_amount = params[params[:shipping_method]]
+      current_order.shipping_amount = shipping_method_amount(params[:shipping_method])
 
       respond_to do |format|
         if current_order.push_shipping_method
@@ -40,6 +40,18 @@ module Gemgento
           format.json { render json: { result: false, errors: 'Please select a shipping method' } }
         end
       end
+    end
+
+    private
+
+    def shipping_method_amount(code)
+      JSON.parse(cookies[:shipping_methods]).each do |shipping_method|
+        if shipping_method[:code] == code
+          return shipping_method[:price]
+        end
+      end
+
+      return 0
     end
 
   end
