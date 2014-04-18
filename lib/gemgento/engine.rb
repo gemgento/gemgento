@@ -6,6 +6,7 @@ module Gemgento
     engine_name 'gemgento'
 
     config.autoload_paths += %W(#{config.root}/lib)
+    config.autoload_paths << File.expand_path('../gemgento', __FILE__)
 
     # load decorators
     config.to_prepare do
