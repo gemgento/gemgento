@@ -126,7 +126,7 @@ module Gemgento
               Gemgento::Address.copy_to_address_book(current_order.billing_address, current_user)
             end
 
-            format.html { render checkout_shipping_path }
+            format.html { redirect_to checkout_shipping_path }
             format.json { render json: { result: true, order: current_order } }
           else
             format.html { render checkout_address }
