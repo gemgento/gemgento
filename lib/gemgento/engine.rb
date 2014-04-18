@@ -1,7 +1,7 @@
 require 'rails/engine'
 
 module Gemgento
-  class Engine < ::Rails::Engine
+  class Engine < Rails::Engine
     isolate_namespace Gemgento
     engine_name 'gemgento'
 
