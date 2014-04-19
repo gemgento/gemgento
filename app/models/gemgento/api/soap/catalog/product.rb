@@ -14,7 +14,13 @@ module Gemgento
                   product_list[:item] = [product_list[:item]] unless product_list[:item].is_a? Array
 
                   product_list[:item].each do |basic_product_info|
-                    next if skip_existing && Gemgento::Product.where(magento_id: basic_product_info[:product_id], store: store).present?
+                    if skip_existing
+                      product = Gemgento::Product.find_by(magento_id: basic_product_info[:product_id])
+
+                      unless product.nil?
+                        next if product.stores.include? store
+                      end
+                    end
 
                     attribute_set = Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
                     fetch(basic_product_info[:product_id], attribute_set, store)
