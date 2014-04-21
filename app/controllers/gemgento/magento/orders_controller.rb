@@ -40,7 +40,7 @@ module Gemgento
       @order.store_name = data[:store_name]
       @order.remote_ip = data[:remote_ip]
       @order.status = data[:status]
-      @order.state = data[:state]
+      @order.state = data[:state] unless data[:state].nil?
       @order.applied_rule_ids = data[:applied_rule_ids]
       @order.global_currency_code = data[:global_currency_code]
       @order.base_currency_code = data[:base_currency_code]
