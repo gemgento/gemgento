@@ -34,6 +34,7 @@ module Gemgento
     end
 
     def create_new_cart
+      cookies.delete :cart
       @current_order = Gemgento::Order.get_cart(nil, current_store)
     end
 
