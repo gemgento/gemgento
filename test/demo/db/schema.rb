@@ -11,38 +11,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20131223181709) do
+ActiveRecord::Schema.define(version: 20140422140433) do
 
-  create_table "active_admin_comments", force: true do |t|
-    t.string "namespace"
-    t.text "body"
-    t.string "resource_id", null: false
-    t.string "resource_type", null: false
-    t.integer "author_id"
-    t.string "author_type"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+  create_table "gemegento_shipment_items", force: true do |t|
+    t.integer "shipment_id"
+    t.string "sku"
+    t.string "name"
+    t.integer "order_item_id"
+    t.integer "product_id"
+    t.float "weight"
+    t.float "price"
+    t.float "qty"
+    t.integer "magento_id"
   end
 
-  add_index "active_admin_comments", ["author_type", "author_id"], name: "index_active_admin_comments_on_author_type_and_author_id", using: :btree
-  add_index "active_admin_comments", ["namespace"], name: "index_active_admin_comments_on_namespace", using: :btree
-  add_index "active_admin_comments", ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource_type_and_resource_id", using: :btree
-
-  create_table "admin_users", force: true do |t|
-    t.string "email", default: "", null: false
-    t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
-    t.integer "sign_in_count", default: 0
-    t.datetime "current_sign_in_at"
-    t.datetime "last_sign_in_at"
-    t.string "current_sign_in_ip"
-    t.string "last_sign_in_ip"
-  end
-
-  add_index "admin_users", ["email"], name: "index_admin_users_on_email", unique: true, using: :btree
-  add_index "admin_users", ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true, using: :btree
+  add_index "gemegento_shipment_items", ["shipment_id"], name: "index_gemegento_shipment_items_on_shipment_id", using: :btree
 
   create_table "gemgento_addresses", force: true do |t|
     t.integer "user_address_id"
@@ -52,9 +35,9 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.string "company"
     t.integer "country_id"
     t.string "fax"
-    t.string "fname"
-    t.string "mname"
-    t.string "lname"
+    t.string "first_name"
+    t.string "middle_name"
+    t.string "last_name"
     t.string "postcode"
     t.string "prefix"
     t.string "suffix"
@@ -68,7 +51,25 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.datetime "updated_at"
     t.integer "order_address_id"
     t.integer "order_id"
-    t.boolean "is_default", default: false
+    t.boolean "is_default_billing", default: false
+    t.boolean "is_default_shipping", default: false
+  end
+
+  create_table "gemgento_api_jobs", force: true do |t|
+    t.integer "source_id"
+    t.string "kind"
+    t.string "state"
+    t.string "source_type"
+    t.string "request_url"
+    t.text "request", limit: 2147483647
+    t.text "response", limit: 2147483647
+    t.boolean "locked"
+    t.text "request_body", limit: 2147483647
+    t.string "request_status"
+    t.string "response_status"
+    t.string "type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "gemgento_asset_files", force: true do |t|
@@ -99,6 +100,9 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.integer "asset_file_id"
   end
 
+  add_index "gemgento_assets", ["product_id"], name: "index_gemgento_assets_on_product_id", using: :btree
+  add_index "gemgento_assets", ["store_id"], name: "index_gemgento_assets_on_store_id", using: :btree
+
   create_table "gemgento_assets_asset_types", id: false, force: true do |t|
     t.integer "asset_id", default: 0, null: false
     t.integer "asset_type_id", default: 0, null: false
@@ -108,6 +112,9 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.integer "product_attribute_set_id", default: 0, null: false
     t.integer "product_attribute_id", default: 0, null: false
   end
+
+  add_index "gemgento_attribute_set_attributes", ["product_attribute_id"], name: "index_gemgento_attribute_set_attributes_on_product_attribute_id", using: :btree
+  add_index "gemgento_attribute_set_attributes", ["product_attribute_set_id", "product_attribute_id"], name: "attribute_set_attributes_index", unique: true, using: :btree
 
   create_table "gemgento_categories", force: true do |t|
     t.integer "magento_id"
@@ -126,6 +133,7 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.string "image_content_type"
     t.integer "image_file_size"
     t.datetime "image_updated_at"
+    t.datetime "deleted_at"
   end
 
   add_index "gemgento_categories", ["magento_id"], name: "index_gemgento_categories_on_magento_id", unique: true, using: :btree
@@ -135,15 +143,23 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.integer "store_id"
   end
 
+  add_index "gemgento_categories_stores", ["category_id", "store_id"], name: "index_gemgento_categories_stores_on_category_id_and_store_id", unique: true, using: :btree
+  add_index "gemgento_categories_stores", ["store_id"], name: "index_gemgento_categories_stores_on_store_id", using: :btree
+
   create_table "gemgento_configurable_attributes", id: false, force: true do |t|
     t.integer "product_id", default: 0, null: false
     t.integer "product_attribute_id", default: 0, null: false
   end
 
+  add_index "gemgento_configurable_attributes", ["product_attribute_id"], name: "index_gemgento_configurable_attributes_on_product_attribute_id", using: :btree
+  add_index "gemgento_configurable_attributes", ["product_id", "product_attribute_id"], name: "configurable_attribute_index", unique: true, using: :btree
+
   create_table "gemgento_configurable_simple_relations", id: false, force: true do |t|
     t.integer "configurable_product_id", default: 0, null: false
     t.integer "simple_product_id", default: 0, null: false
   end
+
+  add_index "gemgento_configurable_simple_relations", ["configurable_product_id", "simple_product_id"], name: "configurable_simple_index", unique: true, using: :btree
 
   create_table "gemgento_countries", force: true do |t|
     t.string "magento_id", null: false
@@ -168,7 +184,12 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.boolean "sync_needed", default: true, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer "store_id"
+    t.boolean "use_default_website_stock", default: true
   end
+
+  add_index "gemgento_inventories", ["product_id", "store_id"], name: "index_gemgento_inventories_on_product_id_and_store_id", unique: true, using: :btree
+  add_index "gemgento_inventories", ["store_id"], name: "index_gemgento_inventories_on_store_id", using: :btree
 
   create_table "gemgento_magento_responses", force: true do |t|
     t.text "request"
@@ -176,27 +197,6 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean "success", default: true, null: false
-  end
-
-  create_table "gemgento_order_addresses", force: true do |t|
-    t.integer "order_id", null: false
-    t.integer "increment_id"
-    t.boolean "is_active", default: true, null: false
-    t.string "address_type"
-    t.string "fname"
-    t.string "lname"
-    t.string "company_name"
-    t.string "street"
-    t.string "city"
-    t.string "region_name"
-    t.integer "region_id"
-    t.string "postcode"
-    t.integer "country_id"
-    t.string "telephone"
-    t.string "fax"
-    t.integer "address_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
   end
 
   create_table "gemgento_order_items", force: true do |t|
@@ -259,6 +259,8 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.datetime "updated_at"
   end
 
+  add_index "gemgento_order_items", ["order_id"], name: "index_gemgento_order_items_on_order_id", using: :btree
+
   create_table "gemgento_order_payments", force: true do |t|
     t.integer "magento_id"
     t.integer "order_id", null: false
@@ -282,6 +284,8 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.datetime "updated_at"
   end
 
+  add_index "gemgento_order_payments", ["order_id"], name: "index_gemgento_order_payments_on_order_id", using: :btree
+
   create_table "gemgento_order_statuses", force: true do |t|
     t.integer "order_id", null: false
     t.integer "increment_id"
@@ -292,6 +296,8 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "gemgento_order_statuses", ["order_id"], name: "index_gemgento_order_statuses_on_order_id", using: :btree
 
   create_table "gemgento_orders", force: true do |t|
     t.integer "order_id"
@@ -323,11 +329,11 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.decimal "base_total_online_refunded", precision: 12, scale: 4
     t.decimal "base_total_offline_refunded", precision: 12, scale: 4
     t.integer "billing_address_id"
-    t.string "billing_fname"
-    t.string "billing_lname"
+    t.string "billing_first_name"
+    t.string "billing_last_name"
     t.integer "shipping_address_id"
-    t.string "shipping_fname"
-    t.string "shipping_lname"
+    t.string "shipping_first_name"
+    t.string "shipping_last_name"
     t.string "billing_name"
     t.string "shipping_name"
     t.string "store_to_base_rate"
@@ -360,6 +366,7 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.string "gift_message"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.datetime "placed_at"
   end
 
   create_table "gemgento_product_attribute_options", force: true do |t|
@@ -373,12 +380,16 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.integer "store_id"
   end
 
+  add_index "gemgento_product_attribute_options", ["product_attribute_id", "store_id"], name: "attribute_options_index", using: :btree
+  add_index "gemgento_product_attribute_options", ["store_id"], name: "index_gemgento_product_attribute_options_on_store_id", using: :btree
+
   create_table "gemgento_product_attribute_sets", force: true do |t|
     t.integer "magento_id"
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "sync_needed", default: true, null: false
+    t.datetime "deleted_at"
   end
 
   create_table "gemgento_product_attribute_values", force: true do |t|
@@ -389,6 +400,9 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.datetime "updated_at", null: false
     t.integer "store_id"
   end
+
+  add_index "gemgento_product_attribute_values", ["product_attribute_id"], name: "index_gemgento_product_attribute_values_on_product_attribute_id", using: :btree
+  add_index "gemgento_product_attribute_values", ["product_id"], name: "index_gemgento_product_attribute_values_on_product_id", using: :btree
 
   create_table "gemgento_product_attributes", force: true do |t|
     t.integer "magento_id"
@@ -408,6 +422,7 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "default_value"
+    t.datetime "deleted_at"
   end
 
   create_table "gemgento_product_categories", force: true do |t|
@@ -417,7 +432,11 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "store_id"
+    t.boolean "sync_needed", default: false
   end
+
+  add_index "gemgento_product_categories", ["category_id"], name: "index_gemgento_product_categories_on_category_id", using: :btree
+  add_index "gemgento_product_categories", ["product_id"], name: "index_gemgento_product_categories_on_product_id", using: :btree
 
   create_table "gemgento_product_imports", force: true do |t|
     t.text "import_errors"
@@ -457,6 +476,7 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.boolean "status", default: true
     t.integer "visibility", default: 4
     t.datetime "deleted_at"
+    t.integer "swatch_id"
   end
 
   create_table "gemgento_regions", force: true do |t|
@@ -486,11 +506,56 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "gemgento_saved_credit_cards", force: true do |t|
+    t.integer "magento_id"
+    t.integer "user_id"
+    t.string "token"
+    t.string "cc_number"
+    t.integer "exp_month"
+    t.integer "exp_year"
+    t.string "cc_type"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "gemgento_sessions", force: true do |t|
     t.string "session_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
+  create_table "gemgento_shipment_comments", force: true do |t|
+    t.integer "shipment_id"
+    t.text "comment"
+    t.boolean "is_customer_notified"
+    t.integer "magento_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "gemgento_shipment_tracks", force: true do |t|
+    t.integer "shipment_id"
+    t.string "carrier_code"
+    t.string "title"
+    t.string "number"
+    t.integer "order_id"
+    t.integer "magento_id"
+  end
+
+  add_index "gemgento_shipment_tracks", ["shipment_id"], name: "index_gemgento_shipment_tracks_on_shipment_id", using: :btree
+
+  create_table "gemgento_shipments", force: true do |t|
+    t.integer "magento_id"
+    t.integer "order_id"
+    t.string "increment_id"
+    t.integer "store_id"
+    t.integer "shipping_address_id"
+    t.float "total_qty"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "gemgento_shipments", ["order_id"], name: "index_gemgento_shipments_on_order_id", using: :btree
 
   create_table "gemgento_stores", force: true do |t|
     t.integer "magento_id", null: false
@@ -502,6 +567,7 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "website_id"
+    t.string "currency_code", default: "usd"
   end
 
   add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true, using: :btree
@@ -511,9 +577,22 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.integer "store_id"
   end
 
+  add_index "gemgento_stores_products", ["product_id", "store_id"], name: "stores_products_index", unique: true, using: :btree
+  add_index "gemgento_stores_products", ["store_id"], name: "index_gemgento_stores_products_on_store_id", using: :btree
+
   create_table "gemgento_stores_users", force: true do |t|
     t.integer "store_id"
     t.integer "user_id"
+  end
+
+  create_table "gemgento_subscribers", force: true do |t|
+    t.string "first_name"
+    t.string "last_name"
+    t.string "email"
+    t.integer "country_id"
+    t.string "city"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "gemgento_swatches", force: true do |t|
@@ -543,9 +622,9 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.integer "magento_id"
     t.string "created_in"
     t.string "email", default: "", null: false
-    t.string "fname"
-    t.string "lname"
-    t.string "mname"
+    t.string "first_name"
+    t.string "last_name"
+    t.string "middle_name"
     t.integer "user_group_id"
     t.string "prefix"
     t.string "suffix"
@@ -568,9 +647,11 @@ ActiveRecord::Schema.define(version: 20131223181709) do
     t.string "last_sign_in_ip"
     t.string "unencrypted_password"
     t.string "type"
+    t.string "gender"
+    t.datetime "deleted_at"
   end
 
-  add_index "gemgento_users", ["email"], name: "index_gemgento_users_on_email", unique: true, using: :btree
+  add_index "gemgento_users", ["email", "deleted_at"], name: "index_gemgento_users_on_email_and_deleted_at", unique: true, using: :btree
   add_index "gemgento_users", ["magento_id"], name: "index_gemgento_users_on_magento_id", unique: true, using: :btree
   add_index "gemgento_users", ["reset_password_token"], name: "index_gemgento_users_on_reset_password_token", unique: true, using: :btree
 

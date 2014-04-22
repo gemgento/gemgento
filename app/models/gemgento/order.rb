@@ -200,6 +200,27 @@ module Gemgento
       return result
     end
 
+    def set_default_billing_address(user)
+      self.billing_address = user.default_billing_address
+
+      if self.billing_address.nil? && !user.address_book.empty?
+        self.billing_address = user.address_book.first
+      else
+        self.billing_address = Gemgento::Address.new
+      end
+    end
+
+    def set_default_shipping_address(user)
+      self.shipping_address = user.default_shipping_address
+
+      if self.shipping_address.nil? && !user.address_book.empty?
+        self.shipping_address = user.address_book.first
+      else
+        self.shipping_address = Gemgento::Address.new
+      end
+    end
+
+
     private
 
     def valid_stock?

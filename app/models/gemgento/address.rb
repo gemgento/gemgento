@@ -116,10 +116,16 @@ module Gemgento
     #
     # @return [void]
     def enforce_single_default
-      if self.is_default
+      if self.is_default_billing
         self.user.address_book.where(address_type: self.address_type).
             where('id != ?', self.id).
-            update_all(is_default: false)
+            update_all(is_default_billing: false)
+      end
+
+      if self.is_default_shipping
+        self.user.address_book.where(address_type: self.address_type).
+            where('id != ?', self.id).
+            update_all(is_default_shipping: false)
       end
     end
 

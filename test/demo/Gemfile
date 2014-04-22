@@ -5,7 +5,6 @@ gem 'rails', '4.0.0'
 gem 'mysql2'
 
 # Gemgento
-#gem 'gemgento', git: 'git@github.com:mauinewyork/gemgento'
 gem 'gemgento', path: '~/Sites/gemgento'
 
 gem 'paperclip'

@@ -15,17 +15,8 @@ module Gemgento
       current_order.push_cart if current_order.magento_quote_id.nil?
 
       if user_signed_in?
-        if current_order.shipping_address.nil?
-          current_order.shipping_address = current_user.addresses.where(address_type: 'shipping', is_default: true).first
-          current_order.shipping_address = current_user.addresses.where(address_type: 'shipping').first if current_order.shipping_address.nil?
-          current_order.shipping_address = Address.new if current_order.shipping_address.nil?
-        end
-
-        if current_order.billing_address.nil?
-          current_order.billing_address = current_user.addresses.where(address_type: 'billing', is_default: true).first
-          current_order.billing_address = current_user.addresses.where(address_type: 'billing').first if current_order.billing_address.nil?
-          current_order.billing_address = Address.new if current_order.billing_address.nil?
-        end
+        current_order.set_default_billing_address(current_user) if current_order.billing_address.nil?
+        current_order.set_default_shipping_address(current_user) if current_order.shipping_address.nil?
       else
         current_order.shipping_address = Address.new if current_order.shipping_address.nil?
         current_order.billing_address = Address.new if current_order.billing_address.nil?

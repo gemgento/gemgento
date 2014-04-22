@@ -50,6 +50,7 @@ Gemgento::Engine.routes.draw do
 
   # - Magento Push Actions - #
   namespace :magento do
+    resources :addresses, only: [:update, :destroy]
     resources :categories, only: [:update, :destroy]
     resources :inventory, only: :update
     resources :orders, only: :update

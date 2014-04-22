@@ -4,11 +4,11 @@ module Gemgento
     def index
       @new_shipping_address = Address.new
       @default_shipping_address = current_user.default_shipping_address
-      @shipping_addresses = current_user.shipping_addresses
 
       @new_billing_address = Address.new
       @default_billing_address = current_user.default_billing_address
-      @billing_addresses = current_user.billing_addresses
+
+      @address_book = current_user.address_book
 
       respond_to do |format|
         format.html

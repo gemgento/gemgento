@@ -75,20 +75,12 @@ module Gemgento
       self.addresses.where('user_address_id IS NOT NULL')
     end
 
-    def shipping_addresses
-      self.addresses.where('user_address_id IS NOT NULL').where(address_type: 'shipping', is_default: false)
+    def default_billing_address
+      self.addresses.where('user_address_id IS NOT NULL').find_by(is_default_billing: true)
     end
 
     def default_shipping_address
-      self.addresses.where('user_address_id IS NOT NULL').where(address_type: 'shipping', is_default: true).first
-    end
-
-    def billing_addresses
-      self.addresses.where('user_address_id IS NOT NULL').where(address_type: 'billing', is_default: false)
-    end
-
-    def default_billing_address
-      self.addresses.where('user_address_id IS NOT NULL').where(address_type: 'billing', is_default: true).first
+      self.addresses.where('user_address_id IS NOT NULL').find_by(is_default_shipping: true)
     end
 
     private
