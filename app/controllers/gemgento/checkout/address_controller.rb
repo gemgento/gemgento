@@ -112,10 +112,12 @@ module Gemgento
           end
 
           if result
-            if params[:save_address]
-              Gemgento::Address.copy_to_address_book(current_order.shipping_address, current_user)
-              Gemgento::Address.copy_to_address_book(current_order.billing_address, current_user)
-            end
+            Gemgento::Address.save_from_order(
+                current_order,
+                params[:save_billing],
+                params[:save_shipping],
+                params[:same_as_billing]
+            ) unless current_order.customer_is_guest
 
             format.html { redirect_to checkout_shipping_path }
             format.json { render json: { result: true, order: current_order } }

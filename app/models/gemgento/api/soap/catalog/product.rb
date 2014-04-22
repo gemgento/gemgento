@@ -394,7 +394,7 @@ module Gemgento
               product.set_simple_products_by_magento_ids(ids)
             end
 
-            unless configurable_magento_product_ids[:item].nil?
+            if !configurable_magento_product_ids.nil? && !configurable_magento_product_ids[:item].nil?
               ids = Gemgento::Magento.enforce_savon_array(configurable_magento_product_ids[:item])
               product.set_configurable_products_by_magento_ids(ids)
             end

@@ -11,7 +11,7 @@ module Gemgento
     validates :region, presence: true, if: ->{ !self.country.nil? && !self.country.regions.empty? }
 
     validates_uniqueness_of :user,
-                            scope: [:street, :city, :country, :region, :postcode, :telephone, :order, :address_type],
+                            scope: [:street, :city, :country, :region, :postcode, :telephone, :order],
                             message: 'address is not unique',
                             if: ->{ self.order.nil? && !self.user.nil? }
 
@@ -51,18 +51,45 @@ module Gemgento
       return result
     end
 
+    # Save order addresses to user address book.  Any new address will be default.
+    #
+    # @param order [Gemgento::Order] the order to save addresses from
+    # @param save_billing [Boolean] true to save the billing address
+    # @param save_shipping [Boolean] true to save the shipping address
+    # @param shipping_same_as_billing [Boolean] true if the shipping and billing addresses are the same
+    def self.save_from_order(order, save_billing, save_shipping, shipping_same_as_billing)
+      puts 'START address copy'
+      puts save_billing.inspect
+      puts save_shipping.inspect
+      puts shipping_same_as_billing.inspect
+
+      if save_billing && shipping_same_as_billing
+        puts 'saving billing, shipping is the same'
+        Address.copy_to_address_book(order.billing_address, order.user, true, true)
+      elsif save_billing && !shipping_same_as_billing
+        puts 'saving billing, different from shipping'
+        Address.copy_to_address_book(order.billing_address, order.user, true, false)
+      end
+
+      if save_shipping && !shipping_same_as_billing
+        puts 'saving shipping'
+        Address.copy_to_address_book(order.shipping_address, order.user, false, true)
+      end
+    end
+
     # Copy an existing address to a user's address book.
     #
     # @param source [Gemgento::Address] the existing address that will be copied.
     # @param user [Gemgento::User] the user who will be associated with the new address.
     # @param is_default [Boolean] true if the new address will be the default for it's type, false otherwise.
     # @return [Gemgento::Address] the newly created Address.
-    def self.copy_to_address_book(source, user, is_default_billing = false, is_default_shipping)
+    def self.copy_to_address_book(source, user, is_default_billing = false, is_default_shipping = false)
       address = source.dup
       address.order = nil
       address.user = user
       address.is_default_billing = is_default_billing
       address.is_default_shipping = is_default_shipping
+      address.sync_needed = true
       address.save
 
       return address
