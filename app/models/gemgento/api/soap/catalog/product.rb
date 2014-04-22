@@ -31,8 +31,6 @@ module Gemgento
                 end
               end
             end
-
-            associate_simple_products_to_configurable_products if updates_made
           end
 
           def self.associate_simple_products_to_configurable_products
