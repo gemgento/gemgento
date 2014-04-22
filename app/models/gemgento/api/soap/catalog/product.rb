@@ -231,7 +231,7 @@ module Gemgento
 
             set_categories(subject[:categories][:item], product, store) if subject[:categories][:item]
             set_attribute_values_from_magento(subject[:additional_attributes][:item], product, store) if (subject[:additional_attributes] and subject[:additional_attributes][:item])
-            # set_associated_products(subject[:simple_product_ids], subject[:configurable_product_ids], product)
+            set_associated_products(subject[:simple_product_ids], subject[:configurable_product_ids], product)
 
             product
           end
