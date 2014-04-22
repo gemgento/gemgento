@@ -199,6 +199,9 @@ module Gemgento
           private
 
           def self.sync_magento_to_local(subject, store)
+            Gemgento::Product.skip_callback(:save, :after, :touch_categories)
+            Gemgento::Product.skip_callback(:save, :after, :touch_configurables)
+
             product = Gemgento::Product.where(magento_id: subject[:product_id]).not_deleted.first_or_initialize
             product.magento_id = subject[:product_id]
             product.magento_type = subject[:type]
@@ -233,7 +236,10 @@ module Gemgento
             set_attribute_values_from_magento(subject[:additional_attributes][:item], product, store) if (subject[:additional_attributes] and subject[:additional_attributes][:item])
             set_associated_products(subject[:simple_product_ids], subject[:configurable_product_ids], product)
 
-            product
+            Gemgento::Product.set_callback(:save, :after, :touch_categories)
+            Gemgento::Product.set_callback(:save, :after, :touch_configurables)
+
+            return product
           end
 
           def self.set_categories(magento_categories, product, store)
