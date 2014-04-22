@@ -57,11 +57,12 @@ module Gemgento
     # @param user [Gemgento::User] the user who will be associated with the new address.
     # @param is_default [Boolean] true if the new address will be the default for it's type, false otherwise.
     # @return [Gemgento::Address] the newly created Address.
-    def self.copy_to_address_book(source, user, is_default = false)
+    def self.copy_to_address_book(source, user, is_default_billing = false, is_default_shipping)
       address = source.dup
       address.order = nil
       address.user = user
-      address.is_default = is_default
+      address.is_default_billing = is_default_billing
+      address.is_default_shipping = is_default_shipping
       address.save
 
       return address
@@ -117,15 +118,11 @@ module Gemgento
     # @return [void]
     def enforce_single_default
       if self.is_default_billing
-        self.user.address_book.where(address_type: self.address_type).
-            where('id != ?', self.id).
-            update_all(is_default_billing: false)
+        self.user.address_book.where('id != ?', self.id).update_all(is_default_billing: false)
       end
 
       if self.is_default_shipping
-        self.user.address_book.where(address_type: self.address_type).
-            where('id != ?', self.id).
-            update_all(is_default_shipping: false)
+        self.user.address_book.where('id != ?', self.id).update_all(is_default_shipping: false)
       end
     end
 
