@@ -18,7 +18,7 @@ module Gemgento
     attr_accessor :address1, :address2, :address3
 
     after_find :explode_street_address
-    before_validation :implode_street_address
+    before_validation :strip_whitespace, :implode_street_address
 
     after_save :sync_local_to_magento
     after_save :enforce_single_default, unless: ->{ self.user.nil? }
@@ -96,6 +96,19 @@ module Gemgento
     end
 
     private
+
+    # Strip attributes where leading/trailing whitespace could pose problems.
+    #
+    # @return [void]
+    def strip_whitespace
+      self.first_name = self.first_name.strip
+      self.last_name = self.last_name.strip
+      self.address1 = self.address1.strip
+      self.address2 = self.address2.strip unless self.address2.blank?
+      self.address3 = self.address3.strip unless self.address3.blank?
+      self.city = self.city.strip
+      self.postcode = self.postcode.strip
+    end
 
     # Split the street attribute into 3 address line attributes. Magento stores street addresses lines as a
     # single attribute that uses line breaks to differentiate the lines.
