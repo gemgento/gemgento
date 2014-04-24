@@ -86,7 +86,7 @@ module Gemgento
       end
 
       # destroy any asset type associations that were not in the list
-      self.asset_types.where('asset_type_id NOT IN (?)', applied_asset_types).destroy_all
+      self.asset_types.delete(AssetType.where('id NOT IN (?)', applied_asset_types))
     end
 
     # Find a products asset by the AssetType code
