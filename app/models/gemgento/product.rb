@@ -229,7 +229,7 @@ module Gemgento
 
       products = self
 
-      unless attribute.frontend_input = 'select'
+      unless attribute.frontend_input == 'select'
         products = products.joins(
             ActiveRecord::Base.escape_sql(
                 'INNER JOIN gemgento_product_attribute_values ON gemgento_product_attribute_values.product_id = gemgento_products.id AND gemgento_product_attribute_values.product_attribute_id = ? AND gemgento_product_attribute_values.store_id = ? ' +
@@ -237,19 +237,19 @@ module Gemgento
                 attribute.id,
                 store.id
             )).
-            order("gemgento_product_attribute_values.value #{direction}").
+            reorder("gemgento_product_attribute_values.value #{direction}").
             readonly(false)
       else
         products = products.joins(
             ActiveRecord::Base.escape_sql(
                 'INNER JOIN gemgento_product_attribute_values ON gemgento_product_attribute_values.product_id = gemgento_products.id AND gemgento_product_attribute_values.product_attribute_id = ? ' +
                     'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ' +
-                    'INNER JOIN gemgento_product_attribute_options ON gemgento_product_attribute_options.product_attribute_id = gemgento_product_attributes.id AND gemgento_product_attribute_options.value = gemgento_product_attribute_values.value' +
+                    'INNER JOIN gemgento_product_attribute_options ON gemgento_product_attribute_options.product_attribute_id = gemgento_product_attributes.id AND gemgento_product_attribute_options.value = gemgento_product_attribute_values.value ' +
                     'AND gemgento_product_attribute_options.store_id = ?',
                 attribute.id,
                 store.id
             )).
-            order("gemgento_product_attribute_options.order #{direction}").
+            reorder("gemgento_product_attribute_options.order #{direction}").
             readonly(false)
       end
 
