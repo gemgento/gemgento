@@ -35,6 +35,7 @@ Gemgento::Engine.routes.draw do
   namespace :checkout do
     resource :login, only: [:show, :update], controller: 'login'
     resource :gift, only: :update, controller: 'gift'
+    resource :coupons, only: [:create, :destroy], controller: 'coupons'
     resource :address, only: [:show, :update], controller: 'address'
     resource :shipping, only: [:show, :update], controller: 'shipping'
     resource :payment, only: [:show, :update], controller: 'payment'

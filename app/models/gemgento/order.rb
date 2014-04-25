@@ -137,6 +137,14 @@ module Gemgento
       return count.to_f
     end
 
+    # Apply a coupon code to the cart.
+    #
+    # @param code [String] coupon code
+    # @return [Boolean] true if the coupon code was successfully applied
+    def apply_coupon(code)
+      Gemgento::API::SOAP::Checkout::Coupon.add(self, code)
+    end
+
     # functions related to processing cart into order
 
     def push_addresses

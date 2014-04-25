@@ -20,17 +20,41 @@ module Gemgento
     def set_totals
       totals = current_order.get_totals
 
+      @subtotal = 0
+      @discounts = []
+      @shipping = 0
+      @tax = 0
+      @total = 0
+
       unless totals.nil?
         totals.each do |total|
-          if total[:title] == 'Grand Total'
-            @total = total[:amount].to_f
-          elsif total[:title] == 'Tax'
-            @tax = total[:amount].to_f
-          elsif total[:title].to_s.include? 'Shipping'
-            @shipping = total[:amount].to_f
+          puts total.inspect
+          unless total[:title].include? 'Discount'
+            if total[:title].include? 'Subtotal'
+              @subtotal = total[:amount].to_f
+            elsif total[:title].include? 'Grand Total'
+              @total = total[:amount].to_f
+            elsif total[:title].include? 'Tax'
+              @tax = total[:amount].to_f
+            elsif total[:title].include? 'Shipping'
+              @shipping = total[:amount].to_f
+            end
+          else
+            code = total[:title][10..-2]
+            @discounts << { code: code, amount: total[:amount] }
           end
         end
       end
+    end
+
+    def merge_totals(hash)
+      hash[:subtotal] = @subtotal
+      hash[:discounts] = @discounts
+      hash[:shipping] = @shipping
+      hash[:tax] = @tax
+      hash[:total] = @total
+
+      return hash
     end
 
   end

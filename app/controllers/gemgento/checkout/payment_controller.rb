@@ -32,17 +32,18 @@ module Gemgento
 
       respond_to do |format|
         format.html
+
+        response = {
+            payment_methods: @payment_methods,
+            card_types: @card_types,
+            exp_years: @exp_years,
+            exp_months: @exp_months,
+            saved_credit_cards: @saved_credit_cards
+        }
+        response = merge_totals(response)
+
         format.json do
-          render json: {
-              payment_methods: @payment_methods,
-              card_types: @card_types,
-              exp_years: @exp_years,
-              exp_months: @exp_months,
-              saved_credit_cards: @saved_credit_cards,
-              total: @total,
-              tax: @tax,
-              shipping: @shipping
-          }
+          render json: response
         end
       end
     end
