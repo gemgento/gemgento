@@ -101,6 +101,7 @@ module Gemgento
     #
     # @return [void]
     def strip_whitespace
+      explode_street_address
       self.first_name = self.first_name.strip
       self.last_name = self.last_name.strip
       self.address1 = self.address1.strip
