@@ -93,7 +93,8 @@ module Gemgento
             end
 
             message = {
-                product: product_id,
+                product: product_id, # <= Magento 1.7.2
+                product_id: product_id, # >= Magento 1.8.0 and higher
                 productIdentifierType: 'id',
                 attributes: {
                     'additional_attributes' => {'item' => additional_attributes}
