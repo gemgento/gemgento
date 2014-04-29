@@ -4,7 +4,8 @@ module Gemgento
   class User < ActiveRecord::Base
     devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable
 
-    validates :email, uniqueness: {scope: :deleted_at}, presence: true
+    validates :email, uniqueness: { scope: :deleted_at }, presence: true
+    validates :magento_id, uniqueness: true, allow_nil: true
 
     belongs_to :user_group
 
