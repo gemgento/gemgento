@@ -101,12 +101,8 @@ module Gemgento
     #
     # @return [void]
     def strip_whitespace
-      explode_street_address
       self.first_name = self.first_name.strip
       self.last_name = self.last_name.strip
-      self.address1 = self.address1.strip
-      self.address2 = self.address2.strip unless self.address2.blank?
-      self.address3 = self.address3.strip unless self.address3.blank?
       self.city = self.city.strip
       self.postcode = self.postcode.strip
     end
