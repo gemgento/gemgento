@@ -2,9 +2,7 @@ module Gemgento
   class Magento::UsersController < MagentoController
 
     def update
-      @user = Gemgento::User.find_by(magento_id: params[:id])
-      @user = Gemgento::User.find_or_initialize_by(email: params[:email]) if @user.nil?
-
+      @user = Gemgento::User.find_or_initialize_by(magento_id: params[:id])
       data = params[:data]
 
       @user.magento_id = params[:id]
