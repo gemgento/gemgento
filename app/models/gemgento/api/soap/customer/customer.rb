@@ -70,12 +70,7 @@ module Gemgento
             response = Gemgento::Magento.create_call(:customer_customer_create, message)
 
             if response.success?
-              if Gemgento::User.exists?(magento_id: response.body[:result]) # customer data may have been pushed back already
-                customer = Gemgento::User.find_by(magento_id: response.body[:result])
-              else
-                customer.magento_id = response.body[:result]
-              end
-
+              customer.magento_id = response.body[:result]
               customer.sync_needed = false
               customer.save
 

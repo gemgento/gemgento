@@ -14,7 +14,7 @@ module Gemgento
 
     has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_users', class_name: 'Store'
 
-    after_commit :sync_local_to_magento
+    after_save :sync_local_to_magento
 
     default_scope -> { where(deleted_at: nil) }
 

@@ -2,6 +2,7 @@ module Gemgento
   class Magento::UsersController < MagentoController
 
     def update
+      sleep 5.seconds
       @user = Gemgento::User.find_by(magento_id: params[:id])
       @user = Gemgento::User.find_or_initialize_by(email: params[:email]) if @user.nil?
 
