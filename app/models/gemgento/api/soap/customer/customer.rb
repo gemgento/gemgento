@@ -71,6 +71,11 @@ module Gemgento
 
             if response.success?
               customer.magento_id = response.body[:result]
+              customer.sync_needed = false
+              customer.save
+
+              # pull customer information to get the password
+              sync_magento_to_local(info(customer.magento_id))
             end
           end
 
