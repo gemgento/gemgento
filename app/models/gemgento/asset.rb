@@ -13,6 +13,8 @@ module Gemgento
     after_save :sync_local_to_magento
     after_save :touch_product
 
+    before_destroy :delete_magento
+
     default_scope -> { includes(:asset_file).order(:position).references(:asset_file) }
 
     validates :asset_file, presence: true
