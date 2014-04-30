@@ -115,24 +115,18 @@ module Gemgento
     end
 
     def create_image(file_name, types, position, label)
-      image = Gemgento::Asset.new
-      image.product = @product
-      image.store = self.store
-      image.position = position
-      image.label = label
-      image.set_file(File.open(file_name))
+      asset = Gemgento::Asset.new
+      asset.product = @product
+      asset.store = self.store
+      asset.position = position
+      asset.label = label
+      asset.set_file(File.open(file_name))
 
       types.each do |type|
-        image.asset_types << type
+        asset.asset_types << type
       end
 
-      image.sync_needed = false
-      image.save
-
-      image.sync_needed = true
-      image.save
-
-      image
+      Gemgento::API::SOAP::Catalog::ProductAttributeMedia.create(asset)
     end
   end
 end
