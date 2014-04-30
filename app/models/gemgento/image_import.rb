@@ -22,23 +22,35 @@ module Gemgento
 
     after_commit :process
 
+    def self.is_active?
+      Gemgento::ImageImport.where(is_active: true).count > 0
+    end
+
     def process
-      if self.spreadsheet.url =~ URI::regexp
-        @worksheet = Spreadsheet.open(open(self.spreadsheet.url)).worksheet(0)
-      else
-        @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
-      end
-
-      @headers = get_headers
-
-      1.upto @worksheet.last_row_index do |index|
-        puts "Working on row #{index}"
-        @row = @worksheet.row(index)
-        @product = Gemgento::Product.not_deleted.find_by(sku: @row[@headers.index('sku').to_i].to_s.strip)
-        create_images
-      end
-
       ImageImport.skip_callback(:commit, :after, :process)
+      self.is_active = true
+      self.save validate: false
+
+      begin
+        if self.spreadsheet.url =~ URI::regexp
+          @worksheet = Spreadsheet.open(open(self.spreadsheet.url)).worksheet(0)
+        else
+          @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
+        end
+
+        @headers = get_headers
+
+        1.upto @worksheet.last_row_index do |index|
+          puts "Working on row #{index}"
+          @row = @worksheet.row(index)
+          @product = Gemgento::Product.not_deleted.find_by(sku: @row[@headers.index('sku').to_i].to_s.strip)
+          create_images
+        end
+      rescue
+        # not doing anything, just need to make sure is_active flag is turned off by reaching the end
+      end
+
+      self.is_active = false
       self.save validate: false
       ImageImport.set_callback(:commit, :after, :process)
     end
