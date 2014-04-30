@@ -129,7 +129,7 @@ module Gemgento
 
       # destroy any assets that were not in the media gallery for each store
       # this is a failsafe for image deletions that were not registered
-      product.assets.where('gemgento_assets.id NOT IN (?)', assets_to_keep).destroy_all
+      product.assets.where(sync_needed: false).where('gemgento_assets.id NOT IN (?)', assets_to_keep).destroy_all
     end
 
     def set_associated_products(simple_magento_product_ids, configurable_magento_product_ids, product)
