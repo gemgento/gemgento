@@ -4,15 +4,15 @@ module Gemgento
     belongs_to :store
 
     has_many :product_attribute_values,
-             foreign_key: 'value',
-             primary_key: 'value',
-             conditions: Proc.new { |join_association|
-               if join_association
-                 'gemgento_product_attribute_values.product_attribute_id = gemgento_product_attribute_options.product_attribute_id'
+              ->(join_or_model) {
+               if join_or_model.is_a? JoinDependency::JoinAssociation
+                 where('gemgento_product_attribute_values.product_attribute_id = gemgento_product_attribute_options.product_attribute_id')
                else
-                 { product_attribute_id: product_attribute_id }
+                 where(product_attribute_id: join_or_model.product_attribute_id)
                end
-             }
+             },
+             foreign_key: 'value',
+             primary_key: 'value'
     has_many :products, through: :product_attribute_values
 
     default_scope -> { order(:order) }
