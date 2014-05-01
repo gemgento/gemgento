@@ -1,6 +1,8 @@
 module Gemgento
   class Magento::ProductsController < MagentoController
 
+    before_filter :ensure_no_active_imports
+
     def new
       @product = Product.new
     end
@@ -20,7 +22,7 @@ module Gemgento
       set_stores(data[:stores], @product) unless data[:stores].nil?
 
       unless data[:additional_attributes].nil?
-        set_assets(data[:additional_attributes], @product) unless Gemgento::ImageImport.is_active?
+        set_assets(data[:additional_attributes], @product)
         set_attribute_values_from_magento(data[:additional_attributes], @product)
       end
 
@@ -162,6 +164,12 @@ module Gemgento
       res = req.request_head(url.path)
 
       return res.code == '200'
+    end
+
+    def ensure_no_active_imports
+      if Gemgento::ImageImport.is_active?
+        raise ActionController::RoutingError.new('Not Found')
+      end
     end
 
   end
