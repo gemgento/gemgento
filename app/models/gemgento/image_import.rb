@@ -52,6 +52,8 @@ module Gemgento
         # not doing anything, just need to make sure is_active flag is turned off by reaching the end
       end
 
+      sleep 1.minute # pause to let Magento catch up
+
       self.is_active = false
       self.save validate: false
       Gemgento::ImageImport.set_callback(:commit, :after, :process)
