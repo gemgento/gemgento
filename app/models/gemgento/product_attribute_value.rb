@@ -5,10 +5,10 @@ module Gemgento
     belongs_to :store
     belongs_to :product_attribute_option,
                ->(join_or_model) {
-                 if join_or_model.is_a? JoinDependency::JoinAssociation
-                   where('gemgento_product_attribute_options.product_attribute_id = gemgento_product_attribute_values.product_attribute_id')
-                 else
+                 if join_or_model.is_a? Gemgento::ProductAttributeValue
                    where(product_attribute_id: join_or_model.product_attribute_id)
+                 else
+                   where('gemgento_product_attribute_options.product_attribute_id = gemgento_product_attribute_values.product_attribute_id')
                  end
                },
                foreign_key: 'value',
