@@ -34,8 +34,7 @@ module Gemgento
       last_updated = last_updated.created_at unless last_updated.nil?
       current = create_current('products')
 
-      Gemgento::API::SOAP::Catalog::Product.propagate_magento_deletions
-      Gemgento::API::SOAP::Catalog::Product.fetch_all(last_updated.to_s(:db), skip_existing)
+      Gemgento::API::SOAP::Catalog::Product.fetch_all(last_updated.to_s(:db))
       Gemgento::API::SOAP::Catalog::Category.set_product_categories
 
       current.complete
