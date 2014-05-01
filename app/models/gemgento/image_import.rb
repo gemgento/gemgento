@@ -145,8 +145,6 @@ module Gemgento
 
       asset.sync_needed = true
       asset.save
-
-      sleep 1.5
     end
   end
 end
