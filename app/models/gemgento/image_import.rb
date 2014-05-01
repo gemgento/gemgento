@@ -27,7 +27,7 @@ module Gemgento
     end
 
     def process
-      ImageImport.skip_callback(:commit, :after, :process)
+      Gemgento::ImageImport.skip_callback(:commit, :after, :process)
       self.is_active = true
       self.save validate: false
 
@@ -44,6 +44,8 @@ module Gemgento
           puts "Working on row #{index}"
           @row = @worksheet.row(index)
           @product = Gemgento::Product.not_deleted.find_by(sku: @row[@headers.index('sku').to_i].to_s.strip)
+          Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch(@product, self.store) # make sure we know about all existing images
+          @product.assets.where(store: self.store).destroy_all if self.destroy_existing
           create_images
         end
       rescue
@@ -52,7 +54,7 @@ module Gemgento
 
       self.is_active = false
       self.save validate: false
-      ImageImport.set_callback(:commit, :after, :process)
+      Gemgento::ImageImport.set_callback(:commit, :after, :process)
     end
 
     def image_labels_raw
@@ -102,8 +104,6 @@ module Gemgento
     end
 
     def create_images
-      @product.assets.where(store: self.store).destroy_all if self.destroy_existing
-
       # find the correct image file name and path
       self.image_labels.each_with_index do |label, position|
 
@@ -138,7 +138,13 @@ module Gemgento
         asset.asset_types << type
       end
 
-      Gemgento::API::SOAP::Catalog::ProductAttributeMedia.create(asset)
+      asset.sync_needed = false
+      asset.save
+
+      asset.sync_needed = true
+      asset.save
+
+      sleep 1.5
     end
   end
 end

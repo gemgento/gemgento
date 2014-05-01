@@ -66,7 +66,9 @@ module Gemgento
             response = Gemgento::Magento.create_call(:catalog_product_attribute_media_create, message)
 
             if response.success?
-              asset.file = response.body[:result]
+              return response.body[:result]
+            else
+              return false
             end
           end
 

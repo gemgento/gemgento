@@ -114,7 +114,7 @@ module Gemgento
     def sync_local_to_magento
       if self.sync_needed
         if self.file.nil? || self.file == ''
-          API::SOAP::Catalog::ProductAttributeMedia.create(self)
+          self.file = API::SOAP::Catalog::ProductAttributeMedia.create(self)
         else
           API::SOAP::Catalog::ProductAttributeMedia.update(self)
         end
