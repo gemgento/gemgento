@@ -20,7 +20,7 @@ module Gemgento
       set_stores(data[:stores], @product) unless data[:stores].nil?
 
       unless data[:additional_attributes].nil?
-        set_assets(data[:additional_attributes], @product)
+        set_assets(data[:additional_attributes], @product) unless Gemgento::ImageImport.is_active?
         set_attribute_values_from_magento(data[:additional_attributes], @product)
       end
 
@@ -130,7 +130,7 @@ module Gemgento
       # destroy any assets that were not in the media gallery for each store
       # this is a failsafe for image deletions that were not registered
       Gemgento::Asset.skip_callback(:destroy, :before, :delete_magento)
-      product.assets.where('gemgento_assets.id NOT IN (?)', assets_to_keep).destroy_all unless Gemgento::ImageImport.is_active?
+      product.assets.where('gemgento_assets.id NOT IN (?)', assets_to_keep).destroy_all
       Gemgento::Asset.set_callback(:destroy, :before, :delete_magento)
     end
 
