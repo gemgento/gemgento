@@ -1,8 +1,6 @@
 module Gemgento
   class Magento::ProductsController < MagentoController
 
-    before_filter :ensure_no_active_imports
-
     def new
       @product = Product.new
     end
@@ -164,12 +162,6 @@ module Gemgento
       res = req.request_head(url.path)
 
       return res.code == '200'
-    end
-
-    def ensure_no_active_imports
-      if Gemgento::ImageImport.is_active?
-        raise ActionController::RoutingError.new('Not Found')
-      end
     end
 
   end

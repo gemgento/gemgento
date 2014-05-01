@@ -27,34 +27,24 @@ module Gemgento
     end
 
     def process
-      Gemgento::ImageImport.skip_callback(:commit, :after, :process)
-      self.is_active = true
-      self.save validate: false
-
-      begin
-        if self.spreadsheet.url =~ URI::regexp
-          @worksheet = Spreadsheet.open(open(self.spreadsheet.url)).worksheet(0)
-        else
-          @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
-        end
-
-        @headers = get_headers
-
-        1.upto @worksheet.last_row_index do |index|
-          puts "Working on row #{index}"
-          @row = @worksheet.row(index)
-          @product = Gemgento::Product.not_deleted.find_by(sku: @row[@headers.index('sku').to_i].to_s.strip)
-          Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch(@product, self.store) # make sure we know about all existing images
-          @product.assets.where(store: self.store).destroy_all if self.destroy_existing
-          create_images
-        end
-      rescue
-        # not doing anything, just need to make sure is_active flag is turned off by reaching the end
+      if self.spreadsheet.url =~ URI::regexp
+        @worksheet = Spreadsheet.open(open(self.spreadsheet.url)).worksheet(0)
+      else
+        @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
       end
 
-      sleep 1.minute # pause to let Magento catch up
+      @headers = get_headers
 
-      self.is_active = false
+      1.upto @worksheet.last_row_index do |index|
+        puts "Working on row #{index}"
+        @row = @worksheet.row(index)
+        @product = Gemgento::Product.not_deleted.find_by(sku: @row[@headers.index('sku').to_i].to_s.strip)
+        Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch(@product, self.store) # make sure we know about all existing images
+        @product.assets.where(store: self.store).destroy_all if self.destroy_existing
+        create_images
+      end
+
+      Gemgento::ImageImport.skip_callback(:commit, :after, :process)
       self.save validate: false
       Gemgento::ImageImport.set_callback(:commit, :after, :process)
     end
