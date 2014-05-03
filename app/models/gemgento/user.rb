@@ -41,7 +41,7 @@ module Gemgento
       unless self.encrypted_password.blank?
         return self.valid_password?(password)
       else
-        if self.magento_password.blank? # if we don't have any passwords, get them from Magento
+        if self.magento_password.blank? || !self.magento_password.include?(':') # if we don't have any passwords, get them from Magento
           Gemgento::API::SOAP::Customer::Customer.fetch(self.magento_id)
           self.reload
         end
