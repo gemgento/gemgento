@@ -39,9 +39,8 @@ module Gemgento
       store = Gemgento::Store.current if store.nil?
 
       if order_id.nil?
-        if user
+        unless user.nil?
           cart = Gemgento::Order.cart.where(state: 'cart', store: store, user: user).order(updated_at: :desc).first_or_initialize
-          puts 'here'
           cart.reset_checkout unless cart.magento_quote_id.nil?
         else
           cart = Gemgento::Order.new(state: 'cart', store: store)
