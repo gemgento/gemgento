@@ -41,6 +41,8 @@ module Gemgento
       if order_id.nil?
         if user
           cart = Gemgento::Order.cart.where(state: 'cart', store: store, user: user).order(updated_at: :desc).first_or_initialize
+          puts 'here'
+          cart.reset_checkout unless cart.magento_quote_id.nil?
         else
           cart = Gemgento::Order.new(state: 'cart', store: store)
         end
@@ -229,6 +231,18 @@ module Gemgento
     end
 
 
+    def reset_checkout
+      self.billing_address.destroy unless self.billing_address.nil?
+      self.billing_address_id = nil
+      self.shipping_address.destroy unless self.shipping_address.nil?
+      self.shipping_address_id = nil
+      self.shipping_method = nil
+      self.shipping_amount = nil
+      self.order_payment.destroy unless self.order_payment.nil?
+      self.save
+    end
+
+
     private
 
     def valid_stock?
@@ -254,5 +268,6 @@ module Gemgento
         self.push_addresses
       end
     end
+
   end
 end
