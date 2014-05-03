@@ -20,6 +20,10 @@ module Gemgento
             end
           end
 
+          def self.fetch(customer_id)
+            sync_magento_to_local(info(customer_id))
+          end
+
           def self.fetch_all_customer_groups
             group.each do |customer_group|
               sync_magento_customer_group_to_local(customer_group)
