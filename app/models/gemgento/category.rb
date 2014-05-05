@@ -18,6 +18,7 @@ module Gemgento
 
     scope :top_level, -> { where(parent: Gemgento::Category.find_by(parent_id: nil), is_active: true) }
     scope :root, -> { find_by(parent_id: nil) }
+    scope :active, -> { where(is_active: true) }
 
     after_save :enforce_positioning, if: :position_changed?
 
