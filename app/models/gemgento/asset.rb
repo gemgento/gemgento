@@ -128,7 +128,7 @@ module Gemgento
     #
     # @return [void]
     def delete_magento
-      if !self.file.nil? && self.file.assets.where('id != ?', self.id).empty?
+      if !self.file.blank? && (!self.image.nil? && self.image.assets.where('id != ?', self.id).empty?)
         API::SOAP::Catalog::ProductAttributeMedia.remove(self)
       end
 
@@ -139,7 +139,7 @@ module Gemgento
     #
     # @return [void]
     def destroy_file
-      if !self.asset_file.nil? && self.asset_file.assets.where('id != ?', self.id).empty?
+      if !self.image.nil? && self.image.assets.where('id != ?', self.id).empty?
         self.file.destroy
       end
     end
