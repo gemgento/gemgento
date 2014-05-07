@@ -13,7 +13,7 @@ module Gemgento
     after_save :sync_local_to_magento
     after_save :touch_product
 
-    before_destroy :delete_magento
+    before_destroy :delete_magento, :destroy_file
 
     default_scope -> { includes(:asset_file).order(:position).references(:asset_file) }
 
@@ -128,11 +128,20 @@ module Gemgento
     #
     # @return [void]
     def delete_magento
-      unless self.file.nil? && self.file.assets.where('id != ?', self.id).empty?
+      if !self.file.nil? && self.file.assets.where('id != ?', self.id).empty?
         API::SOAP::Catalog::ProductAttributeMedia.remove(self)
       end
 
       self.asset_types.clear
+    end
+
+    # Destroy the associated AssetFile if it is not used by other Assets.  This is a before destroy callback.
+    #
+    # @return [void]
+    def destroy_file
+      if !self.file.nil? && self.file.assets.where('id != ?', self.id).empty?
+        self.file.destroy
+      end
     end
 
     # Set product updated_at to now if the Asset has been changed.  This happens asynchronously using Sidekiq and is
