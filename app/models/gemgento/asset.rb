@@ -139,7 +139,7 @@ module Gemgento
     #
     # @return [void]
     def destroy_file
-      if !self.file.nil? && self.file.assets.where('id != ?', self.id).empty?
+      if !self.asset_file.nil? && self.asset_file.assets.where('id != ?', self.id).empty?
         self.file.destroy
       end
     end
