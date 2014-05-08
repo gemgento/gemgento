@@ -23,6 +23,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'haml', '>= 4.0.0'
   gem.add_dependency 'kaminari', '~> 0.14'
   gem.add_dependency 'paperclip', '~> 3.5.1'
+  gem.add_dependency 'paperclip-meta', '~> 1.1.0'
   gem.add_dependency 'sass-rails', '~> 4.0.0'
   gem.add_dependency 'savon', '~> 2.2.0'
   gem.add_dependency 'sidekiq', '~> 2.17.4'
