@@ -31,6 +31,21 @@ module Gemgento
       end
     end
 
+    def create
+      @errors = []
+
+      # save the order and mark is as the current cart
+      current_order.save
+      cookies[:cart] = current_order.id
+
+      add_item
+
+      respond_to do |format|
+        format.html { render 'gemgento/checkout/shopping_bag' }
+        format.js { render '/gemgento/order/add_item', :layout => false }
+      end
+    end
+
     def update
       raise 'Missing action parameter' if params[:activity].nil?
       @errors = []
@@ -40,13 +55,13 @@ module Gemgento
         current_order.save
         cookies[:cart] = current_order.id
       end
-
+      
       case params[:activity]
         when 'add_item'
           @product = add_item
 
           respond_to do |format|
-            format.html { render 'gemgento/checkout/shopping_bag' }
+            format.html { render 'gemgento/cart/show' }
 
             unless @product
               format.js { render '/gemgento/order/no_inventory', layout: false }
@@ -74,7 +89,7 @@ module Gemgento
           remove_item
 
           respond_to do |format|
-            format.html { render 'gemgento/checkout/shopping_bag' }
+            format.html { redirect_to gemgento.cart_url }
             format.js { render '/gemgento/order/remove_item', :layout => false }
             format.json { render json: { result: true, order: current_order } }
           end

@@ -1,0 +1,23 @@
+.pages-holder
+  .pages-header
+    Reset Password
+  .pages-content
+    .form
+      .form-group
+        .form-left
+          = flash[:error]
+          = devise_error_messages!
+          .field
+            %h2 Set new password
+          = form_for(resource, :as => resource_name, :url => password_path(resource_name), :html => {:method => :post}) do |f|      
+            .field
+              %label{for: 'email'} E-mail address
+              = f.email_field :email, :autofocus => true
+
+            .field
+              .form-left
+                = link_to 'BACK TO CHECKOUT', checkout_login_path
+              .form-left
+                = submit_tag 'Reset password'
+
+        .clear

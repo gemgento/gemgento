@@ -1,0 +1,57 @@
+.product-header {
+	h1 {
+      font-size: 18px;
+      font-weight: normal;
+      color: #333333;
+      position: relative;
+      margin-top: 0px;
+    }
+
+   h2 {
+   	font-size: 16px;
+      font-weight: normal;
+      color: #333333;
+      position: relative;
+      margin-top: 0px;
+   }
+}
+
+.product-content {
+  font-family: Verlag-Light;
+  font-size: 14px;
+  color: #333333;
+
+  .product-attribute {
+  	padding: 10px 0px 10px 0px;
+  	border-bottom: 1px solid #dedede;
+
+  	label {
+  		float: left;
+  		width: 150px;	
+  	}
+
+		.attribute {
+			float: left;
+			
+		}
+	}
+
+	.footer {
+		padding: 40px 0 20px 0;
+
+		input[type="submit"] {
+			font-family: 'Verlag-Bold';
+		  background-color: #333333;
+		  border: 0px;
+		  font-size: 14px;
+		  letter-spacing: 1px;
+		  font-weight: normal;
+		  color: #fff;
+		  width: 200px;
+		  height: 40px;
+		  cursor: pointer;
+		  text-transform: none;
+		}
+	}
+}
+

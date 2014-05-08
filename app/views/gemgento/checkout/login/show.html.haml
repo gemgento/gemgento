@@ -1,0 +1,43 @@
+.pages-holder
+  .pages-header
+    = render 'gemgento/checkout/checkout_header'
+  .pages-content
+    .form
+      .form-group
+        .form-left
+          = flash[:error]
+          .field
+            %h2 ALREADY HAVE AN ACCOUNT
+          = form_tag gemgento.checkout_login_path, method: 'patch' do
+            = hidden_field_tag :activity, 'login_user'         
+            .field
+              %label{for: 'email'} E-mail address
+              = text_field_tag 'email', nil
+
+            .field
+              %label{for: 'password'} Password
+              = text_field_tag 'password', nil
+
+            .field
+              .form-left
+                = link_to 'FORGOT PASSWORD', new_user_password_path
+              .form-left
+                = submit_tag 'LOGIN'
+
+        .form-left
+          .field
+            %h2 GUEST CHECKOUT
+          = form_tag gemgento.checkout_login_path, method: 'patch' do      
+            = hidden_field_tag :activity, 'login_guest'
+            .field
+              %label{for: 'email'} E-mail address
+              = text_field_tag 'email'
+
+            .field
+              .form-left
+                = link_to 'CREATE AN ACCOUNT', new_user_registration_path
+
+              .form-left
+                = submit_tag 'CONTINUE'
+
+        .clear

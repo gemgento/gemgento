@@ -52,5 +52,8 @@ module Gemgento
       raise ActiveRecord::RecordNotFound
     end
 
+    def nav_category_is_active(c)
+      return  (@current_category.id == c.id or @current_category.ancestors.include?(c)) ? true : false
+    end
   end
 end

@@ -121,5 +121,14 @@ module Gemgento
       Gemgento::Category.set_callback(:save, :after, :enforce_positioning)
     end
 
+    # Returns list of ancestors, starting from parent until root.
+    #
+    #   subchild1.ancestors # => [child1, root]
+    def ancestors
+      node, nodes = self, []
+      nodes << node = node.parent while node.parent
+      nodes
+    end
+
   end
 end

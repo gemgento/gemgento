@@ -1,0 +1,69 @@
+.pages-holder
+  .pages-header
+    = render 'gemgento/checkout/checkout_header'
+
+  .pages-content
+    = form_for current_order, url: checkout_confirm_path, html: { id: 'checkout_confirm_method' } do |form|
+      .form-group
+        .form-left.text
+          .form-left
+            = @shipping_address.first_name + " " + @shipping_address.last_name
+            %br
+            = current_order.customer_email
+            %br
+            = @shipping_address.telephone
+            %br
+            = @shipping_address.address1
+            %br
+            = @shipping_address.address2
+            %br
+            = "#{@shipping_address.region.name}, " if @shipping_address.region
+            = "#{@shipping_address.city} #{@shipping_address.postcode}"
+            %br
+            = "#{@shipping_address.country.name}" if @shipping_address.country
+
+          .form-left
+            = @billing_address.first_name + " " + @billing_address.last_name
+            %br
+            = current_order.customer_email
+            %br
+            = @billing_address.telephone
+            %br
+            = @billing_address.address1
+            %br
+            = @billing_address.address2
+            %br
+            = "#{@billing_address.region.name}, " if @billing_address.region
+            = "#{@billing_address.city} #{@billing_address.postcode}"
+            %br
+            = "#{@billing_address.country.name}" if @billing_address.country
+
+        .form-left.text
+          .form-left
+            = "#{@shipping_method[:method_title]}"
+            %br
+            = "$#{@shipping_method[:price]}"
+          .form-left
+            = "#{number_to_currency(@total)}"
+            %br
+            - if @payment
+              = "#{@payment.cc_type}"
+              %br
+              = "card ending #{@payment.cc_last4}"
+
+        .clear
+
+        
+      .form-group
+        .form-left
+          &nbsp;
+        .form-left
+          .field
+            .form-left
+              &nbsp;
+            .form-left
+              = submit_tag 'CONTINUE'
+
+        .clear
+
+        

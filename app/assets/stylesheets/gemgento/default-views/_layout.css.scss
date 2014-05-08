@@ -1,0 +1,156 @@
+$font-stack: 'Verlag-Bold';
+
+@font-face {
+  font-family: 'Verlag-Black';
+  src: url('/assets/Verlag-Black.otf')
+}
+
+@font-face {
+  font-family: 'Verlag-Bold';
+  src: url('/assets/Verlag-Bold.otf')
+}
+
+@font-face {
+  font-family: 'Verlag-Light';
+  src: url('/assets/Verlag-Light.otf')
+}
+
+@font-face {
+  font-family: 'Verlag-Book';
+  src: url('/assets/Verlag-Book.otf')
+}
+
+@font-face {
+  font-family: 'Verlag-LightItalic';
+  src: url('/assets/Verlag-LightItalic.otf')
+}
+
+@mixin menu($font-size, $pull-direction, $padding) {
+  ul {
+  	padding: 0px;
+  	margin: 0px;
+		li {
+			font-size: $font-size;
+			text-transform: uppercase;
+			float: $pull-direction;
+			list-style: none;
+			padding: $padding;
+
+			a {
+				color: #333333;
+				text-decoration: none;
+			}
+
+			a.active {
+				color: #000;
+				text-decoration: underline;
+			}
+		}
+	}
+}
+
+body {
+	font-family: $font-stack;
+	margin: 0px;
+	padding: 0px;
+}
+
+.clear {
+	clear:both
+}
+
+.right {
+	float: right;
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    filter:alpha(opacity=50);
+    -moz-opacity:0.5;
+    -khtml-opacity: 0.5;
+    opacity: 0.5;
+    z-index: 10000;
+}
+
+#body-holder {
+	position: relative;
+	
+
+	#header-holder {
+		width: 900px;
+		margin: 0 auto;
+		position: relative;
+		height: 100px;
+		padding: 0px 0 0px 0;
+
+		@import 'header'
+	}
+
+	#subheader-holder {
+		width: 900px;
+		position: relative;
+		margin: 0 auto;
+		padding: 20px 0px 20px 0;
+
+		@import 'subheader'
+	}
+
+	#content-holder {
+		padding: 20px 0px 20px 0px;
+		@import 'products';
+		@import 'product';
+		@import 'pages';
+	}
+
+	#footer-holder {
+		width: 900px;
+		margin: 0 auto;
+		padding: 40px 0 20px 0;
+		position: relative;
+		height: 100px;
+
+		@import 'footer'
+	}
+
+	button[type="submit"] {
+		font-family: 'Verlag-Bold';
+	  background-color: #333333;
+	  border: 0px;
+	  font-size: 14px;
+	  letter-spacing: 1px;
+	  font-weight: normal;
+	  color: #fff;
+	  width: 100%;
+	  height: 40px;
+	  cursor: pointer;
+	  width: 100%;
+	  text-transform: none;
+	}
+
+	input[type=text], input[type=password], input[type=email], input[type=number], input[type=url], input[type=tel], textarea {
+    background-color: #fff;
+    width: calc(100% - 22px);
+    border: 1px solid #c9d0d6;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+    font-size: 0.95em;
+    font-family: Helvetica, Arial, sans-serif;
+    outline: none;
+    padding: 0px 10px 0px 10px;
+    text-align: right;
+    height: 36px;
+  }
+
+  input[type=text]:focus, input[type=password]:focus, input[type=email]:focus, input[type=number]:focus, input[type=url]:focus, input[type=tel]:focus, textarea:focus {
+    border: 1px solid #99a2aa;
+    box-shadow: 0 0 4px #99a2aa;
+    -moz-box-shadow: 0 0 4px #99a2aa;
+    -webkit-box-shadow: 0 0 4px #99a2aa;
+  }
+}

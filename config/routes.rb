@@ -1,5 +1,5 @@
 Gemgento::Engine.routes.draw do
-  root to: 'categories#index'
+  root to: 'home#index'
 
   if defined?(ActiveAdmin)
     devise_for :admin_users, ActiveAdmin::Devise.config
@@ -12,7 +12,7 @@ Gemgento::Engine.routes.draw do
 
   get '/order_export', to: 'order_export#index'
 
-  get '/shop', to: 'categories#index', as: 'categories'
+  #get '/shop', to: 'categories#index', as: 'categories'
   get '/shop/search', to: 'search#index'
   get '/search', to: 'search#index'
 
@@ -69,5 +69,16 @@ Gemgento::Engine.routes.draw do
 
   patch '/orders', to: 'orders#update'
   put '/orders', to: 'orders#update'
+
+  get 'about',                                 to: 'pages#about'
+  get 'contact',                               to: 'pages#contact'
+  get 'terms-of-use',                          to: 'pages#terms_of_use', as: 'terms_of_use'
+  get 'return-policy',                         to: 'pages#return_policy', as: 'return_policy'
+
+
+  #get 'shop/:group/:cat',                      to: 'categories#show', :as => 'shop_by_group_and_cat'
+  #get 'shop/:url_key',                           to: 'categories#show', :as => 'shop_by_group'
+  get 'shop',                                  to: 'categories#show', :as => 'shop'
+
 
 end

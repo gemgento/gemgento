@@ -1,0 +1,56 @@
+.pages-holder
+  .pages-header
+    = render 'gemgento/checkout/checkout_header'
+
+  .pages-content
+    = form_for current_order, url: checkout_payment_path, html: { id: 'checkout_payment' } do |form|
+      = fields_for :order_payment do |order_payment|
+        .form-group
+          .form-left
+            .field
+              %label Saved credit Cards
+              = order_payment.text_field :method
+
+            .field
+              %label Credit Card Types
+              = order_payment.select 'cc_type', @card_types, dir: "rtl"
+
+            .field
+              %label CVV Code
+              = order_payment.text_field 'cc_cid'
+
+
+          .form-left
+            .field
+              %label Card Holders Full Name
+              = order_payment.text_field 'cc_owner'
+
+            .field
+              %label Card Number
+              = order_payment.text_field 'cc_number'
+
+            .field
+              .form-left
+                .field
+                  %label Expiration Month
+                  = order_payment.select 'cc_exp_month', @exp_months, dir: "rtl"
+              .form-left
+                .field
+                  %label Expiration Year
+                  = order_payment.select 'cc_exp_year', @exp_years, dir: "rtl"
+
+        .form-group
+          .form-left
+            .form-header
+              = check_box_tag :same_as_billing
+              Save Paymenet Information for Future Purposes
+
+          .form-left
+            .field
+              .form-left
+                &nbsp;
+              .form-left
+                = submit_tag 'CONTINUE'
+          .clear
+
+        

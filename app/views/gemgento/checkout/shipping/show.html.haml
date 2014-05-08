@@ -1,0 +1,28 @@
+.pages-holder
+  .pages-header
+    = render 'gemgento/checkout/checkout_header'
+
+  .pages-content
+    = form_for current_order, url: checkout_shipping_path, html: { id: 'checkout_shipping_method' } do |form|
+      .form-group
+        .form-left
+          - @shipping_methods.sort_by{ |value| value[:price] }.each do |shipping_method|
+            .field
+              - label = "#{shipping_method[:carrier_title]} #{shipping_method[:method_title]} #{number_to_currency(shipping_method[:price])}"
+              = radio_button_tag :shipping_method, shipping_method[:code]
+              %label= label
+        .clear
+        
+      .form-group
+        .form-left
+          &nbsp;
+        .form-left
+          .field
+            .form-left
+              &nbsp;
+            .form-left
+              = submit_tag 'CONTINUE'
+
+        .clear
+
+        

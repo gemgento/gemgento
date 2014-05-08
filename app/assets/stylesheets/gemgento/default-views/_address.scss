@@ -1,0 +1,11 @@
+table.address {
+	tr td:nth-child(1) {
+		font-family: Verlag-Bold;
+		vertical-align: top;
+		padding-right: 20px;
+	}
+
+	tr td:nth-child(2) {
+		font-family: Verlag-Light;
+	}
+}

@@ -1,0 +1,127 @@
+.form-header {
+  font-family: 'Verlag-Light';
+  font-size: 14px;
+  padding: 5px 0 15px 0px;
+
+  input[type="checkbox"] {
+    vertical-align: bottom;
+  }
+}
+
+.form-group {
+  font-family: 'Verlag-Bold';
+  margin-bottom: 10px;
+
+  .text {
+      font-family: 'Verlag-Light';
+    }
+
+  .form-left:nth-child(2) .field {
+    float: right;
+  }
+
+  .form-left {
+    width: 50%;
+    float: left;
+
+    .field {
+      position: relative;
+      width: calc(100% - 10px);
+      margin-bottom: 10px;
+      float: left;
+
+      h2 {
+        font-size: 12px;
+        font-weight: normal;
+        margin: 20px 0 10px 0;
+        padding: 0px;
+      }
+
+      a {
+        font-size: 9px;
+        font-weight: normal;
+        color: #333333;
+      }
+
+      .form-left .field{
+        float: left;
+      }
+
+      .form-left:nth-child(2) .field {
+        float: right;
+      }
+
+      label {
+        font-family: 'Verlag-Light';
+        size: 14px;
+        color: #333333;
+        font-weight: normal;
+        position: absolute;
+        padding: 8px 10px 7px;
+        line-height: 25px;
+      }
+
+      .field_with_errors label {
+        color: #FF0000;
+      }
+
+      input[type=text], input[type=password], input[type=email], input[type=number], input[type=url], input[type=tel], textarea {
+        background-color: #fff;
+        width: calc(100% - 22px);
+        border: 1px solid #c9d0d6;
+        -webkit-border-radius: 0px;
+        -moz-border-radius: 0px;
+        border-radius: 0px;
+        font-size: 0.95em;
+        outline: none;
+        padding: 0px 10px 0px 10px;
+        text-align: right;
+        height: 38px;
+      }
+
+      input[type=text]:focus, input[type=password]:focus, input[type=email]:focus, input[type=number]:focus, input[type=url]:focus, input[type=tel]:focus, textarea:focus {
+        border: 1px solid #99a2aa;
+        box-shadow: 0 0 4px #99a2aa;
+        -moz-box-shadow: 0 0 4px #99a2aa;
+        -webkit-box-shadow: 0 0 4px #99a2aa;
+      }
+
+      input[type=radio] {
+        margin-top: 12px;
+      }
+      
+      select {
+        background-color: #fff;
+        width: calc(100%);
+        border: 1px solid #c9d0d6;
+        -webkit-border-radius: 0px;
+        -moz-border-radius: 0px;
+        border-radius: 0px;
+        font-size: 0.95em;
+        outline: none;
+        padding: 0px 10px 0px 10px;
+        text-align: right;
+        height: 40px;
+      }
+    }
+
+    .field.error input {
+      color: red;
+    }
+  }
+
+  input[type="submit"] {
+    font-family: 'Verlag-Bold';
+    background-color: #333333;
+    border: 0px;
+    font-size: 14px;
+    letter-spacing: 1px;
+    font-weight: normal;
+    color: #fff;
+    width: 100%;
+    height: 40px;
+    cursor: pointer;
+    width: 100%;
+    text-transform: none;
+  }
+}

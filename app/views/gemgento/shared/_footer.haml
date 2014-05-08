@@ -1,0 +1,7 @@
+.footer-wrapper
+  .footer-links
+    %ul
+      - @footer_items.each do |footer|
+        %li
+          = link_to "#{footer.name.html_safe}", footer.url
+        
