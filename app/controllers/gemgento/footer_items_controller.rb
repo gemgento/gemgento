@@ -1,5 +1,5 @@
 module Gemgento
-	class FooterLinksController < BaseController
+	class FooterLinksController < ApplicationController
 
 	  def index
 
