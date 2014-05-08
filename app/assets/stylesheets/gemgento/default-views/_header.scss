@@ -1,0 +1,32 @@
+#logo-holder {
+	height: 100px;
+	display: table-cell;
+	vertical-align: bottom;
+
+	h1 {
+		font-size: 30px;
+		font-weight: normal;
+		font-family: 'Verlag-Black';
+		color: #333333;
+		margin: 0px;
+		padding: 0px;
+	}
+}
+
+#account-holder {
+	position: absolute;
+	top: 20px;
+	right: 0px;
+
+	@include menu(9px, right, 0 0 0 20px)
+}
+
+#header-nav-holder {
+	position: absolute;
+	bottom: 0px;
+	right: 0px;
+	font-family: 'Verlag-Bold';
+	color: #333333;
+
+	@include menu(16px, right, 0 0 0 40px)
+}

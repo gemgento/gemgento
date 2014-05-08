@@ -15,7 +15,7 @@ module Gemgento
     end
 
     def show
-      @current_category = Gemgento::Category.where('id = ? OR url_key = ?', params[:id], params[:url_key]).first || not_found
+      @current_category = Gemgento::Category.where('id = ? OR url_key = ?', params[:id], params[:url_key]).first || current_category
       current_category.includes_category_products = true
 
       respond_to do |format|

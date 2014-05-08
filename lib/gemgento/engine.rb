@@ -5,8 +5,9 @@ module Gemgento
     isolate_namespace Gemgento
     engine_name 'gemgento'
 
-    config.autoload_paths += %W(#{config.root}/lib/**/)
 
+    config.autoload_paths += %W(#{config.root}/lib/**/)
+    
     # load decorators
     config.to_prepare do
       Dir.glob(Rails.root + 'app/decorators/**/*_decorator*.rb').each do |c|

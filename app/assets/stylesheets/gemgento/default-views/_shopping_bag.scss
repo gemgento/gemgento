@@ -1,0 +1,87 @@
+table.shopping-bag {
+	font-weight: normal;
+	color: #333333;
+	width: 100%;
+		
+
+	thead {
+		th {
+			font-family: 'Verlag-Bold';
+			font-size: 12px;
+			font-weight: normal;
+			text-align: left;
+			border-bottom: 1px solid #dedede;
+		}
+		th:nth-child(1) { width: 40%; border-right: 40px solid #fff; };
+		th:nth-child(2) { width: 20%; border-right: 40px solid #fff; };
+		th:nth-child(3) { width: 10%; border-right: 40px solid #fff; };
+		th:nth-child(4) { width: 15%; border-right: 40px solid #fff; };
+		th:nth-child(5) { width: 15% };
+	}
+
+	tbody {
+		td {
+			font-family: 'Verlag-Light';
+			font-size: 14px;
+			font-weight: normal;
+			img {
+				width: 100px;
+			}
+		}
+	}
+
+	tfoot {
+		font-size: 12px;
+
+		td {
+			padding: 10px 0px 10px 0px;
+		}
+
+		td.label {
+			font-family: 'Verlag-Bold';
+			font-size: 12px;
+			font-weight: normal;
+		}
+
+		td.value {
+			font-family: 'Verlag-Light';
+			font-size: 14px;
+			font-weight: normal;
+		}
+
+		tr:nth-child(1) {
+			td {
+				border-top: 1px solid #dedede;
+				padding-top: 20px;
+			}
+
+			td:nth-child(1) {
+				border-right: 40px solid #fff;
+			}
+
+		}
+
+	}
+
+	input[type=text], input[type=password], input[type=email], input[type=number], input[type=url], input[type=tel], textarea {
+    background-color: #fff;
+    width: calc(100% - 22px);
+    border: 1px solid #c9d0d6;
+    -webkit-border-radius: 0px;
+    -moz-border-radius: 0px;
+    border-radius: 0px;
+    font-size: 0.95em;
+    font-family: Helvetica, Arial, sans-serif;
+    outline: none;
+    padding: 0px 10px 0px 10px;
+    text-align: right;
+    height: 38px;
+  }
+
+  input[type=text]:focus, input[type=password]:focus, input[type=email]:focus, input[type=number]:focus, input[type=url]:focus, input[type=tel]:focus, textarea:focus {
+    border: 1px solid #99a2aa;
+    box-shadow: 0 0 4px #99a2aa;
+    -moz-box-shadow: 0 0 4px #99a2aa;
+    -webkit-box-shadow: 0 0 4px #99a2aa;
+  }
+}

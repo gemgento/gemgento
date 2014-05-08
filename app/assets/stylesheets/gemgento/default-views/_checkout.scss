@@ -1,0 +1,28 @@
+.checkout-steps {
+	position: absolute;
+	right: 0px;
+	bottom: 5px;
+
+	ul {
+		padding: 0px;
+		margin: 0px;
+		float: right;
+
+		li {
+			font-size: 11px;
+			text-transform: uppercase;
+			float: left;
+			list-style: none;
+			padding: 0 0 0 20px;
+
+			a {
+				color: #000;
+				text-decoration: none;
+			}
+		}
+
+		li.active {
+			font-weight: bold;
+		}
+	}
+}

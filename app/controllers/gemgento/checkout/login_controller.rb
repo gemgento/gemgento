@@ -64,7 +64,7 @@ module Gemgento
           format.html { redirect_to checkout_address_path }
           format.json { render json: { result: true, user: current_user, order: current_order } }
         else
-          flash.now[:error] = 'Invalid username and password'
+          flash.keep[:error] = 'Invalid username and password'
 
           format.html { redirect_to checkout_login_path }
           format.json do

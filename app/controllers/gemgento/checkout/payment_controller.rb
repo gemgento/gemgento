@@ -10,18 +10,19 @@ module Gemgento
       @payment_methods = current_order.get_payment_methods
 
       @card_types = {
-          'Credit card type' => nil,
+          '' => nil,
           Visa: 'VI',
           MasterCard: 'MC',
           'American Express' => 'AE'
       }
 
-      @exp_years = []
+      @exp_years = [""]
+
       Time.now.year.upto(Time.now.year + 10) do |year|
         @exp_years << year.to_s
       end
 
-      @exp_months = {}
+      @exp_months = {'' => nil,}
       1.upto(12) do |month|
         month_string = month.to_s.length == 1 ? "0#{month.to_s}" : month.to_s
         @exp_months[month] = month_string

@@ -1,4 +1,40 @@
-#product
-  = @product.attribute_value('name')
-  %img{ src: @product.assets.first.url }
-  = @product.attribute_value('name') + ' $' + @product.attribute_value('price')
+.pages-holder
+  .pages-holder-col30
+    = image_tag @product.assets.first.asset_file.file.url(:default_index)
+  .pages-holder-col70
+    .product-header
+      %h1= @product.name
+      %h2= number_to_currency(@product.price)
+
+    .product-content  
+      %p= @product.description
+
+      = form_for current_order, url: gemgento.cart_url, method: 'patch', html: {id: 'add_to_cart' } do |f|
+        %input{type: 'hidden', name: 'activity', value: 'add_item'}
+        %input{type: 'hidden', name: 'quantity', value: 1}
+        - if simple_products = @product.simple_products.active and simple_products.size > 0
+          - value = @product.simple_products.active.first.id
+
+          %input{type: 'hidden', name: 'product_id', value: @product.id}
+
+          .product-attribute
+            %input{type: 'hidden', name: 'color', value: nil}
+            %label SELECT COLOR
+            - simple_products.each do |simple_product|
+              = link_to_function simple_product.color, ''
+
+
+          .product-attribute
+            %input{type: 'hidden', name: 'size', value: nil}
+            %label SELECT SIZE
+            - simple_products.each do |simple_product|
+              = link_to_function simple_product.shirt_size, ''
+
+        - else 
+          - value = @product.id
+          %input{type: 'hidden', name: 'product_id', value: value }
+        
+        .footer      
+          = f.submit 'ADD TO BAG'
+
+  .clear

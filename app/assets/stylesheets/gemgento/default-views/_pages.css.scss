@@ -1,0 +1,83 @@
+.pages-holder {
+  width: 900px;
+  margin: 0 auto;
+  position: relative;
+
+  .pages-holder-col10 {
+    float: left;
+    width: 10%;
+  }
+
+  .pages-holder-col20 {
+    float: left;
+    width: 20%;
+  }
+
+  .pages-holder-col30 {
+    float: left;
+    width: 30%;
+  }
+
+  .pages-holder-col40 {
+    float: left;
+    width: 40%;
+  }
+
+  .pages-holder-col50 {
+    float: left;
+    width: 50%;
+  }
+
+  .pages-holder-col60 {
+    float: left;
+    width: 60%;
+  }
+
+  .pages-holder-col70 {
+    float: left;
+    width: 70%;
+  }
+
+  .pages-header {
+    h1 {
+      font-size: 18px;
+      font-weight: normal;
+      color: #333333;
+      position: relative;
+      margin-top: 0px;
+
+      @import 'checkout'
+    }
+
+    h2 {
+      font-family: Verlag-LightItalic;
+      font-size: 14px;
+      color: #333333;
+    }
+
+    h1.checkout {
+      border-bottom: 1px solid #dedede;
+      padding-bottom: 5px;
+    }
+  }
+
+  .pages-content {
+    font-family: Verlag-Light;
+    font-size: 14px;
+    color: #333333;
+
+    a {
+      color: #333333;
+    }
+    
+    #shopping-bag {
+      @import 'shopping_bag'
+    }
+
+    form, .form {
+      @import 'form'
+    }
+    
+    @import 'address'
+  }
+}

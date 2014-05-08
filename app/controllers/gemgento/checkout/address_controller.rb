@@ -34,7 +34,11 @@ module Gemgento
       # validate addresses before continuing
       if params[:same_as_billing] && !@billing_address.valid?
         respond_to do |format|
-          format.html { render checkout_address }
+          format.html do 
+            current_order.build_billing_address(billing_address_params).valid?
+            current_order.build_shipping_address(shipping_address_params).valid?
+            render 'gemgento/checkout/address/show'
+          end
           format.json do
             render json: {
                 result: false,
@@ -46,7 +50,11 @@ module Gemgento
         end
       elsif !params[:same_as_billing] && (!@billing_address.valid? || !@shipping_address.valid?)
         respond_to do |format|
-          format.html { render checkout_address }
+          format.html do 
+            current_order.build_billing_address(billing_address_params).valid?
+            current_order.build_shipping_address(shipping_address_params).valid?
+            render 'gemgento/checkout/address/show'
+          end
           format.json do
             render json: {
                 result: false,
@@ -122,7 +130,11 @@ module Gemgento
             format.html { redirect_to checkout_shipping_path }
             format.json { render json: { result: true, order: current_order } }
           else
-            format.html { render checkout_address }
+            format.html do
+              current_order.build_billing_address(billing_address_params).valid?
+              current_order.build_shipping_address(shipping_address_params).valid?
+              render 'gemgento/checkout/address/show'
+            end
             format.json do
               render json: {
                   result: false,

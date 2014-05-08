@@ -1,0 +1,23 @@
+.header-wrapper
+  = link_to root_path do
+    .store-logo
+      = image_tag('bones.png')
+  .pages-wrapper 
+    %ul
+    - @pages.each_with_index do |p, i|
+      %li
+        - unless p.is_shop_landing
+          = link_to_unless_current p.name.upcase, page_path(p) do 
+            = link_to p.name.upcase, page_path(p), class: 'current-page'
+        - else
+          #shop
+            = link_to_unless_current p.name.upcase, '/shop' do 
+              #shop
+                = link_to p.name.upcase, '/shop', class: 'current-page'
+
+:javascript
+  if((window.location.pathname).indexOf('categories') == 1){
+    $('#shop a').addClass('current-page');
+  } else if((window.location.pathname).indexOf('products') == 1){ 
+    $('#shop a').addClass('current-page');
+  }
