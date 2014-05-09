@@ -128,6 +128,14 @@ module Gemgento
       API::SOAP::Checkout::Cart.totals(self)
     end
 
+    def subtotal
+      if self.state != 'cart'
+        super
+      else
+        return self.order_items.map{ |oi| oi.product.price(self.store).to_f }.inject(&:+)
+      end
+    end
+
     def item_count
       count = 0
 
