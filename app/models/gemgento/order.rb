@@ -185,9 +185,11 @@ module Gemgento
     end
 
     def process(remote_ip = nil)
+
       if !valid_stock?
         return false
       elsif API::SOAP::Checkout::Cart.order(self, self.order_payment, remote_ip)
+        Gemgento::HeartBeat.perform_async if Rails.env.production?
         finalize
         return true
       else
