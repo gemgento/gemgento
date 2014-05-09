@@ -58,21 +58,13 @@ module Gemgento
     # @param save_shipping [Boolean] true to save the shipping address
     # @param shipping_same_as_billing [Boolean] true if the shipping and billing addresses are the same
     def self.save_from_order(order, save_billing, save_shipping, shipping_same_as_billing)
-      puts 'START address copy'
-      puts save_billing.inspect
-      puts save_shipping.inspect
-      puts shipping_same_as_billing.inspect
-
       if save_billing && shipping_same_as_billing
-        puts 'saving billing, shipping is the same'
         Address.copy_to_address_book(order.billing_address, order.user, true, true)
       elsif save_billing && !shipping_same_as_billing
-        puts 'saving billing, different from shipping'
         Address.copy_to_address_book(order.billing_address, order.user, true, false)
       end
 
       if save_shipping && !shipping_same_as_billing
-        puts 'saving shipping'
         Address.copy_to_address_book(order.shipping_address, order.user, false, true)
       end
     end
@@ -93,6 +85,12 @@ module Gemgento
       address.save
 
       return address
+    end
+
+    # Set the street attribute.  Override required to explode the street into address lines.
+    def street=(value)
+      super
+      explode_street_address
     end
 
     private
