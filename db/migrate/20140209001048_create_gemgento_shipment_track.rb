@@ -9,7 +9,7 @@ class CreateGemgentoShipmentTrack < ActiveRecord::Migration
       t.integer :magento_id
     end
 
-    add_index :gemgento_shipment_tracks, :shipment_id
+    add_index :gemgento_shipment_tracks, :shipment_id, name: 'shipment_tracks_shipment_index'
   end
 
   def down

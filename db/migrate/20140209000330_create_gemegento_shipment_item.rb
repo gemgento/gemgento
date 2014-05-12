@@ -12,7 +12,7 @@ class CreateGemegentoShipmentItem < ActiveRecord::Migration
       t.integer :magento_id
     end
 
-    add_index :gemegento_shipment_items, :shipment_id
+    add_index :gemegento_shipment_items, :shipment_id, name: 'shipment_items_shipment_id'
   end
 
   def down

@@ -10,7 +10,7 @@ class CreateGemgentoShipment < ActiveRecord::Migration
       t.timestamps
     end
 
-    add_index :gemgento_shipments, :order_id
+    add_index :gemgento_shipments, :order_id, name: 'shipments_order_index'
   end
 
   def down
