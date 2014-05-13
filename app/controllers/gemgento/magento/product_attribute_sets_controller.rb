@@ -19,6 +19,8 @@ module Gemgento
         end
       end
 
+      Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch_all_media_types
+
       render nothing: true
     end
 

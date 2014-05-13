@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    gemgento (1.0.1)
+    gemgento (1.0.2)
       coffee-rails (~> 4.0.0)
       devise (~> 3.2.2)
       exception_notification_rails3 (= 1.2.0)

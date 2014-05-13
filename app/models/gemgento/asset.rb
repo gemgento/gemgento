@@ -38,6 +38,7 @@ module Gemgento
 
         if FileUtils.compare_file(asset.asset_file.file.path(:original), file)
           matching_file = asset.asset_file
+          matching_asset = asset
           break
         end
       end
@@ -50,9 +51,12 @@ module Gemgento
         rescue
           matching_file = nil
         end
+
+        matching_asset = Gemgento::Asset.new
       end
 
       self.asset_file = matching_file
+      self.file = matching_asset.file
     end
 
     # Return the image file associated with the Asset.
