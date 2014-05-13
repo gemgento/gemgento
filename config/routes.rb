@@ -1,10 +1,8 @@
 Gemgento::Engine.routes.draw do
   root to: 'home#index'
 
-  if defined?(ActiveAdmin)
-    devise_for :admin_users, ActiveAdmin::Devise.config
-    ActiveAdmin.routes(self) if defined?(ActiveAdmin)
-  end
+  devise_for :admin_users, ActiveAdmin::Devise.config
+  ActiveAdmin.routes(self)
 
   get '/error/:action', :controller => "errors"
 

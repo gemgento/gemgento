@@ -1,4 +1,5 @@
 require 'devise'
+require 'activeadmin'
 require 'savon'
 require 'exception_notifier'
 require 'builder'
@@ -11,5 +12,7 @@ require 'gemgento/engine'
 require 'gemgento/ssl_requirement'
 
 module Gemgento
+  module Admin
 
+  end
 end
