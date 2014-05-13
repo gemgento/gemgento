@@ -12,7 +12,5 @@ require 'gemgento/engine'
 require 'gemgento/ssl_requirement'
 
 module Gemgento
-  module Admin
 
-  end
 end
