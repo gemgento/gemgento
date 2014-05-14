@@ -1,4 +1,5 @@
 require 'devise'
+require 'activeadmin'
 require 'savon'
 require 'exception_notifier'
 require 'builder'

@@ -1,11 +1,6 @@
 Gemgento::Engine.routes.draw do
   root to: 'home#index'
 
-  if defined?(ActiveAdmin)
-    devise_for :admin_users, ActiveAdmin::Devise.config
-    ActiveAdmin.routes(self) if defined?(ActiveAdmin)
-  end
-
   get '/error/:action', :controller => "errors"
 
   get '/addresses/region_options', to: 'addresses#region_options'
@@ -79,6 +74,9 @@ Gemgento::Engine.routes.draw do
   #get 'shop/:group/:cat',                      to: 'categories#show', :as => 'shop_by_group_and_cat'
   #get 'shop/:url_key',                           to: 'categories#show', :as => 'shop_by_group'
   get 'shop',                                  to: 'categories#show', :as => 'shop'
+end
 
-
+Rails.application.routes.draw do
+  devise_for :admin_users, ActiveAdmin::Devise.config
+  ActiveAdmin.routes(self)
 end

@@ -5,7 +5,6 @@ module Gemgento
     isolate_namespace Gemgento
     engine_name 'gemgento'
 
-
     config.autoload_paths += %W(#{config.root}/lib/**/)
     
     # load decorators
@@ -17,10 +16,7 @@ module Gemgento
 
     initializer :gemgento do
 
-      # use ActiveAdmin if host application supports it
-      if defined?(ActiveAdmin)
-        ActiveAdmin.application.load_paths << File.dirname(__FILE__) + '/admin/'
-      end
+      ActiveAdmin.application.load_paths << File.dirname(__FILE__) + '/admin'
 
       # allow custom queries to sanitize inputs
       class ActiveRecord::Base
