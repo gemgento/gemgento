@@ -20,11 +20,18 @@
 
 				#account-holder
 					%ul
+
 						%li
 							= link_to gemgento.cart_url, class: "#{'active' if params[:controller] == 'gemgento/cart'}" do
 								SHOPPING BAG #{current_order.item_count.to_i}
-						%li
-							MY ACCOUNT
+						- if current_user
+							%li
+								MY ACCOUNT
+							%li
+								= link_to "Abmelden", destroy_user_session_path, :method => :delete
+						- else
+							%li
+								= link_to "Anmelden", new_user_session_path
 
 				#header-nav-holder
 					%ul						
