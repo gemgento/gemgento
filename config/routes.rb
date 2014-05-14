@@ -75,8 +75,3 @@ Gemgento::Engine.routes.draw do
   #get 'shop/:url_key',                           to: 'categories#show', :as => 'shop_by_group'
   get 'shop',                                  to: 'categories#show', :as => 'shop'
 end
-
-Rails.application.routes.draw do
-  devise_for :admin_users, ActiveAdmin::Devise.config
-  ActiveAdmin.routes(self)
-end

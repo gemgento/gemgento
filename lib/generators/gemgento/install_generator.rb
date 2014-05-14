@@ -8,6 +8,8 @@ module Gemgento
 
     desc 'Add the Gemgento routes'
     def add_routes
+      route 'devise_for :admin_users, ActiveAdmin::Devise.config'
+      route 'ActiveAdmin.routes(self)'
       route "mount Gemgento::Engine, at: '/'"
     end
 
