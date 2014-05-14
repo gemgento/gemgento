@@ -293,7 +293,10 @@ module Gemgento
             }
 
             unless product.simple_products.empty?
-              product_data.merge!({'associated_skus' => {'item' => compose_associated_skus(product)}, 'price_changes' => compose_price_changes(product, store)})
+              product_data.merge!({
+                                      'associated_skus' => {'item' => compose_associated_skus(product)},
+                                      'price_changes' => compose_price_changes(product, store)
+                                  })
             end
 
             product_data
@@ -356,10 +359,10 @@ module Gemgento
               options = []
 
               configurable_attribute.product_attribute_options.where(store: store).each do |attribute_option|
-                options << {key: attribute_option.label, value: ''}
+                options << { key: attribute_option.label, value: '' }
               end
 
-              price_changes << {key: configurable_attribute.code, value: options}
+              price_changes << { key: configurable_attribute.code, value: options }
             end
 
             [price_changes]

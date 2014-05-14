@@ -294,7 +294,7 @@ module Gemgento
       if configurable_product.magento_id.nil?
         self.count_created += 1
       else
-        self.count_created += 1
+        self.count_updated += 1
       end
 
       configurable_product.magento_type = 'configurable'

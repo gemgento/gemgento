@@ -32,9 +32,10 @@ module Gemgento
       raise 'Asset does not have an associated product.' if self.product.nil?
 
       matching_file = nil
+      matching_asset = nil
 
       self.product.assets.each do |asset|
-        next if asset_file.nil?
+        next if asset.asset_file.nil?
 
         if FileUtils.compare_file(asset.asset_file.file.path(:original), file)
           matching_file = asset.asset_file
@@ -52,7 +53,8 @@ module Gemgento
           matching_file = nil
         end
 
-        matching_asset = Gemgento::Asset.new
+        matching_asset = Asset.new
+        puts matching_asset.inspect
       end
 
       self.asset_file = matching_file
