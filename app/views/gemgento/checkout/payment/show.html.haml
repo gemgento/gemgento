@@ -1,15 +1,15 @@
 .pages-holder
   .pages-header
     = render 'gemgento/checkout/checkout_header'
-
+  - @order_payment =  current_order.build_order_payment
   .pages-content
     = form_for current_order, url: checkout_payment_path, html: { id: 'checkout_payment' } do |form|
-      = fields_for :order_payment do |order_payment|
+      = form.fields_for :order_payment do |order_payment|
         .form-group
           .form-left
             .field
-              %label Saved credit Cards
-              = order_payment.text_field :method
+              %label Payment Method
+              = order_payment.select :method, @payment_methods[:item].collect{|i| [i[:title], i[:code]]}
 
             .field
               %label Credit Card Types
