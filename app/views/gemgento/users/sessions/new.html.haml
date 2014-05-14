@@ -1,0 +1,25 @@
+.pages-holder
+  .pages-header
+    Sign in
+  .pages-content
+    .form
+      .form-group
+        .form-left
+          = flash[:error]
+          = devise_error_messages!
+          .field
+            %h2 Enter your credentials
+          = form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f|   
+            .field
+              %label{for: 'email'} E-mail address
+              = f.email_field :email, :autofocus => true
+
+            .field
+              %label{for: 'password'} Password
+              = f.password_field :password, :autofocus => true
+
+            .field
+              .form-left
+                = submit_tag 'Sign in'
+
+        .clear
