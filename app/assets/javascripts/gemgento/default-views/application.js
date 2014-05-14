@@ -12,6 +12,5 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require turbolinks
 //= require gemgento/default-views/checkout
 //= require_tree .
