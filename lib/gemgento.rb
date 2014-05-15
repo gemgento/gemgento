@@ -1,3 +1,8 @@
+require 'haml'
+require 'coffee-rails'
+require 'paperclip'
+require 'paperclip-meta'
+require 'sass-rails'
 require 'devise'
 require 'activeadmin'
 require 'savon'
