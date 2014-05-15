@@ -1,6 +1,9 @@
 Gemgento::Engine.routes.draw do
   root to: 'home#index'
 
+  devise_for :admin_users, ActiveAdmin::Devise.config
+  ActiveAdmin.routes(self)
+
   get '/error/:action', :controller => "errors"
 
   get '/addresses/region_options', to: 'addresses#region_options'
