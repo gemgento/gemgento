@@ -10,6 +10,7 @@ unless File.exist?(Rails.root.join('config', 'gemgento_config.yml'))
                         encryption:       '',
                         debug:            false,
                     },
+                    layout: 'gemgento'
                 },
                 beta: {
                     magento: {
@@ -18,6 +19,7 @@ unless File.exist?(Rails.root.join('config', 'gemgento_config.yml'))
                         api_key:          '',
                         encryption:       '',
                     },
+                    layout: 'gemgento'
                 },
                 production: {
                     magento: {
@@ -27,6 +29,7 @@ unless File.exist?(Rails.root.join('config', 'gemgento_config.yml'))
                         encryption:       '',
                         ip_whitelist:     '127.0.0.1'
                     },
+                    layout: 'gemgento'
                 }
             }.to_yaml)
   end
@@ -51,6 +54,7 @@ config_defaults = {
         ip_whitelist:     '127.0.0.1',
         table_prefix:     ''
     },
+    layout: 'gemgento',
     sellect: false
 }
 

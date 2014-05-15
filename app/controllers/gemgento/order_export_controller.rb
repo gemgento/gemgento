@@ -1,5 +1,5 @@
 module Gemgento
-  class OrderExportController < ApplicationController
+  class OrderExportController < Gemgento::ApplicationController
 
     def index
       raise 'No order attributes requested' if params[:order_attributes].nil?

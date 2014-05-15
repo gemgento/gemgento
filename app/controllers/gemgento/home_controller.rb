@@ -1,5 +1,5 @@
 module Gemgento
-  class HomeController < ApplicationController
+  class HomeController < Gemgento::ApplicationController
     def index
     end
   end

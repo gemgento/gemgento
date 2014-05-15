@@ -1,5 +1,5 @@
 module Gemgento
-  class SearchController < ApplicationController
+  class SearchController < Gemgento::ApplicationController
 
     respond_to :json, :html
 

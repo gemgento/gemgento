@@ -1,5 +1,5 @@
 module Gemgento
-  class CategoriesController < ApplicationController
+  class CategoriesController < Gemgento::ApplicationController
 
     respond_to :json, :html
 

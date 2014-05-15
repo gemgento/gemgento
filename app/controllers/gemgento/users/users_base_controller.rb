@@ -1,5 +1,5 @@
 module Gemgento
-  class Users::UsersBaseController < ApplicationController
+  class Users::UsersBaseController < Gemgento::ApplicationController
     before_filter :auth_user
 
     respond_to :json, :html

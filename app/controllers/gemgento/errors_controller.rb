@@ -1,5 +1,5 @@
 module Gemgento
-  class ErrorsController < ApplicationController
+  class ErrorsController < Gemgento::ApplicationController
     def generic
       raise '500 generic error' 
     end

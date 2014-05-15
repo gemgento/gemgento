@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    gemgento (1.0.2)
+    gemgento (1.1.0.pre)
       activeadmin (~> 1.0.0.pre)
       coffee-rails (~> 4.0.0)
       devise (~> 3.2.2)

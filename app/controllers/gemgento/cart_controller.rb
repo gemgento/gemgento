@@ -1,5 +1,5 @@
 module Gemgento
-  class CartController < ApplicationController
+  class CartController < Gemgento::ApplicationController
 
     ssl_allowed
 

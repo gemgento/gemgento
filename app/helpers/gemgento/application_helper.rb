@@ -2,9 +2,7 @@ module Gemgento
   module ApplicationHelper
 
     def set_store
-      if session[:store_id].nil?
-        session[:store_id] = Gemgento::Store.current.id
-      end
+      session[:store_id] = Gemgento::Store.current.id if session[:store_id].nil?
     end
 
     def current_store
@@ -55,5 +53,20 @@ module Gemgento
     def nav_category_is_active(c)
       return  (@current_category.id == c.id or @current_category.ancestors.include?(c)) ? true : false
     end
+
+    def set_layout(html_layout = nil, pjax_layout = false)
+      html_layout = Gemgento::Config[:layout] if html_layout.nil?
+
+      if request.url # Check if we are redirected
+        response.headers['X-PJAX-URL'] = request.url
+      end
+
+      if request.headers['X-PJAX']
+        pjax_layout
+      else
+        html_layout
+      end
+    end
+
   end
 end
