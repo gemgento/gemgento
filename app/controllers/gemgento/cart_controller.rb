@@ -11,25 +11,6 @@ module Gemgento
       respond_with @cart
     end
 
-    def create
-      # save the order and mark is as the current cart
-      current_order.save
-      cookies[:cart] = current_order.id
-
-      @product = add_item
-
-      respond_to do |format|
-        format.html { redirect 'gemgento/checkout/shopping_bag' }
-
-        unless @product
-          format.js { render '/gemgento/order/no_inventory', layout: false }
-          format.json { render json: { result: false, errors: 'Out of stock', order: current_order } }
-        else
-          format.js { render '/gemgento/order/add_item', layout: false }
-          format.json { render json: { result: true, order: current_order } }
-        end
-      end
-    end
 
     def create
       @errors = []
