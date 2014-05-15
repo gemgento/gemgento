@@ -8,9 +8,10 @@ module Gemgento
 
     desc 'Add the Gemgento routes'
     def add_routes
-      route 'devise_for :admin_users, ActiveAdmin::Devise.config'
-      route 'ActiveAdmin.routes(self)'
+      # routes are inserted in reverse
       route "mount Gemgento::Engine, at: '/'"
+      route 'ActiveAdmin.routes(self)'
+      route 'devise_for :admin_users, ActiveAdmin::Devise.config'
     end
 
     desc 'Include the Gemgento::ApplicationHelper'
