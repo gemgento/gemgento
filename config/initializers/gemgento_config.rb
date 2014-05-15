@@ -1,37 +1,32 @@
 # create a default configuration file if none exists
 unless File.exist?(Rails.root.join('config', 'gemgento_config.yml'))
   File.open(Rails.root.join('config', 'gemgento_config.yml'), 'w') do |f|
-    f.write({
-                development: {
-                    magento: {
-                        url: 'www.gemgento.com',
-                        username:         'gemgento',
-                        api_key:          '',
-                        encryption:       '',
-                        debug:            false,
+    f.write({ 'development' => {
+                    'magento' => {
+                        'url' => 'www.gemgento.com',
+                        'username' =>         'gemgento',
+                        'api_key' =>          '',
+                        'debug' =>            false,
                     },
-                    layout: 'gemgento'
+                    'layout' => 'gemgento'
                 },
-                beta: {
-                    magento: {
-                        url: 'www.gemgento.com',
-                        username:         'gemgento',
-                        api_key:          '',
-                        encryption:       '',
+                'beta' => {
+                    'magento' => {
+                        'url' => 'www.gemgento.com',
+                        'username' =>         'gemgento',
+                        'api_key' =>          ''
                     },
-                    layout: 'gemgento'
+                    'layout' => 'gemgento'
                 },
-                production: {
-                    magento: {
-                        url: 'www.gemgento.com',
-                        username:         'gemgento',
-                        api_key:          '',
-                        encryption:       '',
-                        ip_whitelist:     '127.0.0.1'
+                'production' => {
+                    'magento' => {
+                        'url' => 'www.gemgento.com',
+                        'username' =>         'gemgento',
+                        'api_key' =>          '',
+                        'ip_whitelist' =>     '127.0.0.1'
                     },
-                    layout: 'gemgento'
-                }
-            }.to_yaml)
+                    'layout' => 'gemgento'
+                } }.to_yaml)
   end
 end
 
