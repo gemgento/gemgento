@@ -1,0 +1,78 @@
+!!!
+%html
+	%head
+		%title STORE NAME
+		= stylesheet_link_tag "gemgento/default-views/application", media: "all"
+		= javascript_include_tag "gemgento/default-views/application"
+		= csrf_meta_tags
+
+		:javascript
+			jQuery(document).ready(function($) {
+				//$(":input[placeholder]").placeholder();
+			});
+			
+	%body
+		#body-holder
+			#header-holder
+				#logo-holder
+					%h1
+						STORE NAME
+
+				#account-holder
+					%ul
+
+						%li
+							= link_to gemgento.cart_url, class: "#{'active' if params[:controller] == 'gemgento/cart'}" do
+								SHOPPING BAG #{current_order.item_count.to_i}
+						- if current_user
+							%li
+								MY ACCOUNT
+							%li
+								= link_to "SIGN IN", destroy_user_session_path, :method => :delete
+						- else
+							%li
+								= link_to "SIGN OUT", new_user_session_path
+
+				#header-nav-holder
+					%ul						
+						%li= link_to 'ABOUT', gemgento.about_url, class: "#{'active' if params[:action] == 'about'}"
+						%li= link_to 'SHOP', gemgento.shop_url, class: "#{'active' if params[:controller] == 'gemgento/categories'}"
+
+			- if @current_category
+				#subheader-holder
+					#search-holder
+						.search-links
+							%span SORT BY: 
+							%span LOW TO HIGH
+							%span= " | "
+							%span HIGH TO LOW
+					#nav-holder
+						%ul
+							- Gemgento::Category.top_level.each do |c|
+								%li= link_to c.name, gemgento.shop_url(url_key: c.url_key), class: "#{'active' if nav_category_is_active(c)}"
+							.clear
+						- if @current_category and @current_category.parent_id != nil
+							- children = (@current_category.parent and @current_category.parent.parent_id != nil) ?  @current_category.parent.children : @current_category.children
+							%ul
+								- children.each do |c|
+									%li= link_to c.name, gemgento.shop_url(url_key: c.url_key), class: "#{'active' if nav_category_is_active(c)}"
+								.clear
+						.clear
+
+
+					.clear
+
+			#content-holder
+				= yield
+
+			#footer-holder
+				#footer-nav-holder
+					%ul						
+						%li= link_to 'CONTACT', gemgento.contact_url, class: "#{'active' if params[:action] == 'contact'}"
+						%li= link_to 'TERMS OF USE', gemgento.terms_of_use_url, class: "#{'active' if params[:action] == 'terms_of_use'}"
+						%li= link_to 'RETURN POLICY', gemgento.return_policy_url, class: "#{'active' if params[:action] == 'return_policy'}"
+
+				#footer-copyright-holder
+					POWERED BY <b>#{link_to 'gemgento', 'http://www.gemgento.com'}</b>
+					%br
+					© 2014 GEMGENTO. LLC ALL RIGHTS RESERVED
