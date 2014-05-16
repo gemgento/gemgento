@@ -3,11 +3,11 @@ module Gemgento
 
     def update
       data = params[:data]
-      user = Gemgento::User.find_by(magento_id: data[:customer_id])
+      @user = Gemgento::User.find_by(magento_id: data[:customer_id])
 
-      unless user.nil?
+      unless @user.nil?
         @address = Gemgento::Address.find_or_initialize_by(user_address_id: data[:entity_id])
-        @address.user = user
+        @address.user = @user
         @address.city = data[:city]
         @address.company = data[:company]
         @address.country = Country.where(magento_id: data[:country_id]).first
