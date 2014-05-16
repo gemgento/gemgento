@@ -283,7 +283,7 @@ module Gemgento
         return true
       elsif self.attribute_value('special_to_date', store).nil? && !self.attribute_value('special_from_date', store).nil? && Date.parse(special_from_date) <= Date.today # no end date and start date is in the past
         return true
-      elsif Date.parse(self.attribute_value('special_from_date', store).nil?) <= Date.today && Date.parse(self.attribute_value('special_to_date', store)) >= Date.today # start date is in the past and end date is in the future
+      elsif Date.parse(self.attribute_value('special_from_date', store)) <= Date.today && Date.parse(self.attribute_value('special_to_date', store)) >= Date.today # start date is in the past and end date is in the future
         return true
       else
         return false
