@@ -40,6 +40,7 @@ module Gemgento
       case params[:activity]
         when 'add_item'
           @product = add_item
+          current_order.reload
 
           respond_to do |format|
             format.html { render 'gemgento/cart/show' }
@@ -54,6 +55,7 @@ module Gemgento
           end
         when 'update_item'
           @product = update_item
+          current_order.reload
 
           respond_to do |format|
             format.html { render 'gemgento/checkout/shopping_bag' }
@@ -68,6 +70,7 @@ module Gemgento
           end
         when 'remove_item'
           remove_item
+          current_order.reload
 
           respond_to do |format|
             format.html { redirect_to gemgento.cart_url }
