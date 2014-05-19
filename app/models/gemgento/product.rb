@@ -243,7 +243,6 @@ module Gemgento
         else
           products = products.reorder("gemgento_product_attribute_values.value #{direction}")
         end
-
       else
         products = products.joins(
             ActiveRecord::Base.escape_sql(

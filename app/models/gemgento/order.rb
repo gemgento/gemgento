@@ -220,23 +220,39 @@ module Gemgento
     end
 
     def set_default_billing_address(user)
-      self.billing_address = user.default_billing_address
+      if !user.default_billing_address.nil? ||
+        if !user.default_billing_address.nil?
+          original_address = user.default_billing_address
+        elsif !user.address_book.empty?
+          original_address = user.address_book.first
+        end
 
-      if self.billing_address.nil? && !user.address_book.empty?
-        self.billing_address = user.address_book.first
+        address = original_address.dup
+        address.region = original_address.region
+        address.country = original_address.country
       else
-        self.billing_address = Gemgento::Address.new
+        address = Gemgento::Address.new
       end
+
+      self.billing_address = address
     end
 
     def set_default_shipping_address(user)
-      self.shipping_address = user.default_shipping_address
+      if !user.default_shipping_address.nil? ||
+          if !user.default_shipping_address.nil?
+            original_address = user.default_shipping_address
+          elsif !user.address_book.empty?
+            original_address = user.address_book.first
+          end
 
-      if self.shipping_address.nil? && !user.address_book.empty?
-        self.shipping_address = user.address_book.first
+        address = original_address.dup
+        address.region = original_address.region
+        address.country = original_address.country
       else
-        self.shipping_address = Gemgento::Address.new
+        address = Gemgento::Address.new
       end
+
+      self.shipping_address = address
     end
 
 
