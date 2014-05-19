@@ -33,11 +33,8 @@ module Gemgento
       signed_out = (Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name))
       set_flash_message :notice, :signed_out if signed_out && is_navigational_format?
 
-      if !current_order.id.nil? && current_order.state == 'cart'
-        current_order.user_id = nil
-        current_order.magento_quote_id = nil
-        current_order.save
-      end
+      # destroy the cart cookie when a user logs out
+      cookies.delete :cart
 
       # We actually need to hardcode this as Rails default responder doesn't
       # support returning empty response on GET request
