@@ -223,7 +223,7 @@ module Gemgento
       return products
     end
 
-    def self.order_by_attribute(attribute, direction = 'ASC', store = nil)
+    def self.order_by_attribute(attribute, direction = 'ASC', is_numeric = false, store = nil)
       store = Gemgento::Store.current if store.nil?
       raise 'Direction must be equivalent to ASC or DESC' if direction != 'ASC' and direction != 'DESC'
 
@@ -233,25 +233,36 @@ module Gemgento
         products = products.joins(
             ActiveRecord::Base.escape_sql(
                 'INNER JOIN gemgento_product_attribute_values ON gemgento_product_attribute_values.product_id = gemgento_products.id AND gemgento_product_attribute_values.product_attribute_id = ? AND gemgento_product_attribute_values.store_id = ? ' +
-                    'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ',
+                'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ',
                 attribute.id,
                 store.id
-            )).
-            reorder("gemgento_product_attribute_values.value #{direction}").
-            readonly(false)
+            ))
+
+        if is_numeric
+          products = products.reorder("CAST(gemgento_product_attribute_values.value AS SIGNED) #{direction}")
+        else
+          products = products.reorder("gemgento_product_attribute_values.value #{direction}")
+        end
+
       else
         products = products.joins(
             ActiveRecord::Base.escape_sql(
                 'INNER JOIN gemgento_product_attribute_values ON gemgento_product_attribute_values.product_id = gemgento_products.id AND gemgento_product_attribute_values.product_attribute_id = ? ' +
-                    'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ' +
-                    'INNER JOIN gemgento_product_attribute_options ON gemgento_product_attribute_options.product_attribute_id = gemgento_product_attributes.id AND gemgento_product_attribute_options.value = gemgento_product_attribute_values.value ' +
-                    'AND gemgento_product_attribute_options.store_id = ?',
+                'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ' +
+                'INNER JOIN gemgento_product_attribute_options ON gemgento_product_attribute_options.product_attribute_id = gemgento_product_attributes.id AND gemgento_product_attribute_options.value = gemgento_product_attribute_values.value ' +
+                'AND gemgento_product_attribute_options.store_id = ?',
                 attribute.id,
                 store.id
-            )).
-            reorder("gemgento_product_attribute_options.order #{direction}").
-            readonly(false)
+            ))
+
+        if is_numeric
+          products = products.reorder("CAST(gemgento_product_attribute_options.order AS SIGNED) #{direction}")
+        else
+          products = products.reorder("gemgento_product_attribute_options.order #{direction}")
+        end
       end
+
+      products = products.readonly(false)
 
       return products
     end
