@@ -99,10 +99,10 @@ module Gemgento
     #
     # @return [void]
     def strip_whitespace
-      self.first_name = self.first_name.strip
-      self.last_name = self.last_name.strip
-      self.city = self.city.strip
-      self.postcode = self.postcode.strip
+      self.first_name = self.first_name.strip unless self.first_name.nil?
+      self.last_name = self.last_name.strip unless self.last_name.nil?
+      self.city = self.city.strip unless self.city.nil?
+      self.postcode = self.postcode.strip unless self.postcode.nil?
     end
 
     # Split the street attribute into 3 address line attributes. Magento stores street addresses lines as a
