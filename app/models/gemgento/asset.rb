@@ -37,7 +37,7 @@ module Gemgento
       self.product.assets.each do |asset|
         next if asset.asset_file.nil?
 
-        if FileUtils.compare_file(asset.asset_file.file.path(:original), file)
+        if File.exist?(asset.asset_file.file.path(:original)) && FileUtils.compare_file(asset.asset_file.file.path(:original), file)
           matching_file = asset.asset_file
           matching_asset = asset
           break
