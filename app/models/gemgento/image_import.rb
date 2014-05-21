@@ -40,7 +40,8 @@ module Gemgento
         @row = @worksheet.row(index)
         @product = Gemgento::Product.not_deleted.find_by(sku: @row[@headers.index('sku').to_i].to_s.strip)
         Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch(@product, self.store) # make sure we know about all existing images
-        @product.assets.where(store: self.store).destroy_all if self.destroy_existing
+
+        destroy_existing if self.destroy_existing
         create_images
       end
 
@@ -82,6 +83,16 @@ module Gemgento
     end
 
     private
+
+    def destroy_existing
+      @product.assets.where(store: self.store).find_each do |asset|
+        begin
+          asset.destroy
+        rescue
+          # just making sure we don't have a problem if file no longer exists
+        end
+      end
+    end
 
     def get_headers
       accepted_headers = []
