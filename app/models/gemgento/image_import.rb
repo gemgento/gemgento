@@ -41,7 +41,7 @@ module Gemgento
         @product = Gemgento::Product.not_deleted.find_by(sku: @row[@headers.index('sku').to_i].to_s.strip)
         Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch(@product, self.store) # make sure we know about all existing images
 
-        destroy_existing if self.destroy_existing
+        destroy_existing_assets if self.destroy_existing
         create_images
       end
 
@@ -84,7 +84,7 @@ module Gemgento
 
     private
 
-    def destroy_existing
+    def destroy_existing_assets
       @product.assets.where(store: self.store).find_each do |asset|
         begin
           asset.destroy
