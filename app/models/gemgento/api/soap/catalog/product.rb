@@ -244,20 +244,23 @@ module Gemgento
           end
 
           def self.set_categories(magento_categories, product, store)
-            Gemgento::ProductCategory.unscoped.where(product: product, store: store).destroy_all
+            product_category_ids = []
 
             # if there is only one category, the returned value is not interpreted array
             magento_categories = [magento_categories] unless magento_categories.is_a? Array
 
             # loop through each return category and add it to the product if needed
             magento_categories.each do |magento_category|
-              category = Gemgento::Category.where(magento_id: magento_category).first
-              product_category = Gemgento::ProductCategory.new
-              product_category.category = category
-              product_category.product = product
-              product_category.store = store
+              category = Gemgento::Category.find_by(magento_id: magento_category)
+              product_category = Gemgento::ProductCategory.unscoped.find_or_initialize_by(category: category, product: product, store: store)
               product_category.save
+
+              product_category_ids << product_category.id
             end
+
+            Gemgento::ProductCategory.unscoped.
+                where('store_id = ? AND product_id = ? AND id NOT IN (?)', store.id, product.id, product_category_ids).
+                destroy_all
           end
 
           def self.set_attribute_values_from_magento(magento_attribute_values, product, store)
