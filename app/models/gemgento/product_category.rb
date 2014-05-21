@@ -4,6 +4,8 @@ module Gemgento
     belongs_to :category
     belongs_to :store
 
+    validates :product_id, :category_id, :store_id, presence: true
+
     default_scope -> { order(:position) }
 
     after_save :touch_product
