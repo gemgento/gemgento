@@ -32,8 +32,9 @@ module Gemgento
       matching_file = nil
       matching_asset = nil
 
-      self.product.assets.where('gemgento_assets.store_id != ?', self.store_id).each do |asset|
+      self.product.assets.each do |asset|
         next if asset.asset_file.nil?
+        next if asset.store == self.store && asset.id != self.id # don't compare AssetFiles from the same store unless it's the same Asset
 
         if File.exist?(asset.asset_file.file.path(:original)) && FileUtils.compare_file(asset.asset_file.file.path(:original), file)
           matching_file = asset.asset_file
@@ -78,15 +79,20 @@ module Gemgento
 
       # loop through each return category and add it to the product if needed
       asset_type_codes.each do |asset_type_code|
-        unless (asset_type_code.blank?)
-          asset_type = Gemgento::AssetType.find_by(
-              product_attribute_set: self.product.product_attribute_set,
-              code: asset_type_code,
-          )
-          next if asset_type.nil?
+        next if asset_type_code.blank?
 
-          self.asset_types << asset_type unless self.asset_types.include? asset_type # don't duplicate the asset types
-          applied_asset_types << asset_type.id
+        asset_type = Gemgento::AssetType.find_by(
+            product_attribute_set: self.product.product_attribute_set,
+            code: asset_type_code,
+        )
+        next if asset_type.nil?
+
+        self.asset_types << asset_type unless self.asset_types.include? asset_type # don't duplicate the asset types
+        applied_asset_types << asset_type.id
+
+        # an AssetType can only be associated to one asset for every
+        asset_type.assets.where(product_id: self.product_id, store_id: self.store_id).where('gemgento_assets.id != ?', self.id).find_each do |asset|
+          asset.asset_types.destroy(asset_type)
         end
       end
 
