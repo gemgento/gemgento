@@ -113,10 +113,10 @@ module Gemgento
               asset.url = url
               asset.position = source[:position]
               asset.label = source[:label]
-              asset.file = file
               asset.product = product
               asset.sync_needed = false
               asset.set_file(open(url))
+              asset.file = file
               asset.store = store
               asset.save
 
