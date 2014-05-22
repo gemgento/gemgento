@@ -143,9 +143,10 @@ module Gemgento
 
       asset.sync_needed = false
       asset.save
-
+      puts 'saved with no sync'
       asset.sync_needed = true
       asset.save
+      puts 'saved with sync'
     end
   end
 end

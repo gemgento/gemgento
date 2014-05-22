@@ -17,10 +17,7 @@ module Gemgento
 
     default_scope -> { includes(:asset_file).order(:position).references(:asset_file) }
 
-    validates :asset_file, presence: true
-    validates :product, presence: true
-    validates :store, presence: true
-
+    validates :asset_file, :product_id, :store_id, presence: true
     validates_uniqueness_of :product_id, scope: [:asset_file_id, :store_id, :file]
 
     # Associate an image file with the Asset.  If the same file is already associated to a related Asset in a
@@ -30,11 +27,12 @@ module Gemgento
     # @return [void]
     def set_file(file)
       raise 'Asset does not have an associated product.' if self.product.nil?
+      raise 'Asset does not have an associated store.' if self.product.nil?
 
       matching_file = nil
       matching_asset = nil
 
-      self.product.assets.each do |asset|
+      self.product.assets.where('gemgento_assets.store_id != ?', self.store_id).each do |asset|
         next if asset.asset_file.nil?
 
         if File.exist?(asset.asset_file.file.path(:original)) && FileUtils.compare_file(asset.asset_file.file.path(:original), file)
@@ -54,7 +52,6 @@ module Gemgento
         end
 
         matching_asset = Asset.new
-        puts matching_asset.inspect
       end
 
       self.asset_file = matching_file
