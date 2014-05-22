@@ -55,7 +55,7 @@ module Gemgento
       end
 
       self.asset_file = matching_file
-      self.file = matching_asset.file
+      self.file = matching_asset.file if self.file.blank? && !matching_asset.file.blank?
     end
 
     # Return the image file associated with the Asset.
