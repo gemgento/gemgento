@@ -80,6 +80,8 @@ module Gemgento
 
           # Save Magento order to local
           def self.sync_magento_to_local(source)
+            return nil if Gemgento::Store.find_by(magento_id: source[:store_id]).nil?
+
             order = Gemgento::Order.where(increment_id: source[:increment_id]).first_or_initialize
             order.order_id = source[:order_id]
             order.is_active = source[:is_active]
@@ -138,8 +140,9 @@ module Gemgento
             order.store = Gemgento::Store.find_by(magento_id: source[:store_id])
             order.save
 
-            order.shipping_address = sync_magento_address_to_local(source[:shipping_address], order, order.shipping_address)
-            order.billing_address = sync_magento_address_to_local(source[:billing_address], order, order.billing_address)
+            order.shipping_address = sync_magento_address_to_local(source[:shipping_address], order, order.shipping_address) unless source[:shipping_address][:address_id].nil?
+            order.billing_address = sync_magento_address_to_local(source[:billing_address], order, order.billing_address) unless source[:billing_address][:address_id].nil?
+
             order.save
 
             sync_magento_payment_to_local(source[:payment], order)
