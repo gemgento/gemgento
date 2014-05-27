@@ -114,8 +114,7 @@ module Gemgento
 
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source, product, store)
-            asset_file = fetch_asset_file(source[:url])
-            return false if asset_file == false
+            return false unless Gemgento::AssetFile.valid_url(source[:url])
 
             asset = Gemgento::Asset.find_or_initialize_by(product_id: product.id, file: source[:file], store_id: store.id)
             asset.url = source[:url]
@@ -125,34 +124,13 @@ module Gemgento
             asset.product = product
             asset.sync_needed = false
             asset.store = store
-            asset.set_file fetch_asset_file(source[:url])
+            asset.set_file(URI.parse(source[:url]))
             asset.save
 
             # assign AssetTypes
             asset_type_codes = source[:types][:item]
             asset_type_codes = [Gemgento::Magento.enforce_savon_string(asset_type_codes)] unless asset_type_codes.is_a? Array
             asset.set_types_by_codes(asset_type_codes)
-          end
-
-          def self.fetch_asset_file(url)
-            begin
-              open(url)
-            rescue => e
-              case e
-                when OpenURI::HTTPError
-                  false
-                when SocketError
-                  false
-                else
-                  raise e
-              end
-            rescue SystemCallError => e
-              if e === Errno::ECONNRESET
-                false
-              else
-                raise e
-              end
-            end
           end
 
           def self.sync_magento_media_type_to_local(source, product_attribute_set)

@@ -108,14 +108,14 @@ module Gemgento
               asset.destroy
             else
               url, file = get_url_and_file(source)
-              next unless valid_url(url)
+              next unless Gemgento::AssetFile.valid_url(url)
 
               asset.url = url
               asset.position = source[:position]
               asset.label = source[:label]
               asset.product = product
               asset.sync_needed = false
-              asset.set_file(open(url))
+              asset.set_file(URI.parse(url))
               asset.file = file
               asset.store = store
               asset.save
@@ -154,14 +154,6 @@ module Gemgento
       end
 
       return url, file
-    end
-
-    def valid_url(url)
-      url = URI.parse(url)
-      req = Net::HTTP.new(url.host, url.port)
-      res = req.request_head(url.path)
-
-      return res.code == '200'
     end
 
   end
