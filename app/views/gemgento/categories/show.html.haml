@@ -1,19 +1,7 @@
 #product-list
-	- @current_category.products.limit(30).each do |product|
-		- if product.assets.first and File.exists?(Rails.root.to_s + '/public' + product.assets.first.asset_file.file.url(:default_index).split('?').first)
-			- #Gemgento::Product.find(:all, :conditions => ["id IN (?)", [1, 2, 3, 4]]).each do |product|
-			.product
-				= link_to gemgento.product_path(product) do
-					.product-image
-						= image_tag product.assets.first.asset_file.file.url(:default_index), :style => "width: 200px"
-					.product-description
-						.product-name
-							= link_to product.name, gemgento.product_path(product)
-						.product-price
-							= number_to_currency(product.price)
-						.product-swatches
-							- product.swatches.each do |swatch|
-								= image_tag swatch.image.url(:original)
-						
+  - @products.each do |product|
+    = render partial: 'product_tile', locals: { product: product }
+            
+  = paginate @products
 
-	.clear
+  .clear

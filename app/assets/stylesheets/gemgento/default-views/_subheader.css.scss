@@ -1,0 +1,30 @@
+#search-holder {
+  position: absolute;
+  left: 0px;
+  font-size: 11px;
+}
+
+#nav-holder {
+  // position: absolute;
+  // right: 0px;
+  float: right;
+  @include menu(11px, right, 0 0 0 20px);
+
+  ul {
+    padding: 5px 0 5px 0;
+
+    li {
+      .subnav {
+        position: absolute;
+        display: none;
+        right: 0;
+      }
+
+      &:hover {
+        .subnav { display: block }
+      }
+
+    }
+
+  }
+}

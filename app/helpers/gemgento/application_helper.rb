@@ -51,7 +51,7 @@ module Gemgento
     end
 
     def nav_category_is_active(c)
-      return  (@current_category.id == c.id or @current_category.ancestors.include?(c)) ? true : false
+      return (@curent_category == c or @current_category.children.include?(c)) ? true : false
     end
 
     def set_layout(html_layout = nil, pjax_layout = false)
@@ -66,6 +66,10 @@ module Gemgento
       else
         html_layout
       end
+    end
+
+    def product_path(product)
+      "/products/#{product.url_key}"
     end
 
   end

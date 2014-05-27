@@ -1,0 +1,17 @@
+- cache(product) do
+  .product
+    = link_to product_path(product) do
+
+      .product-image
+        - asset = Gemgento::Asset.find_by_code(product, 'image')
+        - unless asset.nil?
+          = image_tag asset.image.url(:default_index), data: { size: asset.asset_file.file.image_size }
+
+      .product-description
+        .product-name
+          = link_to product.name, "/products/#{product.url_key}"
+        .product-price
+          = number_to_currency(product.price)
+        .product-swatches
+          - product.swatches.each do |swatch|
+            = image_tag swatch.image.url(:original)

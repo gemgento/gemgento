@@ -1,0 +1,11 @@
+#footer-holder
+  #footer-nav-holder
+    %ul
+      %li= link_to 'CONTACT', gemgento.contact_url, class: "#{'active' if params[:action] == 'contact'}"
+      %li= link_to 'TERMS OF USE', gemgento.terms_of_use_url, class: "#{'active' if params[:action] == 'terms_of_use'}"
+      %li= link_to 'RETURN POLICY', gemgento.return_policy_url, class: "#{'active' if params[:action] == 'return_policy'}"
+
+  #footer-copyright-holder
+    POWERED BY <b>#{link_to 'gemgento', 'http://www.gemgento.com'}</b>
+    %br
+    © 2014 GEMGENTO. LLC ALL RIGHTS RESERVED

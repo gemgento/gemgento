@@ -10,10 +10,16 @@ Gemgento::Engine.routes.draw do
 
   get '/order_export', to: 'order_export#index'
 
-  #get '/shop', to: 'categories#index', as: 'categories'
+  # - Category - #
+  get 'shop/:parent_url_key/:url_key',  to: 'categories#show', as: 'shop_by_parent_and_key'
+  get 'shop/:url_key',                  to: 'categories#show', as: 'shop_by_key'
+  get 'shop',                           to: 'categories#show', as: 'shop'
+
+  # - SEARCH - #
   get '/shop/search', to: 'search#index'
   get '/search', to: 'search#index'
 
+  # - SYNC - #
   get '/sync/complete', to: 'sync#everything'
   get '/sync/products', to: 'sync#products'
   get '/sync/orders', to: 'sync#orders'
@@ -72,9 +78,4 @@ Gemgento::Engine.routes.draw do
   get 'contact',                               to: 'pages#contact'
   get 'terms-of-use',                          to: 'pages#terms_of_use', as: 'terms_of_use'
   get 'return-policy',                         to: 'pages#return_policy', as: 'return_policy'
-
-
-  #get 'shop/:group/:cat',                      to: 'categories#show', :as => 'shop_by_group_and_cat'
-  #get 'shop/:url_key',                           to: 'categories#show', :as => 'shop_by_group'
-  get 'shop',                                  to: 'categories#show', :as => 'shop'
 end

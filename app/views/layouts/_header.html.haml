@@ -1,0 +1,44 @@
+#header-holder
+  #logo-holder
+    %h1
+      STORE NAME
+
+  #account-holder
+    %ul
+
+      %li
+        = link_to gemgento.cart_url, class: "#{'active' if params[:controller] == 'gemgento/cart'}" do
+          SHOPPING BAG #{current_order.item_count.to_i}
+      - if current_user
+        %li
+          MY ACCOUNT
+        %li
+          = link_to "Abmelden", destroy_user_session_path, :method => :delete
+      - else
+        %li
+          = link_to "Anmelden", new_user_session_path
+
+  #header-nav-holder
+    %ul
+      %li= link_to 'ABOUT', gemgento.about_url, class: "#{'active' if params[:action] == 'about'}"
+      %li= link_to 'SHOP', gemgento.shop_url, class: "#{'active' if params[:controller] == 'gemgento/categories'}"
+
+- if @current_category
+  #subheader-holder
+    #search-holder
+      .search-links
+        %span SORT BY:
+        %span LOW TO HIGH
+        %span= " | "
+        %span HIGH TO LOW
+    #nav-holder
+      %ul
+        - Gemgento::Category.top_level.each do |parent|
+          %li
+            = link_to parent.name, "/shop/#{parent.url_key}", class: "#{'active' if nav_category_is_active(parent)}"
+            - unless parent.children.empty?
+              %ul.subnav
+                - parent.children.each do |child|
+                  %li= link_to child.name, "/shop/#{parent.url_key}/#{child.url_key}", class: "#{'active' if nav_category_is_active(child)}"
+      .clear
+    .clear

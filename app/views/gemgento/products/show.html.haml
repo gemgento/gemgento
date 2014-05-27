@@ -13,7 +13,6 @@
         %input{type: 'hidden', name: 'activity', value: 'add_item'}
         %input{type: 'hidden', name: 'quantity', value: 1}
         - if simple_products = @product.simple_products.active and simple_products.size > 0
-          - value = @product.simple_products.active.first.id
 
           %input{type: 'hidden', name: 'product_id', value: @product.id}
 
