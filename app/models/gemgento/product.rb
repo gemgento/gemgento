@@ -315,6 +315,7 @@ module Gemgento
 
       self.product_attribute_values.select{ |av| av.store_id == options[:store].id }.each do |attribute_value|
         attribute = attribute_value.product_attribute
+        next if attribute.nil?
         result[attribute.code] = self.attribute_value(attribute.code, options[:store])
       end
 
