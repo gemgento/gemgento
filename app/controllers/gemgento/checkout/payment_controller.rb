@@ -2,48 +2,25 @@ module Gemgento
   class Checkout::PaymentController < Checkout::CheckoutBaseController
     before_filter :auth_cart_contents
     before_filter :auth_order_user
+    before_filter :set_totals, only: :show
 
     respond_to :json, :html
 
     def show
-      set_totals
+      current_order.order_payment = Gemgento::OrderPayment.new if current_order.order_payment.nil?
       @payment_methods = current_order.get_payment_methods
-
-      @card_types = {
-          '' => nil,
-          Visa: 'VI',
-          MasterCard: 'MC',
-          'American Express' => 'AE'
-      }
-
-      @exp_years = []
-
-      Time.now.year.upto(Time.now.year + 10) do |year|
-        @exp_years << year.to_s
-      end
-
-      @exp_months = {'' => nil,}
-      1.upto(12) do |month|
-        month_string = month.to_s.length == 1 ? "0#{month.to_s}" : month.to_s
-        @exp_months[month] = month_string
-      end
 
       unless current_order.customer_is_guest
         @saved_credit_cards = current_user.saved_credit_cards
       else
         @saved_credit_cards = []
       end
-      
-      @order_payment =  current_order.order_payment.nil? ? Gemgento::OrderPayment.new : current_order.order_payment
 
       respond_to do |format|
         format.html
 
         response = {
             payment_methods: @payment_methods,
-            card_types: @card_types,
-            exp_years: @exp_years,
-            exp_months: @exp_months,
             saved_credit_cards: @saved_credit_cards
         }
         response = merge_totals(response)
@@ -73,12 +50,6 @@ module Gemgento
           end
         end
       end
-    end
-
-    private
-
-    def order_payment_params
-      params.require(:order).require(:order_payment_attributes).permit(:method, :cc_cid, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month, :cc_owner)
     end
 
   end

@@ -2,11 +2,11 @@ module Gemgento
   class Checkout::ShippingController < Checkout::CheckoutBaseController
     before_filter :auth_cart_contents
     before_filter :auth_order_user
+    before_filter :set_totals, only: :show
 
     respond_to :json, :html
 
     def show
-      set_totals
       @shipping_methods = current_order.get_shipping_methods
       cookies[:shipping_methods] = @shipping_methods.to_json
 

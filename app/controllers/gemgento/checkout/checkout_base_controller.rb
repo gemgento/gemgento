@@ -57,5 +57,9 @@ module Gemgento
       return hash
     end
 
+    def order_payment_params
+      params.require(:order).require(:order_payment_attributes).permit(:method, :cc_cid, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month, :cc_owner)
+    end
+
   end
 end
