@@ -77,7 +77,7 @@ module Gemgento
 
     def attribute_value(code, store = nil)
       store = Gemgento::Store.current if store.nil?
-      product_attribute_value = self.product_attribute_values.select { |value| value.product_attribute.code == code.to_s && value.store_id == store.id }.first
+      product_attribute_value = self.product_attribute_values.select { |value| !value.product_attribute.nil? && value.product_attribute.code == code.to_s && value.store_id == store.id }.first
 
       ## if the attribute is not currently associated with the product, check if it exists
       if product_attribute_value.nil?
