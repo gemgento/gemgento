@@ -148,6 +148,11 @@ module Gemgento
 
     # CHECKOUT methods
 
+    # Set order shipping method and push to Magento.
+    #
+    # @param selected_method[String] the chosen shipping method code
+    # @param shipping_methods[Hash] list of all shipping methods (from API cart shipping methods request)
+    # @return [Boolean] true if the shipping method was successfully set
     def set_shipping_method(selected_method, shipping_methods)
       self.shipping_method = selected_method
       self.shipping_amount = 0
@@ -165,6 +170,22 @@ module Gemgento
       else
         return false
       end
+    end
+
+    # Set the payment method for an order
+    #
+    # @param order_payment_attributes[Hash] all attributes for an OrderPayment
+    # @return [Boolean] true if the payment method was successfully set
+    def set_payment(order_payment_attributes)
+      if self.order_payment.nil?
+        self.order_payment = Gemgento::OrderPayment.new(order_payment_attributes)
+      else
+        self.order_payment.attributes = order_payment_attributes
+      end
+
+      self.order_payment.cc_last4 = current_order.order_payment.cc_number[-4..-1]
+
+      return current_order.order_payment.save && current_order.push_payment_method
     end
 
 

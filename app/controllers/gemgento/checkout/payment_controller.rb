@@ -16,7 +16,7 @@ module Gemgento
           'American Express' => 'AE'
       }
 
-      @exp_years = [""]
+      @exp_years = []
 
       Time.now.year.upto(Time.now.year + 10) do |year|
         @exp_years << year.to_s
@@ -55,16 +55,8 @@ module Gemgento
     end
 
     def update
-      if current_order.order_payment.nil?
-        current_order.order_payment = Gemgento::OrderPayment.new(order_payment_params)
-      else
-        current_order.order_payment.attributes = order_payment_params
-      end
-
-      current_order.order_payment.cc_last4 = current_order.order_payment.cc_number[-4..-1]
-
       respond_to do |format|
-        if current_order.order_payment.save && current_order.push_payment_method
+        if current_order.set_payment(order_payment_params)
           session[:payment_data] = order_payment_params
 
           format.html { redirect_to checkout_confirm_path }
