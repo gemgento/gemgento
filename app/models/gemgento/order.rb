@@ -146,6 +146,28 @@ module Gemgento
       return count.to_f
     end
 
+    # CHECKOUT methods
+
+    def set_shipping_method(selected_method, shipping_methods)
+      self.shipping_method = selected_method
+      self.shipping_amount = 0
+
+      shipping_methods.each do |shipping_method|
+        if shipping_method[:code] == selected_method
+          self.shipping_amount shipping_method[:price]
+          break
+        end
+      end
+
+      if self.push_shipping_method
+        self.save
+        return true
+      else
+        return false
+      end
+    end
+
+
     # Apply a coupon code to the cart.
     #
     # @param code [String] coupon code
