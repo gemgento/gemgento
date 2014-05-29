@@ -43,7 +43,7 @@ Gemgento::Engine.routes.draw do
     resource :address, only: [:show, :update], controller: 'address'
     resource :shipping, only: [:show, :update], controller: 'shipping'
     resource :payment, only: [:show, :update], controller: 'payment'
-    resource :shipping_payment, only: [:show, :update], controller: 'payment_shipping'
+    resource :shipping_payment, only: [:show, :update], controller: 'shipping_payment'
     resource :confirm, only: [:show, :update], controller: 'confirm'
     resource :thank_you, only: [:show], controller: 'thank_you'
   end

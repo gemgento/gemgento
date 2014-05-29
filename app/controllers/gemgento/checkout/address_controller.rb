@@ -127,7 +127,14 @@ module Gemgento
                 params[:same_as_billing]
             ) unless current_order.customer_is_guest
 
-            format.html { redirect_to checkout_shipping_path }
+
+            format.html do
+              if Gemgento::Config[:combined_shipping_payment]
+                redirect_to checkout_shipping_payment_path
+              else
+                redirect_to checkout_shipping_path
+              end
+            end
             format.json { render json: { result: true, order: current_order } }
           else
             format.html do

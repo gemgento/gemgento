@@ -50,7 +50,8 @@ config_defaults = {
         table_prefix:     ''
     },
     layout: 'gemgento',
-    sellect: false
+    sellect: false,
+    combined_shipping_payment: false
 }
 
 # create the configuration hash from environment specifics in configuration file
