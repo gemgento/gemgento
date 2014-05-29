@@ -1,6 +1,7 @@
 if defined?(ActiveAdmin)
   module Gemgento
     ActiveAdmin.register FooterItem do
+      menu priority: 100, parent: 'Gemgento', label: 'Footer Item'
 
       index do
         column :name
