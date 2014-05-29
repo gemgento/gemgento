@@ -270,9 +270,7 @@ module Gemgento
           original_address = user.address_book.first
         end
 
-        address = original_address.dup
-        address.region = original_address.region
-        address.country = original_address.country
+        address = original_address.duplicate
       else
         address = Gemgento::Address.new
       end
@@ -288,16 +286,13 @@ module Gemgento
             original_address = user.address_book.first
           end
 
-        address = original_address.dup
-        address.region = original_address.region
-        address.country = original_address.country
+        address = original_address.duplicate
       else
         address = Gemgento::Address.new
       end
 
       self.shipping_address = address
     end
-
 
     def reset_checkout
       self.billing_address.destroy unless self.billing_address.nil?

@@ -93,6 +93,26 @@ module Gemgento
       explode_street_address
     end
 
+    # Duplicate an address.  Different from dup because it avoids unique magento attributes and includes
+    # country and region associations.
+    #
+    # @return [Gemgento::Address] newly duplicated address
+    def duplicate
+      address = self.dup
+      address.region = original_address.region
+      address.country = original_address.country
+      address.user = nil
+      address.order = nil
+      address.is_default_billing = false
+      address.is_default_shipping = false
+      address.increment_id = nil
+      address.order_address_id = nil
+      address.sync_needed = false
+      address.user_address_id = nil
+
+      return address
+    end
+
     private
 
     # Strip attributes where leading/trailing whitespace could pose problems.
