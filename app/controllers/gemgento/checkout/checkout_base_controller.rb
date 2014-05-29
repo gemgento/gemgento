@@ -58,7 +58,27 @@ module Gemgento
     end
 
     def order_payment_params
-      params.require(:order).require(:order_payment_attributes).permit(:method, :cc_cid, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month, :cc_owner)
+      params.require(:order).require(:order_payment).permit(:method, :cc_cid, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month, :cc_owner)
+    end
+
+    def initialize_shipping_variables
+      @shipping_methods = current_order.get_shipping_methods
+      cookies[:shipping_methods] = @shipping_methods.to_json
+    end
+
+    def initialize_payment_variables
+      unless @order_payment
+        current_order.build_order_payment if current_order.order_payment.nil?
+        @order_payment = current_order.order_payment
+      end
+
+      @payment_methods = current_order.get_payment_methods
+
+      unless current_order.customer_is_guest
+        @saved_credit_cards = current_user.saved_credit_cards
+      else
+        @saved_credit_cards = []
+      end
     end
 
   end

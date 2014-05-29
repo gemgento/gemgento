@@ -7,14 +7,7 @@ module Gemgento
     respond_to :json, :html
 
     def show
-      current_order.order_payment = Gemgento::OrderPayment.new if current_order.order_payment.nil?
-      @payment_methods = current_order.get_payment_methods
-
-      unless current_order.customer_is_guest
-        @saved_credit_cards = current_user.saved_credit_cards
-      else
-        @saved_credit_cards = []
-      end
+      initialize_payment_variables
 
       respond_to do |format|
         format.html
@@ -32,16 +25,20 @@ module Gemgento
     end
 
     def update
+      @order_payment = current_order.order_payment.nil? ? Gemgento::OrderPayment.new : current_order.order_payment
+      @order_payment.attributes = order_payment_params
+
       respond_to do |format|
-        if current_order.set_payment(order_payment_params)
+        if @order_payment.valid? && current_order.set_payment(order_payment_params)
           session[:payment_data] = order_payment_params
 
-          format.html { redirect_to checkout_confirm_path }
+          format.html { render checkout_confirm_path }
           format.json { render json: { result: true, order: current_order } }
         else
-          flash[:error] = 'Invalid payment information. Please review all details and try again.'
+          initialize_payment_variables
 
-          format.html { redirect_to checkout_payment_path }
+          flash[:error] = 'Invalid payment information. Please review all details and try again.'
+          format.html { render action: :show }
           format.json do
             render json: {
                 result: false,

@@ -154,12 +154,15 @@ module Gemgento
     # @param shipping_methods[Hash] list of all shipping methods (from API cart shipping methods request)
     # @return [Boolean] true if the shipping method was successfully set
     def set_shipping_method(selected_method, shipping_methods)
+      return false if selected_method.blank?
+
       self.shipping_method = selected_method
       self.shipping_amount = 0
 
       shipping_methods.each do |shipping_method|
         if shipping_method[:code] == selected_method
-          self.shipping_amount shipping_method[:price]
+          puts shipping_method.inspect
+          self.shipping_amount = shipping_method[:price]
           break
         end
       end
@@ -183,9 +186,9 @@ module Gemgento
         self.order_payment.attributes = order_payment_attributes
       end
 
-      self.order_payment.cc_last4 = current_order.order_payment.cc_number[-4..-1]
+      self.order_payment.cc_last4 = self.order_payment.cc_number[-4..-1]
 
-      return current_order.order_payment.save && current_order.push_payment_method
+      return self.order_payment.save && self.push_payment_method
     end
 
 
