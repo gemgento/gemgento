@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    gemgento (1.1.4)
-      activeadmin (~> 1.0.0.pre)
+    gemgento (1.1.5)
+      activeadmin (= 1.0.0.pre)
       coffee-rails (~> 4.0.0)
       devise (~> 3.2.2)
       exception_notification_rails3 (= 1.2.0)
@@ -33,7 +33,7 @@ GEM
       activesupport (= 4.1.1)
       builder (~> 3.1)
       erubis (~> 2.7.0)
-    activeadmin (1.0.0)
+    activeadmin (1.0.0.pre)
       arbre (~> 1.0)
       bourbon
       coffee-rails
@@ -104,7 +104,7 @@ GEM
     hike (1.2.3)
     httpi (2.0.2)
       rack
-    i18n (0.6.9)
+    i18n (0.6.10)
     inherited_resources (1.4.1)
       has_scope (~> 0.6.0.rc)
       responders (~> 1.0.0.rc)
