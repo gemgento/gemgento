@@ -16,7 +16,7 @@ module Gemgento
       else
         shipping_methods = JSON.parse(cookies[:shipping_methods])
       end
-      puts shipping_methods.inspect
+
       shipping_methods.each do |shipping_method|
         if shipping_method['code'] == current_order.shipping_method
           @shipping_method = shipping_method

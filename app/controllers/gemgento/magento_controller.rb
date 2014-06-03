@@ -5,7 +5,7 @@ module Gemgento
     before_filter :validate_ip
 
     def validate_ip
-      whitelist = Gemgento::Config[:magento][:ip_whitelist].to_s.split(',')
+      whitelist = Gemgento::Config[:magento][:ip_whitelist].to_s.split(',').map(&:strip)
 
       if Rails.env.production? && !whitelist.include?(request.remote_ip.to_s)
         raise ActionController::RoutingError.new('Not Found')

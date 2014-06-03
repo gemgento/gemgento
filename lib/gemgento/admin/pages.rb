@@ -1,6 +1,7 @@
 if defined?(ActiveAdmin)
   module Gemgento
     ActiveAdmin.register Page do
+      menu priority: 100, parent: 'Gemgento', label: 'Page'
 
       index do
         column :name

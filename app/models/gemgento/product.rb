@@ -430,7 +430,7 @@ module Gemgento
         simple_product_ids << simple_product.id
       end
 
-      self.simple_products.where('simple_product_id NOT IN (?)', simple_product_ids).clear
+      self.simple_products.delete(self.simple_products.where('simple_product_id NOT IN (?)', simple_product_ids))
     end
 
     # Set the associated configurable products, using an array of Magento product IDs.
@@ -448,7 +448,7 @@ module Gemgento
         configurable_product_ids << configurable_product.id
       end
 
-      self.configurable_products.where('configurable_product_id NOT IN (?)', configurable_product_ids).clear
+      self.configurable_products.delete(self.configurable_products.where('configurable_product_id NOT IN (?)', configurable_product_ids))
     end
 
     private

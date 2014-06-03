@@ -46,37 +46,6 @@ production:
     encryption: 4de6a444ff58bf44013f3bc05256f1b3
 ````
 
-In version 1.0, the Magento database connection information must also be added to database.yml:
-
-In config/database.yml
-````
-magento_development:
-  adapter: 
-  database: 
-  username: 
-  password: 
-  host: 
-  port: 
-
-magento_beta:
-  adapter: 
-  database: 
-  username: 
-  password: 
-  host: 
-  port: 
-
-magento_production:
-  adapter: 
-  database: 
-  username: 
-  password: 
-  host: 
-  port:  
-````
-
-
-
 
 
 
