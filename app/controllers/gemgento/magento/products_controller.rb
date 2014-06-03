@@ -33,7 +33,7 @@ module Gemgento
       data = params[:data]
 
       if Gemgento::Product.not_deleted.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).count > 0
-        @product = Gemgento::Product.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).first.mark_deleted!
+        @product = Gemgento::Product.find_by('id = ? OR magento_id = ?', params[:id], data[:product_id]).mark_deleted!
       end
 
       render nothing: true
