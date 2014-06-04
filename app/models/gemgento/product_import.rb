@@ -223,7 +223,8 @@ module Gemgento
           category = Category.find_by(url_key: category_url_key, parent_id: parent_id)
 
           unless category.nil?
-            product.categories << category unless product.categories.include?(category)
+            product_category = Gemgento::ProductCategory.find_or_initialize_by(category: category, product: product, store: self.store)
+            product_category.save
             parent_id = category.id
           else
             self.import_errors << "ERROR - row #{@row.index} - Unknown category url key '#{category_url_key}' - skipped"

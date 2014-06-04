@@ -4,36 +4,39 @@
   .pages-holder-col70
     .product-header
       %h1= @product.name
-      %h2= number_to_currency(@product.price)
+      .price
+        - if @product.has_special?
+          %h2.original= number_to_currency(@product.original_price)
+        %h2= number_to_currency(@product.price)
 
     .product-content  
       %p= @product.description
 
-      = form_for current_order, url: gemgento.cart_url, method: 'patch', html: {id: 'add_to_cart' } do |f|
+      = form_for current_order, url: gemgento.cart_url, method: 'patch', html: { id: 'add_to_cart' } do |f|
         %input{type: 'hidden', name: 'activity', value: 'add_item'}
-        %input{type: 'hidden', name: 'quantity', value: 1}
-        - if simple_products = @product.simple_products.active and simple_products.size > 0
 
+
+        - if @product.magento_type == 'configurable'
+          - default_product_id = @product.simple_products.first.id
+          %input{type: 'hidden', name: 'product_id', value: default_product_id}
+          .configurable-attributes
+            - @product.configurable_attribute_order.each do |code, values|
+              .product-attribute
+                %label SELECT COLOR
+                = select_tag code, options_for_select(values)
+
+            - @product.configurable_attribute_order.each do |code, values|
+              .product-attribute
+                %label SELECT COLOR
+                = select_tag code, options_for_select(values)
+        - else
           %input{type: 'hidden', name: 'product_id', value: @product.id}
 
-          .product-attribute
-            %input{type: 'hidden', name: 'color', value: nil}
-            %label SELECT COLOR
-            - simple_products.each do |simple_product|
-              = link_to_function simple_product.color, ''
+        .quantity.product-attribute
+          %label QUANTITY
+          = select_tag 'quantity', options_for_select(1..10)
 
-
-          .product-attribute
-            %input{type: 'hidden', name: 'size', value: nil}
-            %label SELECT SIZE
-            - simple_products.each do |simple_product|
-              = link_to_function simple_product.shirt_size, ''
-
-        - else 
-          - value = @product.id
-          %input{type: 'hidden', name: 'product_id', value: value }
-        
-        .footer      
+        .footer
           = f.submit 'ADD TO BAG'
 
   .clear
