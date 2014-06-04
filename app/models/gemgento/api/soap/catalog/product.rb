@@ -252,6 +252,8 @@ module Gemgento
             # loop through each return category and add it to the product if needed
             magento_categories.each do |magento_category|
               category = Gemgento::Category.find_by(magento_id: magento_category)
+              next if category.nil?
+
               product_category = Gemgento::ProductCategory.unscoped.find_or_initialize_by(category: category, product: product, store: store)
               product_category.save
 
