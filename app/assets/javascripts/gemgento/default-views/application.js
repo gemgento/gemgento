@@ -12,5 +12,5 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require gemgento/default-views/checkout
+//= require gemgento/default-views/base
 //= require_tree .

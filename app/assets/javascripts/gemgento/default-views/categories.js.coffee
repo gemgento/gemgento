@@ -1,17 +1,20 @@
 window.App ||= {}
-class App.Categories extends App.Base
+class App.GemgentoCategories extends App.Base
 
   constructor: ->
     super
+    # js to perform on all controller actions goes here
     return this
 
 
   index: ->
     # Category#index JS goes here
+    return
 
 
   show: ->
     $this.sizeTiles()
+    return
 
 
   sizeTiles: ->
@@ -27,5 +30,10 @@ class App.Categories extends App.Base
       if newHeight > maxHeight
         maxHeight = newHeight
 
+      return
+
     $('#product-list .product').each ->
       $(this).height(maxHeight)
+      return
+
+    return
