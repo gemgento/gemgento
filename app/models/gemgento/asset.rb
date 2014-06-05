@@ -116,13 +116,7 @@ module Gemgento
       return asset_type.assets.find_by(product_id: product.id, store_id: store.id)
     end
 
-    def as_json(options = nil)
-      options = {} if options.nil?
-      options.reverse_merge!(
-          store: Gemgento::Store.current,
-          active_only: true
-      )
-
+    def as_json(options = {})
       result = super
 
       result[:styles] = { 'original' => self.image.url(:original) }
