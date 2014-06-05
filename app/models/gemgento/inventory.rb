@@ -3,22 +3,27 @@ module Gemgento
     belongs_to :product
     belongs_to :store
 
+    # Inventory.backorder may have one of the following values:
+    # 0 - no backorders
+    # 1 - allow qty below 0
+    # 2 - allow qty below 0 and notify customer
+    validates :backorders, inclusion: 0..2
+
     after_save :touch_product, :sync_local_to_magento
 
-    def self.index
-      if Inventory.all.size == 0
-        API::SOAP::CatalogInventory::StockItem.fetch_all
-      end
-
-      Inventory.all
-    end
-
+    # Push the inventory data to Magento.
+    #
+    # @return [Boolean] true if the inventory data was successfully pushed to Magento
     def push
       Gemgento::API::SOAP::CatalogInventory::StockItem.update(self.product);
     end
 
+    # Determine if the specified quantity is in stock.
+    #
+    # @param quantity [Integer] the required quantity
+    # @return [Boolean] true if the required quantity is in stock
     def in_stock?(quantity = 1)
-      if self.is_in_stock && (quantity.to_f <= self.quantity.to_f || quantity.to_f == 0)
+      if self.is_in_stock && ((quantity.to_f <= self.quantity.to_f || quantity.to_f == 0) || self.backorders > 0)
         return true
       else
         return false
@@ -27,11 +32,16 @@ module Gemgento
 
     private
 
+    # Touch the associated product when updated.
+    #
+    # @return [Void]
     def touch_product
       Gemgento::TouchProduct.perform_async([self.product.id]) if self.changed?
     end
 
-    # Push local product changes to magento
+    # Push local inventory changes to magento.
+    #
+    # @return [Void]
     def sync_local_to_magento
       if self.sync_needed
         API::SOAP::CatalogInventory::StockItem.update(self)
