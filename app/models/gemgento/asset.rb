@@ -123,22 +123,20 @@ module Gemgento
           active_only: true
       )
 
-      styles = { 'original' => self.image.url(:original) }
+      result = super
+
+      result[:styles] = { 'original' => self.image.url(:original) }
 
       self.image.styles.keys.to_a.each do |style|
-        styles[style] = self.image.url(style.to_sym)
+        result[:styles][style] = self.image.url(style.to_sym)
       end
 
-      types = []
+      result[:types] = []
       self.asset_types.each do |asset_type|
-        types << asset_type.code
+        result[:types] << asset_type.code unless result[:types].include? asset_type.code
       end
 
-      return {
-          label: self.label,
-          styles: styles,
-          types: types
-      }
+      return result
     end
 
     private
