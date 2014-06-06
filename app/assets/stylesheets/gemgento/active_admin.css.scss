@@ -1,0 +1,36 @@
+#feed-blocks-wrapper-admin {
+  position: relative;
+  width: 100%;
+  float: left;
+}
+
+#feed-blocks-admin {
+  position: relative;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+#feed-blocks-admin li {
+  float: left;
+  width: 200px;
+  height: 300px;
+  border: solid 1px #EEE;
+}
+
+.feed-block-admin img {
+  position: relative;
+}
+
+.admin-category-container {
+  font-size: 24px;
+  position: relative;
+  float: left;
+  margin: 0 0 0 20px;
+}
+
+#feed-blocks-wrapper-admin h3 {
+  width: 100%;
+  float: left;
+  position: relative;
+}
