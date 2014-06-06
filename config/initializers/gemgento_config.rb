@@ -25,7 +25,8 @@ unless File.exist?(Rails.root.join('config', 'gemgento_config.yml'))
                         'api_key' =>          '',
                         'ip_whitelist' =>     '127.0.0.1'
                     },
-                    'layout' => 'gemgento'
+                    'layout' => 'gemgento',
+                    'require_ssl' => true
                 } }.to_yaml)
   end
 end
@@ -51,6 +52,7 @@ config_defaults = {
     },
     layout: 'gemgento',
     sellect: false,
+    require_ssl: true,
     combined_shipping_payment: false
 }
 

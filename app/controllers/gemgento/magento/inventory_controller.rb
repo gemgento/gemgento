@@ -23,6 +23,10 @@ module Gemgento
           inventory.quantity = stock_data[:qty]
           inventory.is_in_stock = stock_data[:is_in_stock]
           inventory.use_default_website_stock = stock_data[:use_default_website_stock].nil? ? true : stock_data[:use_default_website_stock]
+          inventory.backorders = stock_data[:backorders].to_i
+          inventory.use_config_backorders = stock_data[:use_config_backorders]
+          inventory.min_qty = stock_data[:min_qty].to_i
+          inventory.use_config_min_qty = stock_data[:use_config_min_qty]
           inventory.sync_needed = false
           inventory.save
         end
@@ -32,6 +36,10 @@ module Gemgento
           @product.inventories.where(use_default_website_stock: true).each do |inventory|
             inventory.quantity = default_values[:qty]
             inventory.is_in_stock = default_values[:is_in_stock]
+            inventory.backorders = default_values[:backorders].to_i
+            inventory.use_config_backorders = default_values[:use_config_backorders]
+            inventory.min_qty = default_values[:min_qty].to_i
+            inventory.use_config_min_qty = default_values[:use_config_min_qty]
             inventory.sync_needed = false
             inventory.save
           end

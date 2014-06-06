@@ -322,7 +322,7 @@ module Gemgento
       result['currency_code'] = options[:store].currency_code
 
       # product assets
-      result['assets'] = self.assets_as_json(options[:store])
+      result['assets'] = self.assets.where(store: options[:store])
 
       # include simple products
       if self.simple_products.loaded?
@@ -346,31 +346,7 @@ module Gemgento
 
       # inventory flag
       result['is_in_stock'] = self.in_stock?(1, options[:store])
-
-      return result
-    end
-
-    def assets_as_json(store)
-      result = []
-
-      self.assets.select{ |a| a.store_id == store.id }.each do |asset|
-        styles = { 'original' => asset.image.url(:original) }
-
-        asset.image.styles.keys.to_a.each do |style|
-          styles[style] = asset.image.url(style.to_sym)
-        end
-
-        types = []
-        asset.asset_types.each do |asset_type|
-          types << asset_type.code
-        end
-
-        result << {
-            label: asset.label,
-            styles: styles,
-            types: types
-        }
-      end
+      result['inventory'] = self.inventories.find_by(store: options[:store])
 
       return result
     end

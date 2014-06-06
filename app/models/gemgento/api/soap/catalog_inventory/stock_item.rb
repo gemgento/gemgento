@@ -84,7 +84,11 @@ module Gemgento
                 'is_in_stock' => inventory.is_in_stock ? 1 : 0,
                 'manage_stock' => 1,
                 'use_default_website_stock' => inventory.use_default_website_stock ? 1 : 0,
-                'use_config_manage_stock' => 0
+                'use_config_manage_stock' => 0,
+                backorders: inventory.backorders,
+                'use_config_backorders' => inventory.use_config_backorders ? 1: 0,
+                'min_qty' => inventory.min_qty,
+                'use_config_min_qty' => inventory.use_config_min_qty ? 1: 0
             }
 
             if !inventory.use_default_website_stock || include_website
