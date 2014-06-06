@@ -5,7 +5,9 @@
   %ul#feed-blocks-admin{ data: { 'update-url' => '/admin/product_positions/update' } }
     %input{ type: 'hidden', name: 'category_id', value: @category.id, id: "category_id_#{@category.id}" }
     - @products.each_with_index do |p|
-      - unless p.assets.first.nil?
+      - image = Gemgento::Asset.find_by_code(p, 'image') # try to get the base image
+      - image = p.assets.first if image.nil? # grab wahtever the first image is if we don't have a base
+      - unless image.nil?
         = content_tag_for :li, p do
           .feed-block-admin.ui-state-default
             = image_tag p.assets.first.image.url
