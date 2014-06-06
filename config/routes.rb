@@ -52,6 +52,10 @@ Gemgento::Engine.routes.draw do
   namespace :users do
     resources :orders, only: [:index, :show]
     resources :addresses
+
+    # combined login / sign up controller
+    get 'login', to: 'registration_session#new', as: 'new_login'
+    post 'login', to: 'registration_session#create', as: 'login'
   end
 
   # - Magento Push Actions - #

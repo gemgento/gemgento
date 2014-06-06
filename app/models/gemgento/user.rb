@@ -4,7 +4,7 @@ module Gemgento
   class User < ActiveRecord::Base
     devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable
 
-    validates :email, uniqueness: { scope: :deleted_at }, presence: true
+    validates :email, uniqueness: { scope: :deleted_at }
     validates :magento_id, uniqueness: true, allow_nil: true
 
     belongs_to :user_group
@@ -85,6 +85,11 @@ module Gemgento
 
     def default_shipping_address
       self.addresses.where('user_address_id IS NOT NULL').find_by(is_default_shipping: true)
+    end
+
+    def password_confirmation=(value)
+      self[:magento_password] = value
+      @password_confirmation = value
     end
 
     private
