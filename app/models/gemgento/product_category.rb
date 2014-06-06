@@ -8,8 +8,7 @@ module Gemgento
 
     default_scope -> { order(:position) }
 
-    after_save :touch_product
-    after_update :sync_local_to_magento
+    after_save :sync_local_to_magento, :touch_product
 
     private
 
