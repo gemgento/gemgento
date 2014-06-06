@@ -211,12 +211,14 @@ module Gemgento
         else
           products = products.joins(ActiveRecord::Base.escape_sql(
                                         "INNER JOIN gemgento_product_attribute_values AS value#{index} ON value#{index}.product_id = gemgento_products.id
-                    INNER JOIN gemgento_product_attributes AS attribute#{index} ON attribute#{index}.id = value#{index}.product_attribute_id AND attribute#{index}.id IN (?)
-                    INNER JOIN gemgento_product_attribute_options AS option#{index} ON option#{index}.product_attribute_id = attribute#{index}.id AND option#{index}.store_id = ? AND option#{index}.label IN (?)",
+                    INNER JOIN gemgento_product_attributes AS attribute#{index} ON attribute#{index}.id = value#{index}.product_attribute_id
+                      AND attribute#{index}.id IN (?)
+                    INNER JOIN gemgento_product_attribute_options AS option#{index} ON option#{index}.product_attribute_id = attribute#{index}.id
+                      AND value#{index}.value = option#{index}.value
+                      AND option#{index}.label IN (?)",
                                         filter[:attribute].map { |a| a.id },
-                                        store.id,
                                         filter[:value]
-                                    )).readonly(false)
+                                    )).readonly(false) # does not compare against values
         end
       end
 
