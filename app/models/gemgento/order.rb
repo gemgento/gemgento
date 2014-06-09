@@ -266,13 +266,12 @@ module Gemgento
     end
 
     def set_default_billing_address(user)
-      if !user.default_billing_address.nil? ||
-        if !user.default_billing_address.nil?
-          original_address = user.default_billing_address
-        elsif !user.address_book.empty?
-          original_address = user.address_book.first
-        end
-
+      if !user.default_billing_address.nil?
+        puts user.default_billing_address.inspect
+        original_address = user.default_billing_address
+        address = original_address.duplicate
+      elsif !user.address_book.empty?
+        original_address = user.address_book.first
         address = original_address.duplicate
       else
         address = Gemgento::Address.new
@@ -282,13 +281,11 @@ module Gemgento
     end
 
     def set_default_shipping_address(user)
-      if !user.default_shipping_address.nil? ||
-          if !user.default_shipping_address.nil?
-            original_address = user.default_shipping_address
-          elsif !user.address_book.empty?
-            original_address = user.address_book.first
-          end
-
+      if !user.default_shipping_address.nil?
+        original_address = user.default_shipping_address
+        address = original_address.duplicate
+      elsif !user.address_book.empty?
+        original_address = user.address_book.first
         address = original_address.duplicate
       else
         address = Gemgento::Address.new

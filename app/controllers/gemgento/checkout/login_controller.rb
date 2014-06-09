@@ -34,11 +34,11 @@ module Gemgento
         current_order.user = current_user
         current_order.save
 
-        current_order.push_customer
-
-        respond_to do |format|
-          format.html { redirect_to checkout_address_path }
-          format.json { render json: { result: true, user: current_user, order: current_order } }
+        if current_order.push_customer
+          respond_to do |format|
+            format.html { redirect_to checkout_address_path }
+            format.json { render json: { result: true, user: current_user, order: current_order } }
+          end
         end
       end
     end

@@ -99,8 +99,8 @@ module Gemgento
     # @return [Gemgento::Address] newly duplicated address
     def duplicate
       address = self.dup
-      address.region = original_address.region
-      address.country = original_address.country
+      address.region = self.region
+      address.country = self.country
       address.user = nil
       address.order = nil
       address.is_default_billing = false
