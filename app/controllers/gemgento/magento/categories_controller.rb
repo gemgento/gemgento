@@ -34,6 +34,9 @@ module Gemgento
     def destroy
       @category = Gemgento::Category.find_by(magento_id: params[:id])
       @category.mark_deleted! unless @category.nil?
+      @category.children.each do |category|
+        category.mark_deleted!
+      end
 
       render nothing: true
     end
