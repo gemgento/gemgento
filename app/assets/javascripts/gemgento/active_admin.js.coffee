@@ -5,7 +5,7 @@ jQuery ->
     $('a#submit-product-positions').click (event) ->
       event.preventDefault()
       $.post($(this).attr('href'), $('#feed-blocks-admin').sortable('serialize'))
-      alert('Product category positions have been updated')
+      alert('Product category positions changes are being updated.  Please do no not update category positions again, until you see all previous changes on the front end.  This process can take up to 5 minutes, depending on how many position changes were needed.')
       return false
 
     $('#category-select').change ->
