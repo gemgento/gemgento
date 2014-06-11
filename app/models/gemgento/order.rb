@@ -231,10 +231,10 @@ module Gemgento
     end
 
     def process(remote_ip = nil)
-
       if !valid_stock?
         return false
       elsif API::SOAP::Checkout::Cart.order(self, self.order_payment, remote_ip)
+        push_gift_message_comment unless self.gift_message.blank?
         Gemgento::HeartBeat.perform_async if Rails.env.production?
         finalize
         return true
@@ -247,6 +247,10 @@ module Gemgento
       magento_cart = API::SOAP::Checkout::Cart.info(self)
       verify_address(self.shipping_address, magento_cart[:shipping_address])
       verify_address(self.billing_address, magento_cart[:billing_address])
+    end
+
+    def push_gift_message_comment
+      API::SOAP::Sales::Order.add_comment( self.increment_id, self.status, "Gemgento Gift Message: #{self.gift_message}")
     end
 
     def finalize

@@ -72,8 +72,16 @@ module Gemgento
             # TODO: Create cancel API call
           end
 
-          def self.add_comment
-            # TODO: Create addComment API call
+          def self.add_comment(increment_id, status, comment = '', notify = nil)
+            message = {
+              order_increment_id: increment_id,
+              status: status,
+              comment: comment,
+              notify: notify
+            }
+            response = Gemgento::Magento.create_call(:sales_order_add_comment, message)
+
+            return response.success?
           end
 
           private
