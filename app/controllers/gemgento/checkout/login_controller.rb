@@ -129,7 +129,7 @@ module Gemgento
           format.html { redirect_to checkout_address_path }
           format.json { render json: { result: true, order: current_order } }
         else
-          flash.now[:error] = 'Invalid email address'
+          flash.keep[:error] = 'Invalid email address'
 
           format.html { redirect_to checkout_login_path }
           format.json { render json: { result: false, errors: 'Invalid email address', order: current_order } }
