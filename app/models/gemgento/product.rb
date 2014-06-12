@@ -61,6 +61,14 @@ module Gemgento
       if product_attribute.nil?
         return false
       else
+        # enforce a single attribute value per attribute per store per product
+        product_attribute_values = Gemgento::ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store)
+
+        if product_attribute_values.size > 1
+          Gemgento::ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store).where('id != ?', product_attribute_values.first.id).destroy_all
+        end
+
+        # set the attribute value
         product_attribute_value = Gemgento::ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store).first_or_initialize
         product_attribute_value.product = self
         product_attribute_value.product_attribute = product_attribute
