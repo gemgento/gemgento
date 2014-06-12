@@ -72,7 +72,9 @@ Gemgento::Engine.routes.draw do
   end
 
   # - Gemgento Resources - #
-  resources :products, :categories, :orders, :subscribers, :users
+  resources :products, only: :show
+  get '/products', to: 'products#show'
+  resources :categories, :orders, :subscribers, :users
   resources :countries, only: [:index, :show]
   resource :search, only: [:show], controller: 'gemgento/search'
 
