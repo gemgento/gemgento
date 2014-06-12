@@ -4,11 +4,15 @@ module Gemgento
     respond_to :json, :html
 
     def show
-      @order = current_order
-      create_new_cart
+      if cookies[:order]
+        @order = Gemgento::Order.find(cookies[:order])
+        cookies.delete :order
+        create_new_cart
 
-      respond_with @order
+        respond_with @order
+      else
+        redirect_to '/'
+      end
     end
-
   end
 end

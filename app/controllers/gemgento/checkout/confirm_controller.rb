@@ -49,10 +49,16 @@ module Gemgento
       respond_to do |format|
         if current_order.process(request.remote_ip)
           session.delete :payment_data
-          @order.reload
 
-          format.html { redirect_to checkout_thank_you_path }
-          format.json { render json: { result: true, order: @order } }
+          format.html do
+            cookies[:order] = @order.id
+            redirect_to checkout_thank_you_path
+          end
+
+          format.json do
+            @order.reload
+            render json: { result: true, order: @order }
+          end
         else
           flash[:error] = 'There was a problem processing your order.  Please review order details and try again.'
 
