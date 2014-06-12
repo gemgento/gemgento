@@ -331,7 +331,7 @@ module Gemgento
             attributes = []
 
             product.product_attribute_values.where(store: store).each do |product_attribute_value|
-              unless product_attribute_value.value.nil?
+              if !product_attribute_value.value.nil? && !product_attribute_value.product_attribute.nil?
                 attributes << {
                     'key' => product_attribute_value.product_attribute.code,
                     'value' => product_attribute_value.value
