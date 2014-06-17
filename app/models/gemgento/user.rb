@@ -13,6 +13,10 @@ module Gemgento
 
     has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_users', class_name: 'Store'
 
+    attr_accessor :subscribe, :dob_year, :dob_month, :dob_day
+    after_find :set_subscribe, :set_dob_parts
+    before_validation :manage_subscribe, :manage_dob
+
     after_save :sync_local_to_magento
 
     default_scope -> { where(deleted_at: nil) }
@@ -95,6 +99,32 @@ module Gemgento
       result['is_subscriber'] = self.is_subscriber?
 
       return result
+    end
+
+    def set_subscribe
+      self.subscribe = self.is_subscriber?
+    end
+
+    def manage_subscribe
+      Gemgento::Subscriber.manage self, self.subscribe
+    end
+
+    def set_dob_parts
+      unless self.dob.nil?
+        self.dob_year = self.dob.year
+        self.dob_month = self.dob.month
+        self.dob_day = self.dob.day
+      end
+    end
+
+    def manage_dob
+      unless self.dob_year.nil? || self.dob_month.nil? || self.dob_day.nil?
+        new_dob = Date.parse("#{self.dob_year}-#{self.dob_month}-#{self.dob_day}")
+        puts new_dob.inspect
+        if !self.dob_changed? && self.dob != new_dob
+          self.dob = new_dob
+        end
+      end
     end
 
     private
