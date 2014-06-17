@@ -15,8 +15,7 @@ module Gemgento
     end
 
     def self.add_user(user)
-      subscriber = Gemgento::Subscriber.new
-      subscriber.email = user.email
+      subscriber = Gemgento::Subscriber.find_or_initialize_by(email: user.email)
       subscriber.first_name = user.first_name
       subscriber.last_name = user.last_name
       subscriber.save

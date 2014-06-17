@@ -1,5 +1,3 @@
-# TODO: add a validation to make sure a users doesn't add ':' to their password
-
 module Gemgento
   class User < ActiveRecord::Base
     devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable
@@ -90,6 +88,13 @@ module Gemgento
     def password_confirmation=(value)
       self[:magento_password] = value
       @password_confirmation = value
+    end
+
+    def as_json(options = nil)
+      result = super
+      result['is_subscriber'] = self.is_subscriber?
+
+      return result
     end
 
     private
