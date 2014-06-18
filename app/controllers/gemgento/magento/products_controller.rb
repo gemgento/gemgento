@@ -80,6 +80,8 @@ module Gemgento
       unless magento_categories.nil?
         magento_categories.each do |magento_category|
           category = Gemgento::Category.find_by(magento_id: magento_category)
+          next if category.nil? # deleted categories are still returned from Magento, just skip
+
           product_category = Gemgento::ProductCategory.find_or_initialize_by(category: category, product: product, store: store)
           product_category.save
 
@@ -87,6 +89,7 @@ module Gemgento
         end
       end
 
+      # remove Product Category relations that were not pushed
       Gemgento::ProductCategory.where('store_id = ? AND product_id = ? AND category_id NOT IN (?)', store.id, product.id, category_ids).destroy_all
 
       product.save
