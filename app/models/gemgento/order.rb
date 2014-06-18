@@ -200,6 +200,14 @@ module Gemgento
       Gemgento::API::SOAP::Checkout::Coupon.add(self, code)
     end
 
+    # Remove a coupon code to the cart.
+    #
+    # @param code [String] coupon code
+    # @return [Boolean] true if the coupon code was successfully removed
+    def remove_coupons
+      Gemgento::API::SOAP::Checkout::Coupon.remove(self)
+    end
+
     # functions related to processing cart into order
 
     def push_addresses

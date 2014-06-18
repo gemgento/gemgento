@@ -22,7 +22,22 @@ module Gemgento
     end
 
     def destroy
+      if current_order.remove_coupons
+        set_totals
+        response = {
+            result: true,
+            order: current_order,
+        }
+        response = merge_totals(response)
+      else
+        response =  {
+            result: false,
+            order: current_order,
+            errors: 'Problem remove coupons from order'
+        }
+      end
 
+      render json: response
     end
 
   end
