@@ -358,6 +358,9 @@ module Gemgento
       result['is_in_stock'] = self.in_stock?(1, options[:store])
       result['inventory'] = self.inventories.find_by(store: options[:store])
 
+      # categories
+      result['categories'] = self.categories
+
       return result
     end
 
