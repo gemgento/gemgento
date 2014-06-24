@@ -26,11 +26,9 @@ module Gemgento
         @products = @current_category.products.active.catalog_visible.page(params[:page])
       end
 
-      current_category.includes_category_products = true
-
       respond_to do |format|
         format.html
-        format.json { render json: current_category.as_json({ store: current_store })  }
+        format.json { render json: current_category.as_json({store: current_store, includes_products: true}) }
       end
     end
 

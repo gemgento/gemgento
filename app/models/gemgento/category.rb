@@ -12,8 +12,6 @@ module Gemgento
 
     has_attached_file :image
 
-    attr_accessor :includes_category_products
-
     default_scope -> { where(deleted_at: nil).order(:position) }
 
     scope :top_level, -> { where(parent: Gemgento::Category.find_by(parent_id: nil), is_active: true) }
@@ -79,7 +77,7 @@ module Gemgento
 
       result = super
 
-      if self.includes_category_products
+      if options[:include_products]
         result['products'] = self.products.active.catalog_visible.as_json({ store: store })
       end
 
