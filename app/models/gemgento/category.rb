@@ -69,16 +69,16 @@ module Gemgento
     # @param options [Hash, nil]
     # @return [String]
     def as_json(options = nil)
-      if options.nil? || options[:store].nil?
-        store = Gemgento::Store.current
-      else
-        store = options[:store]
-      end
+      options = {} if options.nil?
+      options.reverse_merge!(
+          store: Gemgento::Store.current,
+          include_products: false
+      )
 
       result = super
 
       if options[:include_products]
-        result['products'] = self.products.active.catalog_visible.as_json({ store: store })
+        result['products'] = self.products.active.catalog_visible.as_json({store: options[:store]})
       end
 
       return result
