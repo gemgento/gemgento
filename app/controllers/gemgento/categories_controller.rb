@@ -28,7 +28,7 @@ module Gemgento
 
       respond_to do |format|
         format.html
-        format.json { render json: current_category.as_json({store: current_store, includes_products: true}) }
+        format.json { render json: current_category.as_json({store: current_store, include_products: true}) }
       end
     end
 
