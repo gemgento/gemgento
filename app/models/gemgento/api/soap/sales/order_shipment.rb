@@ -37,7 +37,7 @@ module Gemgento
             }
 
             if shipment.shipment_items.any?
-              message[:items_qty] = compose_items_qty(shipment.shipment_items)
+              message[:items_qty] = {item: compose_items_qty(shipment.shipment_items)}
             end
 
             response = Gemgento::Magento.create_call(:sales_order_shipment_create, message)
