@@ -1,3 +1,5 @@
+#= require active_admin/base
+
 jQuery ->
   if $('body').hasClass('admin_product_positions')
     $('#feed-blocks-admin').sortable()
