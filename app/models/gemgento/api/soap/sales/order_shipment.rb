@@ -28,13 +28,18 @@ module Gemgento
             return response.success?
           end
 
-          def self.create(order_increment_id, email = 0, comment = nil, include_comment = nil)
+          def self.create(shipment)
             message = {
-                order_increment_id: order_increment_id,
-                email: email,
-                comment: comment,
-                include_comment: include_comment
+                order_increment_id: shipment.order.increment_id,
+                email: shipment.email,
+                comment: shipment.comment,
+                include_comment: shipment.include_comment
             }
+
+            if shipment.shipment_items.any?
+              message[:items_qty] = compose_items_qty(shipment.shipment_items)
+            end
+
             response = Gemgento::Magento.create_call(:sales_order_shipment_create, message)
 
             if response.success?
@@ -102,6 +107,21 @@ module Gemgento
             response = Gemgento::Magento.create_call(:sales_order_shipment_send_info, message)
 
             return response.success?
+          end
+
+          private
+
+          def self.compose_items_qty(shipment_items)
+            items_qty = []
+
+            shipment_items.each do |shipment_item|
+              items_qty << {
+                  'order_item_id' => shipment_item.order_item.magento_id,
+                  qty: shipment_item.quantity
+              }
+            end
+
+            return items_qty
           end
 
         end
