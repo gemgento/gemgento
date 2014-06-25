@@ -8,6 +8,8 @@ module Gemgento
 
     attr_accessor :email, :comment, :include_comment
 
+    before_create :push_to_magento, unless: :increment_id
+
     def send_email
       Gemgento::API::SOAP::Sales::OrderShipment.send_info(self.increment_id)
     end
@@ -25,6 +27,8 @@ module Gemgento
       @email || 0
     end
 
+    private
+
     def push_to_magento
       increment_id = Gemgento::API::SOAP::Sales::OrderShipment.create(self)
 
@@ -32,7 +36,6 @@ module Gemgento
         return false
       else
         self.increment_id = increment_id
-        self.save
       end
     end
 
