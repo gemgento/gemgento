@@ -6,7 +6,7 @@ module Gemgento
 
     validates :product_id, :category_id, :store_id, presence: true
 
-    default_scope -> { order(:category_id, :position, :product_id) }
+    default_scope -> { order(:category_id, :position, :product_id, :id) }
 
     after_save :sync_local_to_magento, :touch_product
 
