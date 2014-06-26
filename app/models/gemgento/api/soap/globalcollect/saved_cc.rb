@@ -22,14 +22,13 @@ module Gemgento
           end
 
           def self.tokens(customer_id)
-            response = Gemgento::Magento.create_call(:globalcollect_tokens, { customer_id: customer_id })
+            response = Gemgento::Magento.create_call(:globalcollect_tokens, {customer_id: customer_id})
 
             if response.success?
               if response.body[:result][:item].nil?
                 return []
               else
                 response.body[:result][:item] = [response.body[:result][:item]] unless response.body[:result][:item].is_a? Array
-                puts response.body[:result][:item].inspect
                 return response.body[:result][:item]
               end
             else

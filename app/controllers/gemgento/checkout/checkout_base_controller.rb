@@ -28,7 +28,6 @@ module Gemgento
 
       unless totals.nil?
         totals.each do |total|
-          puts total.inspect
           unless total[:title].include? 'Discount'
             if total[:title].include? 'Subtotal'
               @subtotal = total[:amount].to_f
@@ -41,7 +40,7 @@ module Gemgento
             end
           else
             code = total[:title][10..-2]
-            @discounts << { code: code, amount: total[:amount] }
+            @discounts << {code: code, amount: total[:amount]}
           end
         end
       end

@@ -16,7 +16,6 @@ module Gemgento
 
       if data.key? :image
         begin
-          puts "http://#{Gemgento::Config[:magento][:url]}/media/catalog/category/#{data[:image][:value]}"
           @category.image = open("http://#{Gemgento::Config[:magento][:url]}/media/catalog/category/#{data[:image][:value]}")
         rescue
           @category.image = nil
@@ -67,11 +66,11 @@ module Gemgento
           Gemgento::ProductCategory.where(store_id: store.id, category_id: category.id).destroy_all
         else
           product_category_ids = []
-          product_ids = products.map{ |p| p[:product_id] }
+          product_ids = products.map { |p| p[:product_id] }
 
           Gemgento::Product.where(magento_id: product_ids).each do |product|
             pairing = Gemgento::ProductCategory.find_or_initialize_by(category: category, product: product, store: store)
-            item = products.select{ |p| p[:product_id].to_i == product.magento_id }.first
+            item = products.select { |p| p[:product_id].to_i == product.magento_id }.first
             pairing.position = item[:position].nil? ? 1 : item[:position][0]
             pairing.store = store
             pairing.save

@@ -132,7 +132,7 @@ module Gemgento
       if self.state != 'cart'
         super
       else
-        return self.order_items.map{ |oi| oi.product.price(self.store).to_f }.inject(&:+)
+        return self.order_items.map { |oi| oi.product.price(self.store).to_f }.inject(&:+)
       end
     end
 
@@ -161,7 +161,6 @@ module Gemgento
 
       shipping_methods.each do |shipping_method|
         if shipping_method[:code] == selected_method
-          puts shipping_method.inspect
           self.shipping_amount = shipping_method[:price]
           break
         end
@@ -230,7 +229,7 @@ module Gemgento
 
     def get_shipping_methods
       raise 'Order shipping address not set' if self.shipping_address.nil?
-      return  API::SOAP::Checkout::Shipping.list(self)
+      return API::SOAP::Checkout::Shipping.list(self)
     end
 
     def push_shipping_method
@@ -258,7 +257,7 @@ module Gemgento
     end
 
     def push_gift_message_comment
-      API::SOAP::Sales::Order.add_comment( self.increment_id, self.status, "Gemgento Gift Message: #{self.gift_message}")
+      API::SOAP::Sales::Order.add_comment(self.increment_id, self.status, "Gemgento Gift Message: #{self.gift_message}")
     end
 
     def finalize
@@ -279,7 +278,6 @@ module Gemgento
 
     def set_default_billing_address(user)
       if !user.default_billing_address.nil?
-        puts user.default_billing_address.inspect
         original_address = user.default_billing_address
         address = original_address.duplicate
       elsif !user.address_book.empty?
@@ -332,13 +330,13 @@ module Gemgento
       Rails.logger.info remote_address.inspect
       Rails.logger.info local_address.inspect
       if (
-        local_address.first_name != remote_address[:firstname] ||
-        local_address.last_name != remote_address[:lastname] ||
-        local_address.street != remote_address[:street] ||
-        local_address.city != remote_address[:city] ||
-        local_address.region != Region.find_by(magento_id: remote_address[:region_id]) ||
-        local_address.country != Country.find_by(magento_id: remote_address[:country_id]) ||
-        local_address.postcode != remote_address[:postcode]
+      local_address.first_name != remote_address[:firstname] ||
+          local_address.last_name != remote_address[:lastname] ||
+          local_address.street != remote_address[:street] ||
+          local_address.city != remote_address[:city] ||
+          local_address.region != Region.find_by(magento_id: remote_address[:region_id]) ||
+          local_address.country != Country.find_by(magento_id: remote_address[:country_id]) ||
+          local_address.postcode != remote_address[:postcode]
       )
         self.push_addresses
       end

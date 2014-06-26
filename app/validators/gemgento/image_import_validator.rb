@@ -62,7 +62,6 @@ module Gemgento
 
           @record.image_file_extensions.each do |extension|
             file_name = @record.image_path + file_name_base + '_' + label + extension
-            puts file_name
             next unless File.exist?(file_name)
 
             images_found = true

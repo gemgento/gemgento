@@ -26,13 +26,11 @@ module Gemgento
     after_commit :process
 
     def process
-      puts self.store.inspect
       # create a fake sync record, so products are not synced during the import
       sync_buffer = Gemgento::Sync.new
       sync_buffer.subject = 'products'
       sync_buffer.is_complete = false
       sync_buffer.save
-      puts self.spreadsheet.url.inspect
 
       if self.spreadsheet.url =~ URI::regexp
         @worksheet = Spreadsheet.open(open(self.spreadsheet.url)).worksheet(0)

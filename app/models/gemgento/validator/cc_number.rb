@@ -1,10 +1,9 @@
 module Gemgento
   class Validator::CcNumber < ActiveModel::Validator
     def validate(record)
-      puts record.inspect
       n = record.cc_number
       valid = false
-      size  = get_size(n)
+      size = get_size(n)
 
       # must be between 13 and 16 digits
       if (size > 12 and size < 17)
@@ -22,7 +21,7 @@ module Gemgento
     def sum_of_double_even_place(n)
       # double each number in an even place in n. if the doubled number is two-digits, use the sum of the two digits (use get_digit)
       place = 1
-      sum   = 0
+      sum = 0
       split = n.to_s.split(//)
 
       (split.length-1).downto(0) do |i|
@@ -52,7 +51,7 @@ module Gemgento
     def sum_of_odd_place(n)
       # Return the sum of odd-place digits in number
       place = 1
-      sum   = 0
+      sum = 0
       split = n.to_s.split(//)
 
       (split.length-1).downto(0) do |i|
@@ -81,7 +80,7 @@ module Gemgento
       prefix = n
 
       if (n >= 10**k)
-        prefix = n.to_s[0,k].to_i
+        prefix = n.to_s[0, k].to_i
       end
 
       return prefix

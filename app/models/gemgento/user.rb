@@ -120,10 +120,7 @@ module Gemgento
     def manage_dob
       unless self.dob_year.nil? || self.dob_month.nil? || self.dob_day.nil?
         new_dob = Date.parse("#{self.dob_year}-#{self.dob_month}-#{self.dob_day}")
-        puts new_dob.inspect
-        if !self.dob_changed? && self.dob != new_dob
-          self.dob = new_dob
-        end
+        self.dob = new_dob if !self.dob_changed? && self.dob != new_dob
       end
     end
 

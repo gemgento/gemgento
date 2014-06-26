@@ -19,7 +19,7 @@ module Gemgento
 
           def self.list(product_ids)
             message = {
-                products: { item: product_ids },
+                products: {item: product_ids},
             }
             response = Gemgento::Magento.create_call(:catalog_inventory_stock_item_list, message)
 
@@ -60,7 +60,6 @@ module Gemgento
               end
             else # multiple inventories present
               source[:stock][:item].each do |store_stock|
-                puts(store_stock).inspect
                 store = Gemgento::Store.find_by(website_id: store_stock[:website_id].to_i)
                 create_inventory_from_magento(product, store_stock, store)
               end
@@ -86,9 +85,9 @@ module Gemgento
                 'use_default_website_stock' => inventory.use_default_website_stock ? 1 : 0,
                 'use_config_manage_stock' => 0,
                 backorders: inventory.backorders,
-                'use_config_backorders' => inventory.use_config_backorders ? 1: 0,
+                'use_config_backorders' => inventory.use_config_backorders ? 1 : 0,
                 'min_qty' => inventory.min_qty,
-                'use_config_min_qty' => inventory.use_config_min_qty ? 1: 0
+                'use_config_min_qty' => inventory.use_config_min_qty ? 1 : 0
             }
 
             if !inventory.use_default_website_stock || include_website

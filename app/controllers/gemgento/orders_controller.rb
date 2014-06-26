@@ -16,8 +16,6 @@ module Gemgento
       current_order.save
       cookies[:cart] = current_order.id
 
-      puts "parms.inspect ===========> #{params.inspect}\n\n"
-
       add_item
 
       respond_to do |format|
