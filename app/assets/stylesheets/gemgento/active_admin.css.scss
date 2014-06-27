@@ -131,6 +131,7 @@ body {
 
 // TITLE BAR
 #title_bar {
+  height: 80px;
   background: none;
   border: none;
 
@@ -141,6 +142,8 @@ body {
   #page_title {
     font-family: futura-light;
     color: $black;
+    position: absolute;
+    top: 60px;
   }
 
   .action_items {
@@ -164,6 +167,29 @@ body {
         background-color: $pink;
         border-color: $pink;
       }
+    }
+  }
+
+  .breadcrumb {
+    a {
+      text-transform: lowercase;
+      color: $pink;
+    }
+
+    span.breadcrumb_sep {
+      color: $black;
+      margin: 0;
+    }
+  }
+}
+
+// MAIN CONTENT
+#active_admin_content {
+  padding: 0 30px;
+
+  #main_content {
+    .table_tools {
+      float: right;
     }
   }
 }
