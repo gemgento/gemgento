@@ -34,6 +34,10 @@ body {
   border: none;
   text-shadow: none;
 
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+
   // site titles
   #site_title {
     color: $pink;
@@ -129,6 +133,10 @@ body {
 #title_bar {
   background: none;
   border: none;
+
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
 
   #page_title {
     font-family: futura-light;
