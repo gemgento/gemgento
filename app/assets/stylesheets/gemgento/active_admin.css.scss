@@ -1,7 +1,7 @@
 @import "active_admin/mixins";
 @import "active_admin/base";
 
-$pink: #c75c8a;
+$pink: #ef74a7;
 
 // FONTS
 @font-face {
@@ -22,6 +22,7 @@ $pink: #c75c8a;
 // HEADER
 #header {
   height: 80px;
+  padding: 0;
   background: none;
   background-color: #161822;
   border: none;
@@ -29,11 +30,16 @@ $pink: #c75c8a;
 
   // site titles
   #site_title {
-    color: #ffffff;
+    color: $pink;
     text-transform: uppercase;
     font-size: 14px;
     font-family: futura-light;
     letter-spacing: 1px;
+    padding-left: 115px;
+    background-image: url('/assets/gemgento-icon-bolt.png');
+    background-size: 50px 80px;
+    background-position: left 45px top;
+    background-repeat: no-repeat;
   }
 
   // links
@@ -44,6 +50,7 @@ $pink: #c75c8a;
     font-size: 14px;
     font-family: futura-light;
     letter-spacing: 1px;
+    padding: 50px 10px;
 
     &:hover {
       background: none;
@@ -53,40 +60,55 @@ $pink: #c75c8a;
   }
 
   // menus
-  ul.tabs {
-    li {
+  ul.tabs#tabs {
+    display: table;
+    top: 0;
+
+    & > li {
+      display: table-cell;
+      vertical-align: middle;
+      text-align: center;
       margin: 0;
-      padding: 0;
+      padding: 0 10px;
+      word-wrap: none;
       height: 24px;
-    }
+      height: 80px;
 
-    li ul {
-      background: $pink;
-      border-radius: 0;
-    }
+      &.current,
+      &:hover {
+        background-color: $pink;
+        -moz-box-shadow: inset 0 15px 15px -15px #e081a9;
+        -webkit-box-shadow: inset 0 15px 15px -15px #e081a9;
+        box-shadow: inset 0 15px 15px -15px #e081a9;
+      }
 
-    li:hover > a {
-      background-color: $pink;
-      border-radius: 0;
-    }
+      ul {
+        left: 0;
+        top: 60px;
+        background: $pink;
+        border-radius: 0;
+        -moz-box-shadow: none;
+        -webkit-box-shadow: none;
+        box-shadow: none;
 
-    li.has_nested a,
-    li.has_nested:hover > a {
-      background: none;
-      background-color: $pink;
-      padding-right: 10px;
-      border-radius: 0;
-    }
+        li {
+          text-align: left;
+          margin: 15px;
+        }
+      }
 
-    li.has_nested:hover > a {
-      border-bottom: 5px solid $pink;
-    }
-
-    li.has_nested.current a {
-      background: none;
-      background-color: $pink;
-      padding-right: 10px;
-      border-radius: 0;
+      // undo aa styling on menu links
+      a,
+      &.has_nested a,
+      &.has_nested:hover > a,
+      &.current a,
+      &.has_nested.current a,
+      &:hover > a {
+        background: none;
+        border-radius: 0;
+        padding: 0;
+        border: none;
+      }
     }
   }
 
