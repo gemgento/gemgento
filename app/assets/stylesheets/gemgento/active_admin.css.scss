@@ -1,6 +1,103 @@
 @import "active_admin/mixins";
 @import "active_admin/base";
 
+$pink: #c75c8a;
+
+// FONTS
+@font-face {
+  font-family: 'futura-light';
+  src: url('/assets/FuturaStd-Light.otf')
+}
+
+@font-face {
+  font-family: 'futura-bold';
+  src: url('/assets/FuturaStd-Medium.otf')
+}
+
+@font-face {
+  font-family: 'futura';
+  src: url('/assets/FuturaStd-Book.otf')
+}
+
+// HEADER
+#header {
+  height: 80px;
+  background: none;
+  background-color: #161822;
+  border: none;
+  text-shadow: none;
+
+  // site titles
+  #site_title {
+    color: #ffffff;
+    text-transform: uppercase;
+    font-size: 14px;
+    font-family: futura-light;
+    letter-spacing: 1px;
+  }
+
+  // links
+  a,
+  a:link {
+    color: #ffffff;
+    text-transform: uppercase;
+    font-size: 14px;
+    font-family: futura-light;
+    letter-spacing: 1px;
+
+    &:hover {
+      background: none;
+      background-color: $pink;
+      border-radius: 0;
+    }
+  }
+
+  // menus
+  ul.tabs {
+    li {
+      margin: 0;
+      padding: 0;
+      height: 24px;
+    }
+
+    li ul {
+      background: $pink;
+      border-radius: 0;
+    }
+
+    li:hover > a {
+      background-color: $pink;
+      border-radius: 0;
+    }
+
+    li.has_nested a,
+    li.has_nested:hover > a {
+      background: none;
+      background-color: $pink;
+      padding-right: 10px;
+      border-radius: 0;
+    }
+
+    li.has_nested:hover > a {
+      border-bottom: 5px solid $pink;
+    }
+
+    li.has_nested.current a {
+      background: none;
+      background-color: $pink;
+      padding-right: 10px;
+      border-radius: 0;
+    }
+  }
+
+  // account functions
+  #current_user a {
+    text-transform: lowercase;
+    color: $pink;
+  }
+}
+
+// PRODUCT POSITIONING
 #feed-blocks-wrapper-admin {
   position: relative;
   width: 100%;
