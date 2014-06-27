@@ -2,6 +2,7 @@
 @import "active_admin/base";
 
 $pink: #ef74a7;
+$black: #161822;
 
 // FONTS
 @font-face {
@@ -19,12 +20,17 @@ $pink: #ef74a7;
   src: url('/assets/FuturaStd-Book.otf')
 }
 
+body {
+  color: $black;
+  font-family: futura;
+}
+
 // HEADER
 #header {
   height: 80px;
   padding: 0;
   background: none;
-  background-color: #161822;
+  background-color: $black;
   border: none;
   text-shadow: none;
 
@@ -116,6 +122,41 @@ $pink: #ef74a7;
   #current_user a {
     text-transform: lowercase;
     color: $pink;
+  }
+}
+
+// TITLE BAR
+#title_bar {
+  background: none;
+  border: none;
+
+  #page_title {
+    font-family: futura-light;
+    color: $black;
+  }
+
+  .action_items {
+    span.action_item > a {
+      background: none;
+      text-transform: lowercase;
+      font-family: futura-light;
+      text-shadow: none;
+
+      -webkit-border-radius: 10px;
+      -moz-border-radius: 10px;
+      border-radius: 10px;
+
+      -webkit-box-shadow: none;
+      -moz-box-shadow: none;
+      box-shadow: none;
+
+      &:not(.disabled):hover {
+        color: #ffffff;
+        background: none;
+        background-color: $pink;
+        border-color: $pink;
+      }
+    }
   }
 }
 
