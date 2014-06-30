@@ -1,7 +1,7 @@
 if defined?(ActiveAdmin)
   module Gemgento
     ActiveAdmin.register Subscriber do
-      menu label: 'Subscribers'
+      menu label: 'Subscribers', parent: 'Gemgento'
 
       permit_params :first_name, :last_name, :email
 
