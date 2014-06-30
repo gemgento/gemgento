@@ -3,29 +3,27 @@ if defined?(ActiveAdmin)
     ActiveAdmin.register Subscriber do
       menu label: 'Subscribers'
 
+      permit_params :first_name, :last_name, :email
+
       index do
         column :email
-        column :name
+        column :first_name
+        column :last_name
+        column :country
+        column :city
         default_actions
       end
 
       form multipart: true do |f|
         f.inputs do
           f.input :email
-          f.input :name
+          f.input :first_name
+          f.input :last_name
+          f.input :country
+          f.input :city
         end
 
         f.actions
-      end
-
-      controller do
-        def permitted_params
-          params.permit(
-              :gemgento_subscriber => [
-                  :name,
-                  :email
-              ])
-        end
       end
 
     end

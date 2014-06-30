@@ -1,3 +1,6 @@
+$(document).ready ->
+  $('select').wrap("<div class='styled_select'></div>")
+
 #= require active_admin/base
 
 jQuery ->

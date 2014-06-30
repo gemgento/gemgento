@@ -4,6 +4,8 @@
 // COLORS
 $pink: #ef74a7;
 $black: #161822;
+$dark_grey: #e7e8e8;
+$light_grey: #f7f7f8;
 
 // FONTS
 @font-face {
@@ -19,11 +21,6 @@ $black: #161822;
 @font-face {
   font-family: 'futura';
   src: url('/assets/FuturaStd-Book.otf')
-}
-
-body {
-  color: $black;
-  font-family: futura;
 }
 
 // MIXINS
@@ -48,6 +45,26 @@ body {
     background-color: $pink;
     border-color: $pink;
   }
+}
+
+@mixin text() {
+  font-family: futura-light;
+  font-size: 14px;
+  color: $black;
+  text-shadow: none;
+  font-weight: normal;
+}
+
+// GLOBALS
+body {
+  color: $black;
+  font-family: futura;
+}
+
+a,
+a:link,
+a:visited {
+  color: $pink;
 }
 
 // HEADER
@@ -212,7 +229,141 @@ body {
       padding: none;
     }
   }
+}
 
+table.index_table {
+  th {
+    background: none;
+    background-color: $dark_grey;
+    border: 1px solid #ffffff;
+    padding: 10px 20px;
+    @include text();
+    text-transform: uppercase;
+
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+
+    a,
+    a:link,
+    a:visited {
+      @include text();
+      text-transform: uppercase;
+    }
+  }
+
+  tr td {
+    @include text();
+    padding: 15px;
+  }
+}
+
+// SIDEBAR
+.sidebar_section {
+  background-color: $light_grey;
+
+  & > h3 {
+    @include text();
+    background: none;
+    background-color: $dark_grey;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+    border: none;
+    padding: 10px 20px;
+    margin: none;
+  }
+
+  form {
+    label.label {
+      margin-bottom: 5px;
+      font-size: 11px;
+    }
+
+    input[type=text] {
+      font-size: 11px;
+    }
+    input[type=submit] {
+      width: 108px;
+    }
+  }
+}
+
+form.filter_form .filter_form_field.select_and_search input[type=text] {
+  margin-left: 20px;
+}
+
+// FORM ELEMENTS
+.styled_select {
+  background: $light_grey;
+  border: 1px solid $black;
+  float: left;
+  clear: right;
+  margin-bottom: 5px;
+
+  select {
+    background: none;
+    border: none;
+    margin: 6px 0;
+  }
+}
+
+form {
+  input[type=text],
+  input[type=password],
+  input[type=email],
+  input[type=number],
+  input[type=url],
+  input[type=tel],
+  textarea {
+    @include text();
+    border: 1px solid $black;
+    border-radius: 0;
+    font-size: 14px;
+  }
+
+  input[type=submit] {
+    @include button();
+    border: none;
+    background-color: $black;
+    color: #ffffff;
+    font-size: 14px;
+  }
+
+  &.filter_form a.clear_filters_btn {
+    @include button();
+    background-color: #ffffff;
+    color: $black;
+    float: right;
+    font-size: 14px;
+  }
+
+  .boolean label,
+  label.label {
+    font-size: 14px;
+  }
+
+  &.formtastic {
+    margin-top: 25px;
+
+    fieldset.inputs {
+      background-color: $light_grey;
+      border: none;
+      border-radius: 0;
+
+      -webkit-box-shadow: none;
+      -moz-box-shadow: none;
+      box-shadow: none;
+
+      ol li {
+        clear: both;
+      }
+    }
+
+    fieldset.actions li.cancel a {
+      @include button();
+    }
+  }
 }
 
 // PRODUCT POSITIONING
