@@ -308,6 +308,29 @@ body.logged_out {
   padding: 0 30px;
 }
 
+// PANELS
+#active_admin_content .panel {
+  margin-top: 25px;
+
+  & > h3 {
+    @include text();
+    padding: 10px 20px;
+    background: none;
+    background-color: $dark_grey;
+    border: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+  }
+
+  table th {
+    text-shadow: none;
+    color: $black;
+    font-weight: normal;
+    font-family: futura-medium;
+  }
+}
+
 // TABLES
 .table_tools {
   float: right;
