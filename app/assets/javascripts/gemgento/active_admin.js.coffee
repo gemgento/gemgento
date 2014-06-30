@@ -1,9 +1,11 @@
 #= require active_admin/base
 
 $(document).ready ->
+  console.log 'every page'
   $('select').wrap("<div class='styled_select'></div>")
 
   if $('body').hasClass('logged_out') && $('#login h2').text() != 'Forgot your password?'
+    console.log 'log in page'
     # create placeholders
     $('#admin_user_email_input label').remove()
     $('#admin_user_email_input input').attr('placeholder', 'email')
@@ -15,6 +17,7 @@ $(document).ready ->
     $('#login a').html('forgot password?')
 
   else if $('body').hasClass('logged_out') && $('#login h2').text() == 'Forgot your password?'
+    console.log 'forgot password page'
     $('#admin_user_email_input label').remove()
     $('#admin_user_submit_action').detach().insertAfter('#admin_user_email_input')
     $('#admin_user_email_input input').attr('placeholder', 'email')
