@@ -1,3 +1,5 @@
+#= require active_admin/base
+
 $(document).ready ->
   $('select').wrap("<div class='styled_select'></div>")
 
@@ -19,8 +21,6 @@ $(document).ready ->
     $('#login a').css 'margin', '1px 0'
     $('#login a').css 'text-align', 'center'
     $('#login a').css 'width', '100%'
-
-#= require active_admin/base
 
 jQuery ->
   if $('body').hasClass('admin_product_positions')
