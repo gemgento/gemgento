@@ -69,12 +69,36 @@ module Gemgento
                 'position' => category.position
             }
             message = {
-                categoryId: category.magento_id,
-                categoryData: data,
+                category_id: category.magento_id,
+                category_data: data,
                 store_view: store.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_category_update, message)
             response.body
+          end
+
+          def self.update_product_positions(category, store)
+            # create an array of product positions
+            product_positions = []
+            category.product_categories.where(store: store).each do |product_category|
+              next unless product_category.product.deleted_at.nil?
+              product_positions << {
+                  product_id: product_category.product_id,
+                  position: product_category.position
+              }
+            end
+
+            # compose the message body
+            message = {
+                category_id: category.magento_id,
+                product_positions: {item: product_positions},
+                store_id: store.magento_id
+            }
+
+            # make the call
+            response = Gemgento::Magento.create_call(:catalog_category_update_product_positions, message)
+
+            return response.success?
           end
 
           def self.assigned_products(category, store)
