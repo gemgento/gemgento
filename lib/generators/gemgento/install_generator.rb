@@ -23,5 +23,12 @@ include Gemgento::ApplicationHelper
       end
     end
 
+    desc 'Create default active admin assets'
+
+    def create_active_admin_assets
+      create_file 'app/assets/stylesheets/active_admin.css.scss', '// Custom ActiveAdmin CMS styling goes here'
+      create_file 'app/assets/javascripts/active_admin.js.coffee', '# Custom ActiveAdmin CMS javascript goes here'
+    end
+
   end
 end
