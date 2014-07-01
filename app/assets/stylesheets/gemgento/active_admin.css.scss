@@ -75,6 +75,12 @@ a:visited {
 body.logged_out {
   background-color: $black;
 
+  .flash {
+    @include text();
+    padding: 0 30px;
+    color: #ffffff;
+  }
+
   #content_wrapper {
     position: absolute;
     width: 280px;
