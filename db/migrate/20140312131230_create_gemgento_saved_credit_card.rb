@@ -1,6 +1,6 @@
 class CreateGemgentoSavedCreditCard < ActiveRecord::Migration
   def change
-    create_table :gemgento_saved_credit_cards do |t|
+    create_table :gemgento_saved_credit_cards, options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8' do |t|
       t.integer :magento_id
       t.integer :user_id
       t.string :token

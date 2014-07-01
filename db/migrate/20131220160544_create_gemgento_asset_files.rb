@@ -3,7 +3,7 @@ class CreateGemgentoAssetFiles < ActiveRecord::Migration
     add_column :gemgento_assets, :store_id, :integer
     add_column :gemgento_assets, :asset_file_id, :integer
 
-    create_table :gemgento_asset_files do |t|
+    create_table :gemgento_asset_files, options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8' do |t|
       t.attachment :file
     end
 

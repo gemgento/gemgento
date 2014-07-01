@@ -4,7 +4,7 @@ class DropGemgentoOrderAddresses < ActiveRecord::Migration
   end
 
   def down
-    create_table "gemgento_order_addresses", force: true do |t|
+    create_table "gemgento_order_addresses", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "order_id", null: false
       t.integer "increment_id"
       t.boolean "is_active", default: true, null: false

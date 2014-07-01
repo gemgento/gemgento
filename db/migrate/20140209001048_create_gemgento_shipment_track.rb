@@ -1,6 +1,6 @@
 class CreateGemgentoShipmentTrack < ActiveRecord::Migration
   def up
-    create_table :gemgento_shipment_tracks do |t|
+    create_table :gemgento_shipment_tracks, options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8' do |t|
       t.integer :shipment_id
       t.string :carrier_code
       t.string :title

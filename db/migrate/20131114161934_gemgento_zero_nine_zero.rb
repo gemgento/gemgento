@@ -1,7 +1,7 @@
 class GemgentoZeroNineZero < ActiveRecord::Migration
   def change
 
-    create_table "gemgento_addresses", force: true do |t|
+    create_table "gemgento_addresses", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "user_address_id"
       t.integer "user_id"
       t.string "increment_id"
@@ -28,7 +28,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.boolean "is_default", default: false
     end
 
-    create_table "gemgento_asset_types", force: true do |t|
+    create_table "gemgento_asset_types", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "product_attribute_set_id"
       t.string "code"
       t.string "scope"
@@ -36,7 +36,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "updated_at", null: false
     end
 
-    create_table "gemgento_assets", force: true do |t|
+    create_table "gemgento_assets", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "product_id"
       t.string "url"
       t.integer "position"
@@ -51,17 +51,17 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "attachment_updated_at"
     end
 
-    create_table "gemgento_assets_asset_types", id: false, force: true do |t|
+    create_table "gemgento_assets_asset_types", id: false, options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "asset_id", default: 0, null: false
       t.integer "asset_type_id", default: 0, null: false
     end
 
-    create_table "gemgento_attribute_set_attributes", id: false, force: true do |t|
+    create_table "gemgento_attribute_set_attributes", id: false, options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "attribute_set_id", default: 0, null: false
       t.integer "attribute_id", default: 0, null: false
     end
 
-    create_table "gemgento_categories", force: true do |t|
+    create_table "gemgento_categories", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "magento_id"
       t.string "name"
       t.string "url_key"
@@ -82,22 +82,22 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
 
     add_index "gemgento_categories", ["magento_id"], name: "index_gemgento_categories_on_magento_id", unique: true, using: :btree
 
-    create_table "gemgento_categories_products", id: false, force: true do |t|
+    create_table "gemgento_categories_products", id: false, options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "product_id", default: 0, null: false
       t.integer "category_id", default: 0, null: false
     end
 
-    create_table "gemgento_configurable_attributes", id: false, force: true do |t|
+    create_table "gemgento_configurable_attributes", id: false, options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "product_id", default: 0, null: false
       t.integer "product_attribute_id", default: 0, null: false
     end
 
-    create_table "gemgento_configurable_simple_relations", id: false, force: true do |t|
+    create_table "gemgento_configurable_simple_relations", id: false, options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "configurable_product_id", default: 0, null: false
       t.integer "simple_product_id", default: 0, null: false
     end
 
-    create_table "gemgento_countries", force: true do |t|
+    create_table "gemgento_countries", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.string "magento_id", null: false
       t.string "iso2_code"
       t.string "iso3_code"
@@ -106,14 +106,14 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "updated_at"
     end
 
-    create_table "gemgento_gift_messages", force: true do |t|
+    create_table "gemgento_gift_messages", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "magento_id"
       t.string "to"
       t.string "from"
       t.text "message"
     end
 
-    create_table "gemgento_inventories", force: true do |t|
+    create_table "gemgento_inventories", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "product_id", null: false
       t.integer "quantity", default: 0, null: false
       t.boolean "is_in_stock", default: false, null: false
@@ -122,7 +122,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "updated_at"
     end
 
-    create_table "gemgento_magento_responses", force: true do |t|
+    create_table "gemgento_magento_responses", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.text "request"
       t.text "body", limit: 16777215
       t.datetime "created_at"
@@ -130,7 +130,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.boolean "success", default: true, null: false
     end
 
-    create_table "gemgento_order_addresses", force: true do |t|
+    create_table "gemgento_order_addresses", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "order_id", null: false
       t.integer "increment_id"
       t.boolean "is_active", default: true, null: false
@@ -151,7 +151,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "updated_at"
     end
 
-    create_table "gemgento_order_items", force: true do |t|
+    create_table "gemgento_order_items", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "magento_id"
       t.integer "order_id"
       t.integer "quote_item_id"
@@ -211,7 +211,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "updated_at"
     end
 
-    create_table "gemgento_order_payments", force: true do |t|
+    create_table "gemgento_order_payments", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "magento_id"
       t.integer "order_id", null: false
       t.integer "increment_id"
@@ -234,7 +234,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "updated_at"
     end
 
-    create_table "gemgento_order_statuses", force: true do |t|
+    create_table "gemgento_order_statuses", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "order_id", null: false
       t.integer "increment_id"
       t.boolean "is_active", default: true
@@ -245,7 +245,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "updated_at"
     end
 
-    create_table "gemgento_orders", force: true do |t|
+    create_table "gemgento_orders", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "order_id"
       t.integer "store_id", null: false
       t.boolean "is_active"
@@ -314,7 +314,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "updated_at"
     end
 
-    create_table "gemgento_product_attribute_options", force: true do |t|
+    create_table "gemgento_product_attribute_options", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "product_attribute_id"
       t.string "label"
       t.string "value"
@@ -324,7 +324,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.integer "order"
     end
 
-    create_table "gemgento_product_attribute_sets", force: true do |t|
+    create_table "gemgento_product_attribute_sets", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "magento_id"
       t.string "name"
       t.datetime "created_at", null: false
@@ -332,7 +332,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.boolean "sync_needed", default: true, null: false
     end
 
-    create_table "gemgento_product_attribute_values", force: true do |t|
+    create_table "gemgento_product_attribute_values", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "product_id"
       t.integer "product_attribute_id"
       t.text "value"
@@ -340,7 +340,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "updated_at", null: false
     end
 
-    create_table "gemgento_product_attributes", force: true do |t|
+    create_table "gemgento_product_attributes", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "magento_id"
       t.string "code"
       t.string "frontend_input"
@@ -360,7 +360,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.text "default_value"
     end
 
-    create_table "gemgento_product_categories", force: true do |t|
+    create_table "gemgento_product_categories", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "category_id"
       t.integer "product_id"
       t.integer "position", default: 0, null: false
@@ -368,7 +368,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "updated_at"
     end
 
-    create_table "gemgento_product_imports", force: true do |t|
+    create_table "gemgento_product_imports", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.text "import_errors"
       t.datetime "created_at"
       t.datetime "updated_at"
@@ -389,12 +389,12 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.text "image_file_extensions"
     end
 
-    create_table "gemgento_product_imports_configurable_attributes", id: false, force: true do |t|
+    create_table "gemgento_product_imports_configurable_attributes", id: false, options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "product_import_id", default: 0, null: false
       t.integer "product_attribute_id", default: 0, null: false
     end
 
-    create_table "gemgento_products", force: true do |t|
+    create_table "gemgento_products", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "magento_id"
       t.string "magento_type"
       t.datetime "created_at", null: false
@@ -408,7 +408,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "deleted_at"
     end
 
-    create_table "gemgento_regions", force: true do |t|
+    create_table "gemgento_regions", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "magento_id", null: false
       t.string "code"
       t.string "name"
@@ -417,7 +417,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "updated_at"
     end
 
-    create_table "gemgento_relation_types", force: true do |t|
+    create_table "gemgento_relation_types", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.string "name"
       t.text "description"
       t.string "applies_to"
@@ -425,7 +425,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "updated_at", null: false
     end
 
-    create_table "gemgento_relations", force: true do |t|
+    create_table "gemgento_relations", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "relation_type_id"
       t.integer "relatable_id"
       t.string "relatable_type"
@@ -435,13 +435,13 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "updated_at", null: false
     end
 
-    create_table "gemgento_sessions", force: true do |t|
+    create_table "gemgento_sessions", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.string "session_id"
       t.datetime "created_at", null: false
       t.datetime "updated_at", null: false
     end
 
-    create_table "gemgento_stores", force: true do |t|
+    create_table "gemgento_stores", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "magento_id", null: false
       t.string "code"
       t.integer "group_id"
@@ -454,7 +454,7 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
 
     add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true, using: :btree
 
-    create_table "gemgento_swatches", force: true do |t|
+    create_table "gemgento_swatches", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.string "name"
       t.string "description"
       t.string "image_file_name"
@@ -463,21 +463,21 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
       t.datetime "image_updated_at"
     end
 
-    create_table "gemgento_syncs", force: true do |t|
+    create_table "gemgento_syncs", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.string "subject"
       t.datetime "created_at"
       t.datetime "updated_at"
       t.boolean "is_complete", default: false
     end
 
-    create_table "gemgento_user_groups", force: true do |t|
+    create_table "gemgento_user_groups", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "magento_id"
       t.string "code"
       t.datetime "created_at", null: false
       t.datetime "updated_at", null: false
     end
 
-    create_table "gemgento_users", force: true do |t|
+    create_table "gemgento_users", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer "magento_id"
       t.integer "store_id"
       t.string "created_in"

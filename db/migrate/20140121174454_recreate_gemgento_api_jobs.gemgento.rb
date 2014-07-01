@@ -3,7 +3,7 @@ class RecreateGemgentoApiJobs < ActiveRecord::Migration
   def up
     drop_table :gemgento_api_jobs
 
-    create_table :gemgento_api_jobs, :force => true do |t|
+    create_table :gemgento_api_jobs, options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.integer  :source_id
       t.string   :kind
       t.string   :state

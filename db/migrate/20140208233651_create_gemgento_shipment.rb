@@ -1,6 +1,6 @@
 class CreateGemgentoShipment < ActiveRecord::Migration
   def up
-    create_table :gemgento_shipments do |t|
+    create_table :gemgento_shipments, options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8' do |t|
       t.integer :magento_id
       t.integer :order_id
       t.string :increment_id

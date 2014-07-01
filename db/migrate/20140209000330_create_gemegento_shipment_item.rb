@@ -1,6 +1,6 @@
 class CreateGemegentoShipmentItem < ActiveRecord::Migration
   def change
-    create_table :gemegento_shipment_items do |t|
+    create_table :gemegento_shipment_items, options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8' do |t|
       t.integer :shipment_id
       t.string  :sku
       t.string  :name

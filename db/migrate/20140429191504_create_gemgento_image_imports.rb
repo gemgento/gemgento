@@ -1,6 +1,6 @@
 class CreateGemgentoImageImports < ActiveRecord::Migration
   def change
-    create_table :gemgento_image_imports do |t|
+    create_table :gemgento_image_imports, options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8' do |t|
       t.text :import_errors
       t.attachment :spreadsheet
       t.boolean :destroy_existing, default: false

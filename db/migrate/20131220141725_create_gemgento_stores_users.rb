@@ -1,6 +1,6 @@
 class CreateGemgentoStoresUsers < ActiveRecord::Migration
   def up
-    create_table :gemgento_stores_users do |t|
+    create_table :gemgento_stores_users, options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8' do |t|
       t.integer :store_id
       t.integer :user_id
     end
