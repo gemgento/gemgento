@@ -98,6 +98,7 @@ body.logged_out {
     background-color: $black;
 
     a {
+      @include text();
       color: #ffffff;
       text-decoration: none;
       font-size: 12px;
@@ -134,7 +135,8 @@ body.logged_out {
       padding: 0;
 
       label {
-        text-transform: lowercase;
+        @include text();
+        text-transform: lowercase !important;
         width: 50%;
         font-size: 12px;
         color: #ffffff;
