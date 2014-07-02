@@ -28,9 +28,9 @@ jQuery ->
     $('#feed-blocks-admin').disableSelection()
     $('a#submit-product-positions').click (event) ->
       event.preventDefault()
-      $.post($(this).attr('href'), $('#feed-blocks-admin').sortable('serialize'))
-      alert('Product category positions changes are being updated.  Please do no not update category positions again, until you see all previous changes on the front end.  This process can take up to 5 minutes, depending on how many position changes were needed.')
+      $('#products').val($('#feed-blocks-admin').sortable('toArray', { attribute: 'data-product-id' }))
+      $('#product-positions-form').submit()
       return false
 
-    $('#category-select').change ->
-      window.location = window.location.href.split('?')[0] + '?category_id=' + $(this).val()
+    $('#category-select, #store-select').change ->
+      window.location = window.location.href.split('?')[0] + '?category_id=' + $('#category-select').val() + '&store_id=' + $('#store-select').val()

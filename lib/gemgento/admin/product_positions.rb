@@ -15,27 +15,33 @@ ActiveAdmin.register_page 'Product Positions' do
     def index      
       if params[:category_id]
         @category = Gemgento::Category.find(params[:category_id])
-      else
+      elsif Gemgento::Category.top_level.navigation.any?
         @category = Gemgento::Category.top_level.navigation.first
+      else
+        @category = Gemgento::Category.root
       end
 
-      @products = @category.products.active.catalog_visible
+      @store = params[:store_id].blank? ? nil : Gemgento::Store.find(params[:store_id])
+      @products = @category.products(@store).active.catalog_visible
     end
 
     def update
-      @category = Gemgento::Category.find(params[:category_id][0])
+      @category = Gemgento::Category.where(id: params[:category_id]).first
+      @stores = params[:store_id].blank? ? Gemgento::Store.all : Gemgento::Store.where(id: params[:store_id])
 
-      Gemgento::Product.unscoped do
-        params[:product].each_with_index do |id, index|
-          Gemgento::ProductCategory.where(category_id: @category.id, product_id: id).each do |product_category|
-            product_category.position = index
-            product_category.sync_needed = product_category.changed?
-            product_category.save
-          end
+      @stores.each do |store|
+        params[:products].split(',').each_with_index do |id, index|
+          product_category = Gemgento::ProductCategory.find_or_initialize_by(category_id: @category.id, product_id: id, store_id: store.id)
+          product_category.position = index
+          product_category.sync_needed = false
+          product_category.save
         end
+
+        Gemgento::API::SOAP::Catalog::Category.update_product_positions(@category, store)
       end
 
-      render nothing: true
+      flash[:notice] = 'Product positions successfully updated.'
+      redirect_to admin_product_positions_path(category_id: @category.id, store_id: params[:store_id])
     end
   end
 end
