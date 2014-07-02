@@ -123,10 +123,28 @@ module Gemgento
     # Returns list of ancestors, starting from parent until root.
     #
     #   subchild1.ancestors # => [child1, root]
+    #
+    # @return [Array(Gemgento::Category)]
     def ancestors
       node, nodes = self, []
       nodes << node = node.parent while node.parent
       nodes
+    end
+
+    # Get products associated with the category.  Optional scope of store.
+    #
+    # @param store [Gemgento::Store, nil]
+    # @return [ActiveRecord::Associations::CollectionProxy(Gemgento::Product)]
+    def products(store = nil)
+      if store.nil?
+        return super
+      else
+        return Gemgento::Product.joins(:product_categories).where(
+            'gemgento_product_categories.store_id = ? AND gemgento_product_categories.category_id = ?',
+            store.id,
+            self.id
+        ).order('gemgento_product_categories.position ASC')
+      end
     end
 
   end
