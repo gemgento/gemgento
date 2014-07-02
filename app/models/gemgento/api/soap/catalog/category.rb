@@ -80,12 +80,15 @@ module Gemgento
           def self.update_product_positions(category, store)
             # create an array of product positions
             product_positions = []
-            category.product_categories.where(store: store).each do |product_category|
-              next unless product_category.product.deleted_at.nil?
-              product_positions << {
-                  product_id: product_category.product_id,
-                  position: product_category.position
-              }
+            Gemgento::Product.unscoped do
+              category.product_categories.where(store: store).each do |product_category|
+                next unless product_category.product.deleted_at.nil?
+
+                product_positions << {
+                    product_id: product_category.product.magento_id,
+                    position: product_category.position
+                }
+              end
             end
 
             # compose the message body
