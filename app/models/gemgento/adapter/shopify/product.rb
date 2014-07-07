@@ -1,7 +1,7 @@
 require 'shopify_api'
 
 # Magento attributes that must exist:
-# vendor
+# vendor (brand)
 # fulfillment_service
 # barcode
 # option1,2,3.....
@@ -12,7 +12,7 @@ module Gemgento::Adapter::Shopify
 
     # Import products from Shopify to Gemgento.
     #
-    # @return [Void]
+    # @return [void]
     def self.import
       ShopifyAPI::Base.site = Gemgento::Adapter::ShopifyAdapter.api_url
 
