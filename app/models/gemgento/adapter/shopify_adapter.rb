@@ -14,5 +14,14 @@ module Gemgento::Adapter
       Shopify::Order.import
     end
 
+    def shopify_model
+      if self.shopify_model_type.blank? || self.shopify_model_id.blank?
+        return nil
+      else
+        ShopifyAPI::Base.site = Gemgento::Adapter::ShopifyAdapter.api_url
+        return self.shopify_model_type.constantize.find(self.shopify_model_id)
+      end
+    end
+
   end
 end
