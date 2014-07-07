@@ -55,7 +55,9 @@ module Gemgento::Adapter::Shopify
       product.sync_needed = true
       product.save
 
+      Gemgento::Adapter::ShopifyAdapter.create_association(product, variant)
       product = create_assets(product, base_product[:image], base_product[:images])
+
 
       return product
     end
@@ -82,6 +84,7 @@ module Gemgento::Adapter::Shopify
       product.sync_needed = true
       product.save
 
+      Gemgento::Adapter::ShopifyAdapter.create_association(product, base_product)
       product = create_assets(product, base_product[:image], base_product[:images])
 
       return product
@@ -190,6 +193,8 @@ module Gemgento::Adapter::Shopify
 
         asset.sync_needed = true
         asset.save
+
+        Gemgento::Adapter::ShopifyAdapter.create_association(asset, image)
       end
 
       return product
