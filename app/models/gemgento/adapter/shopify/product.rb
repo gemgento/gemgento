@@ -50,6 +50,7 @@ module Gemgento::Adapter::Shopify
       product.save
 
       product = set_option_values(product, variant)
+      product = set_categories(product, base_product[:id])
 
       product.sync_needed = true
       product.save
@@ -76,6 +77,7 @@ module Gemgento::Adapter::Shopify
       product.save
 
       product = set_configurable_attributes(product, base_product[:variants].first)
+      product = set_categories(product, base_product[:id])
 
       product.sync_needed = true
       product.save
@@ -125,6 +127,29 @@ module Gemgento::Adapter::Shopify
       return product
     end
 
+    # Associate product with categories based on Shopify collections.
+    #
+    # @param product [Gemgento::Product]
+    # @param shopify_id [Integer]
+    # @return [Gemgento::Product]
+    def self.set_categories(product, shopify_id)
+      collections = ShopifyAPI::CustomCollection.where(product_id: shopify_id)
+
+      collections.each do |collection|
+        category = Gemgento::Category.find_by(url_key: collection.handle)
+
+        Gemgento::Store.all.each do |store|
+          product_category = Gemgento::ProductCategory.find_or_initialize_by(product: product, category: category, store: store)
+          product_category.sycn_needed = false
+          product_category.save
+        end
+      end
+
+      product.reload
+
+      return product
+    end
+
     # Define the configurable attributes for a configurable product.
     #
     # @param product [Gemgento::Product]
@@ -169,6 +194,7 @@ module Gemgento::Adapter::Shopify
 
       return product
     end
+
 
   end
 end
