@@ -15,18 +15,20 @@ module Gemgento
     has_many :relations, -> { distinct }, as: :relatable, :class_name => 'Relation', dependent: :destroy
     has_many :shipment_items
 
-    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_products', class_name: Gemgento::Store
-    has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: Gemgento::ProductAttribute
+    has_one :shopify_adapter, class_name: 'Gemgento::Adapter::ShopifyAdapter', as: :gemgento_model
+
+    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_products', class_name: 'Gemgento::Store'
+    has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'Gemgento::ProductAttribute'
     has_and_belongs_to_many :configurable_products, -> { distinct },
                             join_table: 'gemgento_configurable_simple_relations',
                             foreign_key: 'simple_product_id',
                             association_foreign_key: 'configurable_product_id',
-                            class_name: Gemgento::Product
+                            class_name: 'Gemgento::Product'
     has_and_belongs_to_many :simple_products, -> { distinct },
                             join_table: 'gemgento_configurable_simple_relations',
                             foreign_key: 'configurable_product_id',
                             association_foreign_key: 'simple_product_id',
-                            class_name: Gemgento::Product
+                            class_name: 'Gemgento::Product'
 
     default_scope -> { includes([{product_attribute_values: :product_attribute}, {assets: [:asset_file, :asset_types]}, :inventories, :swatch]) }
 

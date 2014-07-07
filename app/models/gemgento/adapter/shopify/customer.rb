@@ -6,11 +6,18 @@ module Gemgento::Adapter::Shopify
     def self.import
       ShopifyAPI::Base.site = Gemgento::Adapter::ShopifyAdapter.api_url
 
-      return fetch_all
+      ShopifyAPI::Customer.all.each do |customer|
+        user = create_user(customer)
+      end
     end
 
-    def fetch_all
-      ShopifyAPI::Customer.all
+    # Create a user from Shopify customer.
+    #
+    # @param customer [ShopifyAPI::Customer]
+    # @return [Gemgento::User]
+    def create_user(customer)
+      user = Gemgento::User.find_or_initialize_by(email: customer.email)
+      return user
     end
 
   end

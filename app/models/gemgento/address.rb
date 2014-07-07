@@ -7,6 +7,8 @@ module Gemgento
     belongs_to :region
     belongs_to :order
 
+    has_one :shopify_adapter, class_name: 'Gemgento::Adapter::ShopifyAdapter', as: :gemgento_model
+
     validates :first_name, :last_name, :street, :city, :country, :postcode, :telephone, presence: true
     validates :region, presence: true, if: ->{ !self.country.nil? && !self.country.regions.empty? }
 

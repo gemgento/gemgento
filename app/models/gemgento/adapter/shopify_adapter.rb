@@ -1,7 +1,8 @@
 require 'shopify_api'
 
 module Gemgento::Adapter
-  class ShopifyAdapter
+  class ShopifyAdapter < ActiveRecord::Base
+    belongs_to :gemgento_model, polymorphic: true
 
     def self.api_url
       "https://#{Gemgento::Config[:adapter][:shopify][:api_key]}:#{Gemgento::Config[:adapter][:shopify][:password]}@#{Gemgento::Config[:adapter][:shopify][:shop_name]}.myshopify.com/admin"
