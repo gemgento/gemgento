@@ -9,11 +9,11 @@ module Gemgento::Adapter::Shopify
     def self.set_all
       ShopifyAPI::Base.site = Gemgento::Adapter::ShopifyAdapter.api_url
 
-      @collections = ShopifyAPI::CustomCollection.all
-      @collects = ShopifyAPI::Collect.all
+      collections = ShopifyAPI::CustomCollection.all
+      collects = ShopifyAPI::Collect.all
 
-      @collects.each do |collect|
-        collection = @collections.select { |c| c.id = collect.collection_id }.first
+      collects.each do |collect|
+        collection = collections.select { |c| c.id = collect.collection_id }.first
         category = Gemgento::Category.find_by(url_key: collection.handle)
         product = Gemgento::Product.filter(
             {
