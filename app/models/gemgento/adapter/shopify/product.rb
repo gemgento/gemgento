@@ -1,16 +1,154 @@
 require 'shopify_api'
 
+# Magento attributes that must exist:
+# shopify_id
+# vendor
+# fulfillment_service
+# barcode
+# option1,2,3.....
+
+
 module Gemgento::Adapter::Shopify
   class Product
 
+    # Import products from Shopify to Gemgento.
+    #
+    # @return [Void]
     def self.import
       ShopifyAPI::Base.site = Gemgento::Adapter::ShopifyAdapter.api_url
 
-      return fetch_all
+      ShopifyAPI::Product.all.each do |product|
+        simple_products = []
+
+        if product.attributes[:variants].count > 1
+          product.attributes[:variants].each do |variant|
+            simple_products << create_simple_product(product, variant, false)
+          end
+
+          create_configurable_product(product, simple_products)
+        else
+          create_simple_product(product, product.attributes[:variants].first, true)
+        end
+      end
     end
 
-    def self.fetch_all
-      ShopifyAPI::Product.all
+    # Create a simple product from Shopify product data.
+    #
+    # @param base_product [ShopifyAPI::Product]
+    # @param variant [ShopifyAPI::Variant]
+    # @param is_catalog_visible [Boolean]
+    # @return [Gemgento::Product]
+    def self.create_simple_product(base_product, variant, is_catalog_visible)
+      product = initialize_product(base_product, variant[:id], variant[:sku], 'simple', is_catalog_visible)
+      product.set_attribute_value('barcode', variant[:barcode])
+      product.set_attribute_value('compare_at_price', variant[:compare_at_price])
+      product.set_attribute_value('fulfillment_service', variant[:fulfillment_service])
+      product.set_attribute_value('weight', variant[:grams])
+      product.set_attribute_value('price', variant[:price])
+      product.set_attribute_value('name', "#{self.name} - #{variant[:title]}")
+      product.sync_needed = false
+      product.save
+
+      product = set_option_values(product, variant)
+      product = create_assets(product, base_product[:image], base_product[:images])
+
+      product.sync_needed = true
+      product.save
+
+      return product
+    end
+
+    # Create a simple product from Shopify product data.
+    #
+    # @param base_product [ShopifyAPI::Product]
+    # @param simple_products [Array(Gemgento::Product)]
+    # @return [Gemgento::Product]
+    def self.create_configurable_product(base_product, simple_products)
+      product = initialize_product(base_product, base_product[:id], "#{simple_products.first.sku}_configurable", 'configurable', true)
+      product.set_attribute_value('barcode', simple_products.first.barcode)
+      product.set_attribute_value('compare_at_price', simple_products.firstcompare_at_price)
+      product.set_attribute_value('fulfillment_service', simple_products.first.fulfillment_service)
+      product.set_attribute_value('weight', simple_products.first.weight)
+      product.set_attribute_value('price', simple_products.first.price)
+      product.simple_products = simple_products
+      product.sync_needed = false
+      product.save
+
+      product = set_configurable_attributes(product, base_product[:variants].first)
+      product = create_assets(product, base_product[:image], base_product[:images])
+
+      product.sync_needed = true
+      product.save
+    end
+
+    # Initialize a Gemgento::Product given some basic data form Shopify product.
+    #
+    # @param base_product [ShopifyAPI::Product]
+    # @param shopify_id [Integer]
+    # @param sku [String]
+    # @param magento_type [String]
+    # @param is_catalog_visible [Boolean]
+    # @return [Gemgento::Product]
+    def self.initialize_product(base_product, shopify_id, sku, magento_type, is_catalog_visible)
+      product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: sku)
+      product.magento_type = magento_type
+      product.visibility = is_catalog_visible ? 4 : 1
+      product.set_attribute_value('url_key', base_product[:handle])
+      product.set_attribute_value('shopify_id', shopify_id)
+      product.set_attribute_value('name', base_product[:title])
+      product.set_attribute_value('vendor', base_product[:vendor])
+      product.set_attribute_value('meta-keywords', base_product[:tags])
+
+      return product
+    end
+
+    # Set product attribute values that have options.
+    #
+    # @param product [Gemgento::Product]
+    # @param variant [ShopifyAPI::Variant]
+    # @return [Gemgento::Product]
+    def self.set_option_values(product, variant)
+      variant.each do |key, value|
+        if key.to_s.include? 'option'
+          product.set_attribute_value(key, value)
+        end
+      end
+
+      product.sync_needed = false
+      product.save
+
+      return product
+    end
+
+    # Define the configurable attributes for a configurable product.
+    #
+    # @param product [Gemgento::Product]
+    # @param variant [ShopifyAPI::Variant]
+    # @return [Gemgento::Product]
+    def self.set_configurable_attributes(product, variant)
+      variant.each do |key, value|
+        if key.to_s.include? 'option'
+          attribute = Gemgento::ProductAttribute.find_by(code: key)
+
+          if attribute.is_configurable
+            product.configurable_attributes << attribute unless product.configurable_attributes.include? attribute
+          end
+        end
+      end
+
+      product.sync_needed = false
+      product.save
+
+      return product
+    end
+
+    # Create the assets for a product.
+    #
+    # @param product [Gemgento::Product]
+    # @param base_image [ShopifyAPI::Image]
+    # @param images [Array(ShopifyAPI::Image)]
+    def self.create_assets(product, base_image, images)
+
     end
 
   end

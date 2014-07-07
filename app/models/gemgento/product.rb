@@ -68,6 +68,18 @@ module Gemgento
           Gemgento::ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store).where('id != ?', product_attribute_values.first.id).destroy_all
         end
 
+        # if there are option values, get the actual value instead of label
+        if product_attribute.frontend_input == 'select'
+          label = value
+          attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: label, store: store)
+
+          if attribute_option.nil?
+            attribute_option = create_attribute_option(product_attribute, label, store)
+          end
+
+          value = attribute_option.value
+        end
+
         # set the attribute value
         product_attribute_value = Gemgento::ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store).first_or_initialize
         product_attribute_value.product = self
@@ -76,11 +88,11 @@ module Gemgento
         product_attribute_value.store = store
         product_attribute_value.save
 
+
         self.product_attribute_values << product_attribute_value unless self.product_attribute_values.include?(product_attribute_value)
 
         return true
       end
-
     end
 
     def attribute_value(code, store = nil)
@@ -441,6 +453,27 @@ module Gemgento
     end
 
     private
+
+    # Create an attribute option in Magento.
+    #
+    # @param product_attribute [Gemgento::ProductAttribute]
+    # @param option_label [String]
+    # @param store [Gemgento::Store]
+    # @return [Gemgento::ProductAttributeOption]
+    def create_attribute_option(product_attribute, option_label, store)
+      attribute_option = ProductAttributeOption.new
+      attribute_option.product_attribute = product_attribute
+      attribute_option.label = option_label
+      attribute_option.store = store
+      attribute_option.sync_needed = false
+      attribute_option.save
+
+      attribute_option.sync_needed = true
+      attribute_option.sync_local_to_magento
+      attribute_option.destroy
+
+      return Gemgento::ProductAttributeOption.find_by(product_attribute: product_attribute, label: option_label, store: store)
+    end
 
     # Push local product changes to magento
     def sync_local_to_magento
