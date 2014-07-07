@@ -50,10 +50,11 @@ module Gemgento::Adapter::Shopify
       product.save
 
       product = set_option_values(product, variant)
-      product = create_assets(product, base_product[:image], base_product[:images])
 
       product.sync_needed = true
       product.save
+
+      product = create_assets(product, base_product[:image], base_product[:images])
 
       return product
     end
@@ -75,10 +76,13 @@ module Gemgento::Adapter::Shopify
       product.save
 
       product = set_configurable_attributes(product, base_product[:variants].first)
-      product = create_assets(product, base_product[:image], base_product[:images])
 
       product.sync_needed = true
       product.save
+
+      product = create_assets(product, base_product[:image], base_product[:images])
+
+      return product
     end
 
     # Initialize a Gemgento::Product given some basic data form Shopify product.
@@ -98,6 +102,7 @@ module Gemgento::Adapter::Shopify
       product.set_attribute_value('name', base_product[:title])
       product.set_attribute_value('vendor', base_product[:vendor])
       product.set_attribute_value('meta-keywords', base_product[:tags])
+      product.stores = Gemgento::Store.all
 
       return product
     end
@@ -147,8 +152,22 @@ module Gemgento::Adapter::Shopify
     # @param product [Gemgento::Product]
     # @param base_image [ShopifyAPI::Image]
     # @param images [Array(ShopifyAPI::Image)]
+    # @return [Gemgento::Product]
     def self.create_assets(product, base_image, images)
+      images.each do |image|
+        asset = Gemgento::Asset.find_or_initialize_by(product: product, label: image.id)
+        asset.asset_types << Gemgento::AssetType.find_by(code: 'image') if image == base_image
+        asset.set_file(URI.parse(source[:url]))
+        asset.store = product.stores.first
+        asset.position = image.position
+        asset.sync_needed = false
+        asset.save
 
+        asset.sync_needed = true
+        asset.save
+      end
+
+      return product
     end
 
   end
