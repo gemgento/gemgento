@@ -1,7 +1,6 @@
 require 'shopify_api'
 
 # Magento attributes that must exist:
-# shopify_id
 # vendor
 # fulfillment_service
 # barcode
@@ -39,7 +38,7 @@ module Gemgento::Adapter::Shopify
     # @param is_catalog_visible [Boolean]
     # @return [Gemgento::Product]
     def self.create_simple_product(base_product, variant, is_catalog_visible)
-      product = initialize_product(base_product, variant[:id], variant[:sku], 'simple', is_catalog_visible)
+      product = initialize_product(base_product, variant[:sku], 'simple', is_catalog_visible)
       product.set_attribute_value('barcode', variant[:barcode])
       product.set_attribute_value('compare_at_price', variant[:compare_at_price])
       product.set_attribute_value('fulfillment_service', variant[:fulfillment_service])
@@ -55,9 +54,8 @@ module Gemgento::Adapter::Shopify
       product.sync_needed = true
       product.save
 
-      Gemgento::Adapter::ShopifyAdapter.create_association(product, variant)
+      Gemgento::Adapter::ShopifyAdapter.create_association(product, variant) if product.shopify_adapter.nil?
       product = create_assets(product, base_product[:image], base_product[:images])
-
 
       return product
     end
@@ -68,7 +66,7 @@ module Gemgento::Adapter::Shopify
     # @param simple_products [Array(Gemgento::Product)]
     # @return [Gemgento::Product]
     def self.create_configurable_product(base_product, simple_products)
-      product = initialize_product(base_product, base_product[:id], "#{simple_products.first.sku}_configurable", 'configurable', true)
+      product = initialize_product(base_product, "#{simple_products.first.sku}_configurable", 'configurable', true)
       product.set_attribute_value('barcode', simple_products.first.barcode)
       product.set_attribute_value('compare_at_price', simple_products.firstcompare_at_price)
       product.set_attribute_value('fulfillment_service', simple_products.first.fulfillment_service)
@@ -84,7 +82,7 @@ module Gemgento::Adapter::Shopify
       product.sync_needed = true
       product.save
 
-      Gemgento::Adapter::ShopifyAdapter.create_association(product, base_product)
+      Gemgento::Adapter::ShopifyAdapter.create_association(product, base_product) if product.shopify_adapter.nil?
       product = create_assets(product, base_product[:image], base_product[:images])
 
       return product
@@ -93,17 +91,15 @@ module Gemgento::Adapter::Shopify
     # Initialize a Gemgento::Product given some basic data form Shopify product.
     #
     # @param base_product [ShopifyAPI::Product]
-    # @param shopify_id [Integer]
     # @param sku [String]
     # @param magento_type [String]
     # @param is_catalog_visible [Boolean]
     # @return [Gemgento::Product]
-    def self.initialize_product(base_product, shopify_id, sku, magento_type, is_catalog_visible)
+    def self.initialize_product(base_product, sku, magento_type, is_catalog_visible)
       product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: sku)
       product.magento_type = magento_type
       product.visibility = is_catalog_visible ? 4 : 1
       product.set_attribute_value('url_key', base_product[:handle])
-      product.set_attribute_value('shopify_id', shopify_id)
       product.set_attribute_value('name', base_product[:title])
       product.set_attribute_value('vendor', base_product[:vendor])
       product.set_attribute_value('meta-keywords', base_product[:tags])
