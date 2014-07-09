@@ -134,8 +134,8 @@ module Gemgento::Adapter::Shopify
     def self.set_categories(product, shopify_id)
       collections = ShopifyAPI::CustomCollection.where(product_id: shopify_id)
 
-      collections.each do |collection|
-        category = Gemgento::Category.find_by(url_key: collection.handle)
+      Gemgento::Adapter::ShopifyAdapter.where(shopify_model: collections).each do |shopify_adapter|
+        category = shopify_adapter.gemgento_model
 
         Gemgento::Store.all.each do |store|
           product_category = Gemgento::ProductCategory.find_or_initialize_by(product: product, category: category, store: store)
@@ -144,7 +144,7 @@ module Gemgento::Adapter::Shopify
         end
       end
 
-      product.reload
+      product.product_categories.reload
 
       return product
     end
