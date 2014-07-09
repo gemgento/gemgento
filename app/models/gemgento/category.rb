@@ -22,6 +22,7 @@ module Gemgento
     scope :active, -> { where(is_active: true) }
 
     after_save :enforce_positioning, if: :position_changed?
+    after_save :sync_local_to_magento
 
     # Create a string representation of the path from the root to the Category.
     #
@@ -146,6 +147,29 @@ module Gemgento
             store.id,
             self.id
         ).order('gemgento_product_categories.position ASC')
+      end
+    end
+
+    # If a sync is required, push the category to Magento.  This is the after save callback method.
+    #
+    # @return [void]
+    def sync_local_to_magento
+      if self.sync_needed
+        if !self.magento_id
+          API::SOAP::Catalog::Category.create(self, self.stores.first)
+
+          self.stores.each_with_index do |store, index|
+            next if index == 0
+            API::SOAP::Catalog::Category.update(self, store)
+          end
+        else
+          self.stores.each do |store|
+            API::SOAP::Catalog::Category.update(self, store)
+          end
+        end
+
+        self.sync_needed = false
+        self.save
       end
     end
 
