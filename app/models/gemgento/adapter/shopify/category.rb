@@ -7,7 +7,7 @@ module Gemgento::Adapter::Shopify
     #
     # @return [void]
     def self.import
-    ShopifyAPI::Base.site = Gemgento::Adapter::ShopifyAdapter.api_url
+      ShopifyAPI::Base.site = Gemgento::Adapter::ShopifyAdapter.api_url
 
       ShopifyAPI::CustomCollection.all.each do |collection|
         sync_shopify_category(collection)
@@ -31,7 +31,7 @@ module Gemgento::Adapter::Shopify
       category.image = URI.parse(collection.image) if collection.has_attribute? :image
       category.is_active = true
       category.include_in_menu = false
-      category.stores = category.stores | Gemgento::Store.all
+      category.stores = Gemgento::Store.all
       category.sync_needed = true
       category.save
 

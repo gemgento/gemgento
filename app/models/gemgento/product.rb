@@ -38,7 +38,7 @@ module Gemgento
     scope :disabled, -> { where(status: false) }
     scope :catalog_visible, -> { where(visibility: [2, 4]) }
     scope :search_visible, -> { where(visibility: [3, 4]) }
-    scope :visible, -> { where(visibility: [2,3,4]) }
+    scope :visible, -> { where(visibility: [2, 3, 4]) }
     scope :not_deleted, -> { where(deleted_at: nil) }
     scope :active, -> { where(deleted_at: nil, status: true) }
 
@@ -199,6 +199,7 @@ module Gemgento
 
     def mark_deleted
       self.deleted_at = Time.now
+      self.shopify_adapter.destroy if self.shopify_adapter
     end
 
     def mark_deleted!
@@ -257,7 +258,7 @@ module Gemgento
         products = products.joins(
             ActiveRecord::Base.escape_sql(
                 'INNER JOIN gemgento_product_attribute_values ON gemgento_product_attribute_values.product_id = gemgento_products.id AND gemgento_product_attribute_values.product_attribute_id = ? AND gemgento_product_attribute_values.store_id = ? ' +
-                'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ',
+                    'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ',
                 attribute.id,
                 store.id
             ))
@@ -271,9 +272,9 @@ module Gemgento
         products = products.joins(
             ActiveRecord::Base.escape_sql(
                 'INNER JOIN gemgento_product_attribute_values ON gemgento_product_attribute_values.product_id = gemgento_products.id AND gemgento_product_attribute_values.product_attribute_id = ? ' +
-                'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ' +
-                'INNER JOIN gemgento_product_attribute_options ON gemgento_product_attribute_options.product_attribute_id = gemgento_product_attributes.id AND gemgento_product_attribute_options.value = gemgento_product_attribute_values.value ' +
-                'AND gemgento_product_attribute_options.store_id = ?',
+                    'INNER JOIN gemgento_product_attributes ON gemgento_product_attributes.id = gemgento_product_attribute_values.product_attribute_id ' +
+                    'INNER JOIN gemgento_product_attribute_options ON gemgento_product_attribute_options.product_attribute_id = gemgento_product_attributes.id AND gemgento_product_attribute_options.value = gemgento_product_attribute_values.value ' +
+                    'AND gemgento_product_attribute_options.store_id = ?',
                 attribute.id,
                 store.id
             ))
@@ -337,7 +338,7 @@ module Gemgento
 
       result = super
 
-      self.product_attribute_values.select{ |av| av.store_id == options[:store].id }.each do |attribute_value|
+      self.product_attribute_values.select { |av| av.store_id == options[:store].id }.each do |attribute_value|
         attribute = attribute_value.product_attribute
         next if attribute.nil?
         result[attribute.code] = self.attribute_value(attribute.code, options[:store])
@@ -479,7 +480,7 @@ module Gemgento
 
     # Push local product changes to magento
     def sync_local_to_magento
-      if self.sync_needed
+      if self.sync_needed && self.deleted_at.nil?
         if !self.magento_id
           API::SOAP::Catalog::Product.create(self, self.stores.first)
 

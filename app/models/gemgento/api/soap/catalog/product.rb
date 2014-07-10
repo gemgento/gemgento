@@ -299,8 +299,9 @@ module Gemgento
 
             unless product.simple_products.empty?
               product_data.merge!({
-                                      'associated_skus' => {'item' => compose_associated_skus(product)},
-                                      'price_changes' => compose_price_changes(product, store)
+                                      'associated_skus' => {item: compose_associated_skus(product)},
+                                      'price_changes' => compose_price_changes(product, store),
+                                      'configurable_attributes' => {item: compose_configurable_attributes(product)}
                                   })
             end
 
@@ -327,6 +328,16 @@ module Gemgento
             websites
           end
 
+          def self.compose_configurable_attributes(product)
+            configurable_attributes = []
+
+            product.configurable_attributes.each do |configurable_attribute|
+              configurable_attributes << "#{configurable_attribute.magento_id}"
+            end
+
+            configurable_attributes
+          end
+
           def self.compose_attribute_values(product, store)
             attributes = []
 
@@ -334,7 +345,7 @@ module Gemgento
               if !product_attribute_value.value.nil? && !product_attribute_value.product_attribute.nil?
                 attributes << {
                     'key' => product_attribute_value.product_attribute.code,
-                    'value' => product_attribute_value.value
+                    'value' => product.attribute_value(product_attribute_value.product_attribute.code, store)
                 }
               end
             end

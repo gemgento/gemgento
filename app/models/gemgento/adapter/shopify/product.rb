@@ -4,6 +4,7 @@ require 'shopify_api'
 # vendor (brand)
 # fulfillment_service
 # barcode
+# compare_at_price
 # option1,2,3.....
 
 
@@ -19,14 +20,14 @@ module Gemgento::Adapter::Shopify
       ShopifyAPI::Product.all.each do |product|
         simple_products = []
 
-        if product.attributes[:variants].count > 1
-          product.attributes[:variants].each do |variant|
+        if product.variants.count > 1
+          product.variants.each do |variant|
             simple_products << create_simple_product(product, variant, false)
           end
 
           create_configurable_product(product, simple_products)
         else
-          create_simple_product(product, product.attributes[:variants].first, true)
+          create_simple_product(product, product.variants.first, true)
         end
       end
     end
@@ -38,24 +39,27 @@ module Gemgento::Adapter::Shopify
     # @param is_catalog_visible [Boolean]
     # @return [Gemgento::Product]
     def self.create_simple_product(base_product, variant, is_catalog_visible)
-      product = initialize_product(base_product, variant[:sku], 'simple', is_catalog_visible)
-      product.set_attribute_value('barcode', variant[:barcode])
-      product.set_attribute_value('compare_at_price', variant[:compare_at_price])
-      product.set_attribute_value('fulfillment_service', variant[:fulfillment_service])
-      product.set_attribute_value('weight', variant[:grams])
-      product.set_attribute_value('price', variant[:price])
-      product.set_attribute_value('name', "#{self.name} - #{variant[:title]}")
-      product.sync_needed = false
-      product.save
+      product = initialize_product(base_product, variant.sku, 'simple', is_catalog_visible)
+      product.set_attribute_value('barcode', variant.barcode)
+      product.set_attribute_value('compare_at_price', variant.compare_at_price)
+      product.set_attribute_value('fulfillment_service', variant.fulfillment_service)
+      product.set_attribute_value('weight', variant.grams)
+      product.set_attribute_value('price', variant.price)
 
-      product = set_option_values(product, variant)
-      product = set_categories(product, base_product[:id])
+      if is_catalog_visible # catalog visible simple products are not part of a configurable
+        product.set_attribute_value('name', base_product.title)
+      else
+        product.set_attribute_value('name', "#{base_product.title} - #{variant.title}")
+      end
+
+      product = set_option_values(product, base_product, variant)
+      product = set_categories(product, base_product.id)
 
       product.sync_needed = true
       product.save
 
       Gemgento::Adapter::ShopifyAdapter.create_association(product, variant) if product.shopify_adapter.nil?
-      product = create_assets(product, base_product[:image], base_product[:images])
+      product = create_assets(product, base_product.image, base_product.images)
 
       return product
     end
@@ -68,22 +72,27 @@ module Gemgento::Adapter::Shopify
     def self.create_configurable_product(base_product, simple_products)
       product = initialize_product(base_product, "#{simple_products.first.sku}_configurable", 'configurable', true)
       product.set_attribute_value('barcode', simple_products.first.barcode)
-      product.set_attribute_value('compare_at_price', simple_products.firstcompare_at_price)
+      product.set_attribute_value('compare_at_price', simple_products.first.compare_at_price)
       product.set_attribute_value('fulfillment_service', simple_products.first.fulfillment_service)
       product.set_attribute_value('weight', simple_products.first.weight)
       product.set_attribute_value('price', simple_products.first.price)
-      product.simple_products = simple_products
+      product.set_attribute_value('name', base_product.title)
+
+      simple_products.uniq.each do |simple_product|
+        simple_product.configurable_products << product unless simple_product.configurable_products.include? product
+      end
+
       product.sync_needed = false
       product.save
 
-      product = set_configurable_attributes(product, base_product[:variants].first)
-      product = set_categories(product, base_product[:id])
+      product = set_configurable_attributes(product, base_product, base_product.variants.first)
+      product = set_categories(product, base_product.id)
 
       product.sync_needed = true
       product.save
 
       Gemgento::Adapter::ShopifyAdapter.create_association(product, base_product) if product.shopify_adapter.nil?
-      product = create_assets(product, base_product[:image], base_product[:images])
+      product = create_assets(product, base_product.image, base_product.images)
 
       return product
     end
@@ -96,13 +105,22 @@ module Gemgento::Adapter::Shopify
     # @param is_catalog_visible [Boolean]
     # @return [Gemgento::Product]
     def self.initialize_product(base_product, sku, magento_type, is_catalog_visible)
-      product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: sku)
+      if shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by_shopify_model(base_product)
+        product = shopify_adapter.gemgento_model
+      else
+        product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: sku)
+      end
+
       product.magento_type = magento_type
       product.visibility = is_catalog_visible ? 4 : 1
-      product.set_attribute_value('url_key', base_product[:handle])
-      product.set_attribute_value('name', base_product[:title])
-      product.set_attribute_value('vendor', base_product[:vendor])
-      product.set_attribute_value('meta-keywords', base_product[:tags])
+      product.product_attribute_set = Gemgento::ProductAttributeSet.first
+      product.sync_needed = false
+      product.save
+
+      product.set_attribute_value('url_key', base_product.handle)
+      product.set_attribute_value('name', base_product.title)
+      product.set_attribute_value('vendor', base_product.vendor)
+      product.set_attribute_value('meta-keywords', base_product.tags)
       product.stores = Gemgento::Store.all
 
       return product
@@ -111,12 +129,17 @@ module Gemgento::Adapter::Shopify
     # Set product attribute values that have options.
     #
     # @param product [Gemgento::Product]
+    # @param base_product [ShopifyAPI::Product]
     # @param variant [ShopifyAPI::Variant]
     # @return [Gemgento::Product]
-    def self.set_option_values(product, variant)
-      variant.each do |key, value|
+    def self.set_option_values(product, base_product, variant)
+      variant.attributes.each do |key, value|
         if key.to_s.include? 'option'
-          product.set_attribute_value(key, value)
+          code = get_option_attribute_code(base_product, key)
+          next if code.nil?
+
+          value = 'N/A' if value.blank?
+          product.set_attribute_value(code, value)
         end
       end
 
@@ -124,6 +147,16 @@ module Gemgento::Adapter::Shopify
       product.save
 
       return product
+    end
+
+    # Get the Gemgento::Attribute.code relate to an Shopify option code.
+    #
+    # @param base_product [ShopifyAPI::Product]
+    # @param option_code [String]
+    def self.get_option_attribute_code(base_product, option_code)
+      index = option_code.to_s.gsub('option', '').to_i - 1
+      return nil if index >= base_product.options.length
+      return base_product.options[index].name.downcase
     end
 
     # Associate product with categories based on Shopify collections.
@@ -134,12 +167,12 @@ module Gemgento::Adapter::Shopify
     def self.set_categories(product, shopify_id)
       collections = ShopifyAPI::CustomCollection.where(product_id: shopify_id)
 
-      Gemgento::Adapter::ShopifyAdapter.where(shopify_model: collections).each do |shopify_adapter|
+      Gemgento::Adapter::ShopifyAdapter.where(shopify_model_type: collections.first.class, shopify_model_id: collections.map(&:id)).each do |shopify_adapter|
         category = shopify_adapter.gemgento_model
 
         Gemgento::Store.all.each do |store|
           product_category = Gemgento::ProductCategory.find_or_initialize_by(product: product, category: category, store: store)
-          product_category.sycn_needed = false
+          product_category.sync_needed = false
           product_category.save
         end
       end
@@ -152,14 +185,17 @@ module Gemgento::Adapter::Shopify
     # Define the configurable attributes for a configurable product.
     #
     # @param product [Gemgento::Product]
+    # @param base_product [ShopifyAPI::Product]
     # @param variant [ShopifyAPI::Variant]
     # @return [Gemgento::Product]
-    def self.set_configurable_attributes(product, variant)
-      variant.each do |key, value|
+    def self.set_configurable_attributes(product, base_product, variant)
+      variant.attributes.each do |key, value|
         if key.to_s.include? 'option'
-          attribute = Gemgento::ProductAttribute.find_by(code: key)
+          code = get_option_attribute_code(base_product, key)
+          next if code.nil?
+          attribute = Gemgento::ProductAttribute.find_by(code: code)
 
-          if attribute.is_configurable
+          if attribute && attribute.is_configurable && is_configurable_attribute_used(product, attribute)
             product.configurable_attributes << attribute unless product.configurable_attributes.include? attribute
           end
         end
@@ -171,6 +207,19 @@ module Gemgento::Adapter::Shopify
       return product
     end
 
+    # Check if a configurable attribute is actually being used to differentiate simples.
+    #
+    # @param product [Gemgento::Product]
+    # @param attribute [Gemgento::ProductAttribute]
+    # @return [Boolean]
+    def self.is_configurable_attribute_used(product, attribute)
+      product.simple_products.each do |simple_product|
+        return false unless simple_product.product_attribute_values.exists?(product_attribute: attribute)
+      end
+
+      return true
+    end
+
     # Create the assets for a product.
     #
     # @param product [Gemgento::Product]
@@ -179,23 +228,28 @@ module Gemgento::Adapter::Shopify
     # @return [Gemgento::Product]
     def self.create_assets(product, base_image, images)
       images.each do |image|
-        asset = Gemgento::Asset.find_or_initialize_by(product: product, label: image.id)
-        asset.asset_types << Gemgento::AssetType.find_by(code: 'image') if image == base_image
-        asset.set_file(URI.parse(source[:url]))
-        asset.store = product.stores.first
-        asset.position = image.position
-        asset.sync_needed = false
-        asset.save
+        asset_file = nil
 
-        asset.sync_needed = true
-        asset.save
+        product.stores.each do |store|
+          asset = Gemgento::Asset.find_or_initialize_by(product: product, label: image.id)
+          asset.asset_types << Gemgento::AssetType.find_by(code: 'image') if image == base_image
+          asset.store = store
+          asset.position = image.position
+          asset.set_file(URI.parse(image.src))
+          asset.sync_needed = false
+          asset.save
 
-        Gemgento::Adapter::ShopifyAdapter.create_association(asset, image)
+          asset.sync_needed = true
+          asset.save
+
+          asset_file = asset.asset_file
+        end
+
+        Gemgento::Adapter::ShopifyAdapter.create_association(asset_file, image) unless asset_file.nil?
       end
 
       return product
     end
-
 
   end
 end

@@ -7,7 +7,7 @@ module Gemgento::Adapter::Shopify
     # @param user [Gemgento::User]
     # @param is_default [Boolean]
     def self.import(shopify_address, user)
-      if shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by(shopify_model: shopify_address)
+      if shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by_shopify_model(shopify_address)
         address = shopify_adapter.gemgento_model
       else
         address = Gemgento::Address.new
