@@ -92,9 +92,10 @@ module Gemgento
     # @return [void]
     def mark_deleted
       self.deleted_at = Time.now
+      self.shopify_adapter.destroy if self.shopify_adapter
     end
 
-    # Marks the category as deleted as saves.
+    # Marks the category as deleted and saves.
     #
     # @return [void]
     def mark_deleted!
@@ -154,7 +155,7 @@ module Gemgento
     #
     # @return [void]
     def sync_local_to_magento
-      if self.sync_needed
+      if self.sync_needed && self.deleted_at.nil?
         if !self.magento_id
           API::SOAP::Catalog::Category.create(self, self.stores.first)
 

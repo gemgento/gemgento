@@ -14,7 +14,7 @@ module Gemgento
 
           def self.tree(store)
             message = {
-              store_view: store.magento_id
+                store_view: store.magento_id
             }
             response = Gemgento::Magento.create_call(:catalog_category_tree, message)
 
@@ -37,7 +37,7 @@ module Gemgento
 
           def self.create(category, store)
             data = {
-                name: self.name,
+                name: category.name,
                 'is_active' => category.is_active ? 1 : 0,
                 'include_in_menu' => category.include_in_menu ? 1 : 0,
                 'available_sort_by' => {'arr:string' => %w[name]},

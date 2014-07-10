@@ -6,8 +6,8 @@ module Gemgento::Adapter::Shopify
     # Import all Shopify collections.
     #
     # @return [void]
-    def import
-      ShopifyAPI::Base.site = Gemgento::Adapter::ShopifyAdapter.api_url
+    def self.import
+    ShopifyAPI::Base.site = Gemgento::Adapter::ShopifyAdapter.api_url
 
       ShopifyAPI::CustomCollection.all.each do |collection|
         sync_shopify_category(collection)
@@ -18,14 +18,21 @@ module Gemgento::Adapter::Shopify
     #
     # @param collection [ShopifyAPI::CustomCollection]
     # @return [Gemgento::Category]
-    def sync_shopify_category(collection)
+    def self.sync_shopify_category(collection)
+      if shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by_shopify_model(collection)
+        category = shopify_adapter.gemgento_model
+      else
+        category = Gemgento::Category.find_or_initialize_by(url_key: collection.handle)
+      end
+
       category = Gemgento::Category.find_or_initialize_by(url_key: collection.handle)
       category.name = collection.title
-      category.parent_id = Gemgento::Category.root
-      category.image = URI.parse(collection.image) if collection.image
+      category.parent = Gemgento::Category.root
+      category.image = URI.parse(collection.image) if collection.has_attribute? :image
       category.is_active = true
       category.include_in_menu = false
-      category.sync_needed = category.new_record?
+      category.stores = category.stores | Gemgento::Store.all
+      category.sync_needed = true
       category.save
 
       Gemgento::Adapter::ShopifyAdapter.create_association(category, collection)

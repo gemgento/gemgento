@@ -12,6 +12,7 @@ module Gemgento::Adapter
     end
 
     def self.import_all
+      Shopify::Category.import
       Shopify::Product.import
       Shopify::Customer.import
       Shopify::Order.import
@@ -48,6 +49,14 @@ module Gemgento::Adapter
       shopify_adapter.gemgento_model = gemgento_model
       shopify_adapter.shopify_model = shopify_model
       shopify_adapter.save
+    end
+
+    # Find a record by the shopify model.
+    #
+    # @param shopify_model [Object]
+    # @param [Object, nil]
+    def self.find_by_shopify_model(shopify_model)
+      Gemgento::Adapter::ShopifyAdapter.find_by(shopify_model_type: shopify_model.class, shopify_model_id: shopify_model.id)
     end
 
   end
