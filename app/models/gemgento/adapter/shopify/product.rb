@@ -68,7 +68,13 @@ module Gemgento::Adapter::Shopify
       product.save
 
       Gemgento::Adapter::ShopifyAdapter.create_association(product, variant) if product.shopify_adapter.nil?
-      product = create_assets(product, base_product.image, base_product.images)
+
+      begin
+        product = create_assets(product, base_product.image, base_product.images)
+      rescue => e
+        Rails.logger.warn "Unable to create assets, will ignore: #{e}"
+      end
+
       create_tags(product, base_product.tags)
       create_inventory(product, variant)
 
