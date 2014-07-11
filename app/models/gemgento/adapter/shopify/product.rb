@@ -70,6 +70,7 @@ module Gemgento::Adapter::Shopify
       Gemgento::Adapter::ShopifyAdapter.create_association(product, variant) if product.shopify_adapter.nil?
       product = create_assets(product, base_product.image, base_product.images)
       create_tags(product, base_product.tags)
+      create_inventory(product, variant)
 
       return product
     end
@@ -260,6 +261,21 @@ module Gemgento::Adapter::Shopify
       end
 
       return product
+    end
+
+    # Create the inventory for the product.
+    #
+    # @param product [Gemgento::Product]
+    # @param variant [ShopifyAPI::Variant]
+    def self.create_inventory(product, variant)
+      product.stores.each do |store|
+        inventory = Gemgento::Inventory.find_or_initialize_by(product: product, store: store)
+        inventory.quantity = variant.inventory_quantity
+        inventory.is_in_stock = (inventory.quantity > 0 || variant.inventory_policy == 'continue')
+        inventory.backorders = variant.inventory_policy == 'continue' ? 1 : 0
+        inventory.sync_needed = inventory.new_record? || inventory.changed?
+        inventory.save
+      end
     end
 
     # Create and associate product with tags.
