@@ -37,6 +37,8 @@ module Gemgento::Adapter::Shopify
         page = page + 1
         shopify_products = ShopifyAPI::Product.where(limit: 250, page: page)
       end
+
+      push_tags
     end
 
     # Create a simple product from Shopify product data.
@@ -67,6 +69,7 @@ module Gemgento::Adapter::Shopify
 
       Gemgento::Adapter::ShopifyAdapter.create_association(product, variant) if product.shopify_adapter.nil?
       product = create_assets(product, base_product.image, base_product.images)
+      create_tags(product, base_product.tags)
 
       return product
     end
@@ -100,6 +103,7 @@ module Gemgento::Adapter::Shopify
 
       Gemgento::Adapter::ShopifyAdapter.create_association(product, base_product) if product.shopify_adapter.nil?
       product = create_assets(product, base_product.image, base_product.images)
+      create_tags(product, base_product.tags)
 
       return product
     end
@@ -256,6 +260,39 @@ module Gemgento::Adapter::Shopify
       end
 
       return product
+    end
+
+    # Create and associate product with tags.
+    #
+    # @param product [Gemgento::Product]
+    # @param tags [String]
+    # @return [Void]
+    def self.create_tags(product, tags)
+      tags.split(',').each do |tag_name|
+        tag = Gemgento::Tag.find_or_initialize_by(name: tag_name.strip)
+        tag.status = 1
+        tag.sync_needed = false
+        tag.save
+
+        Gemgento::Store.all.each do |store|
+          next if tag.stores.include? store
+          tag.store_tags.create(store: store)
+        end
+
+        tag.products << product unless tag.products.include? product
+        tag.sync_needed = false
+        tag.save
+      end
+    end
+
+    # Push all tags to Magento.
+    #
+    # @return [Void]
+    def self.push_tags
+      Gemgento::Tag.all.each do |tag|
+        tag.sync_needed = true
+        tag.save
+      end
     end
 
   end

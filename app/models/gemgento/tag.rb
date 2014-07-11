@@ -5,6 +5,8 @@ module Gemgento
 
     has_and_belongs_to_many :products, class_name: 'Gemgento::Product', join_table: 'gemgento_products_tags'
 
+    validates :name, uniqueness: true
+
     after_save :sync_local_to_magento
 
     # Get the tag base popularity for a store.
