@@ -28,7 +28,7 @@ module Gemgento::Adapter::Shopify
           if product.variants.count > 1 && !skip?(skip_existing, product)
             product.variants.each do |variant|
               if skip?(skip_existing, variant)
-                simple_products << shopify_adapter.gemgento_model
+                simple_products << Gemgento::Adapter::ShopifyAdapter.find_by_shopify_model(variant).gemgento_model
               else
                 simple_products << create_simple_product(product, variant, false)
               end
