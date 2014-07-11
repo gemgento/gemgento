@@ -31,11 +31,11 @@ module Gemgento::Adapter::Shopify
         category = Gemgento::Category.new
       end
 
-      category = Gemgento::Category.find_or_initialize_by(url_key: collection.handle)
+      category.url_key = collection.handle
       category.name = collection.title
       category.parent = Gemgento::Category.root
       category.image = URI.parse(collection.image) if collection.has_attribute? :image
-      category.is_active = collection.published
+      category.is_active = collection.published_at ? true : false
       category.include_in_menu = false
       category.stores = Gemgento::Store.all
       category.sync_needed = true
