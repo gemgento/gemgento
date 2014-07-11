@@ -29,7 +29,7 @@ module Gemgento::Adapter::Shopify
       address.sync_needed = true
       address.save
 
-      Gemgento::Adapter::ShopifyAdapter.create_association(address, shopify_address) if address.shopify_adapter.empty?
+      Gemgento::Adapter::ShopifyAdapter.create_association(address, shopify_address) if address.shopify_adapter.nil?
     end
 
   end

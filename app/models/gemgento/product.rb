@@ -18,6 +18,7 @@ module Gemgento
     has_one :shopify_adapter, class_name: 'Gemgento::Adapter::ShopifyAdapter', as: :gemgento_model
 
     has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_products', class_name: 'Gemgento::Store'
+    has_and_belongs_to_many :tags, class_name: 'Gemgento::Tag', join_table: 'gemgento_products_tags'
     has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'Gemgento::ProductAttribute'
     has_and_belongs_to_many :configurable_products, -> { distinct },
                             join_table: 'gemgento_configurable_simple_relations',

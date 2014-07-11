@@ -15,20 +15,27 @@ module Gemgento::Adapter::Shopify
     #
     # @return [void]
     def self.import
+      page = 1
       ShopifyAPI::Base.site = Gemgento::Adapter::ShopifyAdapter.api_url
+      shopify_products = ShopifyAPI::Product.where(limit: 250, page: page)
 
-      ShopifyAPI::Product.all.each do |product|
-        simple_products = []
+      while shopify_products.any?
+        shopify_products.each do |product|
+          simple_products = []
 
-        if product.variants.count > 1
-          product.variants.each do |variant|
-            simple_products << create_simple_product(product, variant, false)
+          if product.variants.count > 1
+            product.variants.each do |variant|
+              simple_products << create_simple_product(product, variant, false)
+            end
+
+            create_configurable_product(product, simple_products)
+          else
+            create_simple_product(product, product.variants.first, true)
           end
-
-          create_configurable_product(product, simple_products)
-        else
-          create_simple_product(product, product.variants.first, true)
         end
+
+        page = page + 1
+        shopify_products = ShopifyAPI::Product.where(limit: 250, page: page)
       end
     end
 
