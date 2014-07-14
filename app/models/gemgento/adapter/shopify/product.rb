@@ -13,24 +13,30 @@ module Gemgento::Adapter::Shopify
 
     # Import products from Shopify to Gemgento.
     #
+    # @param skip_existing [Boolean]
     # @return [void]
-    def self.import
+    def self.import(skip_existing = false)
       page = 1
       ShopifyAPI::Base.site = Gemgento::Adapter::ShopifyAdapter.api_url
       shopify_products = ShopifyAPI::Product.where(limit: 250, page: page)
 
       while shopify_products.any?
+
         shopify_products.each do |product|
           simple_products = []
 
-          if product.variants.count > 1
+          if product.variants.count > 1 && !skip?(skip_existing, product)
             product.variants.each do |variant|
-              simple_products << create_simple_product(product, variant, false)
+              if skip?(skip_existing, variant)
+                simple_products << Gemgento::Adapter::ShopifyAdapter.find_by_shopify_model(variant).gemgento_model
+              else
+                simple_products << create_simple_product(product, variant, false)
+              end
             end
 
             create_configurable_product(product, simple_products)
           else
-            create_simple_product(product, product.variants.first, true)
+            create_simple_product(product, product.variants.first, true) unless skip?(skip_existing, product.variants.first)
           end
         end
 
@@ -41,6 +47,16 @@ module Gemgento::Adapter::Shopify
       push_tags
     end
 
+    # Determine if product import can be skipped.
+    #
+    # @param skip_existing [Boolean]
+    # @param shopify_model [Object]
+    # @return [Boolean]
+    def self.skip?(skip_existing, shopify_model)
+      shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by_shopify_model(shopify_model)
+      return skip_existing && (shopify_adapter && !shopify_adapter.gemgento_model.magento_id.nil?)
+    end
+
     # Create a simple product from Shopify product data.
     #
     # @param base_product [ShopifyAPI::Product]
@@ -48,7 +64,7 @@ module Gemgento::Adapter::Shopify
     # @param is_catalog_visible [Boolean]
     # @return [Gemgento::Product]
     def self.create_simple_product(base_product, variant, is_catalog_visible)
-      product = initialize_product(base_product, variant.sku, 'simple', is_catalog_visible)
+      product = initialize_product(variant, base_product, variant.sku, 'simple', is_catalog_visible)
       product.set_attribute_value('barcode', variant.barcode)
       product.set_attribute_value('compare_at_price', variant.compare_at_price)
       product.set_attribute_value('fulfillment_service', variant.fulfillment_service)
@@ -68,8 +84,15 @@ module Gemgento::Adapter::Shopify
       product.save
 
       Gemgento::Adapter::ShopifyAdapter.create_association(product, variant) if product.shopify_adapter.nil?
-      product = create_assets(product, base_product.image, base_product.images)
+
+      begin
+        product = create_assets(product, base_product.image, base_product.images)
+      rescue => e
+        Rails.logger.warn "Unable to create assets, will ignore: #{e}"
+      end
+
       create_tags(product, base_product.tags)
+      create_inventory(product, variant)
 
       return product
     end
@@ -80,7 +103,8 @@ module Gemgento::Adapter::Shopify
     # @param simple_products [Array(Gemgento::Product)]
     # @return [Gemgento::Product]
     def self.create_configurable_product(base_product, simple_products)
-      product = initialize_product(base_product, "#{simple_products.first.sku}_configurable", 'configurable', true)
+      product = initialize_product(base_product, base_product, "#{simple_products.first.sku}_configurable", 'configurable', true)
+
       product.set_attribute_value('barcode', simple_products.first.barcode)
       product.set_attribute_value('compare_at_price', simple_products.first.compare_at_price)
       product.set_attribute_value('fulfillment_service', simple_products.first.fulfillment_service)
@@ -102,7 +126,13 @@ module Gemgento::Adapter::Shopify
       product.save
 
       Gemgento::Adapter::ShopifyAdapter.create_association(product, base_product) if product.shopify_adapter.nil?
-      product = create_assets(product, base_product.image, base_product.images)
+
+      begin
+        product = create_assets(product, base_product.image, base_product.images)
+      rescue => e
+        Rails.logger.warn "Unable to create assets, will ignore: #{e}"
+      end
+
       create_tags(product, base_product.tags)
 
       return product
@@ -110,13 +140,14 @@ module Gemgento::Adapter::Shopify
 
     # Initialize a Gemgento::Product given some basic data form Shopify product.
     #
+    # @param shopify_model [Object] the shopify model that the product will be associated with through Gemgento::Adapter::ShopifyAdapter
     # @param base_product [ShopifyAPI::Product]
     # @param sku [String]
     # @param magento_type [String]
     # @param is_catalog_visible [Boolean]
     # @return [Gemgento::Product]
-    def self.initialize_product(base_product, sku, magento_type, is_catalog_visible)
-      if shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by_shopify_model(base_product)
+    def self.initialize_product(shopify_model, base_product, sku, magento_type, is_catalog_visible)
+      if shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by_shopify_model(shopify_model)
         product = shopify_adapter.gemgento_model
       else
         product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: normalize_sku(sku))
@@ -260,6 +291,21 @@ module Gemgento::Adapter::Shopify
       end
 
       return product
+    end
+
+    # Create the inventory for the product.
+    #
+    # @param product [Gemgento::Product]
+    # @param variant [ShopifyAPI::Variant]
+    def self.create_inventory(product, variant)
+      product.stores.each do |store|
+        inventory = Gemgento::Inventory.find_or_initialize_by(product: product, store: store)
+        inventory.quantity = variant.inventory_quantity
+        inventory.is_in_stock = (inventory.quantity > 0 || variant.inventory_policy == 'continue')
+        inventory.backorders = variant.inventory_policy == 'continue' ? 1 : 0
+        inventory.sync_needed = inventory.new_record? || inventory.changed?
+        inventory.save
+      end
     end
 
     # Create and associate product with tags.
