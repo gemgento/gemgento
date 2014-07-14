@@ -59,7 +59,6 @@ module Gemgento::Adapter::Shopify
       store = store(order)
       shipping_address = order.shipping_address
       billing_address = order.billing_address
-      payment = order.payment_details
       totals = totals(order)
       line_items = order.line_items
 
@@ -245,7 +244,27 @@ module Gemgento::Adapter::Shopify
     def self.quantity_ordered(order)
       total = 0.0
 
+      order.line_items.each do |line_item|
+        total = total + line_item.quantity
+      end
+
       return total
+    end
+
+    # Generate a string of line item details for the order.
+    #
+    # @param line_items [ShopifyAPI::LineItem]
+    # @param store [Gemgento::Store]
+    def self.products_ordered(line_items, store)
+      ordered = []
+
+      line_items.each do |line_item|
+        shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by(shopify_model_type: 'ShopifyAPI::Variant', shopify_model_id: line_item.variant_id)
+        product = shopify_adapter.gemgento_model
+        ordered << "#{product.sku}:#{line_item.quantity}:#{product.price}"
+      end
+
+      return ordered.join('|')
     end
 
     # Determine the Magento order status from a Shopify order.
