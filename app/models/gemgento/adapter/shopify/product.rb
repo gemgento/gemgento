@@ -295,5 +295,13 @@ module Gemgento::Adapter::Shopify
       end
     end
 
+    # Normalize the sku.
+    #
+    # @param sku [String]
+    # @return [String]
+    def self.normalize_sku(sku)
+      return sku
+    end
+
   end
 end

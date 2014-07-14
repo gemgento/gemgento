@@ -1,3 +1,4 @@
+require 'csv'
 require 'shopify_api'
 
 module Gemgento::Adapter::Shopify
@@ -13,6 +14,7 @@ module Gemgento::Adapter::Shopify
 
       CSV.open('orders.csv', 'wb') do |csv|
         csv << order_export_headers
+
         while shopify_orders.any?
           shopify_orders.each do |shopify_order|
             csv << order_row(shopify_order)
@@ -57,8 +59,19 @@ module Gemgento::Adapter::Shopify
     def self.order_row(order)
       user = Gemgento::User.find_by(email: order.email)
       store = store(order)
-      shipping_address = order.shipping_address
-      billing_address = order.billing_address
+
+      begin
+        shipping_address = order.shipping_address
+      rescue
+        shipping_address = nil
+      end
+
+      begin
+        billing_address = order.billing_address
+      rescue
+        billing_address = nil
+      end
+
       totals = totals(order)
       line_items = order.line_items
 
@@ -72,30 +85,30 @@ module Gemgento::Adapter::Shopify
           'payment_cryozonic_stripe', # payment_method
           'flatrate_flatrate', # shipping_method
           '', # billing_prefix
-          billing_address.first_name, # billing_firstname
+          (billing_address ? billing_address.first_name : ''), # billing_firstname
           '', # billing_middlename
-          billing_address.last_name, # billing_lastname
+          (billing_address ? billing_address.last_name : ''), # billing_lastname
           '', # billing_suffix
-          street(billing_address), # billing_street_full
-          billing_address.city, # billing_city
-          billing_address.province, # billing_region
-          billing_address.country, # billing_country
-          billing_address.zip, # billing_postcode
-          billing_address.phone, # billing_telephone
-          billing_address.company, # billing_company
+          (billing_address ? street(billing_address) : ''), # billing_street_full
+          (billing_address ? billing_address.city : ''), # billing_city
+          (billing_address ? billing_address.province : ''), # billing_region
+          (billing_address ? billing_address.country : ''), # billing_country
+          (billing_address ? billing_address.zip : ''), # billing_postcode
+          (billing_address ? billing_address.phone : ''), # billing_telephone
+          (billing_address ? billing_address.company : ''), # billing_company
           '', # billing_fax
           '', # shipping_prefix
-          shipping_address.first_name, # shipping_firstname
+          (shipping_address ? shipping_address.first_name : ''), # shipping_firstname
           '', # shipping_middlename
-          shipping_address.last_name, # shipping_lastname
+          (shipping_address ? shipping_address.last_name : ''), # shipping_lastname
           '', # shipping_suffix
-          street(shipping_address), # shipping_street_full
-          shipping_address.city, # shipping_city
-          shipping_address.province, # shipping_region
-          shipping_address.country, # shipping_country
-          shipping_address.zip, # shipping_postcode
-          shipping_address.phone, # shipping_telephone
-          shipping_address.company, # shipping_company
+          (shipping_address ? street(shipping_address) : ''), # shipping_street_full
+          (shipping_address ? shipping_address.city : ''), # shipping_city
+          (shipping_address ? shipping_address.province : ''), # shipping_region
+          (shipping_address ? shipping_address.country : ''), # shipping_country
+          (shipping_address ? shipping_address.zip : ''), # shipping_postcode
+          (shipping_address ? shipping_address.phone : ''), # shipping_telephone
+          (shipping_address ? shipping_address.company : ''), # shipping_company
           '', # shipping_fax
           store.name, # created_in
           (order.buyer_accepts_marketing ? 1 : 0), # is_subscribed
@@ -154,7 +167,7 @@ module Gemgento::Adapter::Shopify
           0, # shipping_tax_refunded
           0, # base_shipping_tax_refunded
           products_ordered(line_items, store), # products_ordered
-          order_status(order.state) # order_status
+          order_status(order) # order_status
       ]
     end
 
@@ -179,7 +192,7 @@ module Gemgento::Adapter::Shopify
       totals[:grand] = order.total_price
       totals[:refunded] = refund_amount(order)
       totals[:paid] = paid_amount(order)
-      totals[:canceled] = canceled_amount(order)
+      totals[:canceled] = (order.financial_status == 'voided') ? totals[:paid] : 0.0
 
       return totals
     end
@@ -207,15 +220,35 @@ module Gemgento::Adapter::Shopify
       return street
     end
 
+    # Calculate the amount paid for an order.
+    #
+    # @param order [ShopifyAPI::Order]
+    # @return [Float]
+    def self.paid_amount(order)
+      return order.total_price if order.financial_status == 'paid'
+
+      begin
+        total = 0.0
+
+        order.transactions.each do |transaction|
+          total = total + transaction.amount.to_f if (transaction.kind == 'capture' && transaction.status == 'success')
+        end
+
+        return total
+      rescue
+        return 0.0
+      end
+    end
+
     # Calculate total shipping cost for shopify order.
     #
     # @param order [ShopifyAPI::Order]
-    # @return [Double]
+    # @return [Float]
     def self.shipping_amount(order)
       total = 0.0
 
       order.shipping_lines.each do |shipping_line|
-        total = total + shipping_line.price
+        total = total + shipping_line.price.to_f
       end
 
       return total
@@ -224,13 +257,13 @@ module Gemgento::Adapter::Shopify
     # Calculate the total amount refunded.
     #
     # @param order [ShopifyAPI::Order]
-    # @return [Double]
+    # @return [Float]
     def self.refund_amount(order)
       total = 0.0
 
       order.refunds.each do |refund|
         refund.transactions.each do |transaction|
-          total = total + refund.amount if transaction.kind = 'refund'
+          total = total + transaction.amount.to_f if transaction.kind = 'refund'
         end
       end
 
@@ -240,12 +273,12 @@ module Gemgento::Adapter::Shopify
     # Calculate total quantity of ordered items.
     #
     # @param [ShopifyAPI::Order]
-    # @return [Double]
+    # @return [Float]
     def self.quantity_ordered(order)
       total = 0.0
 
       order.line_items.each do |line_item|
-        total = total + line_item.quantity
+        total = total + line_item.quantity.to_f
       end
 
       return total
@@ -259,9 +292,17 @@ module Gemgento::Adapter::Shopify
       ordered = []
 
       line_items.each do |line_item|
-        shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by(shopify_model_type: 'ShopifyAPI::Variant', shopify_model_id: line_item.variant_id)
-        product = shopify_adapter.gemgento_model
-        ordered << "#{product.sku}:#{line_item.quantity}:#{product.price}"
+        if shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by(shopify_model_type: 'ShopifyAPI::Variant', shopify_model_id: line_item.variant_id)
+          product = shopify_adapter.gemgento_model
+        else
+          product = Gemgento::Product.find_by(sku: Gemgento::Adapter::Shopify::Product.normalize_sku(line_item.sku))
+        end
+
+        if product
+          ordered << "#{product.sku}:#{line_item.quantity}:#{line_item.price}"
+        else
+          ordered << "#{Gemgento::Adapter::Shopify::Product.normalize_sku(line_item.sku)}:#{line_item.quantity}:#{line_item.price}"
+        end
       end
 
       return ordered.join('|')
