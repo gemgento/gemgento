@@ -119,7 +119,7 @@ module Gemgento::Adapter::Shopify
       if shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by_shopify_model(base_product)
         product = shopify_adapter.gemgento_model
       else
-        product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: sku)
+        product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: normalize_sku(sku))
       end
 
       product.magento_type = magento_type
