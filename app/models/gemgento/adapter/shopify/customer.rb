@@ -5,8 +5,9 @@ module Gemgento::Adapter::Shopify
 
     # Import all customers from Shopify.
     #
+    # @param skip_existing [Boolean]
     # @return [Void]
-    def self.import
+    def self.import(skip_existing = false)
       page = 1
       ShopifyAPI::Base.site = Gemgento::Adapter::ShopifyAdapter.api_url
 
@@ -14,8 +15,8 @@ module Gemgento::Adapter::Shopify
 
       while shopify_customers.any?
         shopify_customers.each do |customer|
-          user = create_user(customer)
-          create_addresses(customer, user)
+          user = create_user(customer, skip_existing)
+          create_addresses(customer, user, skip_existing)
         end
 
         page = page + 1
@@ -26,10 +27,12 @@ module Gemgento::Adapter::Shopify
     # Create a user from Shopify customer.
     #
     # @param shopify_customer [ShopifyAPI::Customer]
+    # @param skip_existing [Boolean]
     # @return [Gemgento::User]
-    def self.create_user(shopify_customer)
+    def self.create_user(shopify_customer, skip_existing)
       if shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by_shopify_model(shopify_customer)
         user = shopify_adapter.gemgento_model
+        return user if skip_existing && !user.magento_id.nil?
       else
         user = Gemgento::User.new
       end
@@ -51,10 +54,11 @@ module Gemgento::Adapter::Shopify
     #
     # @param shopify_customer [ShopifyAPI::Customer]
     # @param user [Gemgento::User]
+    # @param skip_existing [Boolean]
     # @return [Void]
-    def self.create_addresses(shopify_customer, user)
+    def self.create_addresses(shopify_customer, user, skip_existing)
       shopify_customer.addresses.each do |shopify_address|
-        Gemgento::Adapter::Shopify::Address.import(shopify_address, user)
+        Gemgento::Adapter::Shopify::Address.import(shopify_address, user, skip_existing)
       end
     end
 

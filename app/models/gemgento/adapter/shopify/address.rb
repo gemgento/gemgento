@@ -5,10 +5,12 @@ module Gemgento::Adapter::Shopify
     #
     # @param address [ShopifyAPI::Address]
     # @param user [Gemgento::User]
-    # @param is_default [Boolean]
-    def self.import(shopify_address, user)
+    # @param skip_existing[Boolean]
+    # @return [Gemgento::Address]
+    def self.import(shopify_address, user, skip_existing = false)
       if shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by_shopify_model(shopify_address)
         address = shopify_adapter.gemgento_model
+        return address if skip_existing
       else
         address = Gemgento::Address.new
       end
@@ -30,6 +32,8 @@ module Gemgento::Adapter::Shopify
       address.save
 
       Gemgento::Adapter::ShopifyAdapter.create_association(address, shopify_address) if address.shopify_adapter.nil?
+
+      return address
     end
 
   end
