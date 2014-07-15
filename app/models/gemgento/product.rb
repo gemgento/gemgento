@@ -73,11 +73,13 @@ module Gemgento
 
         # if there are option values, get the actual value instead of label
         if product_attribute.frontend_input == 'select'
+          return true if value.nil?
           label = value
           attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: label, store: store)
 
           if attribute_option.nil?
             attribute_option = create_attribute_option(product_attribute, label, store)
+            return false if attribute_option.nil?
           end
 
           value = attribute_option.value
