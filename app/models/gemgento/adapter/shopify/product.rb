@@ -111,6 +111,7 @@ module Gemgento::Adapter::Shopify
       product.set_attribute_value('weight', simple_products.first.weight)
       product.set_attribute_value('price', simple_products.first.price)
       product.set_attribute_value('name', base_product.title)
+      product.set_attribute_value('description', base_product.body_html)
 
       simple_products.uniq.each do |simple_product|
         simple_product.configurable_products << product unless simple_product.configurable_products.include? product
