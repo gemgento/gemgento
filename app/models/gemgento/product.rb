@@ -80,7 +80,7 @@ module Gemgento
             attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, value: value, store: store)
 
             if attribute_option.nil?
-              attribute_option = create_attribute_option(product_attribute, label, store)
+              attribute_option = create_attribute_option(product_attribute, value, store)
               return false if attribute_option.nil?
             end
           end

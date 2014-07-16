@@ -344,8 +344,8 @@ module Gemgento
             product.product_attribute_values.where(store: store).each do |product_attribute_value|
               if !product_attribute_value.value.nil? && !product_attribute_value.product_attribute.nil?
                 attributes << {
-                    'key' => product_attribute_value.product_attribute.code,
-                    'value' => product.attribute_value(product_attribute_value.product_attribute.code, store)
+                    key: product_attribute_value.product_attribute.code,
+                    value: product.attribute_value(product_attribute_value.product_attribute.code, store)
                 }
               end
             end
