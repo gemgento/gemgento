@@ -103,7 +103,7 @@ module Gemgento::Adapter::Shopify
     # @param simple_products [Array(Gemgento::Product)]
     # @return [Gemgento::Product]
     def self.create_configurable_product(base_product, simple_products)
-      product = initialize_product(base_product, base_product, "#{simple_products.first.sku}_configurable", 'configurable', true)
+      product = initialize_product(base_product, base_product, "#{simple_products.first.sku}_base", 'configurable', true)
 
       product.set_attribute_value('barcode', simple_products.first.barcode)
       product.set_attribute_value('compare_at_price', simple_products.first.compare_at_price)
@@ -151,7 +151,7 @@ module Gemgento::Adapter::Shopify
       if shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by_shopify_model(shopify_model)
         product = shopify_adapter.gemgento_model
       else
-        product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: normalize_sku(sku))
+        product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: normalize_sku(sku, base_product, base_product.variants.first))
       end
 
       product.magento_type = magento_type
@@ -345,8 +345,10 @@ module Gemgento::Adapter::Shopify
     # Normalize the sku.
     #
     # @param sku [String]
+    # @param base_product [ShopifyAPI::Product]
+    # @param variant [ShopifyAPI::ProductVariant]
     # @return [String]
-    def self.normalize_sku(sku)
+    def self.normalize_sku(sku, base_product, variant)
       return sku
     end
 
