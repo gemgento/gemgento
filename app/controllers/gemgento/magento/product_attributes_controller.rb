@@ -42,6 +42,7 @@ module Gemgento
     private
 
     def set_options(product_attribute, options)
+      attribute_option_ids = []
       options.each do |store_options|
         next if store_options[:options].nil?
 
@@ -57,9 +58,15 @@ module Gemgento
             product_attribute_option.store = store
             product_attribute_option.sync_needed = false
             product_attribute_option.save
+
+            attribute_option_ids << product_attribute_option.id
           end
         end
       end
+
+      product_attribute.product_attribute_options.
+          where('id NOT IN (?)', attribute_option_ids).
+          destroy_all
     end
 
   end
