@@ -132,7 +132,11 @@ module Gemgento
       if self.state != 'cart'
         super
       else
-        return self.order_items.map { |oi| oi.product.price(self.store).to_f }.inject(&:+)
+        if self.order_items.any?
+          return self.order_items.map { |oi| oi.product.price(self.store).to_f }.inject(&:+)
+        else
+          return 0
+        end
       end
     end
 
