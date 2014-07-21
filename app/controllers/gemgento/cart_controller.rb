@@ -1,16 +1,16 @@
 module Gemgento
   class CartController < Gemgento::ApplicationController
-
     ssl_allowed
 
     respond_to :js, :json, :html
+
+    before_action :set_totals, only: :show
 
     def show
       @cart = current_order
 
       respond_with @cart
     end
-
 
     def create
       @errors = []
@@ -36,21 +36,21 @@ module Gemgento
         current_order.save
         cookies[:cart] = current_order.id
       end
-      
+
       case params[:activity]
         when 'add_item'
           @product = add_item
           current_order.reload
 
           respond_to do |format|
-            format.html { render 'gemgento/cart/show' }
+            format.html { redirect_to action: 'show' }
 
             unless @product
               format.js { render '/gemgento/order/no_inventory', layout: false }
-              format.json { render json: { result: false, errors: 'Out of stock', order: current_order } }
+              format.json { render json: {result: false, errors: 'Out of stock', order: current_order} }
             else
               format.js { render '/gemgento/order/add_item', layout: false }
-              format.json { render json: { result: true, order: current_order } }
+              format.json { render json: {result: true, order: current_order} }
             end
           end
         when 'update_item'
@@ -58,14 +58,14 @@ module Gemgento
           current_order.reload
 
           respond_to do |format|
-            format.html { render 'gemgento/checkout/shopping_bag' }
+            format.html { redirect_to action: 'show' }
 
             unless @product
               format.js { render '/gemgento/order/no_inventory', :layout => false }
-              format.json { render json: { result: false, errors: 'Out of stock', order: current_order } }
+              format.json { render json: {result: false, errors: 'Out of stock', order: current_order} }
             else
               format.js { render '/gemgento/order/update_item', :layout => false }
-              format.json { render json: { result: true, order: current_order } }
+              format.json { render json: {result: true, order: current_order} }
             end
           end
         when 'remove_item'
@@ -73,9 +73,9 @@ module Gemgento
           current_order.reload
 
           respond_to do |format|
-            format.html { redirect_to gemgento.cart_url }
+            format.html { redirect_to action: 'show' }
             format.js { render '/gemgento/order/remove_item', :layout => false }
-            format.json { render json: { result: true, order: current_order } }
+            format.json { render json: {result: true, order: current_order} }
           end
         else
           raise "Unknown action - #{params[:activity]}"
@@ -140,6 +140,35 @@ module Gemgento
       raise 'Product does not exist' if product.nil?
 
       current_order.remove_item(product)
+    end
+
+    def set_totals
+      totals = current_order.get_totals
+
+      @subtotal = 0
+      @discounts = []
+      @shipping = 0
+      @tax = 0
+      @total = 0
+
+      unless totals.nil?
+        totals.each do |total|
+          unless total[:title].include? 'Discount'
+            if total[:title].include? 'Subtotal'
+              @subtotal = total[:amount].to_f
+            elsif total[:title].include? 'Grand Total'
+              @total = total[:amount].to_f
+            elsif total[:title].include? 'Tax'
+              @tax = total[:amount].to_f
+            elsif total[:title].include? 'Shipping'
+              @shipping = total[:amount].to_f
+            end
+          else
+            code = total[:title][10..-2]
+            @discounts << {code: code, amount: total[:amount]}
+          end
+        end
+      end
     end
 
   end
