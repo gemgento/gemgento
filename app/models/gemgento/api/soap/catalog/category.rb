@@ -82,7 +82,7 @@ module Gemgento
             product_positions = []
             Gemgento::Product.unscoped do
               category.product_categories.where(store: store).each do |product_category|
-                next unless product_category.product.deleted_at.nil?
+                next if product_category.category.nil? or product_category.product.nil? or !product_category.product.deleted_at.nil?
 
                 product_positions << {
                     product_id: product_category.product.magento_id,
