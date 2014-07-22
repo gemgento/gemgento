@@ -31,8 +31,7 @@ module Gemgento
                             association_foreign_key: 'simple_product_id',
                             class_name: 'Gemgento::Product'
 
-    default_scope -> { includes([{product_attribute_values: :product_attribute}, {assets: [:asset_file, :asset_types]}, :inventories, :swatch]) }
-
+    scope :eager, -> { includes([{product_attribute_values: :product_attribute}, {assets: [:asset_file, :asset_types]}, :inventories]) }
     scope :configurable, -> { where(magento_type: 'configurable') }
     scope :simple, -> { where(magento_type: 'simple') }
     scope :enabled, -> { where(status: true) }
@@ -118,15 +117,8 @@ module Gemgento
         product_attribute = product_attribute_value.product_attribute
       end
 
-      if product_attribute_value.nil?
-        value = product_attribute.default_value
-
-        if value.nil?
-          return nil
-        end
-      else
-        value = product_attribute_value.value
-      end
+      value = product_attribute_value.nil? ? product_attribute.default_value : product_attribute_value.value
+      return nil if value.nil?
 
       if product_attribute.frontend_input == 'boolean'
         if value == 'Yes' || value == '1' || value == '1.0'
@@ -135,8 +127,7 @@ module Gemgento
           value = false
         end
       elsif product_attribute.frontend_input == 'select'
-        option = product_attribute.product_attribute_options.select { |o| o.value == value && o.store_id == store.id }.first
-
+        option = product_attribute.product_attribute_options.find_by(value: value, store: store)
         value = option.nil? ? nil : option.label
       end
 
@@ -335,56 +326,6 @@ module Gemgento
       return self.attribute_value('price')
     end
 
-    def as_json(options = nil)
-      options = {} if options.nil?
-      options.reverse_merge!(
-          store: Gemgento::Store.current,
-          active_only: true
-      )
-
-      result = super
-
-      self.product_attribute_values.select { |av| av.store_id == options[:store].id }.each do |attribute_value|
-        attribute = attribute_value.product_attribute
-        next if attribute.nil?
-        result[attribute.code] = self.attribute_value(attribute.code, options[:store])
-      end
-
-      result['currency_code'] = options[:store].currency_code
-
-      # product assets
-      result['assets'] = self.assets.where(store: options[:store])
-
-      # include simple products
-      if self.simple_products.loaded?
-        result['configurable_attribute_order'] = self.configurable_attribute_order(options[:store])
-        result['simple_products'] = []
-
-        if options[:active_only]
-          simple_products = self.simple_products.active
-        else
-          simple_products = self.simple_products
-        end
-
-        simple_products.each do |simple_product|
-          result['simple_products'] << simple_product.as_json(options)
-        end
-      else
-        result['simple_product_ids'] = self.simple_products.active.pluck(:id)
-      end
-
-      result['configurable_product_ids'] = self.configurable_products.active.pluck(:id)
-
-      # inventory flag
-      result['is_in_stock'] = self.in_stock?(1, options[:store])
-      result['inventory'] = self.inventories.find_by(store: options[:store])
-
-      # categories
-      result['categories'] = self.categories
-
-      return result
-    end
-
     def configurable_attribute_order(store = nil, active_only = true)
       store = Gemgento::Store.current if store.nil?
       order = {}
@@ -396,9 +337,9 @@ module Gemgento
       end
 
       if active_only
-        simple_products = configurable_product.simple_products.active
+        simple_products = configurable_product.simple_products.active.eager
       else
-        simple_products = self.simple_products
+        simple_products = self.simple_products.eager
       end
 
       configurable_attributes = self.product_attribute_set.product_attributes.
@@ -406,15 +347,19 @@ module Gemgento
 
       configurable_attributes.each do |attribute|
         order[attribute.code] = {}
-        attribute.product_attribute_options.where(store: store).each do |option|
 
-          simple_products.each do |simple_product|
+        simple_products.sort! do |a, b|
+          a_option = product_attribute_options.find_by(product_attribute: attribute, store: store)
+          b_option = b.product_attribute_options.find_by(product_attribute: attribute, store: store)
 
-            if simple_product.attribute_value(attribute.code, store) == option.label
-              order[attribute.code][option.label] = [] if order[attribute.code][option.label].nil?
-              order[attribute.code][option.label] << simple_product.id unless order[attribute.code][option.label].include? simple_product.id
-            end
-          end
+
+          a_option.nil? ? -1 : a_option.order <=> b_option.nil? ? -1 : b_option.order
+        end
+
+        simple_products.each do |simple_product|
+          value = simple_product.attribute_value(attribute.code, store)
+          order[attribute.code][value] = [] if order[attribute.code][value].nil?
+          order[attribute.code][value] << simple_product.id unless order[attribute.code][value].include? simple_product.id
         end
       end
 

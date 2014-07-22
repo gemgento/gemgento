@@ -63,6 +63,8 @@ module Gemgento
 
       if request.headers['X-PJAX']
         pjax_layout
+      elsif request.format == 'json'
+        false
       else
         html_layout
       end
@@ -70,6 +72,14 @@ module Gemgento
 
     def product_path(product)
       "/products/#{product.url_key}"
+    end
+
+    def json_options
+      @json_options ||= {
+          include_products: params[:include_products] ||= false,
+          include_simple_products: params[:include_simple_products] ||= false,
+          active: params[:active] ||= true
+      }
     end
 
   end

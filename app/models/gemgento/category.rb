@@ -67,26 +67,6 @@ module Gemgento
       return options
     end
 
-    # Return the Category as JSON.
-    #
-    # @param options [Hash, nil]
-    # @return [String]
-    def as_json(options = nil)
-      options = {} if options.nil?
-      options.reverse_merge!(
-          store: Gemgento::Store.current,
-          include_products: false
-      )
-
-      result = super
-
-      if options[:include_products]
-        result['products'] = self.products.active.catalog_visible.as_json({store: options[:store]})
-      end
-
-      return result
-    end
-
     # Sets the deleted_at to the current timestamp.
     #
     # @return [void]

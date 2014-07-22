@@ -116,23 +116,6 @@ module Gemgento
       return asset_type.assets.find_by(product_id: product.id, store_id: store.id)
     end
 
-    def as_json(options = {})
-      result = super
-
-      result[:styles] = { 'original' => self.image.url(:original) }
-
-      self.image.styles.keys.to_a.each do |style|
-        result[:styles][style] = self.image.url(style.to_sym)
-      end
-
-      result[:types] = []
-      self.asset_types.each do |asset_type|
-        result[:types] << asset_type.code unless result[:types].include? asset_type.code
-      end
-
-      return result
-    end
-
     private
 
     # Push Asset changes to Magento.  Creates the asset in Magento if it's new, or updates existing assets. This is an

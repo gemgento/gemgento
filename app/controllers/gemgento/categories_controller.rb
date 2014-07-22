@@ -1,8 +1,6 @@
 module Gemgento
   class CategoriesController < Gemgento::ApplicationController
 
-    respond_to :json, :html
-
     def index
       @current_category = Gemgento::Category.root
       @categories = Gemgento::Category.top_level
@@ -10,7 +8,7 @@ module Gemgento
 
       respond_to do |format|
         format.html
-        format.json { render json: @categories.as_json({ store: current_store })  }
+        format.json { render json: @categories.as_json({store: current_store}) }
       end
     end
 
@@ -22,14 +20,7 @@ module Gemgento
         @current_category = Gemgento::Category.active.find_by('id = ? OR url_key = ?', params[:id], params[:url_key]) || current_category
       end
 
-      Gemgento::Product.unscoped do
-        @products = @current_category.products.active.catalog_visible.page(params[:page])
-      end
-
-      respond_to do |format|
-        format.html
-        format.json { render json: current_category.as_json({store: current_store, include_products: true}) }
-      end
+      @products = @current_category.products.active.catalog_visible.page(params[:page])
     end
 
   end
