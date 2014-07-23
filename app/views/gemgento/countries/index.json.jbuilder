@@ -1,3 +1,3 @@
-json.cache! 'countries', expires_in: 7.days do
-  json.partial! partial: 'country', collection: @countries, as: :country
+json.cache! 'countries' do
+  json.array! @countries, partial: 'country', as: :country
 end
