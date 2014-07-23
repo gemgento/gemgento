@@ -75,7 +75,7 @@ Gemgento::Engine.routes.draw do
   resources :products, only: :show
   get '/products', to: 'products#show'
   resources :categories, :orders, :subscribers, :users
-  resources :countries, only: [:index, :show]
+  resources :countries, :regions, only: [:index, :show]
   resource :search, only: [:show], controller: 'gemgento/search'
 
   patch '/orders', to: 'orders#update'
