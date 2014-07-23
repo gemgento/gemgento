@@ -1,7 +1,7 @@
 module Gemgento
-  class CountriesController < Gemgento::ApplicationController
+  class RegionsController < Gemgento::ApplicationController
 
-    respond_to :json, :html
+  respond_to :json, :html
 
     def index
       @regions = Gemgento::Region.all
