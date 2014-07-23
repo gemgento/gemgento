@@ -20,7 +20,7 @@ module Gemgento
         @current_category = Gemgento::Category.active.find_by('id = ? OR url_key = ?', params[:id], params[:url_key]) || current_category
       end
 
-      @products = @current_category.products.active.catalog_visible.page(params[:page])
+      @products = @current_category.products.active.catalog_visible.page(params[:page]).per(params[:per])
     end
 
   end
