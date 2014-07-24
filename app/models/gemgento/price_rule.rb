@@ -142,6 +142,8 @@ module Gemgento
           return (magento_category_ids & condition_category_ids).any?
         when *%w[!= !{} !()]
           return (magento_category_ids & condition_category_ids).empty?
+        else
+          return false
       end
     end
 
@@ -159,6 +161,8 @@ module Gemgento
           return magento_attribute_set_id == condition_attribute_set_id
         when *%w[!= !{} !()]
           return magento_attribute_set_id != condition_attribute_set_id
+        else
+          return false
       end
     end
 
@@ -201,6 +205,8 @@ module Gemgento
           return condition_value.split(',').map(&:strip).include?(product_value)
         when '!()' # is not one of
           return !condition_value.split(',').map(&:strip).include?(product_value)
+        else
+          return false
       end
     end
   end
