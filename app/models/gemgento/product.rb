@@ -302,7 +302,7 @@ module Gemgento
       if self.has_special?(store)
         return self.attribute_value('special_price', store)
       else
-        return self.attribute_value('price', store)
+        return Gemgento::PriceRule.calculate_price(self, store)
       end
     end
 
