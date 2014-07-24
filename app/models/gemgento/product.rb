@@ -299,14 +299,14 @@ module Gemgento
     end
 
     def price(store = nil)
-      if self.has_special?(store)
+      if self.valid_special?(store)
         return self.attribute_value('special_price', store)
       else
         return Gemgento::PriceRule.calculate_price(self, store)
       end
     end
 
-    def has_special?(store = nil)
+    def valid_special?(store = nil)
       if self.attribute_value('special_price', store).nil? # no special price
         return false
       elsif self.attribute_value('special_from_date', store).nil? && self.attribute_value('special_to_date', store).nil? # no start or end date
@@ -320,6 +320,10 @@ module Gemgento
       else
         return false
       end
+    end
+
+    def has_special?(store = nil)
+      return self.attribute_value('price', store) != self.price(store)
     end
 
     def original_price

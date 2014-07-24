@@ -11,6 +11,7 @@ module Gemgento
     # @param store [Gemgento::Store]
     # @return Float
     def self.calculate_price(product, store = nil)
+      store = Gemgento::Store.first if store.nil?
       price = product.attribute_value('price', store).to_f
 
       PriceRule.all.each do |price_rule|
@@ -116,11 +117,11 @@ module Gemgento
     # @param product [Gemgento::Product]
     # @param store [Gemgento::Store]
     # @return [Boolean]
-    def self.meets_condition_product?(condition, product)
+    def self.meets_condition_product?(condition, product, store)
       if condition['attribute'] == 'category_ids'
         return meets_category_condition?(condition, product, store)
       elsif condition['attribute'] == 'attribute_set_id'
-        return meets_attribute_set_condition?(condition, product, store)
+        return meets_attribute_set_condition?(condition, product)
       else
         return meets_attribute_condition?(condition, product, store)
       end
@@ -133,26 +134,31 @@ module Gemgento
     # @param store [Gemgento::Store]
     # @return [Boolean]
     def self.meets_category_condition?(condition, product, store)
-      magento_category_ids = product.categories.pluck(:magento_id).uniq
+      magento_category_ids = Gemgento::ProductCategory.where(product: product, store: store).includes(:category).map{ |pc| pc.category.magento_id }.uniq
       condition_category_ids = condition['value'].split(',').map(&:to_i)
-      category_union = magento_category_ids & condition_category_ids
-      return condition['operator'] == '==' ? category_union.any? : category_union.empty?
+
+      case condition['operator']
+        when *%w[== {} ()]
+          return (magento_category_ids & condition_category_ids).any?
+        when *%w[!= !{} !()]
+          return (magento_category_ids & condition_category_ids).empty?
+      end
     end
 
     # Determines if a product meets an attribute set based condition.
     #
     # @param condition [Hash]
     # @param product [Gemgento::Product]
-    # @param store [Gemgento::Store]
     # @return [Boolean]
-    def self.meets_attribute_set_condition?(condition, product, store)
+    def self.meets_attribute_set_condition?(condition, product)
       magento_attribute_set_id = product.product_attribute_set.magento_id
       condition_attribute_set_id = condition['value'].to_i
 
-      if condition['operator'] == '=='
-        return magento_attribute_set_id == condition_attribute_set_id
-      else
-        return magento_attribute_set_id != condition_attribute_set_id
+      case condition['operator']
+        when *%w[== {} ()]
+          return magento_attribute_set_id == condition_attribute_set_id
+        when *%w[!= !{} !()]
+          return magento_attribute_set_id != condition_attribute_set_id
       end
     end
 
@@ -165,17 +171,36 @@ module Gemgento
     def self.meets_attribute_condition?(condition, product, store)
       return false unless attribute = Gemgento::ProductAttribute.find_by(code: condition['attribute'])
 
+      product_value = product.attribute_value(attribute.code, store).downcase
+
       if attribute.frontend_input == 'select'
         return false unless option = attribute.product_attribute_options.find_by(value: condition['value'], store: store)
-        value = option.label
+        condition_value = option.label.downcase
       else
-        value = condition['value']
+        condition_value = condition['value'].downcase
       end
 
-      if condition['operator'] == '=='
-        return product.attribute_value(attribute.code, store) == value
-      else
-        return product.attribute_value(attribute.code, store) != value
+      case condition['operator']
+        when '==' # is
+          return product_value == condition_value
+        when '!=' # is not
+          return product_value != condition_value
+        when '>=' # equals or greater than
+          return product_value >= condition_value
+        when '<=' # equals or less than
+          return product_value <= condition_value
+        when '>' # greater than
+          return product_value > condition_value
+        when '<' # less than
+          return product_value < condition_value
+        when '{}' # contains
+          return product_value.include?(condition_value)
+        when '!{}' # does not contain
+          return !product_value.include?(condition_value)
+        when '()' # is one of
+          return condition_value.split(',').map(&:strip).include?(product_value)
+        when '!()' # is not one of
+          return !condition_value.split(',').map(&:strip).include?(product_value)
       end
     end
   end
