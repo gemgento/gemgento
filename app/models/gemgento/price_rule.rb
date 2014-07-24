@@ -4,6 +4,9 @@ module Gemgento
   class PriceRule < ActiveRecord::Base
     serialize :conditions, Hash
 
+    has_and_belongs_to_many :stores, join_table: 'gemgento_price_rules_stores', class_name: 'Gemgento::Store'
+    has_and_belongs_to_many :user_groups, join_table: 'gemgento_price_rules_user_groups', class_name: 'Gemgento::UserGroup'
+
     default_scope ->{ order(sort_order: :asc) }
     scope :active, -> { where(is_active: true) }
 

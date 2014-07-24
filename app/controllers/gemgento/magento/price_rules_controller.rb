@@ -20,6 +20,9 @@ module Gemgento
       price_rule.conditions = data[:conditions]
       price_rule.save
 
+      price_rule.stores = Gemgento::Store.where(website_id: data[:website_ids])
+      price_rule.user_groups = Gemgento::UserGroup.where(magento_id: data[:customer_group_ids])
+
       render nothing: true
     end
 
