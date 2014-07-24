@@ -298,11 +298,16 @@ module Gemgento
       return swatches
     end
 
-    def price(store = nil)
+    # Get the product price.
+    #
+    # @param user [Gemgento::User]
+    # @param store [Gemgento::Store]
+    # @return Float
+    def price(user = nil, store = nil)
       if self.valid_special?(store)
-        return self.attribute_value('special_price', store)
+        return self.attribute_value('special_price', store).to_f
       else
-        return Gemgento::PriceRule.calculate_price(self, store)
+        return Gemgento::PriceRule.calculate_price(self, store, user)
       end
     end
 
@@ -322,8 +327,13 @@ module Gemgento
       end
     end
 
-    def has_special?(store = nil)
-      return self.attribute_value('price', store) != self.price(store)
+    # Determine if product has a special price.
+    #
+    # @param user [Gemgento::User]
+    # @param store [Gemgento::Store]
+    # @return Boolean
+    def has_special?(user = nil, store = nil)
+      return self.attribute_value('price', store) != self.price(user, store)
     end
 
     def original_price
