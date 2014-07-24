@@ -2,8 +2,10 @@ module Gemgento
 
   # @author Gemgento LLC
   class PriceRule < ActiveRecord::Base
-    default_scope ->{ order(sort_order: :asc) }
     serialize :conditions, Hash
+
+    default_scope ->{ order(sort_order: :asc) }
+    scope :active, -> { where(is_active: true) }
 
     # Calculate a product price based on PriceRules.
     #
@@ -14,7 +16,7 @@ module Gemgento
       store = Gemgento::Store.first if store.nil?
       price = product.attribute_value('price', store).to_f
 
-      PriceRule.all.each do |price_rule|
+      PriceRule.active.each do |price_rule|
         if price_rule.is_valid?(product, store)
           price = price_rule.calculate(price)
         end
@@ -55,7 +57,7 @@ module Gemgento
       when 'by_fixed'
         return [0, price - self.discount_amount].max
       when 'by_percent'
-        return price * (1- self.discount_amount / 100)
+        return price * (1 - self.discount_amount / 100)
       else
         return price
       end

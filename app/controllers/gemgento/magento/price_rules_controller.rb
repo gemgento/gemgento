@@ -24,7 +24,10 @@ module Gemgento
     end
 
     def destroy
-      price_rule.destroy if price_rule = Gemgento::ProductRule.find_by(magento_id: params[:id])
+      if price_rule = Gemgento::PriceRule.find_by(magento_id: params[:id])
+        price_rule.destroy
+      end
+
       render nothing: true
     end
 
