@@ -5,6 +5,22 @@ module Gemgento
     default_scope ->{ order(sort_order: :asc) }
     serialize :conditions, Hash
 
+    # Determines if the rule is valid for a product.
+    #
+    # @param product [Gemgento::Product]
+    # @return [Boolean]
+    def is_valid?(product)
+      if !self.is_active?
+        return false
+      elsif !self.from_date.nil? && Date.today < from_date
+        return false
+      elsif !self.to_date.nil? && Date.today > to_date
+        return false
+      else
+        return Gemgento::PriceRule.meets_condition?(self.conditions, product)
+      end
+    end
+
     # Determines if the condition is met.
     #
     # @param condition [Hash]
@@ -16,7 +32,7 @@ module Gemgento
       elsif condition['type'] == 'catalogrule/rule_condition_product'
         return meets_condition_product?(condition, product)
       else
-        return false # non-determinable condition
+        return false # non-determinable condition type
       end
     end
 
@@ -58,14 +74,12 @@ module Gemgento
     # @return [Boolean]
     def self.meets_condition_product?(condition, product)
       if condition['attribute'] == 'category_ids'
-        return meets_category_condition(condition, product)
+        return meets_category_condition?(condition, product)
       elsif condition['attribute'] == 'attribute_set_id'
-        return meets_attribute_set_condition(condition, product)
+        return meets_attribute_set_condition?(condition, product)
       else
-        return meets_attribute_condition(condition, product)
-
+        return meets_attribute_condition?(condition, product)
       end
-
     end
 
     # Determines if a product meets a category based condition.
@@ -73,7 +87,7 @@ module Gemgento
     # @param condition [Hash]
     # @param product [Gemgento::Product]
     # @return [Boolean]
-    def self.meets_category_condition(condition, product)
+    def self.meets_category_condition?(condition, product)
       magento_category_ids = product.categories.pluck(:magento_id).uniq
       condition_category_ids = condition['value'].split(',').map(&:to_i)
       category_union = magento_category_ids & condition_category_ids
@@ -85,7 +99,7 @@ module Gemgento
     # @param condition [Hash]
     # @param product [Gemgento::Product]
     # @return [Boolean]
-    def self.meets_attribute_set_condition(condition, product)
+    def self.meets_attribute_set_condition?(condition, product)
       magento_attribute_set_id = product.product_attribute_set.magento_id
       condition_attribute_set_id = condition['value'].to_i
 
@@ -101,13 +115,20 @@ module Gemgento
     # @param condition [Hash]
     # @param product [Gemgento::Product]
     # @return [Boolean]
-    def self.meets_attribute_condition(condition, product)
+    def self.meets_attribute_condition?(condition, product)
       return false unless attribute = Gemgento::ProductAttribute.find_by(code: condition['attribute'])
 
-      if condition['operator'] == '=='
-        return product.attribute_value(attribute.code) == condition['value']
+      if attribute.frontend_input == 'select'
+        return false unless option = attribute.product_attribute_options.find_by(value: condition['value'])
+        value = option.label
       else
-        return product.attribute_value(attribute.code) != condition['value']
+        value = condition['value']
+      end
+
+      if condition['operator'] == '=='
+        return product.attribute_value(attribute.code) == value
+      else
+        return product.attribute_value(attribute.code) != value
       end
     end
   end
