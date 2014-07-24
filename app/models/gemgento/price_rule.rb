@@ -15,12 +15,13 @@ module Gemgento
     # @param product [Gemgento::Product]
     # @param store [Gemgento::Store]
     # @return Float
-    def self.calculate_price(product, store = nil)
+    def self.calculate_price(product, store = nil, user = nil)
       store = Gemgento::Store.first if store.nil?
       price = product.attribute_value('price', store).to_f
+      user_group = user.nil? ? Gemgento::UserGroup.find_by(magento_id: 0) : user.user_group
 
       PriceRule.active.each do |price_rule|
-        if price_rule.is_valid?(product, store)
+        if price_rule.is_valid?(product, store, user_group)
           price = price_rule.calculate(price)
         end
 
@@ -34,9 +35,14 @@ module Gemgento
     #
     # @param product [Gemgento::Product]
     # @param store [Gemgento::Store]
+    # @param user_group [Gemgento::UserGroup]
     # @return [Boolean]
-    def is_valid?(product, store)
+    def is_valid?(product, store, user_group)
       if !self.is_active?
+        return false
+      elsif !self.stores.include?(store)
+        return false
+      elsif !self.user_groups.include?(user_group)
         return false
       elsif !self.from_date.nil? && Date.today < from_date
         return false
