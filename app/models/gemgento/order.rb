@@ -133,7 +133,7 @@ module Gemgento
         super
       else
         if self.order_items.any?
-          return self.order_items.map { |oi| oi.product.price(self.store).to_f }.inject(&:+)
+          return self.order_items.map { |oi| oi.product.price(self.user, self.store).to_f }.inject(&:+)
         else
           return 0
         end
