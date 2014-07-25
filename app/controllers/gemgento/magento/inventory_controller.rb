@@ -27,6 +27,7 @@ module Gemgento
           inventory.use_config_backorders = stock_data[:use_config_backorders]
           inventory.min_qty = stock_data[:min_qty].to_i
           inventory.use_config_min_qty = stock_data[:use_config_min_qty]
+          inventory.manage_stock = stock_data[:manage_stock]
           inventory.sync_needed = false
           inventory.save
         end
@@ -40,6 +41,7 @@ module Gemgento
             inventory.use_config_backorders = default_values[:use_config_backorders]
             inventory.min_qty = default_values[:min_qty].to_i
             inventory.use_config_min_qty = default_values[:use_config_min_qty]
+            inventory.manage_stock = default_values[:manage_stock]
             inventory.sync_needed = false
             inventory.save
           end
