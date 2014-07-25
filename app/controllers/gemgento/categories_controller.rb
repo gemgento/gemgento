@@ -4,12 +4,6 @@ module Gemgento
     def index
       @current_category = Gemgento::Category.root
       @categories = Gemgento::Category.top_level
-      @products = Gemgento::Product.all
-
-      respond_to do |format|
-        format.html
-        format.json { render json: @categories.as_json({store: current_store}) }
-      end
     end
 
     def show

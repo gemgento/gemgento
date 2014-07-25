@@ -4,7 +4,7 @@ module Gemgento
 
     respond_to :js, :json, :html
 
-    before_action :set_totals, only: :show
+    before_action :set_totals, only: :show, if: :is_cart?
 
     def show
       @cart = current_order
@@ -169,6 +169,10 @@ module Gemgento
           end
         end
       end
+    end
+
+    def is_cart?
+      !current_order.magento_quote_id.nil?
     end
 
   end
