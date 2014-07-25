@@ -145,7 +145,7 @@ module Gemgento
     # @param store [Gemgento::Store]
     # @return [Boolean]
     def self.meets_category_condition?(condition, product, store)
-      magento_category_ids = Gemgento::ProductCategory.where(product: product, store: store).includes(:category).map{ |pc| pc.category.magento_id }.uniq
+      magento_category_ids = Gemgento::ProductCategory.where(product: product, store: store).includes(:category).map{ |pc| pc.category.magento_id unless pc.category.nil? }.uniq
       condition_category_ids = condition['value'].split(',').map(&:to_i)
 
       case condition['operator']

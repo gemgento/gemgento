@@ -333,7 +333,7 @@ module Gemgento
     # @param store [Gemgento::Store]
     # @return Boolean
     def has_special?(user = nil, store = nil)
-      return self.attribute_value('price', store) != self.price(user, store)
+      return self.attribute_value('price', store).to_f != self.price(user, store)
     end
 
     def original_price
