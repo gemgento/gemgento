@@ -185,7 +185,7 @@ module Gemgento
     def self.meets_attribute_condition?(condition, product, store)
       return false unless attribute = Gemgento::ProductAttribute.find_by(code: condition['attribute'])
 
-      product_value = product.attribute_value(attribute.code, store).downcase
+      product_value = product.attribute_value(attribute.code, store).to_s.downcase
 
       if attribute.frontend_input == 'select'
         return false unless option = attribute.product_attribute_options.find_by(value: condition['value'], store: store)
