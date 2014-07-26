@@ -59,13 +59,13 @@ module Gemgento
     def calculate(price)
       case self.simple_action
       when 'to_fixed'
-        return [self.discount_amount, price].min
+        return [self.discount_amount.to_f, price].min
       when 'to_percent'
-        return price * self.discount_amount / 100
+        return price * self.discount_amount.to_f / 100
       when 'by_fixed'
-        return [0, price - self.discount_amount].max
+        return [0, price - self.discount_amount.to_f].max
       when 'by_percent'
-        return price * (1 - self.discount_amount / 100)
+        return price * (1 - self.discount_amount.to_f / 100)
       else
         return price
       end
