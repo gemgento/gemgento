@@ -23,9 +23,8 @@ module Gemgento
       PriceRule.active.each do |price_rule|
         if price_rule.is_valid?(product, store, user_group)
           price = price_rule.calculate(price)
+          return price if price_rule.stop_rules_processing?
         end
-
-        return price if price_rule.stop_rules_processing?
       end
 
       return price
