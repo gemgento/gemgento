@@ -120,7 +120,7 @@ module Gemgento
       value = product_attribute_value.nil? ? product_attribute.default_value : product_attribute_value.value
       return nil if value.nil?
 
-      if product_attribute.frontend_input == 'boolean'
+      if product_attribute.frontend_input == 'boolean' || product_attribute.code == 'is_recurring'
         if value == 'Yes' || value == '1' || value == '1.0'
           value = true
         else
