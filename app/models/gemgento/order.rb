@@ -104,14 +104,21 @@ module Gemgento
       end
     end
 
+    # Remove an item from an order in the cart state.
+    #
+    # @param product [Gemgento::Product]
+    # @return [Boolean]
     def remove_item(product)
       raise 'Order not in cart state' if self.state != 'cart'
 
-      order_item = self.order_items.where(product: product).first
+      if order_item = self.order_items.where(product: product).first
 
-      unless order_item.nil?
-        API::SOAP::Checkout::Product.remove(self, [order_item]) unless self.magento_quote_id.nil?
-        order_item.destroy
+        if self.magento_quote_id.nil? || API::SOAP::Checkout::Product.remove(self, [order_item])
+          order_item.destroy
+          return true
+        else
+          return false
+        end
       end
     end
 

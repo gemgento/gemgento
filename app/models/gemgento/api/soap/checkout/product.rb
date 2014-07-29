@@ -12,9 +12,7 @@ module Gemgento
             }
             response = Gemgento::Magento.create_call(:shopping_cart_product_add, message)
 
-            if response.success?
-              return response.body[:result]
-            end
+            return response.success?
           end
 
           def self.update(cart, products)
@@ -25,9 +23,7 @@ module Gemgento
             }
             response = Gemgento::Magento.create_call(:shopping_cart_product_update, message)
 
-            if response.success?
-              return response.body[:result]
-            end
+            return response.success?
           end
 
           def self.remove(cart, products)
@@ -38,9 +34,7 @@ module Gemgento
             }
             response = Gemgento::Magento.create_call(:shopping_cart_product_remove, message)
 
-            if response.success?
-              response.body[:result]
-            end
+            return response.success?
           end
 
           def self.list(cart)
