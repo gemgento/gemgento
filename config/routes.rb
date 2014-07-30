@@ -68,6 +68,7 @@ Gemgento::Engine.routes.draw do
     resources :price_rules, only: [:update, :destroy]
     resources :product_attribute_sets, only: [:update, :destroy]
     resources :product_attributes, only: [:update, :destroy]
+    resources :recurring_profiles, only: :update
     resources :stores, only: :update
     resources :users, only: [:update, :destroy]
   end
