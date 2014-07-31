@@ -1,5 +1,5 @@
 module Gemgento
-  class Users::OrdersController < Users::UsersBaseController
+  class User::OrdersController < User::BaseController
 
     def index
       @orders = current_user.orders.placed.order('created_at DESC')

@@ -27,6 +27,8 @@ module Gemgento
 
     before_destroy :destroy_magento
 
+    default_scope -> { order(is_default_billing: :desc, is_default_shipping: :desc, updated_at: :desc) }
+
     # Pushes Address changes to Magento if the address belongs to a User.  Creates a new address if one does not exist
     # and updates existing addresses.
     #

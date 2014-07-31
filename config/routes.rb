@@ -25,8 +25,8 @@ Gemgento::Engine.routes.draw do
   get '/sync/orders', to: 'sync#orders'
   get '/sync/busy', to: 'sync#busy'
 
-  devise_for :users, class_name: 'Gemgento::User',
-             controllers: {:sessions => 'gemgento/users/sessions', :registrations => 'gemgento/users/registrations', :passwords => 'gemgento/users/passwords'},
+  devise_for :user, class_name: 'Gemgento::User',
+             controllers: {:sessions => 'gemgento/user/sessions', :registrations => 'gemgento/user/registrations', :passwords => 'gemgento/user/passwords'},
              skip: [:unlocks, :omniauth_callbacks],
              module: :devise
 
@@ -49,7 +49,7 @@ Gemgento::Engine.routes.draw do
   end
 
   # - User Account Actions - #
-  namespace :users do
+  namespace :user do
     resources :orders, only: [:index, :show]
     resources :addresses
 
@@ -76,7 +76,7 @@ Gemgento::Engine.routes.draw do
   # - Gemgento Resources - #
   resources :products, only: :show
   get '/products', to: 'products#show'
-  resources :categories, :orders, :subscribers, :users
+  resources :categories, :orders, :subscribers
   resources :countries, :regions, only: [:index, :show]
   resource :search, only: [:show], controller: 'gemgento/search'
 

@@ -1,5 +1,5 @@
 module Gemgento
-  class Users::AddressesController < Users::UsersBaseController
+  class User::AddressesController < User::BaseController
 
     def index
       @new_shipping_address = Address.new
@@ -37,7 +37,8 @@ module Gemgento
 
       respond_to do |format|
         if @address.save
-          format.html { redirect_to action: 'index', notice: 'The new address was created successfully.' }
+          flash[:notice] = 'The new address was created successfully.'
+          format.html { redirect_to action: 'index' }
           format.js { render '/gemgento/users/addresses/success' }
           format.json { render json: { result: true, address: @address } }
         else
@@ -54,7 +55,8 @@ module Gemgento
 
       respond_to do |format|
         if @address.update_attributes(address_params)
-          format.html { redirect_to action: 'index', notice: 'The new address was updated successfully.' }
+          flash[:notice] = 'The new address was updated successfully.'
+          format.html { redirect_to action: 'index' }
           format.js { render '/gemgento/users/addresses/success' }
           format.json { render json: { result: true, address: @address } }
         else
@@ -67,9 +69,9 @@ module Gemgento
 
     def destroy
       current_user.address_book.find(params[:id]).destroy
-
+      flash[:notice] = 'The address was removed.'
       respond_to do |format|
-        format.html
+        format.html { redirect_to action: 'index' }
         format.json { render json: { result: true } }
       end
     end

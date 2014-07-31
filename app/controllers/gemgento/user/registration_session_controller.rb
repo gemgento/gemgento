@@ -1,5 +1,5 @@
 module Gemgento
-  class Users::RegistrationSessionController < Users::UsersBaseController
+  class User::RegistrationSessionController < User::BaseController
 
     skip_before_filter :auth_user
     before_filter :set_user_instances

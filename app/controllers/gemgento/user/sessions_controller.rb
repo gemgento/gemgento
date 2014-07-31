@@ -1,5 +1,5 @@
 module Gemgento
-  class Users::SessionsController < Devise::SessionsController
+  class User::SessionsController < Devise::SessionsController
     include SslRequirement
     ssl_required :new, :create, :destroy
     respond_to :html, :json
