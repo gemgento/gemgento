@@ -126,8 +126,10 @@ module Gemgento
       raise 'Order not in cart state' if self.state != 'cart'
 
       if order_item = self.order_items.where(product: product).first
-
         if self.magento_quote_id.nil?
+          order_item.destroy
+          return true
+        else
           result = API::SOAP::Checkout::Product.remove(self, [order_item])
 
           if result == true
@@ -136,9 +138,9 @@ module Gemgento
           else
             return result
           end
-        else
-          return 'Product is not in the cart'
         end
+      else
+        return 'Product is not in the cart'
       end
     end
 

@@ -56,7 +56,7 @@ module Gemgento
             else
               format.html { redirect_to action: 'show' }
               format.js { render '/gemgento/order/add_item', layout: false }
-              format.json { render json: {result: true, order: current_order} }
+              format.json { render json: { result: true, order: current_order } }
             end
           end
         when 'update_item'
@@ -72,11 +72,11 @@ module Gemgento
                   redirect_to root_path
                 end
               }
-              format.js { render '/gemgento/order/no_inventory', :layout => false }
+              format.js { render '/gemgento/order/no_inventory', layout: false }
               format.json { render json: {result: false, errors: 'Out of stock', order: current_order} }
             else
               format.html { redirect_to action: 'show' }
-              format.js { render '/gemgento/order/update_item', :layout => false }
+              format.js { render '/gemgento/order/update_item', layout: false }
               format.json { render json: {result: true, order: current_order} }
             end
           end
@@ -86,7 +86,7 @@ module Gemgento
 
           respond_to do |format|
             format.html { redirect_to action: 'show' }
-            format.js { render '/gemgento/order/remove_item', :layout => false }
+            format.js { render '/gemgento/order/remove_item', layout: false }
             format.json { render json: {result: true, order: current_order} }
           end
         else
