@@ -52,6 +52,11 @@ module Gemgento
       cart
     end
 
+    # Add an item to an order in the cart state.
+    #
+    # @param [Gemgento::Product] product
+    # @param [Float] quantity
+    # @return [Boolean, String] true if the order item was added, otherwise error message
     def add_item(product, quantity = 1)
       raise 'Order not in cart state' if self.state != 'cart'
 
@@ -67,11 +72,13 @@ module Gemgento
         self.push_cart if self.magento_quote_id.nil?
 
         unless self.magento_quote_id.nil?
-          if API::SOAP::Checkout::Product.add(self, [order_item])
+          result = API::SOAP::Checkout::Product.add(self, [order_item])
+
+          if result == true
             return true
           else
             order_item.destroy
-            return false
+            return result
           end
         end
       else
@@ -79,7 +86,12 @@ module Gemgento
       end
     end
 
-    def update_item(product, quantity = 1)
+    # Update an item in an order that is in the cart state.
+    #
+    # @param [Gemgento::Product] product
+    # @param [Float] quantity
+    # @return [Boolean, String] true if the order item was updated, otherwise error message
+    def update_item(product, quantity = 1.0)
       raise 'Order not in cart state' if self.state != 'cart'
 
       order_item = self.order_items.where(product: product).first
@@ -90,13 +102,15 @@ module Gemgento
         order_item.save
 
         unless self.magento_quote_id.nil?
-          if API::SOAP::Checkout::Product.update(self, [order_item])
+          result = API::SOAP::Checkout::Product.update(self, [order_item])
+
+          if result == true
             return true
           else
             order_item.qty_ordered = old_quantity
             order_item.save
 
-            return false
+            return result
           end
         end
       else
@@ -107,17 +121,23 @@ module Gemgento
     # Remove an item from an order in the cart state.
     #
     # @param product [Gemgento::Product]
-    # @return [Boolean]
+    # @return [Boolean, String] true if the item was remove, otherwise error message
     def remove_item(product)
       raise 'Order not in cart state' if self.state != 'cart'
 
       if order_item = self.order_items.where(product: product).first
 
-        if self.magento_quote_id.nil? || API::SOAP::Checkout::Product.remove(self, [order_item])
-          order_item.destroy
-          return true
+        if self.magento_quote_id.nil?
+          result = API::SOAP::Checkout::Product.remove(self, [order_item])
+
+          if result == true
+            order_item.destroy
+            return true
+          else
+            return result
+          end
         else
-          return false
+          return 'Product is not in the cart'
         end
       end
     end

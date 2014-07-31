@@ -43,12 +43,18 @@ module Gemgento
           current_order.reload
 
           respond_to do |format|
-            format.html { redirect_to action: 'show' }
-
             unless @product
+              format.html {
+                begin
+                  redirect_to :back
+                rescue
+                  redirect_to root_path
+                end
+              }
               format.js { render '/gemgento/order/no_inventory', layout: false }
               format.json { render json: {result: false, errors: 'Out of stock', order: current_order} }
             else
+              format.html { redirect_to action: 'show' }
               format.js { render '/gemgento/order/add_item', layout: false }
               format.json { render json: {result: true, order: current_order} }
             end
@@ -58,12 +64,18 @@ module Gemgento
           current_order.reload
 
           respond_to do |format|
-            format.html { redirect_to action: 'show' }
-
             unless @product
+              format.html {
+                begin
+                  redirect_to :back
+                rescue
+                  redirect_to root_path
+                end
+              }
               format.js { render '/gemgento/order/no_inventory', :layout => false }
               format.json { render json: {result: false, errors: 'Out of stock', order: current_order} }
             else
+              format.html { redirect_to action: 'show' }
               format.js { render '/gemgento/order/update_item', :layout => false }
               format.json { render json: {result: true, order: current_order} }
             end
@@ -99,9 +111,11 @@ module Gemgento
       if order_item.nil?
         if product.in_stock? params[:quantity], current_store
           # add the item to the order
-          if current_order.add_item(product, params[:quantity])
+          result = current_order.add_item(product, params[:quantity])
+          if result == true
             return product
           else
+            flash[:error] = result
             return false
           end
         else
@@ -123,9 +137,11 @@ module Gemgento
 
       if product.in_stock? params[:quantity], current_store
         # update the item
-        if current_order.update_item(product, params[:quantity])
+        result = current_order.update_item(product, params[:quantity])
+        if result == true
           return product
         else
+          flash[:error] = result
           return false
         end
       else
