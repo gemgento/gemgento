@@ -144,6 +144,10 @@ module Gemgento
       end
     end
 
+    def to_param
+      self.increment_id
+    end
+
     def push_cart
       raise 'Cart already pushed, creating a new cart' unless self.magento_quote_id.nil?
       result = API::SOAP::Checkout::Cart.create(self)
