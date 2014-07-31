@@ -48,6 +48,8 @@ module Gemgento
 
     validates_uniqueness_of :sku, :scope => [:deleted_at]
 
+    attr_accessor :configurable_attribute_ordering
+
     def self.index
       if Product.all.size == 0
         API::SOAP::Catalog::Product.fetch_all
@@ -340,7 +342,21 @@ module Gemgento
       return self.attribute_value('price')
     end
 
+    # Return the ordering of configurable attribute values.
+    #
+    # @param [Gemgento::Store, Nil] store
+    # @param [Boolean] active_only
+    # @param [Hash(Hash(Array(Integer)))]
     def configurable_attribute_order(store = nil, active_only = true)
+      self.configurable_attribute_ordering ||= self.get_configurable_attribute_ordering(store, active_only)
+    end
+
+    # Calculate the ordering of configurable attribute values
+    #
+    # @param [Gemgento::Store, Nil]
+    # @param [Boolean]
+    # @return [Hash(Hash(Array(Integer)))]
+    def get_configurable_attribute_ordering(store, active_only)
       store = Gemgento::Store.current if store.nil?
       order = {}
 
@@ -380,6 +396,9 @@ module Gemgento
       return order
     end
 
+    # Determine if the product is catalog visible.
+    #
+    # @return [Boolean]
     def is_catalog_visible?
       return [2, 4].include?(self.visibility)
     end
