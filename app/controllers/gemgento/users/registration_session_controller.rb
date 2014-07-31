@@ -2,12 +2,9 @@ module Gemgento
   class Users::RegistrationSessionController < Users::UsersBaseController
 
     skip_before_filter :auth_user
+    before_filter :set_user_instances
 
     respond_to :json, :html
-
-    def new
-      @user = Gemgento::User.new
-    end
 
     def create
       case params[:activity]
@@ -22,12 +19,17 @@ module Gemgento
 
     private
 
+    def set_user_instances
+      @existing_user = Gemgento::User.new
+      @new_user = Gemgento::User.new
+    end
+
     def create_session
-      @user = User::is_valid_login(user_session_params[:email], user_session_params[:password])
+      @existing_user = User::is_valid_login(user_session_params[:email], user_session_params[:password])
       result = false
 
-      unless @user.nil?
-        sign_in(:user, @user)
+      unless @existing_user.nil?
+        sign_in(:user, @existing_user)
         result = true
       end
 
@@ -36,8 +38,7 @@ module Gemgento
           format.html { redirect_to after_sign_in_path }
           format.json { render json: { result: true, user: current_user } }
         else
-          @user = User.new
-          @user.email = user_session_params[:email]
+          @existing_user = Gemgento::User.new(email: user_session_params[:email])
           flash.keep[:error] = 'Invalid username and password'
 
           format.html { render 'new' }
@@ -52,25 +53,23 @@ module Gemgento
     end
 
     def create_registration
-      @user = User.new(user_registration_params)
-      @user.stores << current_store
-      @user.user_group = Gemgento::UserGroup.where(code: 'General').first
+      @new_user = Gemgento::User.new(user_registration_params)
+      @new_user.stores << current_store
+      @new_user.user_group = Gemgento::UserGroup.where(code: 'General').first
 
       respond_to do |format|
-        if @user.save
-          sign_in(:user, @user)
-          Gemgento::Subscriber.add_user(@user) if params[:subscribe]
+        if @new_user.save
+          sign_in(:user, @new_user)
+          Gemgento::Subscriber.add_user(@new_user) if params[:subscribe]
 
           format.html { redirect_to after_register_path }
-          format.json { render json: { result: true, user: @user, order: current_order } }
+          format.json { render json: { result: true, user: @new_user, order: current_order } }
         else
           format.html { render 'new' }
-          format.json { render json: { result: false, errors: @user.errors.full_messages, order: current_order } }
+          format.json { render json: { result: false, errors: @new_user.errors.full_messages, order: current_order } }
         end
       end
     end
-
-    private
 
     def user_session_params
       params.require(:user).permit(:email, :password)
