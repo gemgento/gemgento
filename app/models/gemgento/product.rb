@@ -313,6 +313,10 @@ module Gemgento
       end
     end
 
+    # Determine if a product has a valid special price set.
+    #
+    # @param [Gemgento::Store] store
+    # @return [Boolean]
     def valid_special?(store = nil)
       if self.attribute_value('special_price', store).nil? # no special price
         return false
