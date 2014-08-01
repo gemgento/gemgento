@@ -9,6 +9,7 @@ module Gemgento
 
     has_many :addresses
     has_many :orders
+    has_many :recurring_profiles
     has_many :saved_credit_cards
 
     has_one :shopify_adapter, class_name: 'Gemgento::Adapter::ShopifyAdapter', as: :gemgento_model
