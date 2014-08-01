@@ -11,20 +11,7 @@ module Gemgento
       @billing_address = current_order.billing_address
       @payment = current_order.order_payment
 
-      if cookies[:shipping_methods].nil?
-        shipping_methods = current_order.get_shipping_methods
-      else
-        shipping_methods = JSON.parse(cookies[:shipping_methods])
-      end
-
-      shipping_methods.each do |shipping_method|
-        if shipping_method['code'] == current_order.shipping_method
-          @shipping_method = shipping_method
-          break
-        else
-          @shipping_method = nil
-        end
-      end
+      @shipping_method = get_magento_shipping_method
 
       respond_to do |format|
         format.html

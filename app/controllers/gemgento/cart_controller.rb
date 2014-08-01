@@ -170,14 +170,26 @@ module Gemgento
       unless totals.nil?
         totals.each do |total|
           unless total[:title].include? 'Discount'
-            if total[:title].include? 'Subtotal'
-              @subtotal = total[:amount].to_f
-            elsif total[:title].include? 'Grand Total'
-              @total = total[:amount].to_f
-            elsif total[:title].include? 'Tax'
-              @tax = total[:amount].to_f
-            elsif total[:title].include? 'Shipping'
-              @shipping = total[:amount].to_f
+            if !total[:title].include? 'Nominal'
+              if total[:title].include? 'Subtotal'
+                @subtotal = total[:amount].to_f
+              elsif total[:title].include? 'Grand Total'
+                @total = total[:amount].to_f
+              elsif total[:title].include? 'Tax'
+                @tax = total[:amount].to_f
+              elsif total[:title].include? 'Shipping'
+                @shipping = total[:amount].to_f
+              end
+            else
+              if total[:title].include? 'Subtotal'
+                @nominal_subtotal = total[:amount].to_f
+              elsif total[:title].include? 'Total'
+                @nominal_total = total[:amount].to_f
+              elsif total[:title].include? 'Tax'
+                @nominal_tax = total[:amount].to_f
+              elsif total[:title].include? 'Shipping'
+                @nominal_shipping = total[:amount].to_f
+              end
             end
           else
             code = total[:title][10..-2]

@@ -22,6 +22,7 @@ module Gemgento
 
       @subtotal = 0
       @discounts = []
+      @nominal = {}
       @shipping = 0
       @tax = 0
       @total = 0
@@ -29,19 +30,44 @@ module Gemgento
       unless totals.nil?
         totals.each do |total|
           unless total[:title].include? 'Discount'
-            if total[:title].include? 'Subtotal'
-              @subtotal = total[:amount].to_f
-            elsif total[:title].include? 'Grand Total'
-              @total = total[:amount].to_f
-            elsif total[:title].include? 'Tax'
-              @tax = total[:amount].to_f
-            elsif total[:title].include? 'Shipping'
-              @shipping = total[:amount].to_f
+            if !total[:title].include? 'Nominal'
+              if total[:title].include? 'Subtotal'
+                @subtotal = total[:amount].to_f
+              elsif total[:title].include? 'Grand Total'
+                @total = total[:amount].to_f
+              elsif total[:title].include? 'Tax'
+                @tax = total[:amount].to_f
+              elsif total[:title].include? 'Shipping'
+                @shipping = total[:amount].to_f
+              end
+            else
+              if total[:title].include? 'Subtotal'
+                @nominal[:subtotal] = total[:amount].to_f
+                @nominal[:subtotal] = current_order.subtotal if @nominal[:subtotal] == 0
+              elsif total[:title].include? 'Total'
+                @nominal[:total] = total[:amount].to_f
+              elsif total[:title].include? 'Tax'
+                @nominal[:tax] = total[:amount].to_f
+              elsif total[:title].include? 'Shipping'
+                @nominal[:shipping] = total[:amount].to_f
+              end
             end
           else
             code = total[:title][10..-2]
             @discounts << {code: code, amount: total[:amount]}
           end
+        end
+
+        unless @nominal.has_key? :shipping
+          if @shipping && @shipping > 0
+            @nominal[:shipping] = @shipping
+          elsif shipping_method = get_magento_shipping_method
+            @nominal[:shipping] = shipping_method['price'].to_f
+          else
+            @nominal[:shipping] = 0.0
+          end
+
+          @nominal[:total] += @nominal[:shipping]
         end
       end
     end
@@ -54,6 +80,22 @@ module Gemgento
       hash[:total] = @total
 
       return hash
+    end
+
+    def get_magento_shipping_method
+      if cookies[:shipping_methods].nil?
+        shipping_methods = current_order.get_shipping_methods
+      else
+        shipping_methods = JSON.parse(cookies[:shipping_methods])
+      end
+
+      shipping_methods.each do |shipping_method|
+        if shipping_method['code'] == current_order.shipping_method
+          return shipping_method
+        end
+      end
+
+      return nil
     end
 
     def order_payment_params
