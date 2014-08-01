@@ -16,5 +16,9 @@ module Gemgento
     serialize :profile_vendor_info, Hash
     serialize :additional_info, Hash
 
+    def change_state(state)
+      Gemgento::API::SOAP::Sales::RecurringProfile.update_state(self.magento_id, state)
+    end
+
   end
 end
