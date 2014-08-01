@@ -52,7 +52,14 @@ module Gemgento
                 end
               }
               format.js { render '/gemgento/order/no_inventory', layout: false }
-              format.json { render json: {result: false, errors: 'Out of stock', order: current_order} }
+              format.json {
+                render json: {
+                    result: false,
+                    errors: flash[:error],
+                    order: current_order
+                }
+                flash[:error] = false
+              }
             else
               format.html { redirect_to action: 'show' }
               format.js { render '/gemgento/order/add_item', layout: false }
@@ -73,7 +80,14 @@ module Gemgento
                 end
               }
               format.js { render '/gemgento/order/no_inventory', layout: false }
-              format.json { render json: {result: false, errors: 'Out of stock', order: current_order} }
+              format.json {
+                render json: {
+                  result: false,
+                  errors: flash[:error],
+                  order: current_order
+                }
+                flash[:error] = false
+              }
             else
               format.html { redirect_to action: 'show' }
               format.js { render '/gemgento/order/update_item', layout: false }
