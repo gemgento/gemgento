@@ -72,7 +72,7 @@ module Gemgento
           @nominal[:total] += @nominal[:shipping] if @nominal.has_key?(:total) # make sure the grand total reflects the shipping changes
         end
 
-        if @subtotal = 0
+        if @subtotal == 0
         end
       end
     end
