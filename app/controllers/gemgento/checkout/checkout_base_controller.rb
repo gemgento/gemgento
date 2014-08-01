@@ -33,6 +33,7 @@ module Gemgento
             if !total[:title].include? 'Nominal' # regular checkout values
               if total[:title].include? 'Subtotal'
                 @subtotal = total[:amount].to_f
+                @subtotal = current_order.subtotal if @subtotal.nil? || @subtotal == 0
               elsif total[:title].include? 'Grand Total'
                 @total = total[:amount].to_f
               elsif total[:title].include? 'Tax'
@@ -59,7 +60,7 @@ module Gemgento
         end
 
         # nominal shipping isn't calculated correctly, so we can set it based on known selected values
-        unless @nominal.has_key? :shipping
+        if !@nominal.has_key?(:shipping) && @nominal.has_key?(:subtotal) && current_order.shipping_address
           if @shipping && @shipping > 0
             @nominal[:shipping] = @shipping
           elsif shipping_method = get_magento_shipping_method
@@ -68,7 +69,10 @@ module Gemgento
             @nominal[:shipping] = 0.0
           end
 
-          @nominal[:total] += @nominal[:shipping] # make sure the grand total reflects the shipping changes
+          @nominal[:total] += @nominal[:shipping] if @nominal.has_key?(:total) # make sure the grand total reflects the shipping changes
+        end
+
+        if @subtotal = 0
         end
       end
     end
