@@ -30,7 +30,7 @@ module Gemgento
       unless totals.nil?
         totals.each do |total|
           unless total[:title].include? 'Discount'
-            if !total[:title].include? 'Nominal'
+            if !total[:title].include? 'Nominal' # regular checkout values
               if total[:title].include? 'Subtotal'
                 @subtotal = total[:amount].to_f
               elsif total[:title].include? 'Grand Total'
@@ -40,7 +40,7 @@ module Gemgento
               elsif total[:title].include? 'Shipping'
                 @shipping = total[:amount].to_f
               end
-            else
+            else # checkout values for a nominal item
               if total[:title].include? 'Subtotal'
                 @nominal[:subtotal] = total[:amount].to_f
                 @nominal[:subtotal] = current_order.subtotal if @nominal[:subtotal] == 0
@@ -58,6 +58,7 @@ module Gemgento
           end
         end
 
+        # nominal shipping isn't calculated correctly, so we can set it based on known selected values
         unless @nominal.has_key? :shipping
           if @shipping && @shipping > 0
             @nominal[:shipping] = @shipping
@@ -67,7 +68,7 @@ module Gemgento
             @nominal[:shipping] = 0.0
           end
 
-          @nominal[:total] += @nominal[:shipping]
+          @nominal[:total] += @nominal[:shipping] # make sure the grand total reflects the shipping changes
         end
       end
     end
