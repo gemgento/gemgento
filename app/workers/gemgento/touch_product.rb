@@ -2,12 +2,21 @@ module Gemgento
   class TouchProduct
     include Sidekiq::Worker
 
-    def perform(product_ids)
+    # Touch products in background task.
+    #
+    # @param [Array(Integer)] product_ids
+    # @param [Boolean] affects_cache_expiration
+    # @return [Void]
+    def perform(product_ids, affects_cache_expiration = false)
       Gemgento::Product.skip_callback(:save, :after, :sync_local_to_magento)
 
       Gemgento::Product.unscoped.where(id: product_ids).each do |product|
-        product.updated_at = Time.now
-        product.save
+        if affects_cache_expiration
+           product.set_cache_expires_at
+        else
+          product.updated_at = Time.now
+          product.save
+        end
       end
 
       Gemgento::Product.set_callback(:save, :after, :sync_local_to_magento)

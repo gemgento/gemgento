@@ -42,6 +42,8 @@ module Gemgento
     scope :not_deleted, -> { where(deleted_at: nil) }
     scope :active, -> { where(deleted_at: nil, status: true) }
 
+    after_find :manage_cache_expires_at
+
     after_save :sync_local_to_magento, :touch_categories, :touch_configurables
 
     before_destroy :delete_associations
@@ -306,10 +308,10 @@ module Gemgento
     # @param store [Gemgento::Store]
     # @return Float
     def price(user = nil, store = nil)
-      if self.valid_special?(store)
+      if self.has_special?(store)
         return self.attribute_value('special_price', store).to_f
       else
-        return Gemgento::PriceRule.calculate_price(self, store, user)
+        return Gemgento::PriceRule.calculate_price(self, user, store)
       end
     end
 
@@ -317,7 +319,7 @@ module Gemgento
     #
     # @param [Gemgento::Store] store
     # @return [Boolean]
-    def valid_special?(store = nil)
+    def has_special?(store = nil)
       if self.attribute_value('special_price', store).nil? # no special price
         return false
       elsif self.attribute_value('special_from_date', store).nil? && self.attribute_value('special_to_date', store).nil? # no start or end date
@@ -333,22 +335,26 @@ module Gemgento
       end
     end
 
-    # Determine if product has a special price.
+    # Determine if product is on sale.
     #
     # @param user [Gemgento::User]
     # @param store [Gemgento::Store]
     # @return Boolean
-    def has_special?(user = nil, store = nil)
+    def on_sale?(user = nil, store = nil)
       return self.attribute_value('price', store).to_f != self.price(user, store)
     end
 
-    def original_price
-      return self.attribute_value('price')
+    # Get the original, non sale, price for a product.
+    #
+    # @param [Gemgento::Store, nil] store
+    # @return [Float]
+    def original_price(store = nil)
+      return self.attribute_value('price', store).to_f
     end
 
     # Return the ordering of configurable attribute values.
     #
-    # @param [Gemgento::Store, Nil] store
+    # @param [Gemgento::Store, nil] store
     # @param [Boolean] active_only
     # @param [Hash(Hash(Array(Integer)))]
     def configurable_attribute_order(store = nil, active_only = true)
@@ -357,8 +363,8 @@ module Gemgento
 
     # Calculate the ordering of configurable attribute values
     #
-    # @param [Gemgento::Store, Nil]
-    # @param [Boolean]
+    # @param [Gemgento::Store, nil] store
+    # @param [Boolean] active_only
     # @return [Hash(Hash(Array(Integer)))]
     def get_configurable_attribute_ordering(store, active_only)
       store = Gemgento::Store.current if store.nil?
@@ -441,6 +447,36 @@ module Gemgento
       end
 
       self.configurable_products.delete(self.configurable_products.where('configurable_product_id NOT IN (?)', configurable_product_ids))
+    end
+
+    # If the product has a cache_expires_at date set, make sure it hasn't expired.  If it has, set it again.
+    #
+    # @return [DateTime, nil]
+    def manage_cache_expires_at
+      self.set_cache_expires_at if self.cache_expires_at && self.cache_expires_at < Time.now
+    end
+
+    # Calculate the datetime that the product cache should expire.
+    #
+    # @return [Void]
+    def set_cache_expires_at
+      self.cache_expires_at = nil
+
+      Store.all.each do |store|
+        UserGroup.all.each do |user_group|
+          if self.has_special?(store)
+            date =  self.attribute_value('special_to_date', store)
+          else
+            date =  PriceRule.first_to_expire(self, user_group, store)
+          end
+
+          next if date.nil?
+          self.cache_expires_at = date if self.cache_expires_at.nil? || date < self.cache_expires_at
+        end
+      end
+
+      self.sync_needed = false
+      self.save
     end
 
     private

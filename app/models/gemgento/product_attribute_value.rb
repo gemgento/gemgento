@@ -21,7 +21,8 @@ module Gemgento
     private
 
     def touch_product
-      Gemgento::TouchProduct.perform_async([self.product.id]) if self.changed?
+      affects_cache_expiration = %w[special_from_date special_to_date special_price].include?(self.product_attribute.code)
+      Gemgento::TouchProduct.perform_async([self.product.id], affects_cache_expiration) if self.changed?
     end
   end
 end

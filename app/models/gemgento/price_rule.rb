@@ -7,21 +7,24 @@ module Gemgento
     has_and_belongs_to_many :stores, join_table: 'gemgento_price_rules_stores', class_name: 'Gemgento::Store'
     has_and_belongs_to_many :user_groups, join_table: 'gemgento_price_rules_user_groups', class_name: 'Gemgento::UserGroup'
 
+    after_save :apply
+
     default_scope ->{ order(sort_order: :asc) }
     scope :active, -> { where(is_active: true) }
 
     # Calculate a product price based on PriceRules.
     #
-    # @param product [Gemgento::Product]
-    # @param store [Gemgento::Store]
-    # @return Float
-    def self.calculate_price(product, store = nil, user = nil)
+    # @param [Gemgento::Product] product
+    # @param [Gemgento::User] user
+    # @param [Gemgento::Store] store
+    # @return [Float]
+    def self.calculate_price(product, user = nil, store = nil)
       store = Gemgento::Store.first if store.nil?
       price = product.attribute_value('price', store).to_f
       user_group = user.nil? ? Gemgento::UserGroup.find_by(magento_id: 0) : user.user_group
 
       PriceRule.active.each do |price_rule|
-        if price_rule.is_valid?(product, store, user_group)
+        if price_rule.is_valid?(product, user_group, store)
           price = price_rule.calculate(price)
           return price if price_rule.stop_rules_processing?
         end
@@ -32,11 +35,11 @@ module Gemgento
 
     # Determines if the rule is valid for a product.
     #
-    # @param product [Gemgento::Product]
-    # @param store [Gemgento::Store]
-    # @param user_group [Gemgento::UserGroup]
+    # @param [Gemgento::Product] product
+    # @param [Gemgento::UserGroup] user_group
+    # @param [Gemgento::Store] store
     # @return [Boolean]
-    def is_valid?(product, store, user_group)
+    def is_valid?(product, user_group, store)
       if !self.is_active?
         return false
       elsif !self.stores.include?(store)
@@ -48,13 +51,13 @@ module Gemgento
       elsif !self.to_date.nil? && Date.today > to_date
         return false
       else
-        return Gemgento::PriceRule.meets_condition?(self.conditions, product, store)
+        return PriceRule.meets_condition?(self.conditions, product, store)
       end
     end
 
     # Calculate the discount based on rule actions.
     #
-    # @param price [Float]
+    # @param [Float] price
     # @return Float
     def calculate(price)
       case self.simple_action
@@ -73,9 +76,9 @@ module Gemgento
 
     # Determines if the condition is met.
     #
-    # @param condition [Hash]
-    # @param product [Gemgento::Product]
-    # @param store [Gemgento::Store]
+    # @param [Hash] condition
+    # @param [Gemgento::Product] product
+    # @param [Gemgento::Store] store
     # @return [Boolean]
     def self.meets_condition?(condition, product, store)
       if condition['type'] == 'catalogrule/rule_condition_combine'
@@ -89,9 +92,9 @@ module Gemgento
 
     # Determines if the combined child conditions are met.
     #
-    # @param condition [Hash]
-    # @param product [Gemgento::Product]
-    # @param store [Gemgento::Store]
+    # @param [Hash] condition
+    # @param [Gemgento::Product] product
+    # @param [Gemgento::Store] store
     # @return [Boolean]
     def self.meets_condition_combine?(condition, product, store)
       return true if condition['conditions'].nil?
@@ -123,9 +126,9 @@ module Gemgento
 
     # Determines if the product conditions are met.
     #
-    # @param condition [Hash]
-    # @param product [Gemgento::Product]
-    # @param store [Gemgento::Store]
+    # @param [Hash] condition
+    # @param [Gemgento::Product] product
+    # @param [Gemgento::Store] store
     # @return [Boolean]
     def self.meets_condition_product?(condition, product, store)
       if condition['attribute'] == 'category_ids'
@@ -139,9 +142,9 @@ module Gemgento
 
     # Determines if a product meets a category based condition.
     #
-    # @param condition [Hash]
-    # @param product [Gemgento::Product]
-    # @param store [Gemgento::Store]
+    # @param [Hash] condition
+    # @param [Gemgento::Product] product
+    # @param [Gemgento::Store] store
     # @return [Boolean]
     def self.meets_category_condition?(condition, product, store)
       magento_category_ids = Gemgento::ProductCategory.where(product: product, store: store).includes(:category).map{ |pc| pc.category.magento_id unless pc.category.nil? }.uniq
@@ -159,8 +162,8 @@ module Gemgento
 
     # Determines if a product meets an attribute set based condition.
     #
-    # @param condition [Hash]
-    # @param product [Gemgento::Product]
+    # @param [Hash] condition
+    # @param [Gemgento::Product] product
     # @return [Boolean]
     def self.meets_attribute_set_condition?(condition, product)
       magento_attribute_set_id = product.product_attribute_set.magento_id
@@ -178,9 +181,9 @@ module Gemgento
 
     # Determines if a product meets an attribute based condition.
     #
-    # @param condition [Hash]
-    # @param product [Gemgento::Product]
-    # @param store [Gemgento::Store]
+    # @param [Hash] condition
+    # @param [Gemgento::Product] product
+    # @param [Gemgento::Store] store
     # @return [Boolean]
     def self.meets_attribute_condition?(condition, product, store)
       return false unless attribute = Gemgento::ProductAttribute.find_by(code: condition['attribute'])
@@ -219,5 +222,37 @@ module Gemgento
           return false
       end
     end
+
+    # Get the earliest date and time that a price rule will expire for a given product.
+    #
+    # @param [Gemgento::Product] product
+    # @param [Gemgento::UserGroup] user_group
+    # @param [Gemgento::Store] store
+    # @return [DateTime, nil]
+    def self.first_to_expire(product, user_group, store)
+      expires_at = nil
+
+      PriceRule.active.each do |price_rule|
+        next if price_rule.to_date.nil?
+
+        if price_rule.is_valid?(product, user_group, store)
+          if expires_at.nil? || price_rule.to_date.end_of_day < expires_at
+            expires_at = price_rule.to_date.end_of_day
+          end
+        end
+      end
+
+      return expires_at
+    end
+
+    private
+
+    # Touch products affected by the PriceRule
+    #
+    # @return [Void]
+    def apply
+      Gemgento::ApplyPriceRule.perform_async(self.id) if self.changed?
+    end
+
   end
 end
