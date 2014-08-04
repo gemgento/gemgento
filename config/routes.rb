@@ -83,8 +83,8 @@ Gemgento::Engine.routes.draw do
   patch '/orders', to: 'orders#update'
   put '/orders', to: 'orders#update'
 
-  get 'about',                                 to: 'pages#about'
-  get 'contact',                               to: 'pages#contact'
-  get 'terms-of-use',                          to: 'pages#terms_of_use', as: 'terms_of_use'
-  get 'return-policy',                         to: 'pages#return_policy', as: 'return_policy'
+  get '/gemgento/about',                                 to: 'pages#about'
+  get '/gemgento/contact',                               to: 'pages#contact'
+  get '/gemgento/terms-of-use',                          to: 'pages#terms_of_use', as: 'terms_of_use'
+  get '/gemgento/return-policy',                         to: 'pages#return_policy', as: 'return_policy'
 end
