@@ -16,8 +16,9 @@ Gemgento::Engine.routes.draw do
   get 'shop',                           to: 'categories#show', as: 'shop'
 
   # - SEARCH - #
-  get '/shop/search', to: 'search#index'
   get '/search', to: 'search#index'
+  get '/shop/search', to: 'search#index'
+
 
   # - SYNC - #
   get '/sync/complete', to: 'sync#everything'
