@@ -30,20 +30,11 @@ Like Rails' database.yml, gemgento.yml is specified by Rails environment.  Here 
 
 ````
 production: 
-  site:
-    name: Your Shop
-    url:  yourshop.com
-
   magento:
     url:  magento.yourshop.com
-    auth_username:  ''
-    auth_password:  ''
     username:  gemgento
     api_key:  XXXXXXXXXXXXX
-    api_type: soap
-    api_version:  2
-    debug: false
-    encryption: 4de6a444ff58bf44013f3bc05256f1b3
+    ip_whitelist: 127.0.0.1,MAGENTO.SERVER.IP
 ````
 
 
