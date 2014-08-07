@@ -1,4 +1,4 @@
-json.cache! [product, current_store, json_options] do
+json.cache! [product, product.cache_expires_at, current_store, json_options] do
   json.(product, :id, :magento_id, :magento_type, :sku, :product_attribute_set_id, :status, :visibility, :swatch_id, :created_at, :updated_at, :deleted_at)
   json.currency_code current_store.currency_code
   json.configurable_product_ids product.configurable_products.active.pluck(:id)
