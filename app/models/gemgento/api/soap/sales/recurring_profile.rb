@@ -41,7 +41,11 @@ module Gemgento
             }
             response = Gemgento::Magento.create_call(:sales_recurring_profile_update_state, message)
 
-            return response.success?
+            if response.success?
+              return true
+            else
+              return response.body[:faultstring]
+            end
           end
           
           private

@@ -53,6 +53,7 @@ Gemgento::Engine.routes.draw do
   namespace :user do
     resources :orders, only: [:index, :show]
     resources :addresses
+    resources :recurring_profiles, only: [:index, :destroy]
 
     # combined login / sign up controller
     get 'login', to: 'registration_session#new', as: 'new_login'
