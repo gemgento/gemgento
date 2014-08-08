@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    gemgento (1.1.8)
+    gemgento (1.1.9)
       activeadmin (= 1.0.0.pre)
       coffee-rails (~> 4.0.0)
       devise (~> 3.2.2)
@@ -181,7 +181,7 @@ GEM
       i18n
       polyamorous (~> 1.0.0)
     redis (3.1.0)
-    redis-namespace (1.5.0)
+    redis-namespace (1.5.1)
       redis (~> 3.0, >= 3.0.4)
     responders (1.1.0)
       railties (>= 3.2, < 5)
