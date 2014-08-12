@@ -389,9 +389,8 @@ module Gemgento
         order[attribute.code] = {}
 
         simple_products.sort! do |a, b|
-          a_option = product_attribute_options.find_by(product_attribute: attribute, store: store)
+          a_option = a.product_attribute_options.find_by(product_attribute: attribute, store: store)
           b_option = b.product_attribute_options.find_by(product_attribute: attribute, store: store)
-
 
           a_option.nil? ? -1 : a_option.order <=> b_option.nil? ? -1 : b_option.order
         end
