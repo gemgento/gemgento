@@ -170,7 +170,15 @@ module Gemgento
         super
       else
         if self.order_items.any?
-          return self.order_items.map{ |oi| oi.product.price(self.user, self.store).to_f * oi.qty_ordered.to_f }.inject(&:+)
+          prices = self.order_items.map do |oi|
+            if oi.product.magento_type == 'giftvoucher'
+              oi.product.gift_price.to_f * oi.qty_ordered.to_f
+            else
+              oi.product.price(self.user, self.store).to_f * oi.qty_ordered.to_f
+            end
+          end
+
+          return prices.inject(&:+)
         else
           return 0
         end
