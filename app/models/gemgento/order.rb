@@ -56,8 +56,9 @@ module Gemgento
     #
     # @param [Gemgento::Product] product
     # @param [Float] quantity
+    # @param [nil, Hash] options product options
     # @return [Boolean, String] true if the order item was added, otherwise error message
-    def add_item(product, quantity = 1)
+    def add_item(product, quantity = 1, options = nil)
       raise 'Order not in cart state' if self.state != 'cart'
 
       order_item = self.order_items.find_by(product: product)
@@ -67,6 +68,7 @@ module Gemgento
         order_item.product = product
         order_item.qty_ordered = quantity
         order_item.order = self
+        order_item.options = options
         order_item.save
 
         self.push_cart if self.magento_quote_id.nil?
@@ -82,7 +84,7 @@ module Gemgento
           end
         end
       else
-        return self.update_item(product, order_item.qty_ordered + quantity.to_f)
+        return self.update_item(product, order_item.qty_ordered + quantity.to_f, options)
       end
     end
 
@@ -90,8 +92,9 @@ module Gemgento
     #
     # @param [Gemgento::Product] product
     # @param [Float] quantity
+    # @param [nil, Hash] options product options
     # @return [Boolean, String] true if the order item was updated, otherwise error message
-    def update_item(product, quantity = 1.0)
+    def update_item(product, quantity = 1.0, options = nil)
       raise 'Order not in cart state' if self.state != 'cart'
 
       order_item = self.order_items.where(product: product).first
@@ -99,6 +102,7 @@ module Gemgento
       unless order_item.nil?
         old_quantity = order_item.qty_ordered
         order_item.qty_ordered = quantity.to_f
+        order_item.options = options
         order_item.save
 
         unless self.magento_quote_id.nil?

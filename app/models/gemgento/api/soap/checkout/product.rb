@@ -7,7 +7,7 @@ module Gemgento
           def self.add(cart, order_items)
             message = {
                 quote_id: cart.magento_quote_id,
-                products: {item: compose_products_data(order_items)},
+                products: { item: compose_products_data(order_items) },
                 store_id: cart.store.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_product_add, message)
@@ -82,14 +82,24 @@ module Gemgento
                   'product_id' => order_item.product.magento_id,
                   sku: order_item.product.sku,
                   qty: qty,
-                  options: nil,
+                  options: { item: (compose_options_data(order_item.options) unless order_item.options.nil?) },
                   'bundle_option' => nil,
                   'bundle_option_qty' => nil,
                   links: nil
               }
             end
 
-            products_data
+            return products_data
+          end
+
+          def self.compose_options_data(options)
+            options_data = []
+
+            options.each do |key, value|
+              options_data << { key: key, value: value }
+            end
+
+            return options_data
           end
 
         end
