@@ -95,8 +95,10 @@ module Gemgento
           def self.compose_options_data(options)
             options_data = []
 
-            options.each do |key, value|
-              options_data << { key: key, value: value }
+            if options.any?
+              options.each do |key, value|
+                options_data << { key: key, value: value }
+              end
             end
 
             return options_data
