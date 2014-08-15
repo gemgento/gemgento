@@ -187,6 +187,24 @@ module Gemgento
       return count.to_f
     end
 
+    # Apply a gift card to the order.  Only works in when order is in cart state.
+    #
+    # @param [String] code gift card code
+    # @return [Boolean,String] true if the gift card was applied, otherwise an error message.
+    def apply_gift_card(code)
+      raise 'Order not in cart state' if self.state != 'cart'
+      Gemgento::API::SOAP::GiftCard.quote_add(self.id, code, self.store.magento_id)
+    end
+
+    # Remove a gift card from an order.  Only works in when order is in cart state.
+    #
+    # @param [String] code gift card code
+    # @return [Boolean,String] true if the gift card was removed, otherwise an error message.
+    def remove_gift_card(code)
+      raise 'Order not in cart state' if self.state != 'cart'
+      Gemgento::API::SOAP::GiftCard.quote_remove(self.id, code, self.store.magento_id)
+    end
+
     # CHECKOUT methods
 
     # Set order shipping method and push to Magento.
