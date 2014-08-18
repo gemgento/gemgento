@@ -12,7 +12,11 @@ module Gemgento
             }
             response = Gemgento::Magento.create_call(:shopping_cart_coupon_add, message)
 
-            return response.success?
+            if response.success?
+              return true
+            else
+              return response.body[:faultstring]
+            end
           end
 
           def self.remove(cart)
@@ -22,7 +26,11 @@ module Gemgento
             }
             response = Gemgento::Magento.create_call(:shopping_cart_coupon_remove, message)
 
-            return response.success?
+            if response.success?
+              return true
+            else
+              return response.body[:faultstring]
+            end
           end
 
         end

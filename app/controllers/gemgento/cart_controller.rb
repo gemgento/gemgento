@@ -174,41 +174,63 @@ module Gemgento
 
     def set_totals
       totals = current_order.get_totals
-
-      @subtotal = 0
-      @discounts = []
-      @shipping = 0
-      @tax = 0
-      @total = 0
+      @totals = {
+          subtotal: 0,
+          discounts: {},
+          gift_card: 0,
+          nominal: {},
+          shipping: 0,
+          tax: 0,
+          total: 0
+      }
 
       unless totals.nil?
         totals.each do |total|
           unless total[:title].include? 'Discount'
-            if !total[:title].include? 'Nominal'
+            if !total[:title].include? 'Nominal' # regular checkout values
               if total[:title].include? 'Subtotal'
-                @subtotal = total[:amount].to_f
+                @totals[:subtotal] = total[:amount].to_f
+                @totals[:subtotal] = current_order.subtotal if @totals[:subtotal] == 0
               elsif total[:title].include? 'Grand Total'
-                @total = total[:amount].to_f
+                @totals[:total] = total[:amount].to_f
               elsif total[:title].include? 'Tax'
-                @tax = total[:amount].to_f
+                @totals[:tax] = total[:amount].to_f
               elsif total[:title].include? 'Shipping'
-                @shipping = total[:amount].to_f
+                @totals[:shipping] = total[:amount].to_f
+              elsif total[:title].include? 'Gift'
+                @totals[:gift_card] = total[:amount].to_f
               end
-            else
+            else # checkout values for a nominal item
               if total[:title].include? 'Subtotal'
-                @nominal_subtotal = total[:amount].to_f
+                @totals[:nominal][:subtotal] = total[:amount].to_f
+                @totals[:nominal][:subtotal] = current_order.subtotal if @totals[:nominal][:subtotal] == 0
               elsif total[:title].include? 'Total'
-                @nominal_total = total[:amount].to_f
+                @totals[:nominal][:total] = total[:amount].to_f
               elsif total[:title].include? 'Tax'
-                @nominal_tax = total[:amount].to_f
+                @totals[:nominal][:tax] = total[:amount].to_f
               elsif total[:title].include? 'Shipping'
-                @nominal_shipping = total[:amount].to_f
+                @totals[:nominal][:shipping] = total[:amount].to_f
+              elsif total[:title].include? 'Gift'
+                @totals[:gift_card] == total[:amount].to_f
               end
             end
           else
             code = total[:title][10..-2]
-            @discounts << {code: code, amount: total[:amount]}
+            @totals[:discounts][code.to_sym] = total[:amount]
           end
+        end
+
+        # nominal shipping isn't calculated correctly, so we can set it based on known selected values
+        if !@totals[:nominal].has_key?(:shipping) && @totals[:nominal].has_key?(:subtotal) && current_order.shipping_address
+          if @totals[:shipping] && @totals[:shipping] > 0
+            @totals[:nominal][:shipping] = @totals[:shipping]
+          elsif shipping_method = get_magento_shipping_method
+            @totals[:nominal][:shipping] = shipping_method['price'].to_f
+          else
+            @totals[:nominal][:shipping] = 0.0
+          end
+
+          @totals[:nominal][:total] += @totals[:nominal][:shipping] if @totals[:nominal].has_key?(:total) # make sure the grand total reflects the shipping changes
         end
       end
     end

@@ -3,8 +3,12 @@ module Gemgento
     respond_to :json, :html
 
     def create
+      result = current_order.apply_coupon(params[:code])
+
       respond_to do |format|
-        if current_order.apply_coupon(params[:code])
+        if result == true
+          format.html { redirect_to cart_path, notice: 'The coupon was successfully applied.' }
+
           format.json do
             set_totals
             response = {
@@ -14,24 +18,18 @@ module Gemgento
             render json: merge_totals(response)
           end
         else
-          format.json do
-            render json: {
-                result: false,
-                order: current_order,
-                errors: 'Code is not valid'
-            }
-          end
-        end
-
-        format.html do
-          redirect_to :back
+          format.html { redirect_to cart_path, alert: result }
+          format.json { render json: { result: false, errors: result }, status: 422 }
         end
       end
     end
 
     def destroy
+      result = current_order.remove_coupons
+
       respond_to do |format|
-        if current_order.remove_coupons
+        if result == true
+          format.html { redirect_to cart_path, notice: 'The coupons have been removed.' }
           format.json do
             set_totals
             response = {
@@ -41,20 +39,11 @@ module Gemgento
             render json: merge_totals(response)
           end
         else
-          format.json do
-            render json: {
-                result: false,
-                order: current_order,
-                errors: 'Problem removing coupons from order'
-            }
-          end
-        end
-
-        format.html do
-          redirect_to :back
+          format.html { redirect_to cart_path, alert: result }
+          format.json { render json: { result: false, errors: result }, status: 422 }
         end
       end
-
     end
+
   end
 end
