@@ -3,7 +3,7 @@ unless File.exist?(Rails.root.join('config', 'gemgento_config.yml'))
   File.open(Rails.root.join('config', 'gemgento_config.yml'), 'w') do |f|
     f.write({ 'development' => {
                     'magento' => {
-                        'url' => 'www.gemgento.com',
+                        'url' => 'http://www.gemgento.com',
                         'username' =>         'gemgento',
                         'api_key' =>          '',
                         'debug' =>            false,
@@ -12,7 +12,7 @@ unless File.exist?(Rails.root.join('config', 'gemgento_config.yml'))
                 },
                 'beta' => {
                     'magento' => {
-                        'url' => 'www.gemgento.com',
+                        'url' => 'http://www.gemgento.com',
                         'username' =>         'gemgento',
                         'api_key' =>          ''
                     },
@@ -20,7 +20,7 @@ unless File.exist?(Rails.root.join('config', 'gemgento_config.yml'))
                 },
                 'production' => {
                     'magento' => {
-                        'url' => 'www.gemgento.com',
+                        'url' => 'http://www.gemgento.com',
                         'username' =>         'gemgento',
                         'api_key' =>          '',
                         'ip_whitelist' =>     '127.0.0.1'
