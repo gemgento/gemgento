@@ -392,7 +392,7 @@ module Gemgento
           if o = simple_product.product_attribute_options.find_by(product_attribute: attribute, store: store)
             o.order
           else
-            nil
+            0
           end
         end
 
