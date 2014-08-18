@@ -12,13 +12,7 @@ module Gemgento
 
       respond_to do |format|
         format.html
-
-        response = { shipping_methods: @shipping_methods }
-        response = merge_totals(response)
-
-        format.json do
-          render json: response
-        end
+        format.json { render json: { shipping_methods: @shipping_methods, totals: @totals } }
       end
     end
 

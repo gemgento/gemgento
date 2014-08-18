@@ -11,16 +11,11 @@ module Gemgento
 
       respond_to do |format|
         format.html
-
-        response = {
+        format.json { render json: {
             payment_methods: @payment_methods,
-            saved_credit_cards: @saved_credit_cards
-        }
-        response = merge_totals(response)
-
-        format.json do
-          render json: response
-        end
+            saved_credit_cards: @saved_credit_cards,
+            totals: @totals
+        } }
       end
     end
 
@@ -36,15 +31,11 @@ module Gemgento
           format.json { render json: { result: true, order: current_order } }
         else
           initialize_payment_variables
-
-          flash[:error] = 'Invalid payment information. Please review all details and try again.'
-          format.html { render action: :show }
-          format.json do
-            render json: {
-                result: false,
-                errors: current_order.order_payment.errors.any? ? current_order.order_payment.errors.full_messages : 'Invalid payment information. Please review all details and try again.'
-            }
-          end
+          format.html { render action: :show, alert: 'Invalid payment information. Please review all details and try again.' }
+          format.json { render json: {
+              result: false,
+              errors: current_order.order_payment.errors.any? ? current_order.order_payment.errors.full_messages : 'Invalid payment information. Please review all details and try again.'
+          } }
         end
       end
     end

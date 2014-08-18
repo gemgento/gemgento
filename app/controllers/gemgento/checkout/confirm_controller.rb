@@ -15,16 +15,7 @@ module Gemgento
 
       respond_to do |format|
         format.html
-
-        response = {
-            order: current_order,
-            shipping_method: @shipping_method
-        }
-        response = merge_totals(response)
-
-        format.json do
-          render json: response
-        end
+        format.json { render json: { order: current_order, shipping_method: @shipping_method, totals: @totals } }
       end
     end
 

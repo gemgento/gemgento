@@ -11,11 +11,7 @@ module Gemgento
 
           format.json do
             set_totals
-            response = {
-                result: true,
-                order: current_order,
-            }
-            render json: merge_totals(response)
+            render json: { result: true, order: current_order, totals: @totals }
           end
         else
           format.html { redirect_to cart_path, alert: result }
@@ -30,14 +26,7 @@ module Gemgento
       respond_to do |format|
         if result == true
           format.html { redirect_to cart_path, notice: 'The coupons have been removed.' }
-          format.json do
-            set_totals
-            response = {
-                result: true,
-                order: current_order,
-            }
-            render json: merge_totals(response)
-          end
+          format.json { render json: { result: true, order: current_order, totals: @totals } }
         else
           format.html { redirect_to cart_path, alert: result }
           format.json { render json: { result: false, errors: result }, status: 422 }
