@@ -495,7 +495,6 @@ module Gemgento
       attribute_option.sync_needed = false
       attribute_option.save
 
-      attribute_option.sync_needed = true
       attribute_option.sync_local_to_magento
       attribute_option.destroy
 
