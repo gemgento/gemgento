@@ -149,10 +149,10 @@ module Gemgento
 
     def get_url_and_file(source)
       if source[:new_file].nil?
-        url = "http://#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:file]}"
+        url = "#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:file]}"
         file = source[:file]
       else
-        url = "http://#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:new_file]}"
+        url = "#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:new_file]}"
         file = source[:new_file]
       end
 

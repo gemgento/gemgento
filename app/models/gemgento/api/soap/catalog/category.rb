@@ -198,7 +198,7 @@ module Gemgento
 
             if subject.key? :image
               begin
-                category.image = open("http://#{Gemgento::Config[:magento][:url]}/media/catalog/category/#{subject[:image]}")
+                category.image = open("#{Gemgento::Config[:magento][:url]}/media/catalog/category/#{subject[:image]}")
               rescue
                 category.image = nil
               end

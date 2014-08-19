@@ -16,7 +16,7 @@ module Gemgento
 
       if data.key? :image
         begin
-          @category.image = open("http://#{Gemgento::Config[:magento][:url]}/media/catalog/category/#{data[:image][:value]}")
+          @category.image = open("#{Gemgento::Config[:magento][:url]}/media/catalog/category/#{data[:image][:value]}")
         rescue
           @category.image = nil
         end
