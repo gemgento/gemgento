@@ -8,11 +8,7 @@ module Gemgento
       respond_to do |format|
         if result == true
           format.html { redirect_to cart_path, notice: 'The coupon was successfully applied.' }
-
-          format.json do
-            set_totals
-            render json: { result: true, order: current_order, totals: @totals }
-          end
+          format.json { render json: { result: true, order: current_order, totals: current_order.totals } }
         else
           format.html { redirect_to cart_path, alert: result }
           format.json { render json: { result: false, errors: result }, status: 422 }
@@ -26,7 +22,7 @@ module Gemgento
       respond_to do |format|
         if result == true
           format.html { redirect_to cart_path, notice: 'The coupons have been removed.' }
-          format.json { render json: { result: true, order: current_order, totals: @totals } }
+          format.json { render json: { result: true, order: current_order, totals: current_order.totals } }
         else
           format.html { redirect_to cart_path, alert: result }
           format.json { render json: { result: false, errors: result }, status: 422 }

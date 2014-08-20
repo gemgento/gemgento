@@ -8,7 +8,7 @@ module Gemgento
       respond_to do |format|
         if result == true
           format.html { redirect_to cart_path, notice: 'The Gift Card was successfully applied.' }
-          format.json { render json: { result: true, order: current_order, totals: @totals } }
+          format.json { render json: { result: true, order: current_order, totals: current_order.totals } }
         else
           format.html { redirect_to cart_path, alert: result }
           format.json { render json: { result: false, errors: result }, status: 422 }
@@ -21,7 +21,7 @@ module Gemgento
 
       if result == true
         format.html { redirect_to cart_path, notice: 'The Gift Card was removed from the order.' }
-        format.json { render json: { result: true, order: current_order, totals: @totals } }
+        format.json { render json: { result: true, order: current_order, totals: current_order.totals } }
       else
         format.html { redirect_to cart_path, alert: result }
         format.json { render json: { result: false, errors: result }, status: 422 }

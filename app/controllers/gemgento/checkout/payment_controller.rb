@@ -2,7 +2,6 @@ module Gemgento
   class Checkout::PaymentController < Checkout::CheckoutBaseController
     before_filter :auth_cart_contents
     before_filter :auth_order_user
-    before_filter :set_totals, only: :show
 
     respond_to :json, :html
 
@@ -14,7 +13,7 @@ module Gemgento
         format.json { render json: {
             payment_methods: @payment_methods,
             saved_credit_cards: @saved_credit_cards,
-            totals: @totals
+            totals: current_order.totals
         } }
       end
     end

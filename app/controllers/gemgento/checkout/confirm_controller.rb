@@ -6,7 +6,6 @@ module Gemgento
     respond_to :json, :html
 
     def show
-      set_totals
       @shipping_address = current_order.shipping_address
       @billing_address = current_order.billing_address
       @payment = current_order.order_payment
@@ -15,7 +14,7 @@ module Gemgento
 
       respond_to do |format|
         format.html
-        format.json { render json: { order: current_order, shipping_method: @shipping_method, totals: @totals } }
+        format.json { render json: { order: current_order, shipping_method: @shipping_method, totals: current_order.totals } }
       end
     end
 

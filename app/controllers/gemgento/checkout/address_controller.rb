@@ -6,8 +6,6 @@ module Gemgento
     respond_to :json, :html
 
     def show
-      set_totals
-
       if current_order.user.nil? && !current_order.customer_is_guest
         current_order.user = current_user
         current_order.save

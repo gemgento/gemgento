@@ -2,7 +2,6 @@ module Gemgento
   class Checkout::ShippingController < Checkout::CheckoutBaseController
     before_filter :auth_cart_contents
     before_filter :auth_order_user
-    before_filter :set_totals, only: :show
 
     respond_to :json, :html
 
@@ -12,7 +11,7 @@ module Gemgento
 
       respond_to do |format|
         format.html
-        format.json { render json: { shipping_methods: @shipping_methods, totals: @totals } }
+        format.json { render json: { shipping_methods: @shipping_methods, totals: current_order.totals } }
       end
     end
 

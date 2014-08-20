@@ -274,6 +274,79 @@ module Gemgento
       Gemgento::API::SOAP::Checkout::Coupon.remove(self)
     end
 
+    def totals
+      @totals ||= set_totals
+    end
+
+    def reset_totals
+      @totals = set_totals
+    end
+
+    def set_totals
+      magento_totals = self.get_totals
+      totals = {
+          subtotal: 0,
+          discounts: {},
+          gift_card: 0,
+          nominal: {},
+          shipping: 0,
+          tax: 0,
+          total: 0
+      }
+
+      unless magento_totals.nil?
+        magento_totals.each do |total|
+          unless total[:title].include? 'Discount'
+            if !total[:title].include? 'Nominal' # regular checkout values
+              if total[:title].include? 'Subtotal'
+                totals[:subtotal] = total[:amount].to_f
+                totals[:subtotal] = current_order.subtotal if totals[:subtotal] == 0
+              elsif total[:title].include? 'Grand Total'
+                totals[:total] = total[:amount].to_f
+              elsif total[:title].include? 'Tax'
+                totals[:tax] = total[:amount].to_f
+              elsif total[:title].include? 'Shipping'
+                totals[:shipping] = total[:amount].to_f
+              elsif total[:title].include? 'Gift Card'
+                totals[:gift_card] = total[:amount].to_f
+              end
+            else # checkout values for a nominal item
+              if total[:title].include? 'Subtotal'
+                totals[:nominal][:subtotal] = total[:amount].to_f
+                totals[:nominal][:subtotal] = current_order.subtotal if totals[:nominal][:subtotal] == 0
+              elsif total[:title].include? 'Total'
+                totals[:nominal][:total] = total[:amount].to_f
+              elsif total[:title].include? 'Tax'
+                totals[:nominal][:tax] = total[:amount].to_f
+              elsif total[:title].include? 'Shipping'
+                totals[:nominal][:shipping] = total[:amount].to_f
+              elsif total[:title].include? 'Gift Card'
+                totals[:gift_card] == total[:amount].to_f
+              end
+            end
+          else
+            code = total[:title][10..-2]
+            totals[:discounts][code.to_sym] = total[:amount]
+          end
+        end
+
+        # nominal shipping isn't calculated correctly, so we can set it based on known selected values
+        if !totals[:nominal].has_key?(:shipping) && totals[:nominal].has_key?(:subtotal) && current_order.shipping_address
+          if totals[:shipping] && totals[:shipping] > 0
+            totals[:nominal][:shipping] = totals[:shipping]
+          elsif shipping_method = get_magento_shipping_method
+            totals[:nominal][:shipping] = shipping_method['price'].to_f
+          else
+            totals[:nominal][:shipping] = 0.0
+          end
+
+          totals[:nominal][:total] += totals[:nominal][:shipping] if totals[:nominal].has_key?(:total) # make sure the grand total reflects the shipping changes
+        end
+      end
+
+      return totals
+    end
+
     # functions related to processing cart into order
 
     def push_addresses
