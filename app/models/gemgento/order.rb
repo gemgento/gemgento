@@ -274,14 +274,23 @@ module Gemgento
       Gemgento::API::SOAP::Checkout::Coupon.remove(self)
     end
 
+    # Order totals for the cart phase.
+    #
+    # @return [Hash]
     def totals
       @totals ||= set_totals
     end
 
+    # Recalculate order totals.
+    #
+    # @return [Hash]
     def reset_totals
       @totals = set_totals
     end
 
+    # Set order totals for the cart phase.
+    #
+    # @return [Hash]
     def set_totals
       magento_totals = self.get_totals
       totals = {
@@ -300,7 +309,7 @@ module Gemgento
             if !total[:title].include? 'Nominal' # regular checkout values
               if total[:title].include? 'Subtotal'
                 totals[:subtotal] = total[:amount].to_f
-                totals[:subtotal] = current_order.subtotal if totals[:subtotal] == 0
+                totals[:subtotal] = self.subtotal if totals[:subtotal] == 0
               elsif total[:title].include? 'Grand Total'
                 totals[:total] = total[:amount].to_f
               elsif total[:title].include? 'Tax'
@@ -313,7 +322,7 @@ module Gemgento
             else # checkout values for a nominal item
               if total[:title].include? 'Subtotal'
                 totals[:nominal][:subtotal] = total[:amount].to_f
-                totals[:nominal][:subtotal] = current_order.subtotal if totals[:nominal][:subtotal] == 0
+                totals[:nominal][:subtotal] = self.subtotal if totals[:nominal][:subtotal] == 0
               elsif total[:title].include? 'Total'
                 totals[:nominal][:total] = total[:amount].to_f
               elsif total[:title].include? 'Tax'
@@ -331,7 +340,7 @@ module Gemgento
         end
 
         # nominal shipping isn't calculated correctly, so we can set it based on known selected values
-        if !totals[:nominal].has_key?(:shipping) && totals[:nominal].has_key?(:subtotal) && current_order.shipping_address
+        if !totals[:nominal].has_key?(:shipping) && totals[:nominal].has_key?(:subtotal) && self.shipping_address
           if totals[:shipping] && totals[:shipping] > 0
             totals[:nominal][:shipping] = totals[:shipping]
           elsif shipping_method = get_magento_shipping_method
