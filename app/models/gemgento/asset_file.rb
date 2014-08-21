@@ -8,7 +8,7 @@ module Gemgento
 
     has_attached_file :file, styles: { default_index: '200x266>' }
 
-    def self.valid_url(url)200
+    def self.valid_url(url)
       url = URI.parse(url)
       req = Net::HTTP.new(url.host, url.port)
       res = req.request_head(url.path)
