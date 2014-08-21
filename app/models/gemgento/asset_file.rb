@@ -11,6 +11,7 @@ module Gemgento
     def self.valid_url(url)
       url = URI.parse(url)
       req = Net::HTTP.new(url.host, url.port)
+      req.use_ssl = (url.port == 443)
       res = req.request_head(url.path)
 
       return res.code == '200'
