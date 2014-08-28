@@ -14,7 +14,7 @@ module Gemgento
 
     has_one :shopify_adapter, class_name: 'Gemgento::Adapter::ShopifyAdapter', as: :gemgento_model
 
-    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_users', class_name: 'Store'
+    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_users', class_name: 'Gemgento::Store'
 
     attr_accessor :subscribe, :dob_year, :dob_month, :dob_day
     after_find :set_subscribe, :set_dob_parts
