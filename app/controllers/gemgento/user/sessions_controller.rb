@@ -45,9 +45,7 @@ module Gemgento
     private
 
     def convert_magento_password
-      if !params[:user][:email].nil? && params[:user][:password].nil?
-        Gemgento::User.is_valid_login params[:user][:email], params[:user][:password]
-      end
+      Gemgento::User.is_valid_login params[:user][:email], params[:user][:password]
     end
 
   end
