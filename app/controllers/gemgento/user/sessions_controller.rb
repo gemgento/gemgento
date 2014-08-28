@@ -3,7 +3,7 @@ module Gemgento
     include SslRequirement
     ssl_required :new, :create, :destroy
     respond_to :html, :json
-    prepend_before_filter :convert_magento_password
+    prepend_before_filter :convert_magento_password, only: :create
 
     # POST /resource/sign_in
     def create
@@ -45,7 +45,9 @@ module Gemgento
     private
 
     def convert_magento_password
-      Gemgento::User.is_valid_login params[:user][:email], params[:user][:password]
+      if !params[:user][:email].nil? && params[:user][:password].nil?
+        Gemgento::User.is_valid_login params[:user][:email], params[:user][:password]
+      end
     end
 
   end
