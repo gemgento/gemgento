@@ -48,7 +48,7 @@ module Gemgento
 
     before_destroy :delete_associations
 
-    validates_uniqueness_of :sku, :scope => [:deleted_at]
+    validates :sku, uniqueness: { scope: :deleted_at }
 
     attr_accessor :configurable_attribute_ordering
 

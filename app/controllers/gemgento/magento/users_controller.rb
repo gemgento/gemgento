@@ -28,7 +28,7 @@ module Gemgento
         @user.magento_password = data[:password_hash]
       end
 
-      @user.save
+      @user.save validate: false
 
       if data[:store_id].to_i > 0
         store = Gemgento::Store.find_by(magento_id: data[:store_id])
