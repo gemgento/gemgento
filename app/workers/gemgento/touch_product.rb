@@ -1,6 +1,7 @@
 module Gemgento
   class TouchProduct
     include Sidekiq::Worker
+    sidekiq_options backtrace: true
 
     # Touch products in background task.
     #
@@ -10,7 +11,7 @@ module Gemgento
     def perform(product_ids, affects_cache_expiration = false)
       Gemgento::Product.skip_callback(:save, :after, :sync_local_to_magento)
 
-      Gemgento::Product.unscoped.where(id: product_ids).each do |product|
+      Gemgento::Product.where(id: product_ids).each do |product|
         if affects_cache_expiration
            product.set_cache_expires_at
         else

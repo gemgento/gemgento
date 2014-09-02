@@ -462,12 +462,12 @@ module Gemgento
     def set_cache_expires_at
       self.cache_expires_at = nil
 
-      Store.all.each do |store|
-        UserGroup.all.each do |user_group|
+      Gemgento::Store.all.each do |store|
+        Gemgento::UserGroup.all.each do |user_group|
           if self.has_special?(store)
             date =  self.attribute_value('special_to_date', store)
           else
-            date =  PriceRule.first_to_expire(self, user_group, store)
+            date =  Gemgento::PriceRule.first_to_expire(self, user_group, store)
           end
 
           next if date.nil?
