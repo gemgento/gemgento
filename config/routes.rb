@@ -27,7 +27,7 @@ Gemgento::Engine.routes.draw do
   get '/sync/busy', to: 'sync#busy'
 
   devise_for :user, class_name: 'Gemgento::User',
-             controllers: {:sessions => 'gemgento/user/sessions', :registrations => 'gemgento/user/registrations', :passwords => 'gemgento/user/passwords'},
+             controllers: { session: 'gemgento/user/sessions', registrations: 'gemgento/user/registrations', passwords: 'gemgento/user/passwords' },
              skip: [:unlocks, :omniauth_callbacks],
              module: :devise
 
@@ -74,6 +74,7 @@ Gemgento::Engine.routes.draw do
     resources :recurring_profiles, only: :update
     resources :stores, only: :update
     resources :users, only: [:update, :destroy]
+    resources :user_groups, only: [:update, :destroy]
   end
 
   # - Gemgento Resources - #
