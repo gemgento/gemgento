@@ -39,14 +39,16 @@ module Gemgento
       end
 
       @headers = get_headers
+      @index = 0
       associated_simple_products = []
       self.import_errors = []
       self.count_created = 0
       self.count_updated = 0
 
       1.upto @worksheet.last_row_index do |index|
-        puts "Working on row #{index}"
-        @row = @worksheet.row(index)
+        @index = index
+        puts "Working on row #{@index}"
+        @row = @worksheet.row(@index)
 
         if @row[@headers.index('magento_type').to_i].to_s.strip.casecmp('simple') == 0
           associated_simple_products << create_simple_product
@@ -153,7 +155,7 @@ module Gemgento
         product_attribute = ProductAttribute.find_by(code: attribute_code) # try to load attribute associated with column header
 
         # apply the attribute value if the attribute exists
-        if !product_attribute.nil? && attribute_code != 'sku' && attribute_code != 'status'
+        if !product_attribute.nil? && attribute_code != 'sku' && attribute_code != 'status' && attribute_code != 'image'
 
           if product_attribute.frontend_input == 'select'
             label = @row[@headers.index(attribute_code).to_i].to_s.strip.gsub('.0', '')
@@ -172,7 +174,7 @@ module Gemgento
 
           product.set_attribute_value(product_attribute.code, value, self.store)
         elsif product_attribute.nil? && attribute_code != 'sku' && attribute_code != 'magento_type' && attribute_code != 'category'
-          self.import_errors << "ERROR - row #{@row.index} - Unknown attribute code, '#{attribute_code}'"
+          self.import_errors << "ERROR - row #{@index} - Unknown attribute code, '#{attribute_code}'"
         end
       end
 
@@ -225,7 +227,7 @@ module Gemgento
             product_category.save
             parent_id = category.id
           else
-            self.import_errors << "ERROR - row #{@row.index} - Unknown category url key '#{category_url_key}' - skipped"
+            self.import_errors << "ERROR - row #{@index} - Unknown category url key '#{category_url_key}' - skipped"
           end
         end
       end
