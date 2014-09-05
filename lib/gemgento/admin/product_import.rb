@@ -32,11 +32,11 @@ if defined?(ActiveAdmin)
           f.input :simple_product_visibility,
                   as: :select,
                   include_blank: false,
-                  collection: {'Not Visible' => 1, 'Catalog' => 2, 'Search' => 3, 'Catalog, Search' => 4}
+                  collection: { 'Not Visible' => 1, 'Catalog' => 2, 'Search' => 3, 'Catalog, Search' => 4 }
           f.input :configurable_product_visibility,
                   as: :select,
                   include_blank: false,
-                  collection: {'Not Visible' => 1, 'Catalog' => 2, 'Search' => 3, 'Catalog, Search' => 4}
+                  collection:  { 'Not Visible' => 1, 'Catalog' => 2, 'Search' => 3, 'Catalog, Search' => 4 }
           f.input :include_images
           f.input :image_path
           f.input :image_file_extensions_raw, as: :string, label: 'Image File Extensions', hint: 'Enter expected image file extensions. Separate extensions with a comma.  E.g. .jpg, .png, .gif'

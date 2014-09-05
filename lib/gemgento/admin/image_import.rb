@@ -5,6 +5,19 @@ if defined?(ActiveAdmin)
       actions :all, except: [:destroy]
       permit_params :spreadsheet, :destroy_existing, :image_path, :image_file_extensions_raw, :image_labels_raw, :image_types_raw, :store_id
 
+      index do
+        column :created_at
+        column :spreadsheet_file_name
+        column :destroy_existing
+        column :store
+
+        column "Errors" do |import|
+          import.import_errors.size
+        end
+
+        actions
+      end
+
       form multipart: true do |f|
         f.inputs do
           f.input :spreadsheet, as: :file, label: 'Spreadsheet'
