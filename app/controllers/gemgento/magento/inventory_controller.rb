@@ -9,7 +9,7 @@ module Gemgento
 
       if !@product.nil? && !data[:inventories].nil?
         data[:inventories].each do |website_id, stock_data|
-          store = Gemgento::Store.find_by(website_id: website_id)
+          store = Gemgento::Store.find_by(website_id: website_id.blank? ? nil : website_id)
           next if stock_data[:qty].nil?
 
           if store.nil?
