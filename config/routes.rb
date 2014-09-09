@@ -78,17 +78,17 @@ Gemgento::Engine.routes.draw do
   end
 
   # - Gemgento Resources - #
-  resources :products, only: :show
-  get '/products', to: 'products#show'
+  resources :products, only: [:index, :show]
   resources :categories, :orders, :subscribers
   resources :countries, :regions, only: [:index, :show]
   resource :search, only: [:show], controller: 'gemgento/search'
+  resources :stock_notifications, only: :create
 
   patch '/orders', to: 'orders#update'
   put '/orders', to: 'orders#update'
 
-  get '/gemgento/about',                                 to: 'pages#about'
-  get '/gemgento/contact',                               to: 'pages#contact'
-  get '/gemgento/terms-of-use',                          to: 'pages#terms_of_use', as: 'terms_of_use'
-  get '/gemgento/return-policy',                         to: 'pages#return_policy', as: 'return_policy'
+  get '/gemgento/about',          to: 'pages#about'
+  get '/gemgento/contact',        to: 'pages#contact'
+  get '/gemgento/terms-of-use',   to: 'pages#terms_of_use', as: 'terms_of_use'
+  get '/gemgento/return-policy',  to: 'pages#return_policy', as: 'return_policy'
 end
