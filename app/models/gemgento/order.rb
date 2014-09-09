@@ -58,7 +58,7 @@ module Gemgento
     # @param [Float] quantity
     # @param [nil, Hash] options product options
     # @return [Boolean, String] true if the order item was added, otherwise error message
-    def add_item(product, quantity = 1, options = nil)
+    def add_item(product, quantity = 1.0, options = nil, background_worker = false)
       raise 'Order not in cart state' if self.state != 'cart'
 
       order_item = self.order_items.find_by(product: product)
@@ -71,20 +71,27 @@ module Gemgento
         order_item.options = options
         order_item.save
 
-        self.push_cart if self.magento_quote_id.nil?
+        if background_worker
+          Gemgento::Cart::AddItemWorker.perform_async(current_order.id, product.id, quantity, options)
+          return true
+        else
+          self.push_cart if self.magento_quote_id.nil?
 
-        unless self.magento_quote_id.nil?
-          result = API::SOAP::Checkout::Product.add(self, [order_item])
+          unless self.magento_quote_id.nil?
+            result = API::SOAP::Checkout::Product.add(self, [order_item])
 
-          if result == true
-            return true
-          else
-            order_item.destroy
-            return result
+            if result == true
+              return true
+            else
+              order_item.destroy
+              return result
+            end
           end
         end
+
+
       else
-        return self.update_item(product, order_item.qty_ordered + quantity.to_f, options)
+        return self.update_item(product, order_item.qty_ordered + quantity.to_f, options, background_worker)
       end
     end
 
@@ -94,7 +101,7 @@ module Gemgento
     # @param [Float] quantity
     # @param [nil, Hash] options product options
     # @return [Boolean, String] true if the order item was updated, otherwise error message
-    def update_item(product, quantity = 1.0, options = nil)
+    def update_item(product, quantity = 1.0, options = nil, background_worker = false)
       raise 'Order not in cart state' if self.state != 'cart'
 
       order_item = self.order_items.where(product: product).first
@@ -106,19 +113,25 @@ module Gemgento
         order_item.save
 
         unless self.magento_quote_id.nil?
-          result = API::SOAP::Checkout::Product.update(self, [order_item])
 
-          if result == true
+          if background_worker
+            Gemgento::Cart::UpdateItemWorker.perform_async(current_order.id, product.id, quantity, old_quantity, options)
             return true
           else
-            order_item.qty_ordered = old_quantity
-            order_item.save
+            result = API::SOAP::Checkout::Product.update(self, [order_item])
 
-            return result
+            if result == true
+              return true
+            else
+              order_item.qty_ordered = old_quantity
+              order_item.save
+
+              return result
+            end
           end
         end
       else
-        return self.add_item(product, quantity)
+        return self.add_item(product, quantity, options, background_worker)
       end
     end
 
