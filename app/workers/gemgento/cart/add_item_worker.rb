@@ -22,5 +22,6 @@ module Gemgento
         end
       end
     end
+
   end
 end

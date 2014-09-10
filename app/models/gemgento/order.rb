@@ -74,7 +74,7 @@ module Gemgento
         order_item.save
 
         if background_worker
-          Gemgento::Cart::AddItemWorker.perform_async(current_order.id, order_item.id, quantity, options)
+          Gemgento::Cart::AddItemWorker.perform_async(order_item.id)
           return true
         else
           self.push_cart if self.magento_quote_id.nil?
@@ -117,7 +117,7 @@ module Gemgento
         unless self.magento_quote_id.nil?
 
           if background_worker
-            Gemgento::Cart::UpdateItemWorker.perform_async(current_order.id, product.id, quantity, old_quantity, options)
+            Gemgento::Cart::UpdateItemWorker.perform_async(order_item.id, old_quantity)
             return true
           else
             result = API::SOAP::Checkout::Product.update(self, [order_item])
