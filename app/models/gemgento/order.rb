@@ -25,6 +25,8 @@ module Gemgento
     scope :cart, -> { where(state: 'cart') }
     scope :placed, -> { where("state != 'cart'") }
 
+    serialize :cart_item_errors, Array
+
     def self.index
       if Order.all.size == 0
         API::SOAP::Sales::Order.fetch_all
@@ -72,7 +74,7 @@ module Gemgento
         order_item.save
 
         if background_worker
-          Gemgento::Cart::AddItemWorker.perform_async(current_order.id, product.id, quantity, options)
+          Gemgento::Cart::AddItemWorker.perform_async(current_order.id, order_item.id, quantity, options)
           return true
         else
           self.push_cart if self.magento_quote_id.nil?
