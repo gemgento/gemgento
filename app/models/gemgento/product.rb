@@ -388,7 +388,7 @@ module Gemgento
       configurable_attributes.each do |attribute|
         order[attribute.code] = {}
 
-        simple_products.sort_by! do |simple_product|
+        simple_products = simple_products.sort_by do |simple_product|
           if o = simple_product.product_attribute_options.find_by(product_attribute: attribute, store: store)
             o.order
           else
