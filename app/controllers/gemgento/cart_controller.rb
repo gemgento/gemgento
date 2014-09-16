@@ -109,6 +109,10 @@ module Gemgento
       end
     end
 
+    def mini_bag
+      render partial: 'shared/mini_bag'
+    end
+
     private
 
     def add_item

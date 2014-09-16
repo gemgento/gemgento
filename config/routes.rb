@@ -35,6 +35,7 @@ Gemgento::Engine.routes.draw do
   get '/checkout/shopping_bag', to: 'cart#show'
   get 'cart', to: 'cart#show'
   patch 'cart', to: 'cart#update'
+  get '/cart/mini-bag', to: 'cart#mini_bag'
 
   # - Checkout - #
   namespace :checkout do
