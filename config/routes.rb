@@ -57,6 +57,8 @@ Gemgento::Engine.routes.draw do
     resources :addresses
     resources :recurring_profiles, only: [:index, :destroy]
 
+    get '', to: 'home#index', as: 'home'
+
     # combined login / sign up controller
     get 'login', to: 'registration_session#new', as: 'new_login'
     post 'login', to: 'registration_session#create', as: 'login'
