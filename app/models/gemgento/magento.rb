@@ -64,7 +64,22 @@ module Gemgento
         magento_response.save
       end
 
+      magento_response.body = replace_empty_strings(magento_response.body)
+      magento_response.body_overflow = replace_empty_strings(magento_response.body_overflow) unless magento_response.body_overflow.nil?
+
       return magento_response
+    end
+
+    def self.replace_empty_strings(subject)
+      if subject == { :'@xsi:type' => 'xsd:string' }
+        return ''
+      elsif subject.is_a?(Array)
+        return subject.map{ |child| replace_empty_strings(child) }
+      elsif subject.is_a?(Hash)
+        return subject.each{ |key, value| subject[key] = replace_empty_strings(value) }
+      else
+        return subject
+      end
     end
 
     def self.enforce_savon_string(subject)
