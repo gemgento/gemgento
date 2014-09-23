@@ -109,6 +109,7 @@ module Gemgento
     end
 
     def manage_subscribe
+      self.subscribe = false if self.subscribe == 0 || self.subscribe == '0'
       Gemgento::Subscriber.manage self, self.subscribe
     end
 
