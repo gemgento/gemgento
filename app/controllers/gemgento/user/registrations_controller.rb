@@ -1,9 +1,5 @@
 module Gemgento
   class User::RegistrationsController < Devise::RegistrationsController
-    include SslRequirement
-
-    ssl_required :new, :create, :edit, :update, :destroy, :cancel
-
     # POST /resource
     def create
       build_resource(sign_up_params)

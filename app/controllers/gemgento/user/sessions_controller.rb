@@ -1,7 +1,5 @@
 module Gemgento
   class User::SessionsController < Devise::SessionsController
-    include SslRequirement
-    ssl_required :new, :create, :destroy
     respond_to :html, :json
     prepend_before_filter :convert_magento_password, only: :create
 

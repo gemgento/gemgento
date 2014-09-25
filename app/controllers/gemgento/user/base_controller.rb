@@ -4,8 +4,6 @@ module Gemgento
 
     respond_to :json, :html
 
-    ssl_required
-
     private
 
     def auth_user

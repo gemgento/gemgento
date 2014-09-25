@@ -1,7 +1,5 @@
 module Gemgento
   class AddressesController < Gemgento::ApplicationController
-    ssl_allowed :region_options
-
     respond_to :html, :json
 
     layout -> { set_layout false }

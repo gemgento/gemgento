@@ -1,6 +1,5 @@
 module Gemgento
   class OrdersController < Gemgento::ApplicationController
-    ssl_allowed
 
     def show
       case current_order.state
