@@ -15,7 +15,6 @@ require 'state_machine'
 require 'jbuilder'
 require 'gemgento/version'
 require 'gemgento/engine'
-require 'gemgento/ssl_requirement'
 
 module Gemgento
 
