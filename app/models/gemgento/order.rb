@@ -17,6 +17,7 @@ module Gemgento
     has_many :api_jobs, class_name: 'Gemgento::ApiJob', as: :source
     has_many :order_items
     has_many :order_statuses
+    has_many :products, through: :order_items
     has_many :shipments
     has_many :shipment_tracks
 
