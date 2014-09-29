@@ -32,7 +32,8 @@ module Gemgento
                     'cc_number' => payment.cc_number,
                     'cc_type' => payment.cc_type,
                     'cc_exp_year' => payment.cc_exp_year,
-                    'cc_exp_month' => payment.cc_exp_month
+                    'cc_exp_month' => payment.cc_exp_month,
+                    'additional_information' => Gemgento::API::SOAP::Checkout::Payment.compose_additional_information(payment)
                 },
                 remote_ip: remote_ip
             }

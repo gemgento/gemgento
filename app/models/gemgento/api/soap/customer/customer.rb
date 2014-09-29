@@ -4,6 +4,16 @@ module Gemgento
       module Customer
         class Customer
 
+          def self.authnet_cim_cards(customer_id)
+            response = Gemgento::Magento.create_call(:customer_customer_authnet_cim_cards, { customer_id: customer_id })
+
+            if response.success?
+              return response.body
+            else
+              return response.body[:faultstring]
+            end
+          end
+
           def self.fetch_all(last_updated = nil)
             list(last_updated).each do |store_view|
 

@@ -4,6 +4,6 @@ module Gemgento
 
     validates :cc_owner, :cc_type, :cc_exp_month, :cc_exp_year, :cc_cid, presence: true
 
-    attr_accessor :cc_number, :cc_cid
+    attr_accessor :cc_number, :cc_cid, :save_card, :payment_id
   end
 end
