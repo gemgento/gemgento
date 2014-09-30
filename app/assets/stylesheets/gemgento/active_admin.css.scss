@@ -10,17 +10,17 @@ $light_grey: #f7f7f8;
 // FONTS
 @font-face {
   font-family: 'futura-light';
-  src: url('/assets/FuturaStd-Light.otf')
+  src: asset-url('FuturaStd-Light.otf')
 }
 
 @font-face {
   font-family: 'futura-bold';
-  src: url('/assets/FuturaStd-Medium.otf')
+  src: asset-url('FuturaStd-Medium.otf')
 }
 
 @font-face {
   font-family: 'futura';
-  src: url('/assets/FuturaStd-Book.otf')
+  src: asset-url('FuturaStd-Book.otf')
 }
 
 // MIXINS
@@ -115,7 +115,7 @@ body.logged_out {
       text-align: center;
       border: none;
       background: none;
-      content: url('/assets/gemgento-icon-bolt.png');
+      content: asset-url('gemgento-icon-bolt.png');
 
       -webkit-box-shadow: none;
       -moz-box-shadow: none;
@@ -192,7 +192,7 @@ body.logged_out {
     font-family: futura-light;
     letter-spacing: 1px;
     padding-left: 115px;
-    background-image: url('/assets/gemgento-icon-bolt.png');
+    background-image: asset-url('gemgento-icon-bolt.png');
     background-size: 50px 80px;
     background-position: left 45px top;
     background-repeat: no-repeat;
