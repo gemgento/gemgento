@@ -128,6 +128,14 @@ module Gemgento
       end
     end
 
+    def saved_credit_cards
+      if Gemgento::Config[:extensions]['authorize-net-cim-payment-module']
+        return Gemgento::API::SOAP::AuthorizeNetCim.payment_profiles(self.magento_id)
+      else
+        super
+      end
+    end
+
     private
 
     # Push local users changes to magento
