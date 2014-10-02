@@ -27,7 +27,7 @@ Gemgento::Engine.routes.draw do
   get '/sync/busy', to: 'sync#busy'
 
   devise_for :user, class_name: 'Gemgento::User',
-             controllers: { session: 'gemgento/user/sessions', registrations: 'gemgento/user/registrations', passwords: 'gemgento/user/passwords' },
+             controllers: { sessions: 'gemgento/user/sessions', registrations: 'gemgento/user/registrations', passwords: 'gemgento/user/passwords' },
              skip: [:unlocks, :omniauth_callbacks],
              module: :devise
 
