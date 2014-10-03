@@ -1,5 +1,6 @@
 module Gemgento
   class InstallGenerator < Rails::Generators::Base
+    source_root File.expand_path("../templates", __FILE__)
 
     desc 'Copies migrations to your application.'
 
@@ -30,8 +31,9 @@ include Gemgento::ApplicationHelper
     desc 'Create default active admin assets'
 
     def create_active_admin_assets
-      create_file 'app/assets/stylesheets/active_admin.css.scss', '// Custom ActiveAdmin CMS styling goes here'
-      create_file 'app/assets/javascripts/active_admin.js.coffee', '# Custom ActiveAdmin CMS javascript goes here'
+      template 'active_admin.rb', 'config/initializers/active_admin.rb'
+      template 'active_admin.css.scss', 'app/assets/stylesheets/active_admin.css.scss'
+      template 'active_admin.js.coffee', 'app/assets/javascripts/active_admin.js.coffee'
     end
 
   end
