@@ -2,16 +2,24 @@ module Gemgento
   class Magento
     # Log into the Magento API and setup the session and client
     def self.api_login(force_new_session = false)
-      @api_url = "#{Gemgento::Config[:magento][:url]}/index.php/api/v#{Gemgento::Config[:magento][:api_version]}_#{Gemgento::Config[:magento][:api_type]}/index/wsdl/1"
-      @client = Savon.client(
-          wsdl: @api_url,
-          log: Gemgento::Config[:magento][:debug],
-          raise_errors: false,
-          open_timeout: 300,
-          read_timeout: 300
-      )
-
+      @client = Savon.client(client_config)
       @session = Gemgento::Session.get(@client, force_new_session)
+    end
+
+    def self.client_config
+      config = {
+        wsdl: "#{Gemgento::Config[:magento][:url]}/index.php/api/v#{Gemgento::Config[:magento][:api_version]}_#{Gemgento::Config[:magento][:api_type]}/index/wsdl/1",
+        log: Gemgento::Config[:magento][:debug],
+        raise_errors: false,
+        open_timeout: 300,
+        read_timeout: 300
+      }
+
+      if !Gemgento::Config[:magento][:auth_username].blank? && !Gemgento::Config[:magento][:auth_password].blank?
+        config[:basic_auth] = [Gemgento::Config[:magento][:auth_username].to_s, Gemgento::Config[:magento][:auth_password].to_s]
+      end
+
+      return config
     end
 
     # Make an API call to Magento and get the response
