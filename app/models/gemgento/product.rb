@@ -320,18 +320,20 @@ module Gemgento
     # @param [Gemgento::Store] store
     # @return [Boolean]
     def has_special?(store = nil)
-      if self.attribute_value('special_price', store).nil? # no special price
+      special_price = self.attribute_value('special_price', store)
+      special_from_date = self.attribute_value('special_from_date', store)
+      special_to_date = self.attribute_value('special_to_date', store)
+
+      if special_price.nil? # no special price
         return false
-      elsif self.attribute_value('special_from_date', store).nil? && self.attribute_value('special_to_date', store).nil? # no start or end date
+      elsif special_from_date.nil? && special_to_date.nil?
         return true
-      elsif self.attribute_value('special_from_date', store).nil? && !self.attribute_value('special_to_date', store) && Date.parse(self.attribute_value('special_to_date', store)) >= Date.today # no start date and end date is in the future
-        return true
-      elsif self.attribute_value('special_to_date', store).nil? && !self.attribute_value('special_from_date', store).nil? && Date.parse(special_from_date) <= Date.today # no end date and start date is in the past
-        return true
-      elsif Date.parse(self.attribute_value('special_from_date', store)) <= Date.today && Date.parse(self.attribute_value('special_to_date', store)) >= Date.today # start date is in the past and end date is in the future
-        return true
+      elsif special_from_date.nil? && !special_to_date.nil?
+        return Date.parse(special_to_date) >= Date.today
+      elsif special_to_date.nil? && !special_from_date.nil?
+        return Date.parse(special_from_date) <= Date.today
       else
-        return false
+        return Date.parse(special_from_date) <= Date.today && Date.parse(special_to_date) >= Date.today
       end
     end
 
