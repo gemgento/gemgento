@@ -8,9 +8,6 @@ unless File.exist?(Rails.root.join('config', 'gemgento_config.yml'))
                         'api_key' =>          '',
                         'debug' =>            false,
                     },
-                    'extensions' => {
-                        'authorize-net-cim-payment-module' => false
-                    },
                     'layout' => 'gemgento'
                 },
                 'beta' => {
@@ -18,9 +15,6 @@ unless File.exist?(Rails.root.join('config', 'gemgento_config.yml'))
                         'url' => 'http://www.gemgento.com',
                         'username' =>         'gemgento',
                         'api_key' =>          ''
-                    },
-                    'extensions' => {
-                        'authorize-net-cim-payment-module' => false
                     },
                     'layout' => 'gemgento'
                 },
@@ -30,9 +24,6 @@ unless File.exist?(Rails.root.join('config', 'gemgento_config.yml'))
                         'username' =>         'gemgento',
                         'api_key' =>          '',
                         'ip_whitelist' =>     '127.0.0.1'
-                    },
-                    'extensions' => {
-                        'authorize-net-cim-payment-module' => false
                     },
                     'layout' => 'gemgento',
                     'require_ssl' => true
