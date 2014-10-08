@@ -7,7 +7,7 @@ if defined?(ActiveAdmin)
         column :name
         column :position
         column :url
-        default_actions
+        actions
       end
 
       form multipart: true do |f|

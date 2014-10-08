@@ -11,7 +11,7 @@ if defined?(ActiveAdmin)
         column :last_name
         column :country
         column :city
-        default_actions
+        actions
       end
 
       form multipart: true do |f|

@@ -7,8 +7,8 @@ ActiveAdmin.setup do |config|
   config.batch_actions = true
 
   config.clear_stylesheets!
-  config.register_stylesheet '/assets/gemgento/active_admin.css'
+  config.register_stylesheet 'gemgento/active_admin.css'
 
   config.clear_javascripts!
-  config.register_javascript '/assets/gemgento/active_admin.js'
+  config.register_javascript 'gemgento/active_admin.js'
 end

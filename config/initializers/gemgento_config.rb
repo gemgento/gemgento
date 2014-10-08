@@ -50,6 +50,9 @@ config_defaults = {
         ip_whitelist:     '127.0.0.1',
         table_prefix:     ''
     },
+    extensions: {
+      'authorize-net-cim-payment-module' => false
+    },
     layout: 'gemgento',
     sellect: false,
     require_ssl: true,

@@ -8,7 +8,7 @@ if defined?(ActiveAdmin)
       index do
         column :name
         column :currency_code
-        default_actions
+        actions
       end
 
       form multipart: true do |f|

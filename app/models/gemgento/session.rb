@@ -3,7 +3,7 @@ module Gemgento
 
     def self.get(client, force_new_session)
       if Session.last.nil? || Session.last.expired || force_new_session
-        response = client.call(:login, message: {:username => Gemgento::Config[:magento][:username], :apiKey => Gemgento::Config[:magento][:api_key]})
+        response = client.call(:login, message: { username: Gemgento::Config[:magento][:username], apiKey: Gemgento::Config[:magento][:api_key] })
 
         unless response.success?
           puts 'Login Failed - Check Session'

@@ -9,7 +9,7 @@ if defined?(ActiveAdmin)
         column :permalink
         column :show_in_main_nav
         column :is_shop_landing
-        default_actions
+        actions
       end
 
       form multipart: true do |f|

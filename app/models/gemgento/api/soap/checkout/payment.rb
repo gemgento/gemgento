@@ -27,13 +27,22 @@ module Gemgento
                     'cc_number' => payment.cc_number,
                     'cc_type' => payment.cc_type,
                     'cc_exp_year' => payment.cc_exp_year,
-                    'cc_exp_month' => payment.cc_exp_month
+                    'cc_exp_month' => payment.cc_exp_month,
+                    'additional_information' => compose_additional_information(payment)
                 },
                 store_id: cart.store.magento_id
             }
             response = Gemgento::Magento.create_call(:shopping_cart_payment_method, message)
 
             return response.success
+          end
+
+          def self.compose_additional_information(payment)
+            additional_information = []
+            additional_information << { key: 'save_card', value: payment.save_card } unless payment.save_card.nil?
+            additional_information << { key: 'payment_id', value: payment.payment_id } unless payment.payment_id.nil?
+
+            return { item: additional_information }
           end
 
         end

@@ -2,7 +2,6 @@ module Gemgento
   class User < ActiveRecord::Base
     devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable
 
-    validates :email, uniqueness: { scope: :deleted_at, case_sensitive: false }
     validates :magento_id, uniqueness: true, allow_nil: true
 
     belongs_to :user_group
@@ -109,6 +108,7 @@ module Gemgento
     end
 
     def manage_subscribe
+      self.subscribe = false if self.subscribe == 0 || self.subscribe == '0'
       Gemgento::Subscriber.manage self, self.subscribe
     end
 
@@ -124,6 +124,14 @@ module Gemgento
       unless self.dob_year.nil? || self.dob_month.nil? || self.dob_day.nil?
         new_dob = Date.parse("#{self.dob_year}-#{self.dob_month}-#{self.dob_day}")
         self.dob = new_dob if !self.dob_changed? && self.dob != new_dob
+      end
+    end
+
+    def saved_credit_cards
+      if Gemgento::Config[:extensions]['authorize-net-cim-payment-module']
+        return Gemgento::API::SOAP::AuthorizeNetCim.payment_profiles(self.magento_id)
+      else
+        super
       end
     end
 
