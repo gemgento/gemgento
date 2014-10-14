@@ -201,14 +201,11 @@ module Gemgento
       end
     end
 
+    # The total quantity of items in the order.
+    #
+    # @return [Float]
     def item_count
-      count = 0
-
-      self.order_items.each do |order_item|
-        count += order_item.qty_ordered
-      end
-
-      return count.to_f
+      order_items.sum(:qty_ordered).to_f
     end
 
     # Apply a gift card to the order.  Only works in when order is in cart state.
