@@ -14,7 +14,7 @@ module Gemgento
 
       # save the order and mark is as the current cart
       current_order.save
-      cookies[:cart] = current_order.id
+      session[:cart] = current_order.id
 
       add_item
 
