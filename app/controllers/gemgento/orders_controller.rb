@@ -20,7 +20,7 @@ module Gemgento
 
       respond_to do |format|
         format.html { render 'gemgento/checkout/shopping_bag' }
-        format.js { render '/gemgento/order/add_item', :layout => false }
+        format.js { render '/gemgento/order/add_item', layout: false }
       end
     end
 
