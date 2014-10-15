@@ -41,21 +41,33 @@ module Gemgento
     def self.get_cart(order_id = nil, store = nil, user = nil)
       store = Gemgento::Store.current if store.nil?
 
-      if order_id.nil?
-        unless user.nil?
-          cart = Gemgento::Order.cart.where(state: 'cart', store: store, user: user).order(updated_at: :desc).first_or_initialize
-          cart.reset_checkout unless cart.magento_quote_id.nil?
-        else
+      if !order_id.blank? && user.nil?
+        cart = Gemgento::Order.where('created_at >= ?', Date.today - 30.days).
+            find_by(id: order_id, state: 'cart', store: store)
+        cart = Gemgento::Order.new(state: 'cart', store: store) if cart.nil?
+
+      elsif !order_id.blank? && !user.nil?
+        cart = Gemgento::Order.where('created_at >= ?', Date.today - 30.days).
+            find_by(id: order_id, state: 'cart', store: store)
+
+        if cart.nil? || (!cart.user.nil? && cart.user != user)
+          cart = Gemgento::Order.where('created_at >= ?', Date.today - 30.days).
+              find_by(id: order_id, state: 'cart', store: store, user: user)
           cart = Gemgento::Order.new(state: 'cart', store: store)
         end
+      elsif order_id.blank? && !user.nil?
+        cart = Gemgento::Order.cart.where(state: 'cart', store: store, user: user).
+            where('created_at >= ?', Date.today - 30.days).
+            order(updated_at: :desc).first_or_initialize
+        cart.reset_checkout unless cart.magento_quote_id.nil?
       else
-        cart = Gemgento::Order.find(order_id)
+        cart = Gemgento::Order.new(state: 'cart', store: store)
       end
 
-      cart
+      return cart
     end
 
-    # Add an item to an order in the cart state.
+    # Add an item to an order in the cart state.  24180
     #
     # @param [Gemgento::Product] product
     # @param [Float] quantity
