@@ -16,24 +16,9 @@ module Gemgento
     end
 
     def current_order
-      @current_order ||= begin
-        if cookies[:cart].blank?
-          cookies.delete :cart
-          Gemgento::Order.get_cart(cookies[:cart], current_store, current_user) if @current_order.nil?
-        else
-          Gemgento::Order.find(cookies[:cart])
-        end
-      end
-
-      if @current_order.state != 'cart'
-        cookies.delete :cart
-        @current_order = Gemgento::Order.get_cart(nil, current_store, current_user)
-      end
-
-      unless @current_order.id.nil?
-        cookies[:cart] = @current_order.id
-      end
-
+      @current_order ||= Gemgento::Order.get_cart(cookies[:cart], current_store, current_user) if @current_order.nil?
+      cookies.delete :cart if cookies[:cart] != @current_order.id
+      cookies[:cart] = @current_order.id unless @current_order.id.nil?
       return @current_order
     end
 
