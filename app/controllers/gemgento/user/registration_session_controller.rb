@@ -5,6 +5,11 @@ module Gemgento
     before_filter :set_user_instances
 
     respond_to :json, :html
+    
+    def new
+      @existing_user = Gemgento::User.new
+      @new_user = Gemgento::User.new
+    end
 
     def create
       case params[:activity]
