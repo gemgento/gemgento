@@ -3,6 +3,7 @@ module Gemgento
     devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable
 
     validates :magento_id, uniqueness: true, allow_nil: true
+    validates :email, presence: true, format: /@/
 
     belongs_to :user_group
 
