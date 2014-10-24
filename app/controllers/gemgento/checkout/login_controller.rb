@@ -9,6 +9,7 @@ module Gemgento
       @user = @order.user || Gemgento::User.new
     end
 
+    # Login user to an existing account and associate with current order.
     def login
       respond_to do |format|
 
@@ -33,6 +34,7 @@ module Gemgento
       end
     end
 
+    # Register a new user and associate with order current order
     def register
       @user = Gemgento::User.new(user_params)
       @user.stores << current_store
@@ -61,6 +63,7 @@ module Gemgento
       end
     end
 
+    # Continue with current order as guest
     def guest
       @order.customer_is_guest = true
 
