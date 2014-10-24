@@ -17,10 +17,12 @@ module Gemgento
     has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_users', class_name: 'Gemgento::Store'
 
     attr_accessor :subscribe
+
     after_find :set_subscribe
     before_validation :manage_subscribe
 
-    after_save :sync_local_to_magento
+    before_create :magento_create, if: 'magento_id.nil?'
+    after_save :magento_update, if: :sync_needed?
 
     default_scope -> { where(deleted_at: nil) }
 
@@ -123,26 +125,30 @@ module Gemgento
 
     private
 
-    # Push local users changes to magento
-    def sync_local_to_magento
-      # Password needs to be past as plain text.  It will be encrypted by Magento and updated.
-      if self.sync_needed
-        if self.magento_id.nil?
-          API::SOAP::Customer::Customer.create(self, self.stores.first)
+    # Create the user in Magento.  Called as a before_save callback, a failure to create new user in Magento will cancel
+    # the transaction and set the Magento response as base error on object.
+    #
+    # @return [Boolean]
+    def magento_create
+      response = API::SOAP::Customer::Customer.create(self, self.stores.first)
 
-          self.stores.each_with_index do |store, index|
-            next if index == 0
-            API::SOAP::Customer::Customer.update(self, store)
-          end
-        else
-          self.stores.each do |store|
-            API::SOAP::Customer::Customer.update(self, store)
-          end
-        end
-
-        self.sync_needed = false
-        self.save
+      if response.success?
+        self.magento_id = response.body[:result]
+        self.created_in = self.stores.first.name
+        return true
+      else
+        self.errors.add(:base, response.body[:faultstring])
+        return false
       end
     end
+
+    def magento_update
+      self.stores.each do |store|
+        API::SOAP::Customer::Customer.update(self, store)
+      end
+
+      self.sync_needed = false
+    end
+
   end
 end

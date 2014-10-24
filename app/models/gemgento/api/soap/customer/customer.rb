@@ -30,8 +30,17 @@ module Gemgento
             end
           end
 
+          # Grab customer from Magento and sync to Gemgento.
+          #
+          # @param [Integer] customer_id
+          # @return [Gemgento::User, String] The fetched user or an error message if there was a problem.
           def self.fetch(customer_id)
-            sync_magento_to_local(info(customer_id))
+            response = info(customer_id)
+            if response.success?
+              sync_magento_to_local(response.body[:customer_info])
+            else
+              response.body[:faultstring]
+            end
           end
 
           def self.fetch_all_customer_groups
@@ -69,52 +78,48 @@ module Gemgento
             end
           end
 
+          # Get customer info from Magento
+          #
+          # @param [Integer] customer_id
+          # @return [Gemgento::MagentoResponse]
           def self.info(customer_id)
-            response = Gemgento::Magento.create_call(:customer_customer_info, {customer_id: customer_id})
-
-            if response.success?
-              response.body[:customer_info]
-            end
+            Gemgento::Magento.create_call(:customer_customer_info, { customer_id: customer_id })
           end
 
+          # Create customer in Magento.
+          #
+          # @param [Gemgento::User] customer
+          # @param [Gemgento::Store] store
+          # @return [Gemgento::MagentoResponse]
           def self.create(customer, store)
             message = {
                 customer_data: compose_customer_data(customer, store)
             }
-            response = Gemgento::Magento.create_call(:customer_customer_create, message)
-
-            if response.success?
-              customer.magento_id = response.body[:result]
-              customer.sync_needed = false
-              customer.save
-
-              # pull customer information to get the password
-              sync_magento_to_local(info(customer.magento_id))
-            end
+            Gemgento::Magento.create_call(:customer_customer_create, message)
           end
 
+          # Update customer in Magento.
+          #
+          # @param [Gemgento::User] customer
+          # @param [Gemgento::Store] store
+          # @return [MagentoResponse]
           def self.update(customer, store)
             message = {
                 customer_id: customer.magento_id,
                 customer_data: compose_customer_data(customer, store)
             }
-            response = Gemgento::Magento.create_call(:customer_customer_update, message)
-
-            if response.success?
-              if customer.magento_password.nil? || !customer.magento_password.include?(':')
-                # pull customer information to get the password
-                sync_magento_to_local(info(customer.magento_id))
-              end
-            end
+            Gemgento::Magento.create_call(:customer_customer_update, message)
           end
 
-          def self.delete
+          # Delete customer in Magento.
+          #
+          # @param [Gemgento::User] customer
+          # @return [Gemgento::MagentoResponse]
+          def self.delete(customer)
             message = {
                 customer_id: customer.magento_id
             }
-            response = Gemgento::Magento.create_call(:customer_customer_delete, message)
-
-            return response.success?
+            Gemgento::Magento.create_call(:customer_customer_delete, message)
           end
 
           def self.group
@@ -159,6 +164,8 @@ module Gemgento
             user.save(validate: false)
 
             Gemgento::API::SOAP::Customer::Address.fetch(user)
+
+            return user
           end
 
           def self.compose_customer_data(customer, store)
