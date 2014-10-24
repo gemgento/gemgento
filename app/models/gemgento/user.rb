@@ -16,9 +16,9 @@ module Gemgento
 
     has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_users', class_name: 'Gemgento::Store'
 
-    attr_accessor :subscribe, :dob_year, :dob_month, :dob_day
-    after_find :set_subscribe, :set_dob_parts
-    before_validation :manage_subscribe, :manage_dob
+    attr_accessor :subscribe
+    after_find :set_subscribe
+    before_validation :manage_subscribe
 
     after_save :sync_local_to_magento
 
@@ -111,21 +111,6 @@ module Gemgento
     def manage_subscribe
       self.subscribe = false if self.subscribe == 0 || self.subscribe == '0'
       Gemgento::Subscriber.manage self, self.subscribe
-    end
-
-    def set_dob_parts
-      unless self.dob.nil?
-        self.dob_year = self.dob.year
-        self.dob_month = self.dob.month
-        self.dob_day = self.dob.day
-      end
-    end
-
-    def manage_dob
-      unless self.dob_year.nil? || self.dob_month.nil? || self.dob_day.nil?
-        new_dob = Date.parse("#{self.dob_year}-#{self.dob_month}-#{self.dob_day}")
-        self.dob = new_dob if !self.dob_changed? && self.dob != new_dob
-      end
     end
 
     def saved_credit_cards
