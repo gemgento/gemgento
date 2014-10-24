@@ -40,7 +40,15 @@ Gemgento::Engine.routes.draw do
 
   # - Checkout - #
   namespace :checkout do
-    resource :login, only: [:show, :update], controller: 'login'
+
+    # login actions
+    resource :login, only: :show, controller: 'login'
+    post '/guest', to: 'login#guest'
+    post '/login', to: 'login#login', as: :sign_in
+    post '/registration', to: 'login#register'
+    get '/guest', to: 'login#show'
+    get '/registration', to: 'login#show'
+
     resource :gift, only: :update, controller: 'gift'
     resource 'gift-card', only: [:create, :destroy], controller: 'gift_card', as: :gift_card
     resource :coupons, only: [:create, :destroy], controller: 'coupons'

@@ -8,9 +8,11 @@ module Gemgento
     belongs_to :user_group
 
     has_many :addresses
-    has_many :orders
     has_many :recurring_profiles
     has_many :saved_credit_cards
+
+    has_many :orders
+    accepts_nested_attributes_for :orders
 
     has_one :shopify_adapter, class_name: 'Gemgento::Adapter::ShopifyAdapter', as: :gemgento_model
 

@@ -4,8 +4,12 @@ module Gemgento
       module Checkout
         class Customer
 
-          def self.set(cart, customer)
-
+          # Set the cart customer.
+          #
+          # @param [Gemgento::Order] cart
+          # @param [Gemgento::User] customer
+          # @return [Gemgento::Response]
+          def self.set(cart)
             if cart.customer_is_guest
               customer = {
                   mode: 'guest',
@@ -17,13 +21,13 @@ module Gemgento
             else
               customer = {
                   mode: 'customer',
-                  'customer_id' => customer.magento_id,
-                  email: customer.email,
-                  firstname: customer.first_name,
-                  lastname: customer.last_name,
-                  password: customer.password,
+                  'customer_id' => cart.user.magento_id,
+                  email: cart.user.email,
+                  firstname: cart.user.first_name,
+                  lastname: cart.user.last_name,
+                  password: cart.user.password,
                   confirmation: true,
-                  'group_id' => customer.user_group.magento_id,
+                  'group_id' => cart.user.user_group.magento_id,
                   'website_id' => '1'
               }
             end
@@ -33,9 +37,7 @@ module Gemgento
                 customer: customer,
                 store_id: cart.store.magento_id
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_customer_set, message)
-
-            return response.success?
+            Gemgento::Magento.create_call(:shopping_cart_customer_set, message)
           end
 
           def self.address(cart)

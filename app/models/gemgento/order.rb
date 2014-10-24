@@ -1,8 +1,9 @@
 module Gemgento
   class Order < ActiveRecord::Base
     belongs_to :store
-    belongs_to :user
     belongs_to :user_group
+
+    belongs_to :user
 
     belongs_to :shipping_address, foreign_key: 'shipping_address_id', class_name: 'Address'
     accepts_nested_attributes_for :shipping_address
@@ -21,12 +22,18 @@ module Gemgento
     has_many :shipments
     has_many :shipment_tracks
 
-    attr_accessor :tax, :total
+    attr_accessor :tax, :total, :push_cart_customer, :subscribe
 
     scope :cart, -> { where(state: 'cart') }
     scope :placed, -> { where("state != 'cart'") }
 
+    before_save :push_cart_customer_to_magento, if: :push_cart_customer
+
+    after_commit :subscribe_customer, if: :subscribe
+
     serialize :cart_item_errors, Array
+
+    validates :customer_email, format: /@/, allow_nil: true
 
     def self.index
       if Order.all.size == 0
@@ -396,9 +403,18 @@ module Gemgento
       API::SOAP::Checkout::Payment.method(self, self.order_payment)
     end
 
-    def push_customer
-      raise 'Order user has not been set' if self.user.nil? && !self.customer_is_guest
-      API::SOAP::Checkout::Customer.set(self, self.user)
+    # Set the cart customer in Magento.
+    #
+    # @return [Boolean]
+    def push_cart_customer_to_magento
+      response = API::SOAP::Checkout::Customer.set(self)
+
+      if response.success?
+        return true
+      else
+        self.errors.add(:base, response.body[:faultstring])
+        return false
+      end
     end
 
     def get_shipping_methods
@@ -492,6 +508,10 @@ module Gemgento
 
     private
 
+    def subscribe_customer
+      Gemgento::Subscriber.create(email: self.customer_email)
+    end
+
     def valid_stock?
       self.order_items.each do |item|
         return false unless item.product.in_stock? item.qty_ordered, self.store
@@ -501,8 +521,6 @@ module Gemgento
     end
 
     def verify_address(local_address, remote_address)
-      Rails.logger.info remote_address.inspect
-      Rails.logger.info local_address.inspect
       if (
       local_address.first_name != remote_address[:firstname] ||
           local_address.last_name != remote_address[:lastname] ||
