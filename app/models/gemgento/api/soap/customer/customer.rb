@@ -179,9 +179,9 @@ module Gemgento
                 'website_id' => store.website_id,
                 prefix: customer.prefix,
                 suffix: customer.suffix,
-                dob: customer.dob.nil? ? nil : "#{customer.dob.inspect} 00:00:00",
+                dob: customer.dob.nil? ? nil : "#{customer.dob.strftime('%Y-%m-%d')} 00:00:00",
                 taxvat: customer.taxvat,
-                gender: customer.gender.nil? ? nil : customer.gender.to_i
+                gender: customer.gender.nil? ? nil : customer.gender
             }
 
             if !customer.magento_password.nil? && !customer.magento_password.include?(':')
