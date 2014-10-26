@@ -91,7 +91,9 @@ module Gemgento
         @order.user = current_user
         @order.save
 
-        if @order.push_customer
+        response = @order.push_cart_customer_to_magento
+
+        if response.success?
           respond_to do |format|
             format.html { redirect_to checkout_address_path }
             format.json { render json: { result: true, user: @user, order: @order } }

@@ -9,7 +9,7 @@ module Gemgento
       if current_order.user.nil? && !current_order.customer_is_guest
         current_order.user = current_user
         current_order.save
-        current_order.push_customer
+        current_order.push_cart_customer_to_magento
       end
 
       current_order.push_cart if current_order.magento_quote_id.nil?
@@ -106,7 +106,7 @@ module Gemgento
           # attempt to save the addresses and respond appropriately
           if current_order.billing_address.save && current_order.shipping_address.save
             current_order.save
-            current_order.push_customer if current_order.customer_is_guest
+            current_order.push_cart_customer_to_magento if current_order.customer_is_guest
             result = true if current_order.push_addresses
           end
 
