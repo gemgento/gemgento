@@ -13,13 +13,13 @@ module Gemgento
     def login
       respond_to do |format|
 
-        if user = User::is_valid_login(params[:email], params[:password])
+        if @user = User::is_valid_login(params[:email], params[:password])
           @order.customer_is_guest = false
-          @order.user = user
+          @order.user = @user
           @order.push_cart_customer = true
 
           if @order.save
-            sign_in(:user, user)
+            sign_in(:user, @user)
             format.html { redirect_to checkout_address_path }
             format.json { render json: { result: true } }
           else # problem saving order
@@ -28,6 +28,8 @@ module Gemgento
           end
 
         else # failed login attempt
+          @user = Gemgento::User.new
+          flash.now[:alert] = 'Invalid username and password.'
           format.html { render 'show' }
           format.json { render json: { result: false, errors: flash[:alert] }, status: 422 }
         end
@@ -66,6 +68,7 @@ module Gemgento
     # Continue with current order as guest
     def guest
       @order.customer_is_guest = true
+      @user = Gemgento::User.new
 
       respond_to do  |format|
 
