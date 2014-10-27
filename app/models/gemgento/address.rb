@@ -14,7 +14,7 @@ module Gemgento
     validates_uniqueness_of :user,
                             scope: [:street, :city, :country, :region, :postcode, :telephone, :order],
                             message: 'address is not unique',
-                            if: ->{ self.order.nil? && !self.user.nil? }
+                            if: ->{ !self.user.nil? }
 
     attr_accessor :address1, :address2, :address3
 
