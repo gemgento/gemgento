@@ -1,19 +1,10 @@
 module Gemgento
   class Order < ActiveRecord::Base
-    belongs_to :store
-    belongs_to :user_group
-
-    belongs_to :user
-
-    belongs_to :shipping_address, foreign_key: 'shipping_address_id', class_name: 'Address'
-    accepts_nested_attributes_for :shipping_address
-
-    belongs_to :billing_address, foreign_key: 'billing_address_id', class_name: 'Address'
-    accepts_nested_attributes_for :billing_address
-
-    #has_one :gift_message
-    has_one :order_payment
-    accepts_nested_attributes_for :order_payment
+    belongs_to :store, class_name: 'Gemgento::Store'
+    belongs_to :user, class_name: 'Gemgento::User'
+    belongs_to :user_group, class_name: 'Gemgento::UserGroup'
+    belongs_to :shipping_address, foreign_key: 'shipping_address_id', class_name: 'Gemgento::Address'
+    belongs_to :billing_address, foreign_key: 'billing_address_id', class_name: 'Gemgento::Address'
 
     has_many :api_jobs, class_name: 'Gemgento::ApiJob', as: :source
     has_many :order_items
@@ -21,6 +12,12 @@ module Gemgento
     has_many :products, through: :order_items
     has_many :shipments
     has_many :shipment_tracks
+
+    has_one :order_payment
+
+    accepts_nested_attributes_for :billing_address
+    accepts_nested_attributes_for :shipping_address
+    accepts_nested_attributes_for :order_payment
 
     attr_accessor :tax, :total, :push_cart_customer, :subscribe
 
