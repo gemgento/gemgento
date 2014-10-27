@@ -20,8 +20,8 @@ module Gemgento
     def validate_order_item_count
       if current_order.item_count <= 0
         respond_to do |format|
-          format.html redirect_to cart_path, alert: 'You do not have any products in your cart.'
-          format.json render json: { result: false, errors: 'You do not have any products in your cart.' }, status: 422
+          format.html { redirect_to cart_path, alert: 'You do not have any products in your cart.' }
+          format.json { render json: { result: false, errors: 'You do not have any products in your cart.' }, status: 422 }
         end
 
         return false
@@ -37,8 +37,8 @@ module Gemgento
       # if the user is not signed in and the cart is not a guest checkout, go to login
       if !user_signed_in? && !(current_order.customer_is_guest && !current_order.customer_email.blank?)
         respond_to do |format|
-          format.html redirect_to checkout_login_path, alert: 'You must login or select guest checkout before continuing.'
-          format.json render json: { result: false, errors: 'You must login or select guest checkout before continuing.' }, status: 422
+          format.html { redirect_to checkout_login_path, alert: 'You must login or select guest checkout before continuing.' }
+          format.json { render json: { result: false, errors: 'You must login or select guest checkout before continuing.' }, status: 422 }
         end
 
         return false
