@@ -39,17 +39,6 @@ module Gemgento
       end
     end
 
-    def merge_totals(hash)
-      hash[:subtotal] = current_order.totals[:subtotal]
-      hash[:discounts] = current_order.totals[:discounts]
-      hash[:shipping] = current_order.totals[:shipping]
-      hash[:tax] = current_order.totals[:tax]
-      hash[:total] = current_order.totals[:total]
-      hash[:gift_card] = current_order.totals[:gift_card]
-
-      return hash
-    end
-
     def get_magento_shipping_method
       if cookies[:shipping_methods].nil?
         shipping_methods = current_order.get_shipping_methods
