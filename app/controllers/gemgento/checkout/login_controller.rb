@@ -1,6 +1,8 @@
 module Gemgento
   class Checkout::LoginController < CheckoutController
-    before_filter :set_order, :verify_guest
+    skip_before_filter :validate_order_user
+    before_filter :set_order
+    before_filter :verify_guest
 
     respond_to :json, :html
 

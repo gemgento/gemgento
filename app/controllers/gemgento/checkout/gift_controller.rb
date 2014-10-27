@@ -1,5 +1,7 @@
 module Gemgento
   class Checkout::GiftController < CheckoutController
+    skip_before_filter :validate_order_user
+
     respond_to :json, :html
 
     def update

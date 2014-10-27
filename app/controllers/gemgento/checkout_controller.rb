@@ -1,24 +1,41 @@
 module Gemgento
   class CheckoutController < Gemgento::ApplicationController
 
-    before_action :auth_cart_contents
+    before_action :validate_order_item_count
+    before_action :validate_order_user
 
     private
 
-    def auth_cart_contents
-      if current_order.item_count == 0
+    # Cart must have a quantity greater than 0.
+    #
+    # @return [Boolean]
+    def validate_order_item_count
+      if current_order.item_count <= 0
         respond_to do |format|
           format.html redirect_to checkout_shopping_bag_path, alert: 'You do not have any products in your cart.'
-          format.json json: { result: false, errors: 'You do not have any products in your cart.' }, status: 422
+          format.json render json: { result: false, errors: 'You do not have any products in your cart.' }, status: 422
         end
 
+        return false
+      else
+        return true
       end
     end
 
-    def auth_order_user
+    # Cart must be associated with a user or marked as guest checkout.
+    #
+    # @return [Boolean]
+    def validate_order_user
       # if the user is not signed in and the cart is not a guest checkout, go to login
-      if !user_signed_in? && !current_order.customer_is_guest
-        redirect_to checkout_login_path
+      if !user_signed_in? && !(current_order.customer_is_guest && !current_order.customer_email.blank?)
+        respond_to do |format|
+          format.html redirect_to checkout_login_path, alert: 'You must login or select guest checkout before continuing.'
+          format.json render json: { result: false, errors: 'You must login or select guest checkout before continuing.' }, status: 422
+        end
+
+        return false
+      else
+        return true
       end
     end
 

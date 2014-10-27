@@ -1,5 +1,7 @@
 module Gemgento
   class Checkout::GiftCardController < CheckoutController
+    skip_before_filter :validate_order_user
+
     respond_to :json, :html
 
     def create

@@ -1,7 +1,5 @@
 module Gemgento
   class Checkout::PaymentController < CheckoutController
-    before_filter :auth_order_user
-
     respond_to :json, :html
 
     def show
