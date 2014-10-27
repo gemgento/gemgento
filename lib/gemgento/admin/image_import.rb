@@ -3,7 +3,6 @@ if defined?(ActiveAdmin)
     ActiveAdmin.register ImageImport do
       menu priority: 200, parent: 'Gemgento', label: 'Image Import'
       actions :all, except: [:destroy]
-      permit_params :spreadsheet, :destroy_existing, :image_path, :image_file_extensions_raw, :image_labels_raw, :image_types_raw, :store_id
 
       index do
         column :created_at
@@ -18,7 +17,7 @@ if defined?(ActiveAdmin)
         actions
       end
 
-      form multipart: true do |f|
+      form as: :gemgento_image_import, multipart: true do |f|
         f.inputs do
           f.input :spreadsheet, as: :file, label: 'Spreadsheet'
           f.input :store, as: :select, :include_blank => false, collection: Store.all.map { |s| [s.name, s.id] }
@@ -30,6 +29,17 @@ if defined?(ActiveAdmin)
         end
 
         f.actions
+      end
+
+      controller do
+        def permitted_params
+          params.permit(
+              gemgento_image_import: [
+                  :spreadsheet, :destroy_existing, :image_path, :image_file_extensions_raw, :image_labels_raw,
+                  :image_types_raw, :store_id
+              ]
+          )
+        end
       end
 
     end
