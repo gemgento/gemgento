@@ -35,14 +35,6 @@ module Gemgento
 
     validates :customer_email, format: /@/, allow_nil: true
 
-    def self.index
-      if Order.all.size == 0
-        API::SOAP::Sales::Order.fetch_all
-      end
-
-      Order.all
-    end
-
     # CART specific functions
 
     def self.get_cart(order_id = nil, store = nil, user = nil)
