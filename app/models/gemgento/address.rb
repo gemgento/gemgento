@@ -5,7 +5,6 @@ module Gemgento
     belongs_to :user
     belongs_to :country
     belongs_to :region
-    belongs_to :order
 
     has_one :shopify_adapter, class_name: 'Gemgento::Adapter::ShopifyAdapter', as: :gemgento_model
 
@@ -81,7 +80,6 @@ module Gemgento
     # @return [Gemgento::Address] the newly created Address.
     def self.copy_to_address_book(source, user, is_default_billing = false, is_default_shipping = false)
       address = source.dup
-      address.order = nil
       address.user = user
       address.is_default_billing = is_default_billing
       address.is_default_shipping = is_default_shipping
@@ -106,11 +104,9 @@ module Gemgento
       address.region = self.region
       address.country = self.country
       address.user = nil
-      address.order = nil
       address.is_default_billing = false
       address.is_default_shipping = false
       address.increment_id = nil
-      address.order_address_id = nil
       address.sync_needed = false
       address.user_address_id = nil
 

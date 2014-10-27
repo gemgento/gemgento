@@ -179,9 +179,7 @@ module Gemgento
           end
 
           def self.sync_magento_address_to_local(source, order, address = nil)
-            address = Gemgento::Address.where(order_address_id: source[:address_id].to_i).first_or_initialize if address.nil?
-            address.order_address_id = source[:address_id]
-            address.order = order
+            address = Gemgento::Address.new if address.nil?
             address.user = order.user
             address.increment_id = source[:increment_id]
             address.city = source[:city]
