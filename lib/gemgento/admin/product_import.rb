@@ -19,7 +19,7 @@ if defined?(ActiveAdmin)
         end
       end
 
-      form multipart: true do |f|
+      form as: :gemgento_product_import, multipart: true do |f|
         f.inputs do
           f.input :spreadsheet, as: :file, label: 'Spreadsheet'
           f.input :product_attribute_set, as: :select, :include_blank => false, collection: ProductAttributeSet.all.map { |as| [as.name, as.id] }
@@ -70,7 +70,7 @@ if defined?(ActiveAdmin)
       controller do
         def permitted_params
           params.permit(
-              :gemgento_product_import => [
+              gemgento_product_import: [
                   :configurable_attribute_ids,
                   :utf8,
                   :authenticity_token,
