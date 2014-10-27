@@ -21,7 +21,14 @@ module Gemgento
 
       @same_as_billing = true
 
-      respond_with @order
+      respond_to do |format|
+        format.html
+        format.json { render json: {
+            billing_address: @order.billing_address,
+            shipping_address: @order.shipping_address,
+            totals: @order.totals
+        } }
+      end
     end
 
     def update
