@@ -1,6 +1,5 @@
 module Gemgento
-  class Checkout::PaymentController < Checkout::CheckoutBaseController
-    before_filter :auth_cart_contents
+  class Checkout::PaymentController < CheckoutController
     before_filter :auth_order_user
 
     respond_to :json, :html

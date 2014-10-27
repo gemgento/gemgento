@@ -1,5 +1,5 @@
 module Gemgento
-  class Checkout::GiftCardController < Checkout::CheckoutBaseController
+  class Checkout::GiftCardController < CheckoutController
     respond_to :json, :html
 
     def create

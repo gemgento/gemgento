@@ -1,11 +1,17 @@
 module Gemgento
-  class Checkout::CheckoutBaseController < Gemgento::ApplicationController
+  class CheckoutController < Gemgento::ApplicationController
+
+    before_action :auth_cart_contents
 
     private
 
     def auth_cart_contents
       if current_order.item_count == 0
-        redirect_to checkout_shopping_bag_path
+        respond_to do |format|
+          format.html redirect_to checkout_shopping_bag_path, alert: 'You do not have any products in your cart.'
+          format.json json: { result: false, errors: 'You do not have any products in your cart.' }, status: 422
+        end
+
       end
     end
 

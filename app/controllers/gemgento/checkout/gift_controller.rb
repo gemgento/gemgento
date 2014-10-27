@@ -1,5 +1,5 @@
 module Gemgento
-  class Checkout::GiftController < Checkout::CheckoutBaseController
+  class Checkout::GiftController < CheckoutController
     respond_to :json, :html
 
     def update

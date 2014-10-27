@@ -1,6 +1,5 @@
 module Gemgento
-  class Checkout::ThankYouController < Checkout::CheckoutBaseController
-
+  class Checkout::ThankYouController < CheckoutController
     respond_to :json, :html
 
     def show

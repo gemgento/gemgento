@@ -1,5 +1,5 @@
 module Gemgento
-  class Checkout::CouponsController < Checkout::CheckoutBaseController
+  class Checkout::CouponsController < CheckoutController
     respond_to :json, :html
 
     def create
