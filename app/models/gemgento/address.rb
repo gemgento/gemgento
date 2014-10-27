@@ -12,7 +12,7 @@ module Gemgento
     validates :region, presence: true, if: ->{ !self.country.nil? && !self.country.regions.empty? }
 
     validates_uniqueness_of :user,
-                            scope: [:street, :city, :country, :region, :postcode, :telephone, :order],
+                            scope: [:street, :city, :country, :region, :postcode, :telephone],
                             message: 'address is not unique',
                             if: ->{ !self.user.nil? }
 
