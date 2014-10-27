@@ -32,10 +32,10 @@ Gemgento::Engine.routes.draw do
              module: :devise
 
   # - Cart - #
-  get '/checkout/shopping_bag', to: 'cart#show'
-  get 'cart', to: 'cart#show'
-  patch 'cart', to: 'cart#update'
-  put '/cart', to: 'cart#update'
+  get '/cart', to: 'cart#show'
+  post '/cart', to: 'cart#create', as: :cart_add_item
+  resources :cart, only: :update, as: :cart_update_item
+  resources :cart, only: :destroy, as: :cart_remove_item
   get '/cart/mini-bag', to: 'cart#mini_bag'
 
   # - Checkout - #

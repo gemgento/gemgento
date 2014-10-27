@@ -4,49 +4,46 @@ module Gemgento
       module Checkout
         class Product
 
+          # Add items to Magento quote.
+          #
+          # @param [Gemgento::Order] cart
+          # @param [Array(Gemgento::OrderItem)] order_items
+          # @return [Gemgento::MagentoResponse]
           def self.add(cart, order_items)
             message = {
                 quote_id: cart.magento_quote_id,
                 products: { item: compose_products_data(order_items) },
                 store_id: cart.store.magento_id
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_product_add, message)
-
-            if response.success?
-              return true
-            else
-              return response.body[:faultstring]
-            end
+            Gemgento::Magento.create_call(:shopping_cart_product_add, message)
           end
 
-          def self.update(cart, products)
+          # Update items in Magento quote.
+          #
+          # @param [Gemgento::Order] cart
+          # @param [Array(Gemgento::OrderItem)] order_items
+          # @return [Gemgento::MagentoResponse]
+          def self.update(cart, order_items)
             message = {
                 quote_id: cart.magento_quote_id,
-                products: {item: compose_products_data(products)},
+                products: {item: compose_products_data(order_items)},
                 store_id: cart.store.magento_id
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_product_update, message)
-
-            if response.success?
-              return true
-            else
-              return response.body[:faultstring]
-            end
+            Gemgento::Magento.create_call(:shopping_cart_product_update, message)
           end
 
-          def self.remove(cart, products)
+          # Remove items from Magento quote.
+          #
+          # @param [Gemgento::Order] cart
+          # @param [Array(Gemgento::OrderItem)] order_items
+          # @return [Gemgento::MagentoResponse]
+          def self.remove(cart, order_items)
             message = {
                 quote_id: cart.magento_quote_id,
-                products: {item: compose_products_data(products)},
+                products: {item: compose_products_data(order_items)},
                 store_id: cart.store.magento_id
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_product_remove, message)
-
-            if response.success?
-              return true
-            else
-              return response.body[:faultstring]
-            end
+            Gemgento::Magento.create_call(:shopping_cart_product_remove, message)
           end
 
           def self.list(cart)

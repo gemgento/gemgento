@@ -5,12 +5,12 @@ module Gemgento
     respond_to :json, :html
 
     def update
-      current_order.gift_message = params[:order][:gift_message]
-      current_order.save
+      @order.gift_message = params[:order][:gift_message]
+      @order.save
 
       respond_to do |format|
         format.html { redirect_to checkout_login_path }
-        format.json { render json: { result: true, order: current_order } }
+        format.json { render json: { result: true, order: @order } }
       end
     end
   end

@@ -9,9 +9,9 @@ module Gemgento
       order.push_cart if order.magento_quote_id.nil?
 
       unless order.magento_quote_id.nil?
-        result = API::SOAP::Checkout::Product.add(order, [order_item])
+        response = API::SOAP::Checkout::Product.add(order, [order_item])
 
-        if result != true
+        if response.success?
           order.cart_item_errors << {
             product_id: order_item.product_id,
             error: result

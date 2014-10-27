@@ -79,7 +79,7 @@ module Gemgento
     # @param [Gemgento::Product] product
     # @param [Float] quantity
     # @param [nil, Hash] options product options
-    # @return [Boolean, String] true if the order item was added, otherwise error message
+    # @return [Boolean]
     def add_item(product, quantity = 1.0, options = nil, background_worker = false)
       raise 'Order not in cart state' if self.state != 'cart'
 
@@ -100,13 +100,14 @@ module Gemgento
           self.push_cart if self.magento_quote_id.nil?
 
           unless self.magento_quote_id.nil?
-            result = API::SOAP::Checkout::Product.add(self, [order_item])
+            response = API::SOAP::Checkout::Product.add(self, [order_item])
 
-            if result == true
+            if response.success?
               return true
             else
               order_item.destroy
-              return result
+              self.errors.add(:base, response.body[:faultstring])
+              return false
             end
           end
         end
@@ -122,7 +123,7 @@ module Gemgento
     # @param [Gemgento::Product] product
     # @param [Float] quantity
     # @param [nil, Hash] options product options
-    # @return [Boolean, String] true if the order item was updated, otherwise error message
+    # @return [Boolean]
     def update_item(product, quantity = 1.0, options = nil, background_worker = false)
       raise 'Order not in cart state' if self.state != 'cart'
 
@@ -140,15 +141,15 @@ module Gemgento
             Gemgento::Cart::UpdateItemWorker.perform_async(order_item.id, old_quantity)
             return true
           else
-            result = API::SOAP::Checkout::Product.update(self, [order_item])
+            response = API::SOAP::Checkout::Product.update(self, [order_item])
 
-            if result == true
+            if response.success?
               return true
             else
               order_item.qty_ordered = old_quantity
               order_item.save
-
-              return result
+              self.errors.add(:base, response.body[:faultstring])
+              return false
             end
           end
         end
@@ -160,7 +161,7 @@ module Gemgento
     # Remove an item from an order in the cart state.
     #
     # @param product [Gemgento::Product]
-    # @return [Boolean, String] true if the item was remove, otherwise error message
+    # @return [Boolean]
     def remove_item(product)
       raise 'Order not in cart state' if self.state != 'cart'
 
@@ -169,17 +170,19 @@ module Gemgento
           order_item.destroy
           return true
         else
-          result = API::SOAP::Checkout::Product.remove(self, [order_item])
+          response = API::SOAP::Checkout::Product.remove(self, [order_item])
 
-          if result == true
+          if response.success?
             order_item.destroy
             return true
           else
-            return result
+            self.errors.add(:base, response.body[:faultstring])
+            return false
           end
         end
       else
-        return 'Product is not in the cart'
+        self.errors.add(:base, 'Product is not in the cart')
+        return false
       end
     end
 
@@ -189,10 +192,16 @@ module Gemgento
 
     def push_cart
       raise 'Cart already pushed, creating a new cart' unless self.magento_quote_id.nil?
-      result = API::SOAP::Checkout::Cart.create(self)
 
-      if !result || self.magento_quote_id.nil?
-        self.push_cart
+      response = API::SOAP::Checkout::Cart.create(self)
+
+      if response.success?
+        self.magento_quote_id = response.body[:quote_id]
+        save
+        return true
+      else
+        errors.add(:base, response.body[:faultstring])
+        return false
       end
     end
 
@@ -429,21 +438,27 @@ module Gemgento
 
     def process(remote_ip = nil)
       if !valid_stock?
+        errors.add(:base, 'Some of the order items are now out of stock.')
         return false
-      elsif API::SOAP::Checkout::Cart.order(self, self.order_payment, remote_ip)
-        push_gift_message_comment unless self.gift_message.blank?
-        Gemgento::HeartBeat.perform_async if Rails.env.production?
-        finalize
-        return true
       else
-        return false
-      end
-    end
+        response = API::SOAP::Checkout::Cart.order(self, self.order_payment, remote_ip)
 
-    def enforce_cart_data
-      magento_cart = API::SOAP::Checkout::Cart.info(self)
-      verify_address(self.shipping_address, magento_cart[:shipping_address])
-      verify_address(self.billing_address, magento_cart[:billing_address])
+        if response.success?
+          self.increment_id = response.body[:result]
+          save
+          Gemgento::API::SOAP::Sales::Order.fetch(self.increment_id) #grab all the new order information
+          reload
+
+          push_gift_message_comment unless self.gift_message.blank?
+          Gemgento::HeartBeat.perform_async if Rails.env.production?
+          finalize
+
+          return true
+        else
+          errors.add(:base, response.body[:faultstring])
+          return false
+        end
+      end
     end
 
     def push_gift_message_comment

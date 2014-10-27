@@ -1,7 +1,6 @@
 module Gemgento
   class Checkout::LoginController < CheckoutController
     skip_before_filter :validate_order_user
-    before_filter :set_order
     before_filter :verify_guest
 
     respond_to :json, :html
@@ -84,10 +83,6 @@ module Gemgento
     end
 
     private
-
-    def set_order
-      @order = current_order
-    end
 
     def verify_guest
       if user_signed_in? && (@order.user.nil? || @order.user == current_user)

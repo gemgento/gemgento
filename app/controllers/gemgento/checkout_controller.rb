@@ -1,10 +1,18 @@
 module Gemgento
   class CheckoutController < Gemgento::ApplicationController
 
+    before_action :set_order
     before_action :validate_order_item_count
     before_action :validate_order_user
 
     private
+
+    # Define current_order as instance variable.
+    #
+    # @return [Void]
+    def set_order
+      @order = current_order
+    end
 
     # Cart must have a quantity greater than 0.
     #

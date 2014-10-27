@@ -6,9 +6,9 @@ module Gemgento
       order_item = Gemgento::OrderItem.find(order_item_id)
       order = order_item.order
 
-      result = API::SOAP::Checkout::Product.update(self, [order_item])
+      response = API::SOAP::Checkout::Product.update(order, [order_item])
 
-      if result != true
+      if response.success?
         order_item.qty_ordered = old_quantity
         order_item.save
 

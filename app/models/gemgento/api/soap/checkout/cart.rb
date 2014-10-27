@@ -4,22 +4,24 @@ module Gemgento
       module Checkout
         class Cart
 
+          # Create a magento quote.
+          #
+          # @param [Gemgento::Order] cart
+          # @return [Gemgento::MagentoResponse]
           def self.create(cart)
             message = {
                 store_id: cart.store.magento_id,
                 gemgento_id: cart.id
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_create, message)
-
-            if response.success?
-              cart.magento_quote_id = response.body[:quote_id]
-              cart.save
-              return true
-            else
-              return false
-            end
+            Gemgento::Magento.create_call(:shopping_cart_create, message)
           end
 
+          # Process magento quote.
+          #
+          # @param [Gemgento::Order] cart
+          # @param [Gemgento::OrderPayment] payment
+          # @param [String] remote_ip
+          # @return [Gemgento::MagentoResponse]
           def self.order(cart, payment, remote_ip)
             message = {
                 quote_id: cart.magento_quote_id,
@@ -37,16 +39,7 @@ module Gemgento
                 },
                 remote_ip: remote_ip
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_order, message)
-
-            if response.success?
-              cart.increment_id = response.body[:result]
-              cart.save
-              Gemgento::API::SOAP::Sales::Order.fetch(cart.increment_id) #grab all the new order information
-              return true
-            else
-              return false
-            end
+            Gemgento::Magento.create_call(:shopping_cart_order, message)
           end
 
           def self.info(cart)
