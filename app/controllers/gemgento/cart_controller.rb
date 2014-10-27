@@ -19,6 +19,7 @@ module Gemgento
         respond @order_item.save
       else # update the appropriate order_item if it is
         @order_item = @order.order_items.find_by(product: product)
+        params[:order_item][:qty_ordered] = params[:order_item][:qty_ordered].to_d + @order_item.qty_ordered # increase existing qty by requested qty
         respond @order_item.update(order_item_params)
       end
     end
