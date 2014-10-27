@@ -20,7 +20,7 @@ module Gemgento
     def validate_order_item_count
       if current_order.item_count <= 0
         respond_to do |format|
-          format.html redirect_to checkout_shopping_bag_path, alert: 'You do not have any products in your cart.'
+          format.html redirect_to cart_path, alert: 'You do not have any products in your cart.'
           format.json render json: { result: false, errors: 'You do not have any products in your cart.' }, status: 422
         end
 
