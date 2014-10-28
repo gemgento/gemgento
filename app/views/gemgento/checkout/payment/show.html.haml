@@ -1,43 +1,43 @@
 .pages-holder
   .pages-header
     = render 'gemgento/checkout/checkout_header'
-  - @order_payment =  current_order.build_order_payment
+  - @payment =  current_order.build_payment
   .pages-content
     = form_for current_order, url: checkout_payment_path, html: { id: 'checkout_payment' } do |form|
-      = form.fields_for :order_payment do |order_payment|
+      = form.fields_for :payment do |payment|
         .form-group
           .form-left
             .field
               %label Payment Method
-              = order_payment.select :method, @payment_methods[:item].collect{|i| [i[:title], i[:code]]}
+              = payment.select :method, @payment_methods[:item].collect{|i| [i[:title], i[:code]]}
 
             .field
               %label Credit Card Types
-              = order_payment.select 'cc_type', @card_types, dir: "rtl"
+              = payment.select 'cc_type', @card_types, dir: "rtl"
 
             .field
               %label CVV Code
-              = order_payment.text_field 'cc_cid'
+              = payment.text_field 'cc_cid'
 
 
           .form-left
             .field
               %label Card Holders Full Name
-              = order_payment.text_field 'cc_owner'
+              = payment.text_field 'cc_owner'
 
             .field
               %label Card Number
-              = order_payment.text_field 'cc_number'
+              = payment.text_field 'cc_number'
 
             .field
               .form-left
                 .field
                   %label Expiration Month
-                  = order_payment.select 'cc_exp_month', @exp_months, dir: "rtl"
+                  = payment.select 'cc_exp_month', @exp_months, dir: "rtl"
               .form-left
                 .field
                   %label Expiration Year
-                  = order_payment.select 'cc_exp_year', @exp_years, dir: "rtl"
+                  = payment.select 'cc_exp_year', @exp_years, dir: "rtl"
 
         .form-group
           .form-left

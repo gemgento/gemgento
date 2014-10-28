@@ -12,7 +12,7 @@ module Gemgento
     end
 
     def update
-      @order.order_payment.update(session[:payment_data])
+      @order.payment.update(session[:payment_data])
 
       respond_to do |format|
         if @order.process(request.remote_ip)
@@ -39,7 +39,7 @@ module Gemgento
     def set_order_component_vars
       @shipping_address = @order.shipping_address
       @billing_address = @order.billing_address
-      @payment = @order.order_payment
+      @payment = @order.payment
 
       @shipping_method = get_magento_shipping_method
     end

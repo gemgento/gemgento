@@ -63,8 +63,8 @@ module Gemgento
       return nil
     end
 
-    def order_payment_params
-      params.require(:order).require(:order_payment).permit(:method, :cc_cid, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month, :cc_owner, :save_card, :payment_id)
+    def payment_params
+      params.require(:order).require(:payment).permit(:method, :cc_cid, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month, :cc_owner, :save_card, :payment_id)
     end
 
     def initialize_shipping_variables
@@ -73,9 +73,9 @@ module Gemgento
     end
 
     def initialize_payment_variables
-      unless @order_payment
-        current_order.build_order_payment if current_order.order_payment.nil?
-        @order_payment = current_order.order_payment
+      unless @payment
+        current_order.build_payment if current_order.payment.nil?
+        @payment = current_order.payment
       end
 
       @payment_methods = current_order.get_payment_methods

@@ -19,7 +19,7 @@ module Gemgento
           # Process magento quote.
           #
           # @param [Gemgento::Order] cart
-          # @param [Gemgento::OrderPayment] payment
+          # @param [Gemgento::Payment] payment
           # @param [String] remote_ip
           # @return [Gemgento::MagentoResponse]
           def self.order(cart, payment, remote_ip)

@@ -16,8 +16,8 @@ json.billing_address do |json|
   json.partial! 'gemgento/addresses/address', address: order.billing_address
 end
 
-json.order_payment do |json|
-  json.partial! 'gemgento/order_statuses/order_status', order_payment: order.order_payment
+json.payment do |json|
+  json.partial! 'gemgento/order_statuses/order_status', payment: order.payment
 end
 
 json.order_statuses do |json|

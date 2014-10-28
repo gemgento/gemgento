@@ -13,11 +13,11 @@ module Gemgento
     has_many :shipments
     has_many :shipment_tracks
 
-    has_one :order_payment
+    has_one :payment
 
     accepts_nested_attributes_for :billing_address
     accepts_nested_attributes_for :shipping_address
-    accepts_nested_attributes_for :order_payment
+    accepts_nested_attributes_for :payment
 
     attr_accessor :tax, :total, :push_cart_customer, :subscribe
 
@@ -161,18 +161,18 @@ module Gemgento
 
     # Set the payment method for an order
     #
-    # @param order_payment_attributes[Hash] all attributes for an OrderPayment
+    # @param payment_attributes[Hash] all attributes for an OrderPayment
     # @return [Boolean] true if the payment method was successfully set
-    def set_payment(order_payment_attributes)
-      if self.order_payment.nil?
-        self.order_payment = Gemgento::OrderPayment.new(order_payment_attributes)
+    def set_payment(payment_attributes)
+      if self.payment.nil?
+        self.payment = Gemgento::Payment.new(payment_attributes)
       else
-        self.order_payment.attributes = order_payment_attributes
+        self.payment.attributes = payment_attributes
       end
 
-      self.order_payment.cc_last4 = self.order_payment.cc_number[-4..-1]
+      self.payment.cc_last4 = self.payment.cc_number[-4..-1]
 
-      return self.order_payment.save && self.push_payment_method
+      return self.payment.save && self.push_payment_method
     end
 
 
@@ -285,8 +285,8 @@ module Gemgento
     end
 
     def push_payment_method
-      raise 'Order payment method has not been set' if self.order_payment.nil?
-      API::SOAP::Checkout::Payment.method(self, self.order_payment)
+      raise 'Order payment method has not been set' if self.payment.nil?
+      API::SOAP::Checkout::Payment.method(self, self.payment)
     end
 
     # Set the cart customer in Magento.
@@ -318,7 +318,7 @@ module Gemgento
         errors.add(:base, 'Some of the order items are now out of stock.')
         return false
       else
-        response = API::SOAP::Checkout::Cart.order(self, self.order_payment, remote_ip)
+        response = API::SOAP::Checkout::Cart.order(self, self.payment, remote_ip)
 
         if response.success?
           self.increment_id = response.body[:result]
@@ -352,7 +352,7 @@ module Gemgento
       result['line_items'] = self.line_items
       result['shipping_address'] = self.shipping_address
       result['billing_address'] = self.billing_address
-      result['payment'] = self.order_payment
+      result['payment'] = self.payment
       result['statuses'] = self.order_statuses
       result['shipments'] = self.shipments
       return result
@@ -393,7 +393,7 @@ module Gemgento
       self.shipping_address_id = nil
       self.shipping_method = nil
       self.shipping_amount = nil
-      self.order_payment.destroy unless self.order_payment.nil?
+      self.payment.destroy unless self.payment.nil?
       self.save
     end
 

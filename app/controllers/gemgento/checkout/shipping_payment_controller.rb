@@ -18,15 +18,15 @@ module Gemgento
     end
 
     def update
-      @order_payment = @order.order_payment.nil? ? Gemgento::OrderPayment.new : @order.order_payment
-      @order_payment.attributes = order_payment_params
+      @payment = @order.payment.nil? ? Gemgento::Payment.new : @order.payment
+      @payment.attributes = payment_params
 
       respond_to do |format|
 
         if @order.set_shipping_method(params[:shipping_method], JSON.parse(cookies[:shipping_methods]))
 
-          if @order_payment.valid? && @order.set_payment(order_payment_params)
-            session[:payment_data] = order_payment_params
+          if @payment.valid? && @order.set_payment(payment_params)
+            session[:payment_data] = payment_params
 
             format.html { redirect_to checkout_confirm_path }
             format.json { render json: { result: true, order: @order } }
@@ -39,7 +39,7 @@ module Gemgento
             format.json do
               render json: {
                   result: false,
-                  errors: @order_payment.errors.any? ? @order_payment.errors.full_messages : 'Invalid payment information. Please review all details and try again.'
+                  errors: @payment.errors.any? ? @payment.errors.full_messages : 'Invalid payment information. Please review all details and try again.'
               }
             end
           end
