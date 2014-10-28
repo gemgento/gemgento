@@ -16,11 +16,18 @@ module Gemgento
     accepts_nested_attributes_for :shipping_address
     accepts_nested_attributes_for :payment
 
-    attr_accessor :tax, :total, :push_quote_customer, :subscribe
+    attr_accessor :tax, :total, :push_customer, :push_addresses, :push_shipping_method, :push_payment_method, :subscribe
 
     validates :customer_email, format: /@/, allow_nil: true
 
     before_create :create_magento_quote, if: 'magento_id.nil?'
+
+    before_save :set_magento_customer, if: :push_customer
+    before_save :set_magento_addresses, if: :push_addresses
+    before_save :set_magento_shipping_method, if: :push_shipping_methd
+    before_save :set_magento_payment_method, if: :push_shipping_method
+
+    after_save :create_subscriber, if: :subscribe
 
     # Get the current quote given a quote_id, Store, and User.
     #
@@ -134,7 +141,7 @@ module Gemgento
     # @return [Boolean]
     def remove_coupons
       response = API::SOAP::Checkout::Coupon.remove(self)
-            a
+
       if response.success?
         return true
       else
@@ -146,7 +153,7 @@ module Gemgento
     # Push Quote shipping and billing addresses to Magento.
     #
     # @return [Boolean]
-    def push_addresses
+    def set_magento_addresses
       response = API::SOAP::Checkout::Customer.address(self)
 
       if response.success?
@@ -175,7 +182,7 @@ module Gemgento
     # Set Quote payment method in Magento.
     #
     # @return [Boolean]
-    def push_payment_method
+    def set_magento_payment_method
       response = API::SOAP::Checkout::Payment.method(self, self.payment)
 
       if response.success?
@@ -189,7 +196,7 @@ module Gemgento
     # Set quote customer in Magento.
     #
     # @return [Boolean]
-    def push_cart_customer_to_magento
+    def set_magento_customer
       response = API::SOAP::Checkout::Customer.set(self)
 
       if response.success?
@@ -219,7 +226,7 @@ module Gemgento
     # Set Quote shipping method in Magento.
     #
     # @return [Boolean]
-    def push_shipping_method
+    def set_magento_shipping_method
       response = API::SOAP::Checkout::Shipping.method(self, self.shipping_method)
 
       if response.success?
