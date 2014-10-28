@@ -129,7 +129,7 @@ module Gemgento
           product.id
       ).first_or_initialize
 
-      line_item.order = order
+      line_item.itemizable = order
       line_item.magento_id = source[:item_id]
       line_item.quote_item_id = source[:quote_item_id]
       line_item.product = Gemgento::Product.find_by(magento_id: source[:product_id])

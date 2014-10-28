@@ -4,7 +4,7 @@ module Gemgento
 
     def perform(line_item_id)
       line_item = Gemgento::LineItem.find(line_item_id)
-      order = line_item.order
+      order = line_item.itemizable
 
       order.push_cart if order.magento_quote_id.nil?
 

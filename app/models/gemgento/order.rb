@@ -7,7 +7,7 @@ module Gemgento
     belongs_to :billing_address, foreign_key: 'billing_address_id', class_name: 'Gemgento::Address'
 
     has_many :api_jobs, class_name: 'Gemgento::ApiJob', as: :source
-    has_many :line_items
+    has_many :line_items, as: :itemizable
     has_many :order_statuses
     has_many :products, through: :line_items
     has_many :shipments
@@ -78,7 +78,7 @@ module Gemgento
         line_item = LineItem.new
         line_item.product = product
         line_item.qty_ordered = quantity
-        line_item.order = self
+        line_item.itemizable = self
         line_item.options = options
         line_item.save
 

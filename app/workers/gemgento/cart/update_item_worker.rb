@@ -4,7 +4,7 @@ module Gemgento
 
     def perform(line_item_id, old_quantity)
       line_item = Gemgento::LineItem.find(line_item_id)
-      order = line_item.order
+      order = line_item.itemizable
 
       response = API::SOAP::Checkout::Product.update(order, [line_item])
 

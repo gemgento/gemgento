@@ -15,7 +15,7 @@ module Gemgento
 
       if !@order.products.include? product # make sure the product isn't in the cart
         @line_item = Gemgento::LineItem.new(line_item_params)
-        @line_item.order = @order
+        @line_item.itemizable = @order
         respond @line_item.save
       else # update the appropriate line_item if it is
         @line_item = @order.line_items.find_by(product: product)
