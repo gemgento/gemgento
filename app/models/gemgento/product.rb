@@ -12,7 +12,7 @@ module Gemgento
     has_many :product_attributes, through: :product_attribute_values
     has_many :product_attribute_options, through: :product_attribute_values
     has_many :product_categories, -> { distinct }, dependent: :destroy
-    has_many :relations, -> { distinct }, as: :relatable, :class_name => 'Relation', dependent: :destroy
+    has_many :relations, as: :relatable, class_name: 'Gemgento::Relation', dependent: :destroy
     has_many :shipment_items
 
     has_one :shopify_adapter, class_name: 'Gemgento::Adapter::ShopifyAdapter', as: :gemgento_model
@@ -152,26 +152,6 @@ module Gemgento
       end
     end
 
-    def self.by_attributes(filters, store = nil)
-      store = Gemgento::Store.current if store.nil?
-      products = Gemgento::Product.configurable
-
-      filters.each do |code, value|
-        product_attribute = ProductAttribute.find_by(code: code)
-        next if product_attribute.nil?
-
-        if product_attribute.product_attribute_options.empty?
-          product_attribute_values = product_attribute.product_attribute_values.where(value: value)
-        else
-          product_attribute_values = product_attribute.product_attribute_options.where(label: value, store: store).product_attribute_values
-        end
-
-        products = products.joins(:product_attribute_values).where('gemgento_product_attribute_values.value' => product_attribute_values)
-      end
-
-      return products
-    end
-
     def in_stock?(quantity = 1, store = nil)
       store = Gemgento::Store.current if store.nil?
 
@@ -212,7 +192,7 @@ module Gemgento
       relation_type = RelationType.find_by(name: relation_name)
       raise "Unknown relation type - #{relation_name}" if relation_type.nil?
 
-      return self.relations.where(relation_type: relation_type).collect { |relation| relation.relatedxzz_to }
+      return self.relations.where(relation_type: relation_type).collect { |relation| relation.related_to }
     end
 
     def self.filter(filters, store = nil)
