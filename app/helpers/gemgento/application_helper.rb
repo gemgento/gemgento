@@ -2,32 +2,32 @@ module Gemgento
   module ApplicationHelper
 
     def set_store
-      session[:store_id] = Gemgento::Store.current.id if session[:store_id].nil?
+      session[:store_id] = Store.current.id if session[:store_id].nil?
     end
 
     def current_store
       @current_store ||= begin
         if session[:store_id].nil?
-          Gemgento::Store.current
+          Store.current
         else
-          Gemgento::Store.find(session[:store_id])
+          Store.find(session[:store_id])
         end
       end
     end
 
     def current_order
-      @current_order ||= Gemgento::Order.get_cart(session[:cart], current_store, current_user) if @current_order.nil?
+      @current_order ||= Order.get_cart(session[:cart], current_store, current_user) if @current_order.nil?
       session[:cart] = @current_order.id
       return @current_order
     end
 
     def create_new_cart
       session.delete :cart
-      @current_order = Gemgento::Order.get_cart(nil, current_store)
+      @current_order = Order.get_cart(nil, current_store)
     end
 
     def current_category
-      @current_category ||= Gemgento::Category.root
+      @current_category ||= Category.root
     end
 
     def not_found
@@ -39,7 +39,7 @@ module Gemgento
     end
 
     def set_layout(html_layout = nil, pjax_layout = false)
-      html_layout = Gemgento::Config[:layout] if html_layout.nil?
+      html_layout = Config[:layout] if html_layout.nil?
 
       if request.url # Check if we are redirected
         response.headers['X-PJAX-URL'] = request.url
