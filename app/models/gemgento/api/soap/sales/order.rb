@@ -207,7 +207,7 @@ module Gemgento
 
           def self.sync_magento_payment_to_local(source, order)
             payment = Gemgento::Payment.where(magento_id: source[:payment_id].to_i).first_or_initialize
-            payment.order = order
+            payment.payable = order
             payment.magento_id = source[:payment_id]
             payment.increment_id = source[:increment_id]
             payment.is_active = source[:is_active]

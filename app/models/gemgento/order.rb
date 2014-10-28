@@ -13,7 +13,7 @@ module Gemgento
     has_many :shipments
     has_many :shipment_tracks
 
-    has_one :payment
+    has_one :payment, as: :payable
 
     accepts_nested_attributes_for :billing_address
     accepts_nested_attributes_for :shipping_address
