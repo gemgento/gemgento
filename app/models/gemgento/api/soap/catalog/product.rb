@@ -18,14 +18,14 @@ module Gemgento
 
                   product_list[:item].each do |basic_product_info|
                     if skip_existing
-                      product = Gemgento::Product.find_by(magento_id: basic_product_info[:product_id])
+                      product = ::Gemgento::Product.find_by(magento_id: basic_product_info[:product_id])
 
                       unless product.nil?
                         next if product.stores.include? store
                       end
                     end
 
-                    attribute_set = Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
+                    attribute_set = ::Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
                     fetch(basic_product_info[:product_id], attribute_set, store)
                   end
                 end
@@ -34,14 +34,14 @@ module Gemgento
           end
 
           def self.associate_simple_products_to_configurable_products
-            Gemgento::Product.skip_callback(:save, :after, :sync_local_to_magento)
+            ::Gemgento::Product.skip_callback(:save, :after, :sync_local_to_magento)
 
-            Gemgento::Product.where(magento_type: 'configurable').each do |configurable_product|
+            ::Gemgento::Product.where(magento_type: 'configurable').each do |configurable_product|
               configurable_product.simple_products.clear
               configurable_product.simple_products = MagentoDB.associated_simple_products(configurable_product)
             end
 
-            Product.set_callback(:save, :after, :sync_local_to_magento)
+            ::Gemgento::Product.set_callback(:save, :after, :sync_local_to_magento)
           end
 
           def self.fetch(product_id, attribute_set, store)
@@ -163,7 +163,7 @@ module Gemgento
             response = Magento.create_call(:catalog_product_info, message)
 
             unless response.success?
-              return Gemgento::Product.new
+              return ::Gemgento::Product.new
             else
               return sync_magento_to_local(response.body[:info], store)
             end

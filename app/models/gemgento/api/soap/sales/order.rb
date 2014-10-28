@@ -90,7 +90,7 @@ module Gemgento
           def self.sync_magento_to_local(source)
             return nil if Store.find_by(magento_id: source[:store_id]).nil?
 
-            order = Order.where(increment_id: source[:increment_id]).first_or_initialize
+            order = ::Gemgento::Order.where(increment_id: source[:increment_id]).first_or_initialize
             order.order_id = source[:order_id]
             order.is_active = source[:is_active]
             order.user = User.find_by(magento_id: source[:customer_id])
