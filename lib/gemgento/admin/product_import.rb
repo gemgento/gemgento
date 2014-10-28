@@ -2,21 +2,24 @@ if defined?(ActiveAdmin)
   module Gemgento
     ActiveAdmin.register ProductImport do
       menu priority: 100, parent: 'Gemgento', label: 'Product Import'
+      actions :all, except: [:destroy]
 
       index do
         column :created_at
+
         column "Products Created" do |import|
           import.count_created
         end
+
         column "Products Updated" do |import|
           import.count_updated
         end
+
         column "Errors" do |import|
           import.import_errors.size
         end
-        actions :defaults => false do |pi|
-          link_to 'Show', admin_gemgento_product_import_path(pi)
-        end
+
+        actions
       end
 
       form as: :gemgento_product_import, multipart: true do |f|
