@@ -5,7 +5,7 @@ module Gemgento
         class Region
 
           def self.fetch_all
-            Gemgento::Country.all.each do |country|
+            Country.all.each do |country|
               list(country.iso2_code).each do |region|
                 sync_magento_to_local(region, country)
               end
@@ -13,7 +13,7 @@ module Gemgento
           end
 
           def self.list(country)
-            response = Gemgento::Magento.create_call(:directory_region_list, {country: country})
+            response = Magento.create_call(:directory_region_list, {country: country})
 
             if response.success?
               if !response.body[:countries][:item].nil?

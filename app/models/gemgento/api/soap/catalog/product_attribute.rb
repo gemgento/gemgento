@@ -5,7 +5,7 @@ module Gemgento
         class ProductAttribute
 
           def self.fetch_all
-            Gemgento::ProductAttributeSet.all.each do |product_attribute_set|
+            ProductAttributeSet.all.each do |product_attribute_set|
               list(product_attribute_set).each do |product_attribute|
                 sync_magento_to_local(info(product_attribute[:attribute_id]), product_attribute_set)
               end
@@ -19,12 +19,12 @@ module Gemgento
 
           def self.fetch_all_options(product_attribute)
             # add attribute options if there are any
-            Gemgento::Store.all.each do |store|
+            Store.all.each do |store|
               options(product_attribute.magento_id, store).each_with_index do |attribute_option, index|
-                label = Gemgento::Magento.enforce_savon_string(attribute_option[:label])
-                value = Gemgento::Magento.enforce_savon_string(attribute_option[:value])
+                label = Magento.enforce_savon_string(attribute_option[:label])
+                value = Magento.enforce_savon_string(attribute_option[:value])
 
-                product_attribute_option = Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: label, value: value, store: store).first_or_initialize
+                product_attribute_option = ProductAttributeOption.where(product_attribute: product_attribute, label: label, value: value, store: store).first_or_initialize
                 product_attribute_option.label = label
                 product_attribute_option.value = value
                 product_attribute_option.product_attribute = product_attribute
@@ -37,7 +37,7 @@ module Gemgento
           end
 
           def self.list(product_attribute_set)
-            response = Gemgento::Magento.create_call(:catalog_product_attribute_list, {set_id: product_attribute_set.magento_id})
+            response = Magento.create_call(:catalog_product_attribute_list, {set_id: product_attribute_set.magento_id})
 
             if response.success?
               unless response.body[:result][:item].is_a? Array
@@ -49,7 +49,7 @@ module Gemgento
           end
 
           def self.info(attribute_id)
-            response = Gemgento::Magento.create_call(:catalog_product_attribute_info, {attribute: attribute_id})
+            response = Magento.create_call(:catalog_product_attribute_info, {attribute: attribute_id})
 
             if response.success?
               response.body[:result]
@@ -61,7 +61,7 @@ module Gemgento
                 attributeId: product_attribute_id,
                 storeView: store.magento_id
             }
-            response = Gemgento::Magento.create_call(:catalog_product_attribute_options, message)
+            response = Magento.create_call(:catalog_product_attribute_options, message)
 
             if response.success?
               if response.body[:result][:item].nil?
@@ -90,12 +90,12 @@ module Gemgento
 
           def self.add_option(product_attribute_option, product_attribute)
             message = {attribute: product_attribute.magento_id, data: {
-                label: {item: [{'store_id' => {item: Gemgento::Store.all.map { |s| s.magento_id.to_s } << 0}, value: product_attribute_option.label}]},
+                label: {item: [{'store_id' => {item: Store.all.map { |s| s.magento_id.to_s } << 0}, value: product_attribute_option.label}]},
                 order: '0',
                 'is_default' => '0'
             }}
 
-            response = Gemgento::Magento.create_call(:catalog_product_attribute_add_option, message)
+            response = Magento.create_call(:catalog_product_attribute_add_option, message)
             fetch_all_options(product_attribute) if response.success?
           end
 
@@ -107,8 +107,8 @@ module Gemgento
 
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source, product_attribute_set)
-            unless Gemgento::ProductAttribute.ignored.include?(source[:attribute_code])
-              product_attribute = Gemgento::ProductAttribute.find_or_initialize_by(magento_id: source[:attribute_id])
+            unless ProductAttribute.ignored.include?(source[:attribute_code])
+              product_attribute = ProductAttribute.find_or_initialize_by(magento_id: source[:attribute_id])
               product_attribute.magento_id = source[:attribute_id]
               product_attribute.product_attribute_sets << product_attribute_set unless product_attribute.product_attribute_sets.include? product_attribute_set
               product_attribute.code = source[:attribute_code]

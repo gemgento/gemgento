@@ -5,7 +5,7 @@ module Gemgento
         class Address
 
           def self.fetch_all
-            Gemgento::User.all.each do |user|
+            User.all.each do |user|
               fetch(user)
             end
           end
@@ -17,7 +17,7 @@ module Gemgento
           end
 
           def self.list(customer_id)
-            response = Gemgento::Magento.create_call(:customer_address_list, {customer_id: customer_id})
+            response = Magento.create_call(:customer_address_list, {customer_id: customer_id})
 
             if response.success?
               unless response.body[:result][:item].nil?
@@ -33,7 +33,7 @@ module Gemgento
           end
 
           def self.info(address_id)
-            response = Gemgento::Magento.create_call(:customer_address_list, {address_id: address_id})
+            response = Magento.create_call(:customer_address_list, {address_id: address_id})
 
             if response.success?
               return response.body[:result][:info]
@@ -45,7 +45,7 @@ module Gemgento
                 customer_id: address.user.magento_id,
                 address_data: compose_address_data(address)
             }
-            response = Gemgento::Magento.create_call(:customer_address_create, message)
+            response = Magento.create_call(:customer_address_create, message)
 
             if response.success?
               address.user_address_id = response.body[:result]
@@ -61,13 +61,13 @@ module Gemgento
                 address_id: address.user_address_id,
                 address_data: compose_address_data(address)
             }
-            response = Gemgento::Magento.create_call(:customer_address_update, message)
+            response = Magento.create_call(:customer_address_update, message)
 
             return response.success?
           end
 
           def self.delete(address_id)
-            response = Gemgento::Magento.create_call(:customer_address_update, {address_id: address_id})
+            response = Magento.create_call(:customer_address_update, {address_id: address_id})
 
             return response.success?
           end
@@ -76,7 +76,7 @@ module Gemgento
 
           # Save Magento users address to local
           def self.sync_magento_to_local(source, user)
-            address = Gemgento::Address.where(user_address_id: source[:customer_address_id]).first_or_initialize
+            address = Gemgento::Address.find_or_initialize_by(user_address_id: source[:customer_address_id])
             address.user_address_id = source[:customer_address_id]
             address.user = user
             address.increment_id = source[:increment_id]

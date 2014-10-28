@@ -39,7 +39,7 @@ module Gemgento
               }
             end
 
-            response = Gemgento::Magento.create_call(:sales_order_list, message)
+            response = Magento.create_call(:sales_order_list, message)
 
             if response.success?
               unless response.body_overflow[:result][:item].is_a? Array
@@ -51,7 +51,7 @@ module Gemgento
           end
 
           def self.info(increment_id)
-            response = Gemgento::Magento.create_call(:sales_order_info, {order_increment_id: increment_id})
+            response = Magento.create_call(:sales_order_info, {order_increment_id: increment_id})
 
             if response.success?
               return response.body[:result]
@@ -79,7 +79,7 @@ module Gemgento
               comment: comment,
               notify: notify
             }
-            response = Gemgento::Magento.create_call(:sales_order_add_comment, message)
+            response = Magento.create_call(:sales_order_add_comment, message)
 
             return response.success?
           end
@@ -88,7 +88,7 @@ module Gemgento
 
           # Save Magento order to local
           def self.sync_magento_to_local(source)
-            return nil if Gemgento::Store.find_by(magento_id: source[:store_id]).nil?
+            return nil if Store.find_by(magento_id: source[:store_id]).nil?
 
             order = Gemgento::Order.where(increment_id: source[:increment_id]).first_or_initialize
             order.order_id = source[:order_id]
@@ -145,7 +145,7 @@ module Gemgento
             order.email_sent = source[:email_sent]
             order.increment_id = source[:increment_id]
             order.placed_at = source[:created_at]
-            order.store = Gemgento::Store.find_by(magento_id: source[:store_id])
+            order.store = Store.find_by(magento_id: source[:store_id])
             order.save
 
             order.shipping_address = sync_magento_address_to_local(source[:shipping_address], order, order.shipping_address) unless source[:shipping_address][:address_id].nil?
@@ -156,7 +156,7 @@ module Gemgento
             sync_magento_payment_to_local(source[:payment], order)
 
             unless source[:gift_message_id].nil?
-              gift_message = Gemgento::API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
+              gift_message = API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
               order.gift_message = gift_message
               order.save
             end
@@ -179,7 +179,7 @@ module Gemgento
           end
 
           def self.sync_magento_address_to_local(source, order, address = nil)
-            address = Gemgento::Address.new if address.nil?
+            address = Address.new if address.nil?
             address.user = order.user
             address.increment_id = source[:increment_id]
             address.city = source[:city]
@@ -206,7 +206,7 @@ module Gemgento
           end
 
           def self.sync_magento_payment_to_local(source, order)
-            payment = Gemgento::Payment.where(magento_id: source[:payment_id].to_i).first_or_initialize
+            payment = Payment.where(magento_id: source[:payment_id].to_i).first_or_initialize
             payment.payable = order
             payment.magento_id = source[:payment_id]
             payment.increment_id = source[:increment_id]
@@ -231,7 +231,7 @@ module Gemgento
           end
 
           def self.sync_magento_order_status_to_local(source, order)
-            order_status = Gemgento::OrderStatus.where(order_id: order.id, status: source[:status], comment: source[:comment]).first_or_initialize
+            order_status = OrderStatus.where(order_id: order.id, status: source[:status], comment: source[:comment]).first_or_initialize
             order_status.order = order
             order_status.status = source[:status]
             order_status.is_active = source[:is_active]
@@ -244,11 +244,11 @@ module Gemgento
           end
 
           def self.sync_magento_line_item_to_local(source, order)
-            line_item = Gemgento::LineItem.find_or_initialize_by(magento_id: source[:item_id])
+            line_item = LineItem.find_or_initialize_by(magento_id: source[:item_id])
             line_item.itemizable = order
             line_item.magento_id = source[:item_id]
             line_item.quote_item_id = source[:quote_item_id]
-            line_item.product = Gemgento::Product.find_by(magento_id: source[:product_id])
+            line_item.product = Product.find_by(magento_id: source[:product_id])
             line_item.product_type = source[:product_type]
             line_item.product_options = source[:product_options]
             line_item.weight = source[:weight]
@@ -300,7 +300,7 @@ module Gemgento
             line_item.save
 
             unless source[:gift_message_id].nil?
-              gift_message = Gemgento::API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
+              gift_message = API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
               line_item.gift_message = gift_message
               line_item.save
             end

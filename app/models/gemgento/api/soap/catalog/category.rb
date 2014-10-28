@@ -6,7 +6,7 @@ module Gemgento
 
           # Synchronize local database with Magento database
           def self.fetch_all
-            Gemgento::Store.all.each do |store|
+            Store.all.each do |store|
               category_tree = tree(store)
               sync_magento_tree_to_local(category_tree, store) unless category_tree.nil?
             end
@@ -16,7 +16,7 @@ module Gemgento
             message = {
                 store_view: store.magento_id
             }
-            response = Gemgento::Magento.create_call(:catalog_category_tree, message)
+            response = Magento.create_call(:catalog_category_tree, message)
 
             if response.success?
               return response.body[:tree]
@@ -28,7 +28,7 @@ module Gemgento
                 category_id: category_id,
                 store_view: store.magento_id
             }
-            response = Gemgento::Magento.create_call(:catalog_category_info, message)
+            response = Magento.create_call(:catalog_category_info, message)
 
             if response.success?
               return response.body[:info]
@@ -51,7 +51,7 @@ module Gemgento
                 category_data: data,
                 store_view: store.magento_id
             }
-            response = Gemgento::Magento.create_call(:catalog_category_create, message)
+            response = Magento.create_call(:catalog_category_create, message)
 
             if response.success?
               category.magento_id = response.body[:attribute_id]
@@ -73,14 +73,14 @@ module Gemgento
                 category_data: data,
                 store_view: store.magento_id
             }
-            response = Gemgento::Magento.create_call(:catalog_category_update, message)
+            response = Magento.create_call(:catalog_category_update, message)
             response.body
           end
 
           def self.update_product_positions(category, store)
             # create an array of product positions
             product_positions = []
-            Gemgento::Product.unscoped do
+            Product.unscoped do
               category.product_categories.where(store: store).each do |product_category|
                 next if product_category.category.nil? or product_category.product.nil? or !product_category.product.deleted_at.nil?
 
@@ -99,7 +99,7 @@ module Gemgento
             }
 
             # make the call
-            response = Gemgento::Magento.create_call(:catalog_category_update_product_positions, message)
+            response = Magento.create_call(:catalog_category_update_product_positions, message)
 
             return response.success?
           end
@@ -109,7 +109,7 @@ module Gemgento
                 category_id: category.magento_id,
                 store_id: store.magento_id
             }
-            response = Gemgento::Magento.create_call(:catalog_category_assigned_products, message)
+            response = Magento.create_call(:catalog_category_assigned_products, message)
 
             if response.success? && !response.body[:result][:item].nil?
               result = response.body[:result][:item]
@@ -128,16 +128,16 @@ module Gemgento
                 result = assigned_products(category, store)
 
                 if result.nil? || result == false || result.empty?
-                  Gemgento::ProductCategory.unscoped.where(category: category, store: store).destroy_all
+                  ProductCategory.unscoped.where(category: category, store: store).destroy_all
                   next
                 end
 
                 product_category_ids = []
                 result.each do |item|
-                  product = Gemgento::Product.find_by(magento_id: item[:product_id])
+                  product = Product.find_by(magento_id: item[:product_id])
                   next if product.nil?
 
-                  pairing = Gemgento::ProductCategory.unscoped.find_or_initialize_by(category: category, product: product, store: store)
+                  pairing = ProductCategory.unscoped.find_or_initialize_by(category: category, product: product, store: store)
                   pairing.position = item[:position].nil? ? 1 : item[:position][0]
                   pairing.store = store
                   pairing.save
@@ -145,7 +145,7 @@ module Gemgento
                   product_category_ids << pairing.id
                 end
 
-                Gemgento::ProductCategory.unscoped.
+                ProductCategory.unscoped.
                     where('store_id = ? AND category_id = ? AND id NOT IN (?)', store.id, category.id, product_category_ids).
                     destroy_all
               end
@@ -159,7 +159,7 @@ module Gemgento
                 position: product_category.position,
                 product_identifier_type: 'id'
             }
-            response = Gemgento::Magento.create_call(:catalog_category_update_product, message)
+            response = Magento.create_call(:catalog_category_update_product, message)
 
             if response.success?
               return response.body[:info]
@@ -198,7 +198,7 @@ module Gemgento
 
             if subject.key? :image
               begin
-                category.image = open("#{Gemgento::Config[:magento][:url]}/media/catalog/category/#{subject[:image]}")
+                category.image = open("#{Config[:magento][:url]}/media/catalog/category/#{subject[:image]}")
               rescue
                 category.image = nil
               end

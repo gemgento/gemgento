@@ -6,22 +6,22 @@ module Gemgento
 
           # Create a magento quote.
           #
-          # @param [Gemgento::Order] cart
-          # @return [Gemgento::MagentoResponse]
+          # @param [Order] cart
+          # @return [MagentoResponse]
           def self.create(cart)
             message = {
                 store_id: cart.store.magento_id,
                 gemgento_id: cart.id
             }
-            Gemgento::Magento.create_call(:shopping_cart_create, message)
+            Magento.create_call(:shopping_cart_create, message)
           end
 
           # Process magento quote.
           #
-          # @param [Gemgento::Order] cart
-          # @param [Gemgento::Payment] payment
+          # @param [Order] cart
+          # @param [Payment] payment
           # @param [String] remote_ip
-          # @return [Gemgento::MagentoResponse]
+          # @return [MagentoResponse]
           def self.order(cart, payment, remote_ip)
             message = {
                 quote_id: cart.magento_quote_id,
@@ -35,11 +35,11 @@ module Gemgento
                     'cc_type' => payment.cc_type,
                     'cc_exp_year' => payment.cc_exp_year,
                     'cc_exp_month' => payment.cc_exp_month,
-                    'additional_information' => Gemgento::API::SOAP::Checkout::Payment.compose_additional_information(payment)
+                    'additional_information' => API::SOAP::Checkout::Payment.compose_additional_information(payment)
                 },
                 remote_ip: remote_ip
             }
-            Gemgento::Magento.create_call(:shopping_cart_order, message)
+            Magento.create_call(:shopping_cart_order, message)
           end
 
           def self.info(cart)
@@ -47,7 +47,7 @@ module Gemgento
                 quote_id: cart.magento_quote_id,
                 store_id: cart.store.magento_id
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_info, message)
+            response = Magento.create_call(:shopping_cart_info, message)
 
             if response.success?
               return response.body[:result]
@@ -61,7 +61,7 @@ module Gemgento
                 quote_id: cart.magento_quote_id,
                 store_id: cart.store.magento_id
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_totals, message)
+            response = Magento.create_call(:shopping_cart_totals, message)
 
             if response.success?
               response.body[:result][:item]
@@ -73,7 +73,7 @@ module Gemgento
                 quote_id: cart.magento_quote_id,
                 store_id: cart.store.magento_id
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_license, message)
+            response = Magento.create_call(:shopping_cart_license, message)
 
             if response.success?
               response.body[:result][:item]

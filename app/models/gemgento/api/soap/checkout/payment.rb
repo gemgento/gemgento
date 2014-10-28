@@ -9,7 +9,7 @@ module Gemgento
                 quote_id: cart.magento_quote_id,
                 store_id: cart.store.magento_id
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_payment_list, message)
+            response = Magento.create_call(:shopping_cart_payment_list, message)
 
             if response.success?
               return response.body[:result]
@@ -32,7 +32,7 @@ module Gemgento
                 },
                 store_id: cart.store.magento_id
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_payment_method, message)
+            response = Magento.create_call(:shopping_cart_payment_method, message)
 
             return response.success
           end

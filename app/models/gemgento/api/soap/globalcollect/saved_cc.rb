@@ -5,7 +5,7 @@ module Gemgento
         class SavedCc
 
           def self.fetch_all
-            Gemgento::User.all.each do |user|
+            User.all.each do |user|
               fetch(user)
             end
           end
@@ -18,11 +18,11 @@ module Gemgento
             end
 
             # destroy saved cards that were not returned
-            Gemgento::SavedCreditCard.where(user: user).where('id NOT IN (?)', saved_cards.collect(&:id)).delete_all
+            SavedCreditCard.where(user: user).where('id NOT IN (?)', saved_cards.collect(&:id)).delete_all
           end
 
           def self.tokens(customer_id)
-            response = Gemgento::Magento.create_call(:globalcollect_tokens, {customer_id: customer_id})
+            response = Magento.create_call(:globalcollect_tokens, {customer_id: customer_id})
 
             if response.success?
               if response.body[:result][:item].nil?
@@ -39,7 +39,7 @@ module Gemgento
           private
 
           def self.sync_magento_to_local(token, user_id)
-            saved_cc = Gemgento::SavedCreditCard.find_or_initialize_by(magento_id: token[:token_id])
+            saved_cc = SavedCreditCard.find_or_initialize_by(magento_id: token[:token_id])
             saved_cc.user_id = user_id
             saved_cc.token = token[:token]
             saved_cc.cc_number = token[:cc_number]

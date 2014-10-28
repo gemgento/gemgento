@@ -12,7 +12,7 @@ module Gemgento
               email: email,
               phone: phone
           }
-          response = Gemgento::Magento.create_call(:stocknotification_add, message)
+          response = Magento.create_call(:stocknotification_add, message)
 
           if response.success?
             return true

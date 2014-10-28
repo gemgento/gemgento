@@ -6,44 +6,44 @@ module Gemgento
 
           # Add items to Magento quote.
           #
-          # @param [Gemgento::Order] cart
-          # @param [Array(Gemgento::LineItem)] line_items
-          # @return [Gemgento::MagentoResponse]
+          # @param [Order] cart
+          # @param [Array(LineItem)] line_items
+          # @return [MagentoResponse]
           def self.add(cart, line_items)
             message = {
                 quote_id: cart.magento_quote_id,
                 products: { item: compose_products_data(line_items) },
                 store_id: cart.store.magento_id
             }
-            Gemgento::Magento.create_call(:shopping_cart_product_add, message)
+            Magento.create_call(:shopping_cart_product_add, message)
           end
 
           # Update items in Magento quote.
           #
-          # @param [Gemgento::Order] cart
-          # @param [Array(Gemgento::LineItem)] line_items
-          # @return [Gemgento::MagentoResponse]
+          # @param [Order] cart
+          # @param [Array(LineItem)] line_items
+          # @return [MagentoResponse]
           def self.update(cart, line_items)
             message = {
                 quote_id: cart.magento_quote_id,
                 products: {item: compose_products_data(line_items)},
                 store_id: cart.store.magento_id
             }
-            Gemgento::Magento.create_call(:shopping_cart_product_update, message)
+            Magento.create_call(:shopping_cart_product_update, message)
           end
 
           # Remove items from Magento quote.
           #
-          # @param [Gemgento::Order] cart
-          # @param [Array(Gemgento::LineItem)] line_items
-          # @return [Gemgento::MagentoResponse]
+          # @param [Order] cart
+          # @param [Array(LineItem)] line_items
+          # @return [MagentoResponse]
           def self.remove(cart, line_items)
             message = {
                 quote_id: cart.magento_quote_id,
                 products: {item: compose_products_data(line_items)},
                 store_id: cart.store.magento_id
             }
-            Gemgento::Magento.create_call(:shopping_cart_product_remove, message)
+            Magento.create_call(:shopping_cart_product_remove, message)
           end
 
           def self.list(cart)
@@ -51,7 +51,7 @@ module Gemgento
                 quote_id: cart.magento_quote_id,
                 store_id: cart.store.magento_id
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_product_list, message)
+            response = Magento.create_call(:shopping_cart_product_list, message)
 
             if response.success?
               if response.body[:result][:item].nil?

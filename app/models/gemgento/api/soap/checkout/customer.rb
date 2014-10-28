@@ -6,9 +6,9 @@ module Gemgento
 
           # Set the cart customer.
           #
-          # @param [Gemgento::Order] cart
-          # @param [Gemgento::User] customer
-          # @return [Gemgento::Response]
+          # @param [Order] cart
+          # @param [User] customer
+          # @return [Response]
           def self.set(cart)
             if cart.customer_is_guest
               customer = {
@@ -37,7 +37,7 @@ module Gemgento
                 customer: customer,
                 store_id: cart.store.magento_id
             }
-            Gemgento::Magento.create_call(:shopping_cart_customer_set, message)
+            Magento.create_call(:shopping_cart_customer_set, message)
           end
 
           def self.address(cart)
@@ -46,7 +46,7 @@ module Gemgento
                 customer: {item: compose_address_data([cart.shipping_address, cart.billing_address])},
                 store_id: cart.store.magento_id
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_customer_addresses, message)
+            response = Magento.create_call(:shopping_cart_customer_addresses, message)
 
             return response.success?
           end

@@ -1,4 +1,4 @@
-module Gemgento::API::SOAP::CatalogRule
+module API::SOAP::CatalogRule
   class Rule
 
     def self.fetch_all
@@ -10,7 +10,7 @@ module Gemgento::API::SOAP::CatalogRule
     end
 
     def self.list
-      response = Gemgento::Magento.create_call(:catalog_rule_list)
+      response = Magento.create_call(:catalog_rule_list)
 
       if response.success?
         response.body[:result][:item] = [response.body[:result][:item]] unless response.body[:result][:item].is_a? Array
@@ -21,7 +21,7 @@ module Gemgento::API::SOAP::CatalogRule
     end
 
     def self.sync_magento_to_local(source, website_ids, user_group_ids)
-      price_rule = Gemgento::PriceRule.find_or_initialize_by(magento_id: source[:rule_id])
+      price_rule = PriceRule.find_or_initialize_by(magento_id: source[:rule_id])
       price_rule.name = source[:name]
       price_rule.description = source[:description]
       price_rule.from_date = source[:from_date]
@@ -37,8 +37,8 @@ module Gemgento::API::SOAP::CatalogRule
       price_rule.conditions = source[:conditions]
       price_rule.save
 
-      price_rule.stores = Gemgento::Store.where(website_id: website_ids)
-      price_rule.user_groups = Gemgento::UserGroup.where(magento_id: user_group_ids)
+      price_rule.stores = Store.where(website_id: website_ids)
+      price_rule.user_groups = UserGroup.where(magento_id: user_group_ids)
     end
 
   end

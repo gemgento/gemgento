@@ -8,7 +8,7 @@ module Gemgento
           def self.fetch_all(last_updated = nil, skip_existing = false)
             updates_made = false
 
-            Gemgento::Store.all.each do |store|
+            Store.all.each do |store|
               list(store, last_updated).each do |product_list|
                 unless product_list == empty_product_list
                   updates_made = true
@@ -38,10 +38,10 @@ module Gemgento
 
             Gemgento::Product.where(magento_type: 'configurable').each do |configurable_product|
               configurable_product.simple_products.clear
-              configurable_product.simple_products = Gemgento::MagentoDB.associated_simple_products(configurable_product)
+              configurable_product.simple_products = MagentoDB.associated_simple_products(configurable_product)
             end
 
-            Gemgento::Product.set_callback(:save, :after, :sync_local_to_magento)
+            Product.set_callback(:save, :after, :sync_local_to_magento)
           end
 
           def self.fetch(product_id, attribute_set, store)
@@ -49,11 +49,11 @@ module Gemgento
 
             # update the product and grab the images
             product = sync_magento_to_local(product_info, store)
-            Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch(product, store)
+            API::SOAP::Catalog::ProductAttributeMedia.fetch(product, store)
           end
 
           def self.list(store = nil, last_updated = nil)
-            store = Gemgento::Store.current if store.nil?
+            store = Store.current if store.nil?
 
             if last_updated.nil?
               message = {}
@@ -72,7 +72,7 @@ module Gemgento
               }
             end
 
-            response = Gemgento::Magento.create_call(:catalog_product_list, message)
+            response = Magento.create_call(:catalog_product_list, message)
             if response.success? && !response.body_overflow[:store_view].nil?
 
               # enforce array
@@ -101,7 +101,7 @@ module Gemgento
                 },
                 store_view: store.magento_id
             }
-            response = Gemgento::Magento.create_call(:catalog_product_info, message)
+            response = Magento.create_call(:catalog_product_info, message)
 
             if response.success?
               return response.body[:info]
@@ -117,7 +117,7 @@ module Gemgento
                 product_data: compose_product_data(product, store),
                 store_view: store.magento_id
             }
-            response = Gemgento::Magento.create_call(:catalog_product_create, message)
+            response = Magento.create_call(:catalog_product_create, message)
 
             if response.success?
               product.magento_id = response.body[:result]
@@ -134,14 +134,14 @@ module Gemgento
                 product_data: compose_product_data(product, store),
                 store_view: store.magento_id
             }
-            response = Gemgento::Magento.create_call(:catalog_product_update, message)
+            response = Magento.create_call(:catalog_product_update, message)
 
             return response.success?
           end
 
           def self.delete(product)
             message = { product: product.magento_id, product_identifier_type: 'id' }
-            response = Gemgento::Magento.create_call(:catalog_product_delete, message)
+            response = Magento.create_call(:catalog_product_delete, message)
 
             return response.success?
           end
@@ -160,7 +160,7 @@ module Gemgento
                 }
             }
 
-            response = Gemgento::Magento.create_call(:catalog_product_info, message)
+            response = Magento.create_call(:catalog_product_info, message)
 
             unless response.success?
               return Gemgento::Product.new
@@ -192,7 +192,7 @@ module Gemgento
           end
 
           def self.propagate_magento_deletions
-            Gemgento::Product.not_deleted.where('magento_id NOT IN (?)', all_magento_product_ids).each do |product|
+            Product.not_deleted.where('magento_id NOT IN (?)', all_magento_product_ids).each do |product|
               product.mark_deleted!
             end
           end
@@ -251,16 +251,16 @@ module Gemgento
 
             # loop through each return category and add it to the product if needed
             magento_categories.each do |magento_category|
-              category = Gemgento::Category.find_by(magento_id: magento_category)
+              category = Category.find_by(magento_id: magento_category)
               next if category.nil?
 
-              product_category = Gemgento::ProductCategory.unscoped.find_or_initialize_by(category: category, product: product, store: store)
+              product_category = ProductCategory.unscoped.find_or_initialize_by(category: category, product: product, store: store)
               product_category.save
 
               product_category_ids << product_category.id
             end
 
-            Gemgento::ProductCategory.unscoped.
+            ProductCategory.unscoped.
                 where('store_id = ? AND product_id = ? AND id NOT IN (?)', store.id, product.id, product_category_ids).
                 destroy_all
           end
@@ -410,12 +410,12 @@ module Gemgento
 
           def self.set_associated_products(simple_magento_product_ids, configurable_magento_product_ids, product)
             if !simple_magento_product_ids.nil? && !simple_magento_product_ids[:item].nil?
-              ids = Gemgento::Magento.enforce_savon_array(simple_magento_product_ids[:item])
+              ids = Magento.enforce_savon_array(simple_magento_product_ids[:item])
               product.set_simple_products_by_magento_ids(ids)
             end
 
             if !configurable_magento_product_ids.nil? && !configurable_magento_product_ids[:item].nil?
-              ids = Gemgento::Magento.enforce_savon_array(configurable_magento_product_ids[:item])
+              ids = Magento.enforce_savon_array(configurable_magento_product_ids[:item])
               product.set_configurable_products_by_magento_ids(ids)
             end
           end

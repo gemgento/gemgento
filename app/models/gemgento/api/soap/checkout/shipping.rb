@@ -9,7 +9,7 @@ module Gemgento
                 quote_id: cart.magento_quote_id,
                 store_id: cart.store.magento_id
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_shipping_list, message)
+            response = Magento.create_call(:shopping_cart_shipping_list, message)
 
             if response.success?
               response.body[:result][:item] = [response.body[:result][:item]] unless response.body[:result][:item].is_a? Array
@@ -24,7 +24,7 @@ module Gemgento
                 method: shipping_method,
                 store_id: cart.store.magento_id
             }
-            response = Gemgento::Magento.create_call(:shopping_cart_shipping_method, message)
+            response = Magento.create_call(:shopping_cart_shipping_method, message)
 
             return response.success?
           end

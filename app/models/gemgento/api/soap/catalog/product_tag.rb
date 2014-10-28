@@ -8,7 +8,7 @@ module Gemgento
           #
           # @return [Void]
           def self.fetch_all
-            Gemgento::Product.not_deleted.where(magento_id: [391]).each do |product|
+            Product.not_deleted.where(magento_id: [391]).each do |product|
               product.stores.each do |store|
                 list(product, store).each do |tag|
                   if info = info(tag[:tag_id], store)
@@ -21,15 +21,15 @@ module Gemgento
 
           # Retrieve a list of tags related to a product and store.
           #
-          # @param product [Gemgento::Product]
-          # @param store [Gemgento::Store]
+          # @param product [Product]
+          # @param store [Store]
           # @return [Array(Hash), Boolean]
           def self.list(product, store)
             message = {
                 product_id: product.magento_id,
                 store: store.magento_id
             }
-            response = Gemgento::Magento.create_call(:catalog_product_tag_list, message)
+            response = Magento.create_call(:catalog_product_tag_list, message)
 
             if response.success?
               unless response.body[:result][:item].is_a? Array
@@ -45,14 +45,14 @@ module Gemgento
           # Retrieve info on a specific tag.
           #
           # @param magento_tag_id [Integer]
-          # @param store [Gemgento::Store]
+          # @param store [Store]
           # @return [Hash, Boolean]
           def self.info(magento_tag_id, store)
             message = {
                 tag_id: magento_tag_id,
                 store: store.magento_id
             }
-            response = Gemgento::Magento.create_call(:catalog_product_tag_info, message)
+            response = Magento.create_call(:catalog_product_tag_info, message)
 
             return response.success? ? response.body[:result] : false
           end
@@ -61,14 +61,14 @@ module Gemgento
           #
           # @param magento_tag_id [Integer]
           # @param source [Hash]
-          # @param store [Gemgento::Store]
+          # @param store [Store]
           def self.sync_magento_to_local(magento_tag_id, source, store)
-            tag = Gemgento::Tag.find_or_initialize_by(magento_id: magento_tag_id)
+            tag = Tag.find_or_initialize_by(magento_id: magento_tag_id)
             tag.name = source[:name]
             tag.sync_needed = false
             tag.save
 
-            store_tag = Gemgento::StoreTag.find_or_initialize_by(store: store, tag: tag)
+            store_tag = StoreTag.find_or_initialize_by(store: store, tag: tag)
             store_tag.base_popularity = source[:base_popularity]
             store_tag.save
 
@@ -77,7 +77,7 @@ module Gemgento
 
           # Associate a tag using a set of magento product ids.
           #
-          # @param tag [Gemgento::Tag]
+          # @param tag [Tag]
           # @param source_product_ids [Hash, Array(Hash)]
           # @return [Void]
           def self.associate_products(tag, source_product_ids)
@@ -85,8 +85,8 @@ module Gemgento
             source_product_ids = [source_product_ids] unless source_product_ids.is_a? Array
 
             source_product_ids.each do |product_key|
-              Gemgento::Product.unscoped do
-                if product = Gemgento::Product.not_deleted.find_by(magento_id: product_key[:key])
+              Product.unscoped do
+                if product = Product.not_deleted.find_by(magento_id: product_key[:key])
                   tag.products << product unless tag.products.include? product
                   product_ids << product.id
                 end
@@ -98,10 +98,10 @@ module Gemgento
 
           # Add tags to a product.
           #
-          # @param tags [Array(Gemgento::Tag)]
-          # @param products [Gemgento::Product]
-          # @param store [Gemgento::Store]
-          # @param user [Gemgento::User]
+          # @param tags [Array(Tag)]
+          # @param products [Product]
+          # @param store [Store]
+          # @param user [User]
           # @return [Boolean]
           def self.add(tags, product, store, user = nil)
             message = {
@@ -111,7 +111,7 @@ module Gemgento
             }
             message[:customer_id] = user.magento_id unless user.nil?
 
-            response = Gemgento::Magento.create_call(:catalog_product_tag_info, message)
+            response = Magento.create_call(:catalog_product_tag_info, message)
 
             if response.success?
               tag_ids = response.body[:result][:item].is_a?(Array) ? response.body[:result][:item] : [response.body[:result][:item]]
@@ -131,8 +131,8 @@ module Gemgento
 
           # Manage a tag, this will create/update a tag with absolute values.
           #
-          # @param tag [Gemgento::Tag]
-          # @param store [Gemgento::Store]
+          # @param tag [Tag]
+          # @param store [Store]
           # @return [Boolean]
           def self.manage(tag, store)
             message = {
@@ -144,7 +144,7 @@ module Gemgento
             }
             message[:tag_id] = tag.magento_id unless tag.magento_id.nil?
 
-            response = Gemgento::Magento.create_call(:catalog_product_tag_manage, message)
+            response = Magento.create_call(:catalog_product_tag_manage, message)
 
             if response.success?
               tag.magento_id = response.body[:result]

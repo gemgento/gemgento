@@ -20,7 +20,7 @@ module Gemgento
           #
           # @return [Array(Hash), Boolean]
           def self.list
-            response = Gemgento::Magento.create_call(:sales_recurring_profile_list)
+            response = Magento.create_call(:sales_recurring_profile_list)
 
             if response.success?
               return response.body[:result][:item].is_a?(Array) ? response.body[:result][:item] : [response.body[:result][:item]]
@@ -39,7 +39,7 @@ module Gemgento
                 profile_id: profile_id,
                 state: state
             }
-            response = Gemgento::Magento.create_call(:sales_recurring_profile_update_state, message)
+            response = Magento.create_call(:sales_recurring_profile_update_state, message)
 
             if response.success?
               return true
@@ -53,11 +53,11 @@ module Gemgento
           # Sync a Magento recurring profile to Gemgento.
           #
           # @param [Hash] source
-          # @return [Gemgento::Profile]
+          # @return [Profile]
           def self.sync_magento_to_local(source)
             profile = Gemgento::RecurringProfile.find_or_initialize_by(magento_id: source[:profile_id])
             profile.state = source[:state]
-            profile.store = Gemgento::Store.find_by(magento_id: source[:store_id])
+            profile.store = Store.find_by(magento_id: source[:store_id])
             profile.method_code = source[:method_code]
             profile.reference_id = source[:reference_id]
             profile.subscriber_name = source[:subscriber_name]
@@ -71,7 +71,7 @@ module Gemgento
             profile.shipping_amount = source[:shipping_amount]
             profile.tax_amount = source[:tax_amount]
 
-            if user = Gemgento::User.find_by(magento_id: source[:customer_id])
+            if user = User.find_by(magento_id: source[:customer_id])
               profile.user = user
             end
 

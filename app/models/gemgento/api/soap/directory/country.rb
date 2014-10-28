@@ -12,7 +12,7 @@ module Gemgento
           end
 
           def self.list
-            response = Gemgento::Magento.create_call(:directory_country_list)
+            response = Magento.create_call(:directory_country_list)
 
             if response.success?
               unless response.body[:countries][:item].is_a? Array

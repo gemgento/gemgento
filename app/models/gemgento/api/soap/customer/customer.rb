@@ -5,7 +5,7 @@ module Gemgento
         class Customer
 
           def self.authnet_cim_cards(customer_id)
-            response = Gemgento::Magento.create_call(:customer_customer_authnet_cim_cards, { customer_id: customer_id })
+            response = Magento.create_call(:customer_customer_authnet_cim_cards, { customer_id: customer_id })
 
             if response.success?
               return response.body
@@ -33,7 +33,7 @@ module Gemgento
           # Grab customer from Magento and sync to Gemgento.
           #
           # @param [Integer] customer_id
-          # @return [Gemgento::User, String] The fetched user or an error message if there was a problem.
+          # @return [User, String] The fetched user or an error message if there was a problem.
           def self.fetch(customer_id)
             response = info(customer_id)
             if response.success?
@@ -66,7 +66,7 @@ module Gemgento
               }
             end
 
-            response = Gemgento::Magento.create_call(:customer_customer_list, message)
+            response = Magento.create_call(:customer_customer_list, message)
 
             if response.success?
               # enforce array
@@ -81,49 +81,49 @@ module Gemgento
           # Get customer info from Magento
           #
           # @param [Integer] customer_id
-          # @return [Gemgento::MagentoResponse]
+          # @return [MagentoResponse]
           def self.info(customer_id)
-            Gemgento::Magento.create_call(:customer_customer_info, { customer_id: customer_id })
+            Magento.create_call(:customer_customer_info, { customer_id: customer_id })
           end
 
           # Create customer in Magento.
           #
-          # @param [Gemgento::User] customer
-          # @param [Gemgento::Store] store
-          # @return [Gemgento::MagentoResponse]
+          # @param [User] customer
+          # @param [Store] store
+          # @return [MagentoResponse]
           def self.create(customer, store)
             message = {
                 customer_data: compose_customer_data(customer, store)
             }
-            Gemgento::Magento.create_call(:customer_customer_create, message)
+            Magento.create_call(:customer_customer_create, message)
           end
 
           # Update customer in Magento.
           #
-          # @param [Gemgento::User] customer
-          # @param [Gemgento::Store] store
+          # @param [User] customer
+          # @param [Store] store
           # @return [MagentoResponse]
           def self.update(customer, store)
             message = {
                 customer_id: customer.magento_id,
                 customer_data: compose_customer_data(customer, store)
             }
-            Gemgento::Magento.create_call(:customer_customer_update, message)
+            Magento.create_call(:customer_customer_update, message)
           end
 
           # Delete customer in Magento.
           #
-          # @param [Gemgento::User] customer
-          # @return [Gemgento::MagentoResponse]
+          # @param [User] customer
+          # @return [MagentoResponse]
           def self.delete(customer)
             message = {
                 customer_id: customer.magento_id
             }
-            Gemgento::Magento.create_call(:customer_customer_delete, message)
+            Magento.create_call(:customer_customer_delete, message)
           end
 
           def self.group
-            response = Gemgento::Magento.create_call(:customer_group_list)
+            response = Magento.create_call(:customer_group_list)
 
             if response.success?
               unless response.body[:result][:item].is_a? Array
@@ -138,15 +138,15 @@ module Gemgento
 
           # Save a Magento customer as local users
           def self.sync_magento_to_local(source)
-            user = Gemgento::User.find_by(magento_id: source[:customer_id])
+            user = User.find_by(magento_id: source[:customer_id])
 
             if user.nil?
-              user = Gemgento::User.where(email: source[:email]).first_or_initialize
+              user = User.where(email: source[:email]).first_or_initialize
             end
 
             user.magento_id = source[:customer_id]
             user.increment_id = source[:increment_id]
-            user.stores << Gemgento::Store.find_by(magento_id: source[:store_id]) unless source[:store_id] == '0' || user.stores.include?(Gemgento::Store.find_by(magento_id: source[:store_id]))
+            user.stores << Store.find_by(magento_id: source[:store_id]) unless source[:store_id] == '0' || user.stores.include?(Store.find_by(magento_id: source[:store_id]))
             user.created_in = source[:created_in]
             user.email = source[:email]
             user.first_name = source[:firstname]
@@ -163,7 +163,7 @@ module Gemgento
             user.sync_needed = false
             user.save(validate: false)
 
-            Gemgento::API::SOAP::Customer::Address.fetch(user)
+            API::SOAP::Customer::Address.fetch(user)
 
             return user
           end
@@ -192,7 +192,7 @@ module Gemgento
           end
 
           def self.sync_magento_customer_group_to_local(source)
-            customer_group = Gemgento::UserGroup.where(magento_id: source[:customer_group_id]).first_or_initialize
+            customer_group = UserGroup.where(magento_id: source[:customer_group_id]).first_or_initialize
             customer_group.magento_id = source[:customer_group_id]
             customer_group.code = source[:customer_group_code]
             customer_group.save

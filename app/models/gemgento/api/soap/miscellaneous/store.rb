@@ -11,7 +11,7 @@ module Gemgento
           end
 
           def self.list
-            response = Gemgento::Magento.create_call(:store_list)
+            response = Magento.create_call(:store_list)
 
             if response.success?
               unless response.body[:stores][:item].is_a? Array
@@ -23,7 +23,7 @@ module Gemgento
           end
 
           def self.info
-            response = Gemgento::Magento.create_call(:store_list)
+            response = Magento.create_call(:store_list)
 
             if response.success?
               response.body[:result]

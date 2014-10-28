@@ -11,7 +11,7 @@ module Gemgento
                 email: email,
                 include_in_email: include_in_email
             }
-            response = Gemgento::Magento.create_call(:sales_order_shipment_add_comment, message)
+            response = Magento.create_call(:sales_order_shipment_add_comment, message)
 
             return response.success?
           end
@@ -23,7 +23,7 @@ module Gemgento
                 title: shipment_track.title,
                 track_number: shipment_track.number
             }
-            response = Gemgento::Magento.create_call(:sales_order_shipment_add_track, message)
+            response = Magento.create_call(:sales_order_shipment_add_track, message)
 
             return response.success?
           end
@@ -40,7 +40,7 @@ module Gemgento
               message[:items_qty] = {item: compose_items_qty(shipment.shipment_items)}
             end
 
-            response = Gemgento::Magento.create_call(:sales_order_shipment_create, message)
+            response = Magento.create_call(:sales_order_shipment_create, message)
 
             if response.success?
               return response.body[:shipment_increment_id]
@@ -53,7 +53,7 @@ module Gemgento
             message = {
                 order_increment_id: order_increment_id,
             }
-            response = Gemgento::Magento.create_call(:sales_order_shipment_get_carriers, message)
+            response = Magento.create_call(:sales_order_shipment_get_carriers, message)
 
             if response.success?
               if response.body[:result][:item].nil?
@@ -70,7 +70,7 @@ module Gemgento
             message = {
                 shipment_increment_id: shipment_increment_id,
             }
-            response = Gemgento::Magento.create_call(:sales_order_shipment_info, message)
+            response = Magento.create_call(:sales_order_shipment_info, message)
 
             if response.success?
               return response.body[:result]
@@ -80,7 +80,7 @@ module Gemgento
           end
 
           def self.list
-            response = Gemgento::Magento.create_call(:sales_order_shipment_list)
+            response = Magento.create_call(:sales_order_shipment_list)
 
             if response.success?
               return response.body[:result]
@@ -94,7 +94,7 @@ module Gemgento
                 shipment_increment_id: shipment_increment_id,
                 track_id: track_id
             }
-            response = Gemgento::Magento.create_call(:sales_order_shipment_remove_track, message)
+            response = Magento.create_call(:sales_order_shipment_remove_track, message)
 
             return response.success?
           end
@@ -104,7 +104,7 @@ module Gemgento
                 shipment_increment_id: shipment_increment_id,
                 comment: comment
             }
-            response = Gemgento::Magento.create_call(:sales_order_shipment_send_info, message)
+            response = Magento.create_call(:sales_order_shipment_send_info, message)
 
             return response.success?
           end

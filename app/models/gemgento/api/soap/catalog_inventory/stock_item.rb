@@ -5,7 +5,7 @@ module Gemgento
         class StockItem
 
           def self.fetch_all(products = nil)
-            products = Gemgento::Product.simple.not_deleted if products.nil?
+            products = Product.simple.not_deleted if products.nil?
             magento_product_ids = []
 
             products.each do |product|
@@ -21,7 +21,7 @@ module Gemgento
             message = {
                 products: {item: product_ids},
             }
-            response = Gemgento::Magento.create_call(:catalog_inventory_stock_item_list, message)
+            response = Magento.create_call(:catalog_inventory_stock_item_list, message)
 
             if response.success?
               if response.body[:result][:item].nil?
@@ -42,7 +42,7 @@ module Gemgento
                 data: compose_inventory_data(inventory, include_website)
             }
 
-            response = Gemgento::Magento.create_call(:catalog_inventory_stock_item_update, message)
+            response = Magento.create_call(:catalog_inventory_stock_item_update, message)
 
             return response.success?
           end
@@ -51,23 +51,23 @@ module Gemgento
 
           # Save Magento users inventory to local
           def self.sync_magento_to_local(source)
-            product = Gemgento::Product.unscoped.find_by(magento_id: source[:product_id])
+            product = Product.unscoped.find_by(magento_id: source[:product_id])
             return false if product.nil?
 
             if source[:stock].nil? # multiple inventory extension not present
-              Gemgento::Store.all.each do |store|
+              Store.all.each do |store|
                 create_inventory_from_magento(product, source, store)
               end
             else # multiple inventories present
               source[:stock][:item].each do |store_stock|
-                store = Gemgento::Store.find_by(website_id: store_stock[:website_id].to_i)
+                store = Store.find_by(website_id: store_stock[:website_id].to_i)
                 create_inventory_from_magento(product, store_stock, store)
               end
             end
           end
 
           def self.create_inventory_from_magento(product, source, store)
-            inventory = Gemgento::Inventory.where(product: product, store: store).first_or_initialize
+            inventory = Inventory.where(product: product, store: store).first_or_initialize
             inventory.store = store
             inventory.product = product
             inventory.quantity = source[:qty].is_a?(Array) ? source[:qty][0] : source[:qty]
