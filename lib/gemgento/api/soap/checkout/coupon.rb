@@ -10,13 +10,7 @@ module Gemgento
                 coupon_code: coupon_code,
                 store_id: cart.store.magento_id
             }
-            response = Magento.create_call(:shopping_cart_coupon_add, message)
-
-            if response.success?
-              return true
-            else
-              return response.body[:faultstring]
-            end
+            Magento.create_call(:shopping_cart_coupon_add, message)
           end
 
           def self.remove(cart)
@@ -24,13 +18,7 @@ module Gemgento
                 quote_id: cart.magento_quote_id,
                 store_id: cart.store.magento_id
             }
-            response = Magento.create_call(:shopping_cart_coupon_remove, message)
-
-            if response.success?
-              return true
-            else
-              return response.body[:faultstring]
-            end
+            Magento.create_call(:shopping_cart_coupon_remove, message)
           end
 
         end

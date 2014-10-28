@@ -3,7 +3,7 @@
     = render 'gemgento/checkout/checkout_header'
 
   .pages-content
-    = form_for current_order, url: checkout_shipping_path, html: { id: 'checkout_shipping_method' } do |form|
+    = form_for current_quote, url: checkout_shipping_path, html: { id: 'checkout_shipping_method' } do |form|
       .form-group
         .form-left
           - @shipping_methods.sort_by{ |value| value[:price] }.each do |shipping_method|

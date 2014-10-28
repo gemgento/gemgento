@@ -2,7 +2,7 @@ module Gemgento
   class OrdersController < ApplicationController
 
     def show
-      case current_order.state
+      case current_quote.state
         when 'cart'
           render 'cart'
       end

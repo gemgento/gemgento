@@ -1,24 +1,24 @@
 module Gemgento
   class CartController < ApplicationController
-    before_action :set_order
+    before_action :set_quote
     before_action :create_magento_quote, only: :create
     before_action :validate_line_item, only: [:update, :destroy]
 
     respond_to :js, :json, :html
 
     def show
-      respond_with @order
+      respond_with @quote
     end
 
     def create
       product = Product.find(params[:line_item][:product_id])
 
-      if !@order.products.include? product # make sure the product isn't in the cart
+      if !@quote.products.include? product # make sure the product isn't in the cart
         @line_item = LineItem.new(line_item_params)
-        @line_item.itemizable = @order
+        @line_item.itemizable = @quote
         respond @line_item.save
       else # update the appropriate line_item if it is
-        @line_item = @order.line_items.find_by(product: product)
+        @line_item = @quote.line_items.find_by(product: product)
         params[:line_item][:qty_ordered] = params[:line_item][:qty_ordered].to_d + @line_item.qty_ordered # increase existing qty by requested qty
         respond @line_item.update(line_item_params)
       end
@@ -38,22 +38,22 @@ module Gemgento
 
     private
 
-    def set_order
-      @order = current_order
+    def set_quote
+      @quote = current_quote
     end
 
-    # Create quote in magento if the order doesn't have a magento_quote_id.
+    # Create quote in magento if the quote doesn't have a magento_id.
     #
     # @return [Boolean]
     def create_magento_quote
-      if @order.magento_quote_id.nil?
-        if @order.push_cart
-          session[:cart] = @order.id
+      if @quote.magento_id.nil?
+        if @quote.push_cart
+          session[:quote] = @quote.id
           return true
         else
           respond_to do |format|
             format.html { render 'show' }
-            format.json { render json: { result: false, errors: @order.errors.full_messages } }
+            format.json { render json: { result: false, errors: @quote.errors.full_messages } }
           end
 
           return false
@@ -63,11 +63,11 @@ module Gemgento
       end
     end
 
-    # Initialize the line_item and verify it belongs to the order.
+    # Initialize the line_item and verify it belongs to the quote.
     #
     # @return [Boolean]
     def validate_line_item
-      if @line_item = @order.line_items.find(params[:id])
+      if @line_item = @quote.line_items.find(params[:id])
         return true
       else
         flash.now[:alert] = 'Order item is not in your cart.'

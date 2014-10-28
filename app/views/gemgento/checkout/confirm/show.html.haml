@@ -3,13 +3,13 @@
     = render 'gemgento/checkout/checkout_header'
 
   .pages-content
-    = form_for current_order, url: checkout_confirm_path, html: { id: 'checkout_confirm_method' } do |form|
+    = form_for current_quote, url: checkout_confirm_path, html: { id: 'checkout_confirm_method' } do |form|
       .form-group
         .form-left.text
           .form-left
             = @shipping_address.first_name + " " + @shipping_address.last_name
             %br
-            = current_order.customer_email
+            = current_quote.customer_email
             %br
             = @shipping_address.telephone
             %br
@@ -25,7 +25,7 @@
           .form-left
             = @billing_address.first_name + " " + @billing_address.last_name
             %br
-            = current_order.customer_email
+            = current_quote.customer_email
             %br
             = @billing_address.telephone
             %br

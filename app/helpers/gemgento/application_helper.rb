@@ -15,15 +15,15 @@ module Gemgento
       end
     end
 
-    def current_order
-      @current_order ||= Order.get_cart(session[:cart], current_store, current_user) if @current_order.nil?
-      session[:cart] = @current_order.id
-      return @current_order
+    def current_quote
+      @current_quote ||= Quote.current(current_store, session[:quote], current_user) if @current_quote.nil?
+      session[:quote] = @current_quote.id
+      return @current_quote
     end
 
     def create_new_cart
       session.delete :cart
-      @current_order = Order.get_cart(nil, current_store)
+      @current_quote = Order.get_cart(nil, current_store)
     end
 
     def current_category

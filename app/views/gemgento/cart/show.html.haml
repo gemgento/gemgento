@@ -17,8 +17,8 @@
 						%th
 
 				%tbody
-					- if current_order.line_items.size > 0
-						- current_order.line_items.each do |line_item|
+					- if current_quote.line_items.size > 0
+						- current_quote.line_items.each do |line_item|
 							- total += line_item.qty_ordered.to_i * line_item.product.price.to_i
 
 							%tr
@@ -58,13 +58,13 @@
 						%td.label{colspan: 2}
 							SHIPPING FEE
 						%td.value{colspan: 2}
-							= number_to_currency(current_order.shipping_amount)
+							= number_to_currency(current_quote.shipping_amount)
 					%tr
 						%td{colspan: 3}
 						%td.label{colspan: 2}
 							SUBTOTAL
 						%td.value{colspan: 2}
-							= number_to_currency(current_order.grand_total)
+							= number_to_currency(current_quote.grand_total)
 
 					%tr
 						%td{colspan: 3}

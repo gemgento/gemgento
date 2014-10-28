@@ -68,10 +68,10 @@ module Gemgento
           Subscriber.add_user(@new_user) if params[:subscribe]
 
           format.html { redirect_to after_register_path }
-          format.json { render json: { result: true, user: @new_user, order: current_order } }
+          format.json { render json: { result: true, user: @new_user, order: current_quote } }
         else
           format.html { render 'new' }
-          format.json { render json: { result: false, errors: @new_user.errors.full_messages, order: current_order } }
+          format.json { render json: { result: false, errors: @new_user.errors.full_messages, order: current_quote } }
         end
       end
     end

@@ -3,7 +3,7 @@
     = render 'gemgento/checkout/checkout_header'
     
   .pages-content
-    = form_for current_order, url: checkout_address_path, html: { id: 'address_form' } do |form|
+    = form_for current_quote, url: checkout_address_path, html: { id: 'address_form' } do |form|
 
       .form-header
         .right
@@ -46,7 +46,7 @@
                 = billing.text_field 'city'
               .field
                 = billing.label :state
-                - if country = current_order.billing_address.country
+                - if country = current_quote.billing_address.country
                   - regions = Gemgento::Region.where(country: country)
                 - else 
                   - regions = []
@@ -91,7 +91,7 @@
                 = shipping.text_field 'city'
               .field
                 = shipping.label :state
-                - if country = current_order.shipping_address.country
+                - if country = current_quote.shipping_address.country
                   - regions = Gemgento::Region.where(country: country)
                 - else 
                   - regions = []

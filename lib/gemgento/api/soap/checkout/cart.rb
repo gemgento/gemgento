@@ -61,11 +61,7 @@ module Gemgento
                 quote_id: cart.magento_quote_id,
                 store_id: cart.store.magento_id
             }
-            response = Magento.create_call(:shopping_cart_totals, message)
-
-            if response.success?
-              response.body[:result][:item]
-            end
+            Magento.create_call(:shopping_cart_totals, message)
           end
 
           def self.license(cart)

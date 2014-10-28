@@ -5,6 +5,7 @@ module Gemgento
     belongs_to :user_group, class_name: 'UserGroup'
     belongs_to :shipping_address, foreign_key: 'shipping_address_id', class_name: 'Address'
     belongs_to :billing_address, foreign_key: 'billing_address_id', class_name: 'Address'
+    belongs_to :quote, class_name: 'Quote'
 
     has_many :api_jobs, class_name: 'ApiJob', as: :source
     has_many :line_items, as: :itemizable
@@ -21,341 +22,34 @@ module Gemgento
 
     attr_accessor :tax, :total, :push_cart_customer, :subscribe
 
-    scope :cart, -> { where(state: 'cart') }
-    scope :placed, -> { where("state != 'cart'") }
-
-    before_save :push_cart_customer_to_magento, if: :push_cart_customer
-
     after_commit :subscribe_customer, if: :subscribe
 
     serialize :cart_item_errors, Array
 
     validates :customer_email, format: /@/, allow_nil: true
 
-    # CART specific functions
-
-    def self.get_cart(order_id = nil, store = nil, user = nil)
-      store = Store.current if store.nil?
-
-      if !order_id.blank? && user.nil?
-        cart = Order.where('created_at >= ?', Date.today - 30.days).
-            find_by(id: order_id, state: 'cart', store: store)
-        cart = Order.new(state: 'cart', store: store) if cart.nil?
-
-      elsif !order_id.blank? && !user.nil?
-        cart = Order.where('created_at >= ?', Date.today - 30.days).
-            find_by(id: order_id, state: 'cart', store: store)
-
-        if cart.nil? || (!cart.user.nil? && cart.user != user)
-          cart = Order.where('created_at >= ?', Date.today - 30.days).
-              find_by(id: order_id, state: 'cart', store: store, user: user)
-          cart = Order.new(state: 'cart', store: store)
-        end
-      elsif order_id.blank? && !user.nil?
-        cart = Order.cart.where(state: 'cart', store: store, user: user).
-            where('created_at >= ?', Date.today - 30.days).
-            order(updated_at: :desc).first_or_initialize
-        cart.reset_checkout unless cart.magento_quote_id.nil?
-      else
-        cart = Order.new(state: 'cart', store: store)
-      end
-
-      return cart
-    end
-
     def to_param
       self.increment_id
     end
 
-    def push_cart
-      raise 'Cart already pushed, creating a new cart' unless self.magento_quote_id.nil?
-
-      response = API::SOAP::Checkout::Cart.create(self)
-
-      if response.success?
-        self.magento_quote_id = response.body[:quote_id]
-        save
-        return true
-      else
-        errors.add(:base, response.body[:faultstring])
-        return false
-      end
-    end
-
-    def get_totals
-      API::SOAP::Checkout::Cart.totals(self)
-    end
-
     def subtotal
-      if self.state != 'cart'
-        super
-      else
-        if self.line_items.any?
-          prices = self.line_items.map do |oi|
-            if oi.product.magento_type == 'giftvoucher'
-              oi.product.gift_price.to_f * oi.qty_ordered.to_f
-            else
-              oi.product.price(self.user, self.store).to_f * oi.qty_ordered.to_f
-            end
-          end
-
-          return prices.inject(&:+)
-        else
-          return 0
-        end
-      end
-    end
-
-    # The total quantity of items in the order.
-    #
-    # @return [Float]
-    def item_count
-      line_items.sum(:qty_ordered).to_f
-    end
-
-    # Apply a gift card to the order.  Only works in when order is in cart state.
-    #
-    # @param [String] code gift card code
-    # @return [Boolean,String] true if the gift card was applied, otherwise an error message.
-    def apply_gift_card(code)
-      raise 'Order not in cart state' if self.state != 'cart'
-      API::SOAP::GiftCard.quote_add(self.magento_quote_id, code, self.store.magento_id)
-    end
-
-    # Remove a gift card from an order.  Only works in when order is in cart state.
-    #
-    # @param [String] code gift card code
-    # @return [Boolean,String] true if the gift card was removed, otherwise an error message.
-    def remove_gift_card(code)
-      raise 'Order not in cart state' if self.state != 'cart'
-      API::SOAP::GiftCard.quote_remove(self.magento_quote_id, code, self.store.magento_id)
-    end
-
-    # CHECKOUT methods
-
-    # Set order shipping method and push to Magento.
-    #
-    # @param selected_method[String] the chosen shipping method code
-    # @param shipping_methods[Hash] list of all shipping methods (from API cart shipping methods request)
-    # @return [Boolean] true if the shipping method was successfully set
-    def set_shipping_method(selected_method, shipping_methods)
-      return false if selected_method.blank?
-
-      self.shipping_method = selected_method
-      self.shipping_amount = 0
-
-      shipping_methods.each do |shipping_method|
-        if shipping_method[:code] == selected_method
-          self.shipping_amount = shipping_method[:price]
-          break
-        end
-      end
-
-      if self.push_shipping_method
-        self.save
-        return true
-      else
-        return false
-      end
-    end
-
-    # Set the payment method for an order
-    #
-    # @param payment_attributes[Hash] all attributes for an OrderPayment
-    # @return [Boolean] true if the payment method was successfully set
-    def set_payment(payment_attributes)
-      if self.payment.nil?
-        self.payment = Payment.new(payment_attributes)
-      else
-        self.payment.attributes = payment_attributes
-      end
-
-      self.payment.cc_last4 = self.payment.cc_number[-4..-1]
-
-      return self.payment.save && self.push_payment_method
-    end
-
-
-    # Apply a coupon code to the cart.
-    #
-    # @param code [String] coupon code
-    # @return [Boolean] true if the coupon code was successfully applied
-    def apply_coupon(code)
-      API::SOAP::Checkout::Coupon.add(self, code)
-    end
-
-    # Remove a coupon code to the cart.
-    #
-    # @param code [String] coupon code
-    # @return [Boolean] true if the coupon code was successfully removed
-    def remove_coupons
-      API::SOAP::Checkout::Coupon.remove(self)
-    end
-
-    # Order totals for the cart phase.
-    #
-    # @return [Hash]
-    def totals
-      @totals ||= set_totals
-    end
-
-    # Recalculate order totals.
-    #
-    # @return [Hash]
-    def reset_totals
-      @totals = set_totals
-    end
-
-    # Set order totals for the cart phase.
-    #
-    # @return [Hash]
-    def set_totals
-      magento_totals = self.get_totals
-      totals = {
-          subtotal: 0,
-          discounts: {},
-          gift_card: 0,
-          nominal: {},
-          shipping: 0,
-          tax: 0,
-          total: 0
-      }
-
-      unless magento_totals.nil?
-        magento_totals.each do |total|
-          unless total[:title].include? 'Discount'
-            if !total[:title].include? 'Nominal' # regular checkout values
-              if total[:title].include? 'Subtotal'
-                totals[:subtotal] = total[:amount].to_f
-                totals[:subtotal] = self.subtotal if totals[:subtotal] == 0
-              elsif total[:title].include? 'Grand Total'
-                totals[:total] = total[:amount].to_f
-              elsif total[:title].include? 'Tax'
-                totals[:tax] = total[:amount].to_f
-              elsif total[:title].include? 'Shipping'
-                totals[:shipping] = total[:amount].to_f
-              elsif total[:title].include? 'Gift Card'
-                totals[:gift_card] = total[:amount].to_f
-              end
-            else # checkout values for a nominal item
-              if total[:title].include? 'Subtotal'
-                totals[:nominal][:subtotal] = total[:amount].to_f
-                totals[:nominal][:subtotal] = self.subtotal if totals[:nominal][:subtotal] == 0
-              elsif total[:title].include? 'Total'
-                totals[:nominal][:total] = total[:amount].to_f
-              elsif total[:title].include? 'Tax'
-                totals[:nominal][:tax] = total[:amount].to_f
-              elsif total[:title].include? 'Shipping'
-                totals[:nominal][:shipping] = total[:amount].to_f
-              elsif total[:title].include? 'Gift Card'
-                totals[:gift_card] == total[:amount].to_f
-              end
-            end
+      if self.line_items.any?
+        prices = self.line_items.map do |oi|
+          if oi.product.magento_type == 'giftvoucher'
+            oi.product.gift_price.to_f * oi.qty_ordered.to_f
           else
-            code = total[:title][10..-2]
-            totals[:discounts][code.to_sym] = total[:amount]
+            oi.product.price(self.user, self.store).to_f * oi.qty_ordered.to_f
           end
         end
 
-        # nominal shipping isn't calculated correctly, so we can set it based on known selected values
-        if !totals[:nominal].has_key?(:shipping) && totals[:nominal].has_key?(:subtotal) && self.shipping_address
-          if totals[:shipping] && totals[:shipping] > 0
-            totals[:nominal][:shipping] = totals[:shipping]
-          elsif shipping_method = get_magento_shipping_method
-            totals[:nominal][:shipping] = shipping_method['price'].to_f
-          else
-            totals[:nominal][:shipping] = 0.0
-          end
-
-          totals[:nominal][:total] += totals[:nominal][:shipping] if totals[:nominal].has_key?(:total) # make sure the grand total reflects the shipping changes
-        end
-      end
-
-      return totals
-    end
-
-    # functions related to processing cart into order
-
-    def push_addresses
-      API::SOAP::Checkout::Customer.address(self)
-    end
-
-    def get_payment_methods
-      API::SOAP::Checkout::Payment.list(self)
-    end
-
-    def push_payment_method
-      raise 'Order payment method has not been set' if self.payment.nil?
-      API::SOAP::Checkout::Payment.method(self, self.payment)
-    end
-
-    # Set the cart customer in Magento.
-    #
-    # @return [Boolean]
-    def push_cart_customer_to_magento
-      response = API::SOAP::Checkout::Customer.set(self)
-
-      if response.success?
-        return true
+        return prices.inject(&:+)
       else
-        self.errors.add(:base, response.body[:faultstring])
-        return false
-      end
-    end
-
-    def get_shipping_methods
-      raise 'Order shipping address not set' if self.shipping_address.nil?
-      return API::SOAP::Checkout::Shipping.list(self)
-    end
-
-    def push_shipping_method
-      raise 'Order shipping method has not been set' if self.shipping_method.nil?
-      API::SOAP::Checkout::Shipping.method(self, self.shipping_method)
-    end
-
-    def process(remote_ip = nil)
-      if !valid_stock?
-        errors.add(:base, 'Some of the order items are now out of stock.')
-        return false
-      else
-        response = API::SOAP::Checkout::Cart.order(self, self.payment, remote_ip)
-
-        if response.success?
-          self.increment_id = response.body[:result]
-          save
-          API::SOAP::Sales::Order.fetch(self.increment_id) #grab all the new order information
-          reload
-
-          push_gift_message_comment unless self.gift_message.blank?
-          HeartBeat.perform_async if Rails.env.production?
-          finalize
-
-          return true
-        else
-          errors.add(:base, response.body[:faultstring])
-          return false
-        end
+        return 0
       end
     end
 
     def push_gift_message_comment
       API::SOAP::Sales::Order.add_comment(self.increment_id, self.status, "Gemgento Gift Message: #{self.gift_message}")
-    end
-
-    def finalize
-      # for application defined post order actions
-    end
-
-    def as_json(options = nil)
-      result = super
-      result['user'] = self.user
-      result['line_items'] = self.line_items
-      result['shipping_address'] = self.shipping_address
-      result['billing_address'] = self.billing_address
-      result['payment'] = self.payment
-      result['statuses'] = self.order_statuses
-      result['shipments'] = self.shipments
-      return result
     end
 
     def set_default_billing_address(user)

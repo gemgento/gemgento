@@ -46,9 +46,7 @@ module Gemgento
                 customer: {item: compose_address_data([cart.shipping_address, cart.billing_address])},
                 store_id: cart.store.magento_id
             }
-            response = Magento.create_call(:shopping_cart_customer_addresses, message)
-
-            return response.success?
+            Magento.create_call(:shopping_cart_customer_addresses, message)
           end
 
           private

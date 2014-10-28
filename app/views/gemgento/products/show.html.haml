@@ -12,7 +12,7 @@
     .product-content  
       %p= @product.description
 
-      = form_for current_order, url: gemgento.cart_url, method: 'patch', html: { id: 'add_to_cart' } do |f|
+      = form_for current_quote, url: gemgento.cart_url, method: 'patch', html: { id: 'add_to_cart' } do |f|
         %input{type: 'hidden', name: 'activity', value: 'add_item'}
 
 

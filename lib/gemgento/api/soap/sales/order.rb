@@ -12,14 +12,18 @@ module Gemgento
             end
           end
 
+          # Fetch a Magento Order.
+          #
+          # @param increment_id [String] Order increment id.
+          # @return [Gemgento::Order]
           def self.fetch(increment_id)
-            info = info(increment_id)
+            response = info(increment_id)
 
-            unless info == false
-              sync_magento_to_local(info)
-              return true
+            if response.success?
+              sync_magento_to_local(response.body[:result])
+            else
+              return nil
             end
-            return false
           end
 
           def self.list(last_updated = nil)
@@ -50,14 +54,12 @@ module Gemgento
             end
           end
 
+          # Get Order info from Magento.
+          #
+          # @param increment_id [String]
+          # @return [Gemgento::MagentoResponse]
           def self.info(increment_id)
-            response = Magento.create_call(:sales_order_info, {order_increment_id: increment_id})
-
-            if response.success?
-              return response.body[:result]
-            else
-              return false
-            end
+            Magento.create_call(:sales_order_info, { order_increment_id: increment_id })
           end
 
           def self.hold
@@ -79,9 +81,7 @@ module Gemgento
               comment: comment,
               notify: notify
             }
-            response = Magento.create_call(:sales_order_add_comment, message)
-
-            return response.success?
+            Magento.create_call(:sales_order_add_comment, message)
           end
 
           private
@@ -176,6 +176,9 @@ module Gemgento
                 sync_magento_order_status_to_local(status, order)
               end
             end
+
+            order.reload
+            return order
           end
 
           def self.sync_magento_address_to_local(source, order, address = nil)

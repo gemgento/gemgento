@@ -1,9 +1,9 @@
 .pages-holder
   .pages-header
     = render 'gemgento/checkout/checkout_header'
-  - @payment =  current_order.build_payment
+  - @payment =  current_quote.build_payment
   .pages-content
-    = form_for current_order, url: checkout_payment_path, html: { id: 'checkout_payment' } do |form|
+    = form_for current_quote, url: checkout_payment_path, html: { id: 'checkout_payment' } do |form|
       = form.fields_for :payment do |payment|
         .form-group
           .form-left
