@@ -1,5 +1,5 @@
 module Gemgento
-  class Validator::CcNumber < ActiveModel::Validator
+  class CcNumber < ActiveModel::Validator
     def validate(record)
       n = record.cc_number
       valid = false
