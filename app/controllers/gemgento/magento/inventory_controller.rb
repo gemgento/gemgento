@@ -4,12 +4,12 @@ module Gemgento
     def update
       data = params[:data]
 
-      @product = Gemgento::Product.find_by(magento_id: data[:product_id])
+      @product = Product.find_by(magento_id: data[:product_id])
       default_values = nil
 
       if !@product.nil? && !data[:inventories].nil?
         data[:inventories].each do |website_id, stock_data|
-          store = Gemgento::Store.find_by(website_id: website_id.blank? ? nil : website_id)
+          store = Store.find_by(website_id: website_id.blank? ? nil : website_id)
           next if stock_data[:qty].nil?
 
           if store.nil?
@@ -17,7 +17,7 @@ module Gemgento
             next
           end
 
-          inventory = Gemgento::Inventory.find_or_initialize_by(store: store, product: @product)
+          inventory = Inventory.find_or_initialize_by(store: store, product: @product)
           inventory.product = @product
           inventory.store = store
           inventory.quantity = stock_data[:qty]

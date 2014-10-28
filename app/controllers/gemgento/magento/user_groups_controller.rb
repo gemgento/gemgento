@@ -2,7 +2,7 @@ module Gemgento
   class Magento::UserGroupsController < MagentoController
 
     def update
-      @user_group = Gemgento::UserGroup.find_or_initialize_by(magento_id: params[:id])
+      @user_group = UserGroup.find_or_initialize_by(magento_id: params[:id])
       @user_group.code = params[:data][:code]
       @user_group.save
 
@@ -10,7 +10,7 @@ module Gemgento
     end
 
     def destroy
-      if @user_group = Gemgento::UserGroup.find_by(magento_id: params[:id])
+      if @user_group = UserGroup.find_by(magento_id: params[:id])
         @user_group.destroy
       end
 

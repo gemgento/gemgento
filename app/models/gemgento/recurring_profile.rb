@@ -5,7 +5,7 @@ module Gemgento
 
     belongs_to :user
     belongs_to :store
-    has_and_belongs_to_many :orders, class_name: 'Gemgento::Order', join_table: 'gemgento_orders_recurring_profiles'
+    has_and_belongs_to_many :orders, class_name: 'Order', join_table: 'gemgento_orders_recurring_profiles'
 
     validates :magento_id, uniqueness: true, presence: true
 
@@ -21,7 +21,7 @@ module Gemgento
     scope :canceled, -> { where(state: 'canceled') }
 
     def change_state(state)
-      Gemgento::API::SOAP::Sales::RecurringProfile.update_state(self.magento_id, state)
+      API::SOAP::Sales::RecurringProfile.update_state(self.magento_id, state)
     end
 
   end

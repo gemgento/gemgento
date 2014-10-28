@@ -4,9 +4,9 @@ module Gemgento
     def update
       data = params[:data]
 
-      profile = Gemgento::RecurringProfile.find_or_initialize_by(magento_id: params[:id])
+      profile = RecurringProfile.find_or_initialize_by(magento_id: params[:id])
       profile.state = data['state']
-      profile.store = Gemgento::Store.find_by(magento_id: data['store_id'])
+      profile.store = Store.find_by(magento_id: data['store_id'])
       profile.method_code = data['method_code']
       profile.reference_id = data['reference_id']
       profile.subscriber_name = data['subscriber_name']
@@ -26,12 +26,12 @@ module Gemgento
       profile.profile_vendor_info = data['profile_vendor_info']
       profile.additional_info = data['additional_info']
 
-      if user = Gemgento::User.find_by(magento_id: data['customer_id'])
+      if user = User.find_by(magento_id: data['customer_id'])
         profile.user = user
       end
 
       profile.save
-      profile.orders = Gemgento::Order.where(order_id: data['order_ids'])
+      profile.orders = Order.where(order_id: data['order_ids'])
 
       render nothing: true
     end

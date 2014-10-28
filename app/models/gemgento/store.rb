@@ -17,7 +17,7 @@ module Gemgento
     cattr_accessor :current
 
     def self.current
-      @@current = Gemgento::Store.first if @@current.nil?
+      @@current = Store.first if @@current.nil?
       return @@current
     end
 

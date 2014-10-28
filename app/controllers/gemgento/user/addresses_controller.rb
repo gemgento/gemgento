@@ -22,7 +22,7 @@ module Gemgento
     end
 
     def new
-      @address = Gemgento::Address.new
+      @address = Address.new
     end
 
     def edit

@@ -15,7 +15,7 @@ module Gemgento
     #
     # @return [Boolean] true if the inventory data was successfully pushed to Magento
     def push
-      Gemgento::API::SOAP::CatalogInventory::StockItem.update(self.product);
+      API::SOAP::CatalogInventory::StockItem.update(self.product);
     end
 
     # Determine if the specified quantity is in stock.
@@ -38,7 +38,7 @@ module Gemgento
     #
     # @return [Void]
     def touch_product
-      Gemgento::TouchProduct.perform_async([self.product.id]) if self.changed?
+      TouchProduct.perform_async([self.product.id]) if self.changed?
     end
 
     # Push local inventory changes to magento.

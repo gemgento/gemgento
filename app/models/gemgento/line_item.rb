@@ -15,7 +15,7 @@ module Gemgento
 
     def as_json(options = nil)
       result = super
-      result['product'] = self.product.as_json({ store: Gemgento::Store.find(self.itemizable.store.id) })
+      result['product'] = self.product.as_json({ store: Store.find(self.itemizable.store.id) })
       return result
     end
 
@@ -38,9 +38,9 @@ module Gemgento
 
     def push_magento_quote_item_async
       if new_record?
-        Gemgento::Cart::AddItemWorker.perform_async(self.id)
+        Cart::AddItemWorker.perform_async(self.id)
       else
-        Gemgento::Cart::UpdateItemWorker.perform_async(self.id, self.qty_itemizableed_was)
+        Cart::UpdateItemWorker.perform_async(self.id, self.qty_itemizableed_was)
       end
     end
 

@@ -12,24 +12,24 @@ module Gemgento
     has_many :product_attributes, through: :product_attribute_values
     has_many :product_attribute_options, through: :product_attribute_values
     has_many :product_categories, -> { distinct }, dependent: :destroy
-    has_many :relations, as: :relatable, class_name: 'Gemgento::Relation', dependent: :destroy
+    has_many :relations, as: :relatable, class_name: 'Relation', dependent: :destroy
     has_many :shipment_items
 
-    has_one :shopify_adapter, class_name: 'Gemgento::Adapter::ShopifyAdapter', as: :gemgento_model
+    has_one :shopify_adapter, class_name: 'Adapter::ShopifyAdapter', as: :gemgento_model
 
-    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_products', class_name: 'Gemgento::Store'
-    has_and_belongs_to_many :tags, class_name: 'Gemgento::Tag', join_table: 'gemgento_products_tags'
-    has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'Gemgento::ProductAttribute'
+    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_products', class_name: 'Store'
+    has_and_belongs_to_many :tags, class_name: 'Tag', join_table: 'gemgento_products_tags'
+    has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_configurable_attributes', class_name: 'ProductAttribute'
     has_and_belongs_to_many :configurable_products, -> { distinct },
                             join_table: 'gemgento_configurable_simple_relations',
                             foreign_key: 'simple_product_id',
                             association_foreign_key: 'configurable_product_id',
-                            class_name: 'Gemgento::Product'
+                            class_name: 'Product'
     has_and_belongs_to_many :simple_products, -> { distinct },
                             join_table: 'gemgento_configurable_simple_relations',
                             foreign_key: 'configurable_product_id',
                             association_foreign_key: 'simple_product_id',
-                            class_name: 'Gemgento::Product'
+                            class_name: 'Product'
 
     scope :eager, -> { includes([{product_attribute_values: :product_attribute}, {assets: [:asset_file, :asset_types]}, :inventories]) }
     scope :configurable, -> { where(magento_type: 'configurable') }
@@ -60,27 +60,27 @@ module Gemgento
     end
 
     def set_attribute_value(code, value, store = nil)
-      store = Gemgento::Store.current if store.nil?
+      store = Store.current if store.nil?
 
-      product_attribute = Gemgento::ProductAttribute.find_by(code: code)
+      product_attribute = ProductAttribute.find_by(code: code)
 
       if product_attribute.nil?
         return false
       else
         # enforce a single attribute value per attribute per store per product
-        product_attribute_values = Gemgento::ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store)
+        product_attribute_values = ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store)
 
         if product_attribute_values.size > 1
-          Gemgento::ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store).where('id != ?', product_attribute_values.first.id).destroy_all
+          ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store).where('id != ?', product_attribute_values.first.id).destroy_all
         end
 
         # if there are option values, get the actual value instead of label
         if product_attribute.frontend_input == 'select'
           return true if value.nil?
-          attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: value, store: store)
+          attribute_option = ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: value, store: store)
 
           if attribute_option.nil?
-            attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, value: value, store: store)
+            attribute_option = ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, value: value, store: store)
 
             if attribute_option.nil?
               attribute_option = create_attribute_option(product_attribute, value, store)
@@ -92,7 +92,7 @@ module Gemgento
         end
 
         # set the attribute value
-        product_attribute_value = Gemgento::ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store).first_or_initialize
+        product_attribute_value = ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store).first_or_initialize
         product_attribute_value.product = self
         product_attribute_value.product_attribute = product_attribute
         product_attribute_value.value = value
@@ -107,12 +107,12 @@ module Gemgento
     end
 
     def attribute_value(code, store = nil)
-      store = Gemgento::Store.current if store.nil?
+      store = Store.current if store.nil?
       product_attribute_value = self.product_attribute_values.select { |value| !value.product_attribute.nil? && value.product_attribute.code == code.to_s && value.store_id == store.id }.first
 
       ## if the attribute is not currently associated with the product, check if it exists
       if product_attribute_value.nil?
-        product_attribute = Gemgento::ProductAttribute.find_by(code: code)
+        product_attribute = ProductAttribute.find_by(code: code)
 
         if product_attribute.nil? # throw an error if the code is not recognized
           raise "Unknown product attribute code - #{code}"
@@ -139,7 +139,7 @@ module Gemgento
     end
 
     def self.check_magento(identifier, identifier_type, attribute_set, store = nil)
-      store = Gemgento::Store.current if store.nil?
+      store = Store.current if store.nil?
       API::SOAP::Catalog::Product.check_magento(identifier, identifier_type, attribute_set, store)
     end
 
@@ -153,7 +153,7 @@ module Gemgento
     end
 
     def in_stock?(quantity = 1, store = nil)
-      store = Gemgento::Store.current if store.nil?
+      store = Store.current if store.nil?
 
       if self.magento_type == 'simple'
         inventory = self.inventories.find_by(store: store)
@@ -164,7 +164,7 @@ module Gemgento
         end
       else # check configurable product inventory
         # load inventories with out completely loading the associated simple products
-        inventories = Gemgento::Inventory.where(product_id: self.simple_products.select(:id), store: store)
+        inventories = Inventory.where(product_id: self.simple_products.select(:id), store: store)
 
         if inventories.empty? # no inventories means inventory is not tracked
           return true
@@ -196,7 +196,7 @@ module Gemgento
     end
 
     def self.filter(filters, store = nil)
-      store = Gemgento::Store.current if store.nil?
+      store = Store.current if store.nil?
 
       filters = [filters] unless filters.is_a? Array
       products = self
@@ -230,7 +230,7 @@ module Gemgento
     end
 
     def self.order_by_attribute(attribute, direction = 'ASC', is_numeric = false, store = nil)
-      store = Gemgento::Store.current if store.nil?
+      store = Store.current if store.nil?
       raise 'Direction must be equivalent to ASC or DESC' if direction != 'ASC' and direction != 'DESC'
 
       products = self
@@ -284,20 +284,20 @@ module Gemgento
 
     # Get the product price.
     #
-    # @param user [Gemgento::User]
-    # @param store [Gemgento::Store]
+    # @param user [User]
+    # @param store [Store]
     # @return Float
     def price(user = nil, store = nil)
       if self.has_special?(store)
         return self.attribute_value('special_price', store).to_f
       else
-        return Gemgento::PriceRule.calculate_price(self, user, store)
+        return PriceRule.calculate_price(self, user, store)
       end
     end
 
     # Determine if a product has a valid special price set.
     #
-    # @param [Gemgento::Store] store
+    # @param [Store] store
     # @return [Boolean]
     def has_special?(store = nil)
       special_price = self.attribute_value('special_price', store)
@@ -319,8 +319,8 @@ module Gemgento
 
     # Determine if product is on sale.
     #
-    # @param user [Gemgento::User]
-    # @param store [Gemgento::Store]
+    # @param user [User]
+    # @param store [Store]
     # @return Boolean
     def on_sale?(user = nil, store = nil)
       return self.attribute_value('price', store).to_f != self.price(user, store)
@@ -328,7 +328,7 @@ module Gemgento
 
     # Get the original, non sale, price for a product.
     #
-    # @param [Gemgento::Store, nil] store
+    # @param [Store, nil] store
     # @return [Float]
     def original_price(store = nil)
       return self.attribute_value('price', store).to_f
@@ -336,7 +336,7 @@ module Gemgento
 
     # Return the ordering of configurable attribute values.
     #
-    # @param [Gemgento::Store, nil] store
+    # @param [Store, nil] store
     # @param [Boolean] active_only
     # @param [Hash(Hash(Array(Integer)))]
     def configurable_attribute_order(store = nil, active_only = true)
@@ -345,11 +345,11 @@ module Gemgento
 
     # Calculate the ordering of configurable attribute values
     #
-    # @param [Gemgento::Store, nil] store
+    # @param [Store, nil] store
     # @param [Boolean] active_only
     # @return [Hash(Hash(Array(Integer)))]
     def get_configurable_attribute_ordering(store, active_only)
-      store = Gemgento::Store.current if store.nil?
+      store = Store.current if store.nil?
       order = {}
 
       if self.magento_type != 'configurable' && !self.configurable_products.empty?
@@ -403,7 +403,7 @@ module Gemgento
       simple_product_ids = []
 
       magento_ids.each do |magento_id|
-        simple_product = Gemgento::Product.find_by(magento_id: magento_id)
+        simple_product = Product.find_by(magento_id: magento_id)
         next if simple_product.nil?
 
         self.simple_products << simple_product unless self.simple_products.include? simple_product
@@ -421,7 +421,7 @@ module Gemgento
       configurable_product_ids = []
 
       magento_ids.each do |magento_id|
-        configurable_product = Gemgento::Product.find_by(magento_id: magento_id)
+        configurable_product = Product.find_by(magento_id: magento_id)
         next if configurable_product.nil?
 
         self.configurable_products << configurable_product unless self.configurable_products.include? configurable_product
@@ -444,12 +444,12 @@ module Gemgento
     def set_cache_expires_at
       self.cache_expires_at = nil
 
-      Gemgento::Store.all.each do |store|
-        Gemgento::UserGroup.all.each do |user_group|
+      Store.all.each do |store|
+        UserGroup.all.each do |user_group|
           if self.has_special?(store)
             date =  self.attribute_value('special_to_date', store)
           else
-            date =  Gemgento::PriceRule.first_to_expire(self, user_group, store)
+            date =  PriceRule.first_to_expire(self, user_group, store)
           end
 
           next if date.nil?
@@ -465,10 +465,10 @@ module Gemgento
 
     # Create an attribute option in Magento.
     #
-    # @param product_attribute [Gemgento::ProductAttribute]
+    # @param product_attribute [ProductAttribute]
     # @param option_label [String]
-    # @param store [Gemgento::Store]
-    # @return [Gemgento::ProductAttributeOption]
+    # @param store [Store]
+    # @return [ProductAttributeOption]
     def create_attribute_option(product_attribute, option_label, store)
       attribute_option = ProductAttributeOption.new
       attribute_option.product_attribute = product_attribute
@@ -480,7 +480,7 @@ module Gemgento
       attribute_option.sync_local_to_magento
       attribute_option.destroy
 
-      return Gemgento::ProductAttributeOption.find_by(product_attribute: product_attribute, label: option_label, store: store)
+      return ProductAttributeOption.find_by(product_attribute: product_attribute, label: option_label, store: store)
     end
 
     # Push local product changes to magento
@@ -509,12 +509,12 @@ module Gemgento
     end
 
     def touch_categories
-      Gemgento::TouchCategory.perform_async(self.categories.pluck(:id)) if self.changed?
+      TouchCategory.perform_async(self.categories.pluck(:id)) if self.changed?
     end
 
     def touch_configurables
       self.configurable_products.update_all(updated_at: Time.now) if self.changed?
-      Gemgento::TouchProduct.perform_async(self.configurable_products.pluck(:id)) if self.changed?
+      TouchProduct.perform_async(self.configurable_products.pluck(:id)) if self.changed?
     end
 
     def to_ary

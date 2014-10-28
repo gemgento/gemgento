@@ -7,7 +7,7 @@ module Gemgento
     private
 
     def push_to_magento
-      Gemgento::API::SOAP::Sales::OrderShipment.add_comment(
+      API::SOAP::Sales::OrderShipment.add_comment(
           self,
           (self.is_customer_notified ? 1 : nil),
           (self.include_in_email ? 1 : nil)

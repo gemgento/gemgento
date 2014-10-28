@@ -1,5 +1,5 @@
 module Gemgento
-	class PagesController < Gemgento::ApplicationController
+	class PagesController < ApplicationController
 
 		def about
 

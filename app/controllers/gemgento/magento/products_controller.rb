@@ -8,12 +8,12 @@ module Gemgento
     def update
       data = params[:data]
 
-      @product = Gemgento::Product.not_deleted.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).first_or_initialize
+      @product = Product.not_deleted.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).first_or_initialize
       @product.magento_id = data[:product_id]
       @product.magento_type = data[:type]
       @product.sku = data[:sku]
       @product.sync_needed = false
-      @product.product_attribute_set = Gemgento::ProductAttributeSet.where(magento_id: data[:set]).first
+      @product.product_attribute_set = ProductAttributeSet.where(magento_id: data[:set]).first
       @product.magento_type = data[:type]
       @product.save
 
@@ -32,8 +32,8 @@ module Gemgento
     def destroy
       data = params[:data]
 
-      if Gemgento::Product.not_deleted.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).count > 0
-        @product = Gemgento::Product.find_by('id = ? OR magento_id = ?', params[:id], data[:product_id]).mark_deleted!
+      if Product.not_deleted.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).count > 0
+        @product = Product.find_by('id = ? OR magento_id = ?', params[:id], data[:product_id]).mark_deleted!
       end
 
       render nothing: true
@@ -45,7 +45,7 @@ module Gemgento
       product.stores.clear
 
       magento_stores.each do |magento_id|
-        product.stores << Gemgento::Store.find_by(magento_id: magento_id)
+        product.stores << Store.find_by(magento_id: magento_id)
       end
 
       product.save
@@ -53,7 +53,7 @@ module Gemgento
 
     def set_attribute_values_from_magento(magento_attribute_values, product)
       magento_attribute_values.each do |store_id, attribute_values|
-        store = Gemgento::Store.find_by(magento_id: store_id)
+        store = Store.find_by(magento_id: store_id)
 
         attribute_values.each do |code, value|
 
@@ -79,10 +79,10 @@ module Gemgento
       # loop through each return category and add it to the product if needed
       unless magento_categories.nil?
         magento_categories.each do |magento_category|
-          category = Gemgento::Category.find_by(magento_id: magento_category)
+          category = Category.find_by(magento_id: magento_category)
           next if category.nil? # deleted categories are still returned from Magento, just skip
 
-          product_category = Gemgento::ProductCategory.find_or_initialize_by(category: category, product: product, store: store)
+          product_category = ProductCategory.find_or_initialize_by(category: category, product: product, store: store)
           product_category.save
 
           category_ids << category.id
@@ -90,7 +90,7 @@ module Gemgento
       end
 
       # remove Product Category relations that were not pushed
-      Gemgento::ProductCategory.where('store_id = ? AND product_id = ? AND category_id NOT IN (?)', store.id, product.id, category_ids).destroy_all
+      ProductCategory.where('store_id = ? AND product_id = ? AND category_id NOT IN (?)', store.id, product.id, category_ids).destroy_all
 
       product.save
     end
@@ -101,17 +101,17 @@ module Gemgento
       magento_source_assets.each do |store_id, source_assets| # cycle through media galleries for each
 
         if !source_assets[:media_gallery].nil? && !source_assets[:media_gallery][:images].nil?
-          store = Gemgento::Store.find_by(magento_id: store_id)
+          store = Store.find_by(magento_id: store_id)
           media_gallery = source_assets[:media_gallery][:images]
 
           media_gallery.each do |source| # cycle through the store specific assets
-            asset = Gemgento::Asset.find_or_initialize_by(product_id: product.id, file: source[:file], store: store)
+            asset = Asset.find_or_initialize_by(product_id: product.id, file: source[:file], store: store)
 
             if !source[:removed].nil? && source[:removed] == 1
               asset.destroy
             else
               url, file = get_url_and_file(source)
-              next unless Gemgento::AssetFile.valid_url(url)
+              next unless AssetFile.valid_url(url)
 
               asset.url = url
               asset.position = source[:position]
@@ -132,9 +132,9 @@ module Gemgento
 
       # destroy any assets that were not in the media gallery for each store
       # this is a failsafe for image deletions that were not registered
-      Gemgento::Asset.skip_callback(:destroy, :before, :delete_magento)
+      Asset.skip_callback(:destroy, :before, :delete_magento)
       product.assets.where('gemgento_assets.id NOT IN (?)', assets_to_keep).destroy_all
-      Gemgento::Asset.set_callback(:destroy, :before, :delete_magento)
+      Asset.set_callback(:destroy, :before, :delete_magento)
     end
 
     def set_associated_products(simple_magento_product_ids, configurable_magento_product_ids, product)
@@ -149,10 +149,10 @@ module Gemgento
 
     def get_url_and_file(source)
       if source[:new_file].nil?
-        url = "#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:file]}"
+        url = "#{Config[:magento][:url]}/media/catalog/product#{source[:file]}"
         file = source[:file]
       else
-        url = "#{Gemgento::Config[:magento][:url]}/media/catalog/product#{source[:new_file]}"
+        url = "#{Config[:magento][:url]}/media/catalog/product#{source[:new_file]}"
         file = source[:new_file]
       end
 

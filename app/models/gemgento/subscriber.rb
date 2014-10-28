@@ -15,14 +15,14 @@ module Gemgento
     end
 
     def self.add_user(user)
-      subscriber = Gemgento::Subscriber.find_or_initialize_by(email: user.email)
+      subscriber = Subscriber.find_or_initialize_by(email: user.email)
       subscriber.first_name = user.first_name
       subscriber.last_name = user.last_name
       subscriber.save
     end
 
     def self.remove_user(user)
-      Gemgento::Subscriber.where(email: user.email).destroy_all
+      Subscriber.where(email: user.email).destroy_all
     end
   end
 end

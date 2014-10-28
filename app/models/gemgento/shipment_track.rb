@@ -8,7 +8,7 @@ module Gemgento
     private
 
     def push_to_magento
-      return Gemgento::API::SOAP::Sales::OrderShipment.add_track(self)
+      return API::SOAP::Sales::OrderShipment.add_track(self)
     end
   end
 end

@@ -124,7 +124,7 @@ module Gemgento
           end
 
           if result
-            Gemgento::Address.save_from_order(
+            Address.save_from_order(
                 @order,
                 params[:save_billing],
                 params[:save_shipping],
@@ -133,7 +133,7 @@ module Gemgento
 
 
             format.html do
-              if Gemgento::Config[:combined_shipping_payment]
+              if Config[:combined_shipping_payment]
                 redirect_to checkout_shipping_payment_path
               else
                 redirect_to checkout_shipping_path

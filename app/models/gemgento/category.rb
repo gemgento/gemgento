@@ -6,7 +6,7 @@ module Gemgento
     has_many :products, -> { distinct }, through: :product_categories
     has_many :children, foreign_key: 'parent_id', class_name: 'Category'
 
-    has_one :shopify_adapter, class_name: 'Gemgento::Adapter::ShopifyAdapter', as: :gemgento_model
+    has_one :shopify_adapter, class_name: 'Adapter::ShopifyAdapter', as: :gemgento_model
 
     belongs_to :parent, foreign_key: 'parent_id', class_name: 'Category'
 
@@ -16,7 +16,7 @@ module Gemgento
 
     default_scope -> { where(deleted_at: nil).order(:position) }
 
-    scope :top_level, -> { where(parent: Gemgento::Category.find_by(parent_id: nil), is_active: true) }
+    scope :top_level, -> { where(parent: Category.find_by(parent_id: nil), is_active: true) }
     scope :navigation, -> { where(include_in_menu: true) }
     scope :root, -> { find_by(parent_id: nil) }
     scope :active, -> { where(is_active: true) }
@@ -28,7 +28,7 @@ module Gemgento
     #
     # @return [String]
     def tree_path
-      root = Gemgento::Category.root
+      root = Category.root
       parent = self.parent
       path = self.name
 
@@ -47,7 +47,7 @@ module Gemgento
     def self.grouped_options
       options = []
 
-      Gemgento::Category.top_level.each do |parent|
+      Category.top_level.each do |parent|
 
         child_options = [["#{parent.name} (parent)", parent.id]]
 
@@ -88,10 +88,10 @@ module Gemgento
     #
     # @return [void]
     def enforce_positioning
-      Gemgento::Category.skip_callback(:save, :after, :enforce_positioning)
+      Category.skip_callback(:save, :after, :enforce_positioning)
 
       last_position = self.position
-      categories = Gemgento::Category.where('parent_id = ? AND position >= ? AND id != ?', self.parent_id, self.position, self.id)
+      categories = Category.where('parent_id = ? AND position >= ? AND id != ?', self.parent_id, self.position, self.id)
       categories.each do |category|
         break if category.position != last_position
 
@@ -101,14 +101,14 @@ module Gemgento
         last_position = category.position
       end
 
-      Gemgento::Category.set_callback(:save, :after, :enforce_positioning)
+      Category.set_callback(:save, :after, :enforce_positioning)
     end
 
     # Returns list of ancestors, starting from parent until root.
     #
     #   subchild1.ancestors # => [child1, root]
     #
-    # @return [Array(Gemgento::Category)]
+    # @return [Array(Category)]
     def ancestors
       node, nodes = self, []
       nodes << node = node.parent while node.parent
@@ -117,13 +117,13 @@ module Gemgento
 
     # Get products associated with the category.  Optional scope of store.
     #
-    # @param store [Gemgento::Store, nil]
-    # @return [ActiveRecord::Associations::CollectionProxy(Gemgento::Product)]
+    # @param store [Store, nil]
+    # @return [ActiveRecord::Associations::CollectionProxy(Product)]
     def products(store = nil)
       if store.nil?
         return super
       else
-        return Gemgento::Product.joins(:product_categories).where(
+        return Product.joins(:product_categories).where(
             'gemgento_product_categories.store_id = ? AND gemgento_product_categories.category_id = ?',
             store.id,
             self.id

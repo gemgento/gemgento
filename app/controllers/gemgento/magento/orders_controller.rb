@@ -4,10 +4,10 @@ module Gemgento
     def update
       data = params[:data]
 
-      @order = Gemgento::Order.where('id = ? OR order_id = ?', params[:id], data[:order_id]).first_or_initialize
+      @order = Order.where('id = ? OR order_id = ?', params[:id], data[:order_id]).first_or_initialize
       @order.order_id = data[:order_id]
       @order.is_active = data[:is_active]
-      @order.user = Gemgento::User.where(magento_id: data[:customer_id]).first
+      @order.user = User.where(magento_id: data[:customer_id]).first
       @order.tax_amount = data[:tax_amount]
       @order.shipping_amount = data[:shipping_amount]
       @order.discount_amount = data[:discount_amount]
@@ -53,13 +53,13 @@ module Gemgento
       @order.customer_lastname = data[:customer_lastname]
       @order.magento_quote_id = data[:quote_id] unless data[:quote_id].nil?
       @order.is_virtual = data[:is_virtual]
-      @order.user_group = Gemgento::UserGroup.find_by(magento_id: data[:customer_group_id])
+      @order.user_group = UserGroup.find_by(magento_id: data[:customer_group_id])
       @order.customer_note_notify = data[:customer_note_notify]
       @order.customer_is_guest = data[:customer_is_guest]
       @order.email_sent = data[:email_sent]
       @order.increment_id = data[:increment_id]
       @order.placed_at = data[:created_at]
-      @order.store = Gemgento::Store.find_by(magento_id: data[:store_id])
+      @order.store = Store.find_by(magento_id: data[:store_id])
       @order.save
 
       @order.shipping_address = sync_magento_address_to_local(data[:shipping_address], @order, @order.shipping_address)
@@ -84,7 +84,7 @@ module Gemgento
     private
 
     def sync_magento_address_to_local(source, order, address = nil)
-      address = Gemgento::Address.new if address.nil?
+      address = Address.new if address.nil?
       address.increment_id = source[:increment_id]
       address.city = source[:city]
       address.company = source[:company]
@@ -108,7 +108,7 @@ module Gemgento
     end
 
     def sync_magento_order_status_to_local(source, order)
-      order_status = Gemgento::OrderStatus.where(order_id: order.id, status: source[:status], comment: source[:comment]).first_or_initialize
+      order_status = OrderStatus.where(order_id: order.id, status: source[:status], comment: source[:comment]).first_or_initialize
       order_status.order = order
       order_status.status = source[:status]
       order_status.is_active = source[:is_active]
@@ -121,8 +121,8 @@ module Gemgento
     end
 
     def sync_magento_line_item_to_local(source, order)
-      product = Gemgento::Product.find_by(magento_id: source[:product_id])
-      line_item = Gemgento::LineItem.where(
+      product = Product.find_by(magento_id: source[:product_id])
+      line_item = LineItem.where(
           'magento_id = ? OR (order_id = ? AND product_id = ?)',
           source[:item_id],
           order.id,
@@ -132,7 +132,7 @@ module Gemgento
       line_item.itemizable = order
       line_item.magento_id = source[:item_id]
       line_item.quote_item_id = source[:quote_item_id]
-      line_item.product = Gemgento::Product.find_by(magento_id: source[:product_id])
+      line_item.product = Product.find_by(magento_id: source[:product_id])
       line_item.product_type = source[:product_type]
       line_item.product_options = source[:product_options]
       line_item.weight = source[:weight]
@@ -184,7 +184,7 @@ module Gemgento
       line_item.save
 
       unless source[:gift_message_id].nil?
-        gift_message = Gemgento::API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
+        gift_message = API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
         line_item.gift_message = gift_message
         line_item.save
       end

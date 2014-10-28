@@ -3,7 +3,7 @@ module Gemgento
 
     def self.get(client, force_new_session)
       if Session.last.nil? || Session.last.expired || force_new_session
-        response = client.call(:login, message: { username: Gemgento::Config[:magento][:username], apiKey: Gemgento::Config[:magento][:api_key] })
+        response = client.call(:login, message: { username: Config[:magento][:username], apiKey: Config[:magento][:api_key] })
 
         unless response.success?
           puts 'Login Failed - Check Session'
@@ -12,11 +12,11 @@ module Gemgento
 
         session = response.body[:login_response][:login_return];
 
-        s = Gemgento::Session.new
+        s = Session.new
         s.session_id = session
         s.save
       else
-        s = Gemgento::Session.last
+        s = Session.last
         s.touch
 
         session = s.session_id
@@ -36,10 +36,10 @@ module Gemgento
     private
 
     def timeout
-      if Gemgento::Config[:magento][:session_life].nil?
+      if Config[:magento][:session_life].nil?
         return 24 * 60 # default of 24 minutes, determined by PHP
       else
-        return Gemgento::Config[:magento][:session_life].to_i
+        return Config[:magento][:session_life].to_i
       end
     end
 

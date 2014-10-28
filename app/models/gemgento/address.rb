@@ -6,7 +6,7 @@ module Gemgento
     belongs_to :country
     belongs_to :region
 
-    has_one :shopify_adapter, class_name: 'Gemgento::Adapter::ShopifyAdapter', as: :gemgento_model
+    has_one :shopify_adapter, class_name: 'Adapter::ShopifyAdapter', as: :gemgento_model
 
     validates :first_name, :last_name, :street, :city, :country, :postcode, :telephone, presence: true
     validates :region, presence: true, if: ->{ !self.country.nil? && !self.country.regions.empty? }
@@ -56,7 +56,7 @@ module Gemgento
 
     # Save order addresses to user address book.  Any new address will be default.
     #
-    # @param order [Gemgento::Order] the order to save addresses from
+    # @param order [Order] the order to save addresses from
     # @param save_billing [Boolean] true to save the billing address
     # @param save_shipping [Boolean] true to save the shipping address
     # @param shipping_same_as_billing [Boolean] true if the shipping and billing addresses are the same
@@ -74,10 +74,10 @@ module Gemgento
 
     # Copy an existing address to a user's address book.
     #
-    # @param source [Gemgento::Address] the existing address that will be copied.
-    # @param user [Gemgento::User] the user who will be associated with the new address.
+    # @param source [Address] the existing address that will be copied.
+    # @param user [User] the user who will be associated with the new address.
     # @param is_default [Boolean] true if the new address will be the default for it's type, false otherwise.
-    # @return [Gemgento::Address] the newly created Address.
+    # @return [Address] the newly created Address.
     def self.copy_to_address_book(source, user, is_default_billing = false, is_default_shipping = false)
       address = source.dup
       address.user = user
@@ -98,7 +98,7 @@ module Gemgento
     # Duplicate an address.  Different from dup because it avoids unique magento attributes and includes
     # country and region associations.
     #
-    # @return [Gemgento::Address] newly duplicated address
+    # @return [Address] newly duplicated address
     def duplicate
       address = self.dup
       address.region = self.region

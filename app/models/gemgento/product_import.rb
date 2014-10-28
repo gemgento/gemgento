@@ -21,13 +21,13 @@ module Gemgento
     attr_accessor :image_file_extensions_raw
     attr_accessor :image_types_raw
 
-    validates_with Gemgento::ProductImportValidator
+    validates_with ProductImportValidator
 
     after_commit :process
 
     def process
       # create a fake sync record, so products are not synced during the import
-      sync_buffer = Gemgento::Sync.new
+      sync_buffer = Sync.new
       sync_buffer.subject = 'products'
       sync_buffer.is_complete = false
       sync_buffer.save
@@ -116,7 +116,7 @@ module Gemgento
     def create_simple_product
       sku = @row[@headers.index('sku').to_i].to_s.strip
 
-      product = Gemgento::Product.where(sku: sku).not_deleted.first_or_initialize
+      product = Product.where(sku: sku).not_deleted.first_or_initialize
 
       if product.nil? # If product isn't known locally, check with Magento
         product = Product.check_magento(sku, 'sku', product_attribute_set)
@@ -160,7 +160,7 @@ module Gemgento
           if product_attribute.frontend_input == 'select'
             label = @row[@headers.index(attribute_code).to_i].to_s.strip.gsub('.0', '')
             label = label.gsub('.0', '') if label.end_with? '.0'
-            attribute_option = Gemgento::ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: label, store: self.store)
+            attribute_option = ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: label, store: self.store)
 
             if attribute_option.nil?
               attribute_option = create_attribute_option(product_attribute, label)
@@ -195,7 +195,7 @@ module Gemgento
       attribute_option.sync_local_to_magento
       attribute_option.destroy
 
-      return Gemgento::ProductAttributeOption.where(product_attribute: product_attribute, label: option_label, store: self.store).first
+      return ProductAttributeOption.where(product_attribute: product_attribute, label: option_label, store: self.store).first
     end
 
     def set_default_attribute_values(product)
@@ -223,7 +223,7 @@ module Gemgento
           category = Category.find_by(url_key: category_url_key, parent_id: parent_id)
 
           unless category.nil?
-            product_category = Gemgento::ProductCategory.find_or_initialize_by(category: category, product: product, store: self.store)
+            product_category = ProductCategory.find_or_initialize_by(category: category, product: product, store: self.store)
             product_category.save
             parent_id = category.id
           else
@@ -248,7 +248,7 @@ module Gemgento
           types = []
 
           unless self.image_types[position].nil?
-            types = Gemgento::AssetType.where('product_attribute_set_id = ? AND code IN (?)', self.product_attribute_set.id, self.image_types[position].split(',').map(&:strip))
+            types = AssetType.where('product_attribute_set_id = ? AND code IN (?)', self.product_attribute_set.id, self.image_types[position].split(',').map(&:strip))
           end
 
           unless types.is_a? Array
@@ -266,7 +266,7 @@ module Gemgento
     end
 
     def create_image(product, file_name, types, position, label)
-      image = Gemgento::Asset.new
+      image = Asset.new
       image.product = product
       image.store = self.store
       image.position = position
@@ -290,7 +290,7 @@ module Gemgento
       sku = @row[@headers.index('sku').to_i].to_s.strip
 
       # set the default configurable product attributes
-      configurable_product = Gemgento::Product.where(sku: sku).not_deleted.first_or_initialize
+      configurable_product = Product.where(sku: sku).not_deleted.first_or_initialize
 
       if configurable_product.magento_id.nil?
         self.count_created += 1
@@ -337,7 +337,7 @@ module Gemgento
       default_product = configurable_product.simple_products.first
 
       default_product.assets.where(store: self.store).each do |asset|
-        asset_copy = Gemgento::Asset.new
+        asset_copy = Asset.new
         asset_copy.product = configurable_product
         asset_copy.store = self.store
         asset_copy.set_file(File.open(asset.asset_file.file.path(:original)))

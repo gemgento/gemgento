@@ -4,7 +4,7 @@ module Gemgento
     def create
       build_resource(sign_up_params)
       resource.stores << current_store unless resource.stores.include? current_store
-      resource.user_group = Gemgento::UserGroup.find_by(code: 'General')
+      resource.user_group = UserGroup.find_by(code: 'General')
       resource.sync_needed = true
 
       if resource.save

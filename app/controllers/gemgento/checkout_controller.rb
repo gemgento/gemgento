@@ -1,5 +1,5 @@
 module Gemgento
-  class CheckoutController < Gemgento::ApplicationController
+  class CheckoutController < ApplicationController
 
     before_action :set_order
     before_action :validate_line_item_count

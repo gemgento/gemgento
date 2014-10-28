@@ -1,16 +1,16 @@
 module Gemgento
-  class RegionsController < Gemgento::ApplicationController
+  class RegionsController < ApplicationController
 
   respond_to :json, :html
 
     def index
-      @regions = Gemgento::Region.all
+      @regions = Region.all
 
       respond_with @regions
     end
 
     def show
-      @region = Gemgento::Region.find(params[:id])
+      @region = Region.find(params[:id])
 
       respond_with @region
     end

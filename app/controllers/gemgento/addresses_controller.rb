@@ -1,5 +1,5 @@
 module Gemgento
-  class AddressesController < Gemgento::ApplicationController
+  class AddressesController < ApplicationController
     respond_to :html, :json
 
     layout -> { set_layout false }

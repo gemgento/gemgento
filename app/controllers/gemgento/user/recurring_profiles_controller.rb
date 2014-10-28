@@ -2,11 +2,11 @@ module Gemgento
   class User::RecurringProfilesController < User::BaseController
 
     def index
-      @recurring_profile = Gemgento::RecurringProfile.where(user: current_user)
+      @recurring_profile = RecurringProfile.where(user: current_user)
     end
 
     def destroy
-      recurring_profile = Gemgento::RecurringProfile.find_by!(id: params[:id], user: current_user)
+      recurring_profile = RecurringProfile.find_by!(id: params[:id], user: current_user)
 
       respond_to do |format|
         result = recurring_profile.change_state('cancel')

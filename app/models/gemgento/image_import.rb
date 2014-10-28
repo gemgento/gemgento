@@ -18,12 +18,12 @@ module Gemgento
     attr_accessor :image_types_raw
 
     validates :image_file_extensions, :image_labels, :image_path, presence: true
-    validates_with Gemgento::ImageImportValidator
+    validates_with ImageImportValidator
 
     after_commit :process
 
     def self.is_active?
-      Gemgento::ImageImport.where(is_active: true).count > 0
+      ImageImport.where(is_active: true).count > 0
     end
 
     def process
@@ -38,16 +38,16 @@ module Gemgento
       1.upto @worksheet.last_row_index do |index|
         puts "Working on row #{index}"
         @row = @worksheet.row(index)
-        @product = Gemgento::Product.not_deleted.find_by(sku: @row[@headers.index('sku').to_i].to_s.strip)
-        Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch(@product, self.store) # make sure we know about all existing images
+        @product = Product.not_deleted.find_by(sku: @row[@headers.index('sku').to_i].to_s.strip)
+        API::SOAP::Catalog::ProductAttributeMedia.fetch(@product, self.store) # make sure we know about all existing images
 
         destroy_existing_assets if self.destroy_existing
         create_images
       end
 
-      Gemgento::ImageImport.skip_callback(:commit, :after, :process)
+      ImageImport.skip_callback(:commit, :after, :process)
       self.save validate: false
-      Gemgento::ImageImport.set_callback(:commit, :after, :process)
+      ImageImport.set_callback(:commit, :after, :process)
     end
 
     def image_labels_raw
@@ -117,7 +117,7 @@ module Gemgento
           types = []
 
           unless self.image_types[position].nil?
-            types = Gemgento::AssetType.where('product_attribute_set_id = ? AND code IN (?)', @product.product_attribute_set.id, self.image_types[position].split(',').map(&:strip))
+            types = AssetType.where('product_attribute_set_id = ? AND code IN (?)', @product.product_attribute_set.id, self.image_types[position].split(',').map(&:strip))
           end
 
           unless types.is_a? Array
@@ -130,7 +130,7 @@ module Gemgento
     end
 
     def create_image(file_name, types, position, label)
-      asset = Gemgento::Asset.new
+      asset = Asset.new
       asset.product = @product
       asset.store = self.store
       asset.position = position

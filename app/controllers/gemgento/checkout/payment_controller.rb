@@ -16,7 +16,7 @@ module Gemgento
     end
 
     def update
-      @payment = @order.payment.nil? ? Gemgento::Payment.new : @order.payment
+      @payment = @order.payment.nil? ? Payment.new : @order.payment
       @payment.attributes = payment_params
 
       respond_to do |format|

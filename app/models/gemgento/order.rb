@@ -1,12 +1,12 @@
 module Gemgento
   class Order < ActiveRecord::Base
-    belongs_to :store, class_name: 'Gemgento::Store'
-    belongs_to :user, class_name: 'Gemgento::User'
-    belongs_to :user_group, class_name: 'Gemgento::UserGroup'
-    belongs_to :shipping_address, foreign_key: 'shipping_address_id', class_name: 'Gemgento::Address'
-    belongs_to :billing_address, foreign_key: 'billing_address_id', class_name: 'Gemgento::Address'
+    belongs_to :store, class_name: 'Store'
+    belongs_to :user, class_name: 'User'
+    belongs_to :user_group, class_name: 'UserGroup'
+    belongs_to :shipping_address, foreign_key: 'shipping_address_id', class_name: 'Address'
+    belongs_to :billing_address, foreign_key: 'billing_address_id', class_name: 'Address'
 
-    has_many :api_jobs, class_name: 'Gemgento::ApiJob', as: :source
+    has_many :api_jobs, class_name: 'ApiJob', as: :source
     has_many :line_items, as: :itemizable
     has_many :order_statuses
     has_many :products, through: :line_items
@@ -35,29 +35,29 @@ module Gemgento
     # CART specific functions
 
     def self.get_cart(order_id = nil, store = nil, user = nil)
-      store = Gemgento::Store.current if store.nil?
+      store = Store.current if store.nil?
 
       if !order_id.blank? && user.nil?
-        cart = Gemgento::Order.where('created_at >= ?', Date.today - 30.days).
+        cart = Order.where('created_at >= ?', Date.today - 30.days).
             find_by(id: order_id, state: 'cart', store: store)
-        cart = Gemgento::Order.new(state: 'cart', store: store) if cart.nil?
+        cart = Order.new(state: 'cart', store: store) if cart.nil?
 
       elsif !order_id.blank? && !user.nil?
-        cart = Gemgento::Order.where('created_at >= ?', Date.today - 30.days).
+        cart = Order.where('created_at >= ?', Date.today - 30.days).
             find_by(id: order_id, state: 'cart', store: store)
 
         if cart.nil? || (!cart.user.nil? && cart.user != user)
-          cart = Gemgento::Order.where('created_at >= ?', Date.today - 30.days).
+          cart = Order.where('created_at >= ?', Date.today - 30.days).
               find_by(id: order_id, state: 'cart', store: store, user: user)
-          cart = Gemgento::Order.new(state: 'cart', store: store)
+          cart = Order.new(state: 'cart', store: store)
         end
       elsif order_id.blank? && !user.nil?
-        cart = Gemgento::Order.cart.where(state: 'cart', store: store, user: user).
+        cart = Order.cart.where(state: 'cart', store: store, user: user).
             where('created_at >= ?', Date.today - 30.days).
             order(updated_at: :desc).first_or_initialize
         cart.reset_checkout unless cart.magento_quote_id.nil?
       else
-        cart = Gemgento::Order.new(state: 'cart', store: store)
+        cart = Order.new(state: 'cart', store: store)
       end
 
       return cart
@@ -119,7 +119,7 @@ module Gemgento
     # @return [Boolean,String] true if the gift card was applied, otherwise an error message.
     def apply_gift_card(code)
       raise 'Order not in cart state' if self.state != 'cart'
-      Gemgento::API::SOAP::GiftCard.quote_add(self.magento_quote_id, code, self.store.magento_id)
+      API::SOAP::GiftCard.quote_add(self.magento_quote_id, code, self.store.magento_id)
     end
 
     # Remove a gift card from an order.  Only works in when order is in cart state.
@@ -128,7 +128,7 @@ module Gemgento
     # @return [Boolean,String] true if the gift card was removed, otherwise an error message.
     def remove_gift_card(code)
       raise 'Order not in cart state' if self.state != 'cart'
-      Gemgento::API::SOAP::GiftCard.quote_remove(self.magento_quote_id, code, self.store.magento_id)
+      API::SOAP::GiftCard.quote_remove(self.magento_quote_id, code, self.store.magento_id)
     end
 
     # CHECKOUT methods
@@ -165,7 +165,7 @@ module Gemgento
     # @return [Boolean] true if the payment method was successfully set
     def set_payment(payment_attributes)
       if self.payment.nil?
-        self.payment = Gemgento::Payment.new(payment_attributes)
+        self.payment = Payment.new(payment_attributes)
       else
         self.payment.attributes = payment_attributes
       end
@@ -181,7 +181,7 @@ module Gemgento
     # @param code [String] coupon code
     # @return [Boolean] true if the coupon code was successfully applied
     def apply_coupon(code)
-      Gemgento::API::SOAP::Checkout::Coupon.add(self, code)
+      API::SOAP::Checkout::Coupon.add(self, code)
     end
 
     # Remove a coupon code to the cart.
@@ -189,7 +189,7 @@ module Gemgento
     # @param code [String] coupon code
     # @return [Boolean] true if the coupon code was successfully removed
     def remove_coupons
-      Gemgento::API::SOAP::Checkout::Coupon.remove(self)
+      API::SOAP::Checkout::Coupon.remove(self)
     end
 
     # Order totals for the cart phase.
@@ -323,11 +323,11 @@ module Gemgento
         if response.success?
           self.increment_id = response.body[:result]
           save
-          Gemgento::API::SOAP::Sales::Order.fetch(self.increment_id) #grab all the new order information
+          API::SOAP::Sales::Order.fetch(self.increment_id) #grab all the new order information
           reload
 
           push_gift_message_comment unless self.gift_message.blank?
-          Gemgento::HeartBeat.perform_async if Rails.env.production?
+          HeartBeat.perform_async if Rails.env.production?
           finalize
 
           return true
@@ -366,7 +366,7 @@ module Gemgento
         original_address = user.address_book.first
         address = original_address.duplicate
       else
-        address = Gemgento::Address.new
+        address = Address.new
       end
 
       self.billing_address = address
@@ -380,7 +380,7 @@ module Gemgento
         original_address = user.address_book.first
         address = original_address.duplicate
       else
-        address = Gemgento::Address.new
+        address = Address.new
       end
 
       self.shipping_address = address
@@ -401,7 +401,7 @@ module Gemgento
     private
 
     def subscribe_customer
-      Gemgento::Subscriber.create(email: self.customer_email)
+      Subscriber.create(email: self.customer_email)
     end
 
     def valid_stock?

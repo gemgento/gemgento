@@ -9,7 +9,7 @@ module Gemgento
     attr_accessor :email, :comment, :include_comment
 
     def send_email
-      Gemgento::API::SOAP::Sales::OrderShipment.send_info(self.increment_id)
+      API::SOAP::Sales::OrderShipment.send_info(self.increment_id)
     end
 
     def as_json(options = nil)
@@ -26,7 +26,7 @@ module Gemgento
     end
 
     def push_to_magento
-      increment_id = Gemgento::API::SOAP::Sales::OrderShipment.create(self)
+      increment_id = API::SOAP::Sales::OrderShipment.create(self)
 
       if increment_id == false
         return false

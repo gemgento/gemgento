@@ -83,7 +83,7 @@ module Gemgento
       asset_type_codes.each do |asset_type_code|
         next if asset_type_code.blank?
 
-        asset_type = Gemgento::AssetType.find_by(
+        asset_type = AssetType.find_by(
             product_attribute_set: self.product.product_attribute_set,
             code: asset_type_code,
         )
@@ -104,13 +104,13 @@ module Gemgento
 
     # Find a products asset by the AssetType code
     #
-    # @param product [Gemgento::Product]
+    # @param product [Product]
     # @param code [String]
     # @param store [Integer, nil]
-    # @return [Gemgento::Asset, nil]
+    # @return [Asset, nil]
     def self.find_by_code(product, code, store = nil)
-      store = Gemgento::Store.current if store.nil?
-      asset_type = Gemgento::AssetType.find_by(code: code, product_attribute_set_id: product.product_attribute_set_id)
+      store = Store.current if store.nil?
+      asset_type = AssetType.find_by(code: code, product_attribute_set_id: product.product_attribute_set_id)
       raise "Unknown AssetType code for given product's ProductAttributeSet" if asset_type.nil?
 
       return asset_type.assets.find_by(product_id: product.id, store_id: store.id)
@@ -177,7 +177,7 @@ module Gemgento
     #
     # @return [void]
     def touch_product
-      Gemgento::TouchProduct.perform_async([self.product.id]) if self.changed?
+      TouchProduct.perform_async([self.product.id]) if self.changed?
     end
 
   end

@@ -1,5 +1,5 @@
 module Gemgento
-  class SubscribersController < Gemgento::ApplicationController
+  class SubscribersController < ApplicationController
 
     respond_to :js, :json, :html
 
@@ -10,7 +10,7 @@ module Gemgento
     end
 
     def create
-      @subscriber = Gemgento::Subscriber.create(subscriber_params)
+      @subscriber = Subscriber.create(subscriber_params)
 
       respond_to do |format|
         if @subscriber.save

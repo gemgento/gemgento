@@ -7,8 +7,8 @@ module Gemgento
     respond_to :json, :html
     
     def new
-      @existing_user = Gemgento::User.new
-      @new_user = Gemgento::User.new
+      @existing_user = User.new
+      @new_user = User.new
     end
 
     def create
@@ -25,8 +25,8 @@ module Gemgento
     private
 
     def set_user_instances
-      @existing_user = Gemgento::User.new
-      @new_user = Gemgento::User.new
+      @existing_user = User.new
+      @new_user = User.new
     end
 
     def create_session
@@ -43,7 +43,7 @@ module Gemgento
           format.html { redirect_to after_sign_in_path }
           format.json { render json: { result: true, user: current_user } }
         else
-          @existing_user = Gemgento::User.new(email: user_session_params[:email])
+          @existing_user = User.new(email: user_session_params[:email])
           flash.keep[:error] = 'Invalid username and password'
 
           format.html { render 'new' }
@@ -58,14 +58,14 @@ module Gemgento
     end
 
     def create_registration
-      @new_user = Gemgento::User.new(user_registration_params)
+      @new_user = User.new(user_registration_params)
       @new_user.stores << current_store
-      @new_user.user_group = Gemgento::UserGroup.where(code: 'General').first
+      @new_user.user_group = UserGroup.where(code: 'General').first
 
       respond_to do |format|
         if @new_user.save
           sign_in(:user, @new_user)
-          Gemgento::Subscriber.add_user(@new_user) if params[:subscribe]
+          Subscriber.add_user(@new_user) if params[:subscribe]
 
           format.html { redirect_to after_register_path }
           format.json { render json: { result: true, user: @new_user, order: current_order } }

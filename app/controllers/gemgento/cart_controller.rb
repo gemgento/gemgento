@@ -1,5 +1,5 @@
 module Gemgento
-  class CartController < Gemgento::ApplicationController
+  class CartController < ApplicationController
     before_action :set_order
     before_action :create_magento_quote, only: :create
     before_action :validate_line_item, only: [:update, :destroy]
@@ -11,10 +11,10 @@ module Gemgento
     end
 
     def create
-      product = Gemgento::Product.find(params[:line_item][:product_id])
+      product = Product.find(params[:line_item][:product_id])
 
       if !@order.products.include? product # make sure the product isn't in the cart
-        @line_item = Gemgento::LineItem.new(line_item_params)
+        @line_item = LineItem.new(line_item_params)
         @line_item.itemizable = @order
         respond @line_item.save
       else # update the appropriate line_item if it is

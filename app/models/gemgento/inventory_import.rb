@@ -9,12 +9,12 @@ module Gemgento
 
     serialize :import_errors, Array
 
-    validates_with Gemgento::InventoryImportValidator
+    validates_with InventoryImportValidator
 
     after_commit :process
 
     def self.is_active?
-      Gemgento::InventoryImport.where(is_active: true).count > 0
+      InventoryImport.where(is_active: true).count > 0
     end
 
     def process
@@ -27,18 +27,18 @@ module Gemgento
       end
 
       @headers = get_headers
-      @stores = Gemgento::Store.all
+      @stores = Store.all
 
       1.upto @worksheet.last_row_index do |index|
         puts "Working on row #{index}"
         @row = @worksheet.row(index)
-        @product = Gemgento::Product.not_deleted.find_by(sku: @row[@headers.index('sku').to_i].to_s.strip)
+        @product = Product.not_deleted.find_by(sku: @row[@headers.index('sku').to_i].to_s.strip)
         set_inventory
       end
 
-      Gemgento::InventoryImport.skip_callback(:commit, :after, :process)
+      InventoryImport.skip_callback(:commit, :after, :process)
       self.save validate: false
-      Gemgento::InventoryImport.set_callback(:commit, :after, :process)
+      InventoryImport.set_callback(:commit, :after, :process)
     end
 
     private
@@ -57,7 +57,7 @@ module Gemgento
 
     def set_inventory
       @stores.each do |store|
-        inventory = Gemgento::Inventory.find_or_initialize_by(product: @product, store: store)
+        inventory = Inventory.find_or_initialize_by(product: @product, store: store)
 
         @headers.each_with_index do |attribute, index|
           next if attribute == 'sku'

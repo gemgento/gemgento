@@ -4,8 +4,8 @@ module Gemgento
     def update
       data = params[:data]
 
-      unless Gemgento::ProductAttribute.ignored.include?(data[:attribute_code])
-        @product_attribute = Gemgento::ProductAttribute.find_or_initialize_by(magento_id: params[:id])
+      unless ProductAttribute.ignored.include?(data[:attribute_code])
+        @product_attribute = ProductAttribute.find_or_initialize_by(magento_id: params[:id])
         @product_attribute.magento_id = data[:attribute_id]
         @product_attribute.code = data[:attribute_code]
         @product_attribute.frontend_input = data[:frontend_input]
@@ -25,7 +25,7 @@ module Gemgento
         set_options(@product_attribute, data[:options]) unless data[:options].nil?
 
         if @product_attribute.frontend_input == 'media_image'
-          Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch_all_media_types
+          API::SOAP::Catalog::ProductAttributeMedia.fetch_all_media_types
         end
       end
 
@@ -33,7 +33,7 @@ module Gemgento
     end
 
     def destroy
-      @product_attribute = Gemgento::ProductAttribute.find_by(magento_id: params[:id])
+      @product_attribute = ProductAttribute.find_by(magento_id: params[:id])
       @product_attribute.mark_deleted! unless @product_attribute.nil?
 
       render nothing: true
@@ -46,11 +46,11 @@ module Gemgento
       options.each do |store_options|
         next if store_options[:options].nil?
 
-        store = Gemgento::Store.find_by(magento_id: store_options[:store_id])
+        store = Store.find_by(magento_id: store_options[:store_id])
 
         if store
           store_options[:options].each_with_index do |option, index|
-            product_attribute_option = Gemgento::ProductAttributeOption.find_or_initialize_by(value: option[:value], product_attribute: product_attribute, store: store)
+            product_attribute_option = ProductAttributeOption.find_or_initialize_by(value: option[:value], product_attribute: product_attribute, store: store)
             product_attribute_option.product_attribute = product_attribute
             product_attribute_option.value = option[:value]
             product_attribute_option.label = option[:label]

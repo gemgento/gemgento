@@ -1,5 +1,5 @@
 module Gemgento
-  class ShipmentsController < Gemgento::ApplicationController
+  class ShipmentsController < ApplicationController
 
   end
 end

@@ -3,20 +3,20 @@ module Gemgento
     # Log into the Magento API and setup the session and client
     def self.api_login(force_new_session = false)
       @client = Savon.client(client_config)
-      @session = Gemgento::Session.get(@client, force_new_session)
+      @session = Session.get(@client, force_new_session)
     end
 
     def self.client_config
       config = {
-        wsdl: "#{Gemgento::Config[:magento][:url]}/index.php/api/v#{Gemgento::Config[:magento][:api_version]}_#{Gemgento::Config[:magento][:api_type]}/index/wsdl/1",
-        log: Gemgento::Config[:magento][:debug],
+        wsdl: "#{Config[:magento][:url]}/index.php/api/v#{Config[:magento][:api_version]}_#{Config[:magento][:api_type]}/index/wsdl/1",
+        log: Config[:magento][:debug],
         raise_errors: false,
         open_timeout: 300,
         read_timeout: 300
       }
 
-      if !Gemgento::Config[:magento][:auth_username].blank? && !Gemgento::Config[:magento][:auth_password].blank?
-        config[:basic_auth] = [Gemgento::Config[:magento][:auth_username].to_s, Gemgento::Config[:magento][:auth_password].to_s]
+      if !Config[:magento][:auth_username].blank? && !Config[:magento][:auth_password].blank?
+        config[:basic_auth] = [Config[:magento][:auth_username].to_s, Config[:magento][:auth_password].to_s]
       end
 
       return config
@@ -55,7 +55,7 @@ module Gemgento
         end
 
         # only save successful responses if debugging is enabled
-        magento_response.save if Gemgento::Config[:magento][:debug]
+        magento_response.save if Config[:magento][:debug]
 
         Rails.logger.debug '^^^ Success ^^^'
       else

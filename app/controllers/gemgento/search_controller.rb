@@ -1,10 +1,10 @@
 module Gemgento
-  class SearchController < Gemgento::ApplicationController
+  class SearchController < ApplicationController
 
     respond_to :json, :html
 
     def index
-      @results = Gemgento::Search.products(params[:query])
+      @results = Search.products(params[:query])
 
       respond_to do |format|
         format.html

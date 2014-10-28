@@ -13,12 +13,12 @@ module Gemgento
     private
 
     def touch_product
-      Gemgento::TouchProduct.perform_async([self.product.id]) if self.changed?
+      TouchProduct.perform_async([self.product.id]) if self.changed?
     end
 
     def sync_local_to_magento
       if self.sync_needed
-        Gemgento::API::SOAP::Catalog::Category.update_product(self)
+        API::SOAP::Catalog::Category.update_product(self)
         self.sync_needed = false
         self.save
       end

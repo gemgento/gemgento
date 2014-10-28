@@ -8,7 +8,7 @@ module Gemgento
     end
 
     def show
-      @order = Gemgento::Order.find_by(increment_id: params[:id], user: current_user)
+      @order = Order.find_by(increment_id: params[:id], user: current_user)
 
       respond_with @order
     end

@@ -6,7 +6,7 @@ module Gemgento
     respond_to :json, :html
 
     def show
-      @user = @order.user || Gemgento::User.new
+      @user = @order.user || User.new
     end
 
     # Login user to an existing account and associate with current order.
@@ -28,7 +28,7 @@ module Gemgento
           end
 
         else # failed login attempt
-          @user = Gemgento::User.new
+          @user = User.new
           flash.now[:alert] = 'Invalid username and password.'
           format.html { render 'show' }
           format.json { render json: { result: false, errors: flash[:alert] }, status: 422 }
@@ -38,9 +38,9 @@ module Gemgento
 
     # Register a new user and associate with order current order
     def register
-      @user = Gemgento::User.new(user_params)
+      @user = User.new(user_params)
       @user.stores << current_store
-      @user.user_group = Gemgento::UserGroup.find_by(code: 'General')
+      @user.user_group = UserGroup.find_by(code: 'General')
 
       respond_to do |format|
 
@@ -68,7 +68,7 @@ module Gemgento
     # Continue with current order as guest
     def guest
       @order.customer_is_guest = true
-      @user = Gemgento::User.new
+      @user = User.new
 
       respond_to do  |format|
 

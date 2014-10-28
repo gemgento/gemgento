@@ -43,7 +43,7 @@ module Gemgento
     private
 
     def convert_magento_password
-      Gemgento::User.is_valid_login params[:user][:email], params[:user][:password]
+      User.is_valid_login params[:user][:email], params[:user][:password]
     end
 
   end

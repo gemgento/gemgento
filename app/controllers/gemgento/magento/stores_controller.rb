@@ -3,7 +3,7 @@ module Gemgento
     def update
       data = params[:data]
 
-      @store = Gemgento::Store.find_or_initialize_by(magento_id: data[:store_id])
+      @store = Store.find_or_initialize_by(magento_id: data[:store_id])
       @store.magento_id = source[:store_id]
       @store.code = source[:code]
       @store.website_id = source[:website_id]

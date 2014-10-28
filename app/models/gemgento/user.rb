@@ -14,9 +14,9 @@ module Gemgento
     has_many :orders
     accepts_nested_attributes_for :orders
 
-    has_one :shopify_adapter, class_name: 'Gemgento::Adapter::ShopifyAdapter', as: :gemgento_model
+    has_one :shopify_adapter, class_name: 'Adapter::ShopifyAdapter', as: :gemgento_model
 
-    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_users', class_name: 'Gemgento::Store'
+    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_users', class_name: 'Store'
 
     attr_accessor :subscribe
 
@@ -51,7 +51,7 @@ module Gemgento
         return self.valid_password?(password)
       else
         if self.magento_password.blank? || !self.magento_password.include?(':') # if we don't have any passwords, get them from Magento
-          Gemgento::API::SOAP::Customer::Customer.fetch(self.magento_id)
+          API::SOAP::Customer::Customer.fetch(self.magento_id)
           self.reload
         end
 
@@ -114,12 +114,12 @@ module Gemgento
 
     def manage_subscribe
       self.subscribe = false if self.subscribe == 0 || self.subscribe == '0'
-      Gemgento::Subscriber.manage self, self.subscribe
+      Subscriber.manage self, self.subscribe
     end
 
     def saved_credit_cards
-      if Gemgento::Config[:extensions]['authorize-net-cim-payment-module']
-        return Gemgento::API::SOAP::AuthorizeNetCim.payment_profiles(self.magento_id)
+      if Config[:extensions]['authorize-net-cim-payment-module']
+        return API::SOAP::AuthorizeNetCim.payment_profiles(self.magento_id)
       else
         super
       end

@@ -3,10 +3,10 @@ module Gemgento
 
     def update
       data = params[:data]
-      @user = Gemgento::User.find_by(magento_id: data[:customer_id])
+      @user = User.find_by(magento_id: data[:customer_id])
 
       unless @user.nil?
-        @address = Gemgento::Address.find_or_initialize_by(user_address_id: data[:entity_id])
+        @address = Address.find_or_initialize_by(user_address_id: data[:entity_id])
         @address.user = @user
         @address.city = data[:city]
         @address.company = data[:company]
@@ -32,12 +32,12 @@ module Gemgento
     end
 
     def destroy
-      Gemgento::Address.skip_callback(:destroy, :before, :destroy_magento)
+      Address.skip_callback(:destroy, :before, :destroy_magento)
 
-      @address = Gemgento::Address.find_by(user_address_id: params[:id])
+      @address = Address.find_by(user_address_id: params[:id])
       @address.destroy unless @address.nil?
 
-      Gemgento::Address.set_callback(:destroy, :before, :destroy_magento)
+      Address.set_callback(:destroy, :before, :destroy_magento)
 
       render nothing: true
     end

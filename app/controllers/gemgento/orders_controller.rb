@@ -1,5 +1,5 @@
 module Gemgento
-  class OrdersController < Gemgento::ApplicationController
+  class OrdersController < ApplicationController
 
     def show
       case current_order.state
