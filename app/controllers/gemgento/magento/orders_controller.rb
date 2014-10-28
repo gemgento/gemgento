@@ -122,12 +122,7 @@ module Gemgento
 
     def sync_magento_line_item_to_local(source, order)
       product = Product.find_by(magento_id: source[:product_id])
-      line_item = LineItem.where(
-          'magento_id = ? OR (order_id = ? AND product_id = ?)',
-          source[:item_id],
-          order.id,
-          product.id
-      ).first_or_initialize
+      line_item = LineItem.find_or_initialize_by('magento_id = ? OR (order_id = ? AND product_id = ?)', source[:item_id], order.id, product.id)
 
       line_item.itemizable = order
       line_item.magento_id = source[:item_id]
