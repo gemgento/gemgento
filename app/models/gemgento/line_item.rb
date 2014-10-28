@@ -5,8 +5,8 @@ module Gemgento
 
     validates :itemizable, :product, presence: true
 
-    before_save :push_magento_quote_item, if: "itemizable.state == 'cart' && !async"
-    after_save :push_magento_quote_item_async, if: "itemizable.state == 'cart' && async"
+    before_save :push_magento_quote_item, if: "itemizable_type == 'Gemgento::Quote' && !async"
+    after_save :push_magento_quote_item_async, if: "itemizable_type == 'Gemgento::Quote' && async"
     before_destroy :destroy_magento_quote_item
 
     serialize :options, Hash

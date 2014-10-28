@@ -1,5 +1,7 @@
 module Gemgento
   class Quote < ActiveRecord::Base
+    include ActiveSupport::Callbacks
+
     belongs_to :store, class_name: 'Store'
     belongs_to :user, class_name: 'User'
     belongs_to :user_group, class_name: 'UserGroup'
@@ -16,18 +18,15 @@ module Gemgento
     accepts_nested_attributes_for :shipping_address
     accepts_nested_attributes_for :payment
 
-    attr_accessor :tax, :total, :push_customer, :push_addresses, :push_shipping_method, :push_payment_method, :subscribe
+    attr_accessor :push_customer, :push_addresses, :push_shipping_method, :push_payment_method, :subscribe
 
     validates :customer_email, format: /@/, allow_nil: true
-
-    define_callbacks :before_convert, :after_convert_success, :after_convert_fail
 
     before_create :create_magento_quote, if: 'magento_id.nil?'
 
     before_save :set_magento_customer, if: :push_customer
     before_save :set_magento_addresses, if: :push_addresses
-    before_save :set_magento_shipping_method, if: :push_shipping_methd
-    before_save :set_magento_payment_method, if: :push_shipping_method
+    before_save :set_magento_shipping_method, if: :push_shipping_method
 
     after_save :create_subscriber, if: :subscribe
 
@@ -246,39 +245,37 @@ module Gemgento
       end
     end
 
-    # Set Quote payment method in Magento.
-    #
-    # @return [Boolean]
-    def set_magento_payment_method
-      response = API::SOAP::Checkout::Payment.method(self, self.payment)
-
-      if response.success?
-        return true
-      else
-        self.errors.add(:base, response.body[:faultstring])
-        return false
-      end
-    end
-
     # Convert a Quote to an Order.
     #
     # @return [Boolean]
     def convert(remote_ip = nil)
-      run_callbacks :before_convert
+      before_convert
       response = API::SOAP::Checkout::Cart.order(self, self.payment, remote_ip)
 
       if response.success?
-        order = API::SOAP::Sales::Order.fetch(self.increment_id) #grab all the new order information
+        self.order = API::SOAP::Sales::Order.fetch(self.increment_id) #grab all the new order information
 
         HeartBeat.perform_async if Rails.env.production?
-        run_callbacks :after_convert_success
+        after_convert_success
 
         return true
       else
         errors.add(:base, response.body[:faultstring])
-        run_callbacks :after_convert_fail
+        after_convert_fail
         return false
       end
+    end
+
+    def before_convert
+
+    end
+
+    def after_convert_success
+
+    end
+
+    def after_convert_fail
+
     end
 
     def as_json(options = nil)
@@ -289,6 +286,25 @@ module Gemgento
       result['billing_address'] = self.billing_address
       result['payment'] = self.payment
       return result
+    end
+
+    # Calculate the subtotal of the Quote.
+    #
+    # @return [BigDecimal]
+    def subtotal
+      if self.line_items.any?
+        prices = self.line_items.map do |line_item|
+          if line_item.product.magento_type == 'giftvoucher'
+            line_item.product.gift_price.to_d * line_item.qty_ordered.to_d
+          else
+            line_item.product.price(self.user, self.store).to_d * line_item.qty_ordered.to_d
+          end
+        end
+
+        return prices.inject(&:+)
+      else
+        return 0
+      end
     end
 
     private

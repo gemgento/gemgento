@@ -32,22 +32,6 @@ module Gemgento
       self.increment_id
     end
 
-    def subtotal
-      if self.line_items.any?
-        prices = self.line_items.map do |oi|
-          if oi.product.magento_type == 'giftvoucher'
-            oi.product.gift_price.to_f * oi.qty_ordered.to_f
-          else
-            oi.product.price(self.user, self.store).to_f * oi.qty_ordered.to_f
-          end
-        end
-
-        return prices.inject(&:+)
-      else
-        return 0
-      end
-    end
-
     def push_gift_message_comment
       API::SOAP::Sales::Order.add_comment(self.increment_id, self.status, "Gemgento Gift Message: #{self.gift_message}")
     end

@@ -56,10 +56,14 @@ module Gemgento
             end
           end
 
-          def self.totals(cart)
+          # Mage a Magento API call to get quote totals.
+          #
+          # @param quote [Gemgento::Quote]
+          # @return [Gemgento::MagentoResponse]
+          def self.totals(quote)
             message = {
-                quote_id: cart.magento_quote_id,
-                store_id: cart.store.magento_id
+                quote_id: quote.magento_id,
+                store_id: quote.store.magento_id
             }
             Magento.create_call(:shopping_cart_totals, message)
           end
