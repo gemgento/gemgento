@@ -20,6 +20,8 @@ module Gemgento
 
     validates :customer_email, format: /@/, allow_nil: true
 
+    define_callbacks :before_convert, :after_convert_success, :after_convert_fail
+
     before_create :create_magento_quote, if: 'magento_id.nil?'
 
     before_save :set_magento_customer, if: :push_customer
@@ -150,11 +152,76 @@ module Gemgento
       end
     end
 
+    # Set quote customer in Magento.
+    #
+    # @return [Boolean]
+    def set_magento_customer
+      response = API::SOAP::Checkout::Customer.set(self)
+
+      if response.success?
+        return true
+      else
+        self.errors.add(:base, response.body[:faultstring])
+        return false
+      end
+    end
+
     # Push Quote shipping and billing addresses to Magento.
     #
     # @return [Boolean]
     def set_magento_addresses
       response = API::SOAP::Checkout::Customer.address(self)
+
+      if response.success?
+        return true
+      else
+        self.errors.add(:base, response.body[:faultstring])
+        return false
+      end
+    end
+
+    # Fetch available shipping methods from Magento.
+    #
+    # @return [Array(Hash), nil]
+    def shipping_methods
+      response =  API::SOAP::Checkout::Shipping.list(self)
+
+      if response.success?
+        response.body[:result][:item] = [response.body[:result][:item]] unless response.body[:result][:item].is_a? Array
+
+        return response.body[:result][:item]
+      else
+        self.errors.add(:base, response.body[:faultstring])
+        return nil
+      end
+    end
+
+    # Set the shipping method.
+    #
+    # @param selected_method [String]
+    # @param shipping_methods [Array(Hash)]
+    # @return [Void]
+    def set_shipping_method(selected_method, shipping_methods = nil)
+      shipping_methods = self.shipping_methods if shipping_methods.blank?
+      self.shipping_method = selected_method
+      self.shipping_amount = 0
+      self.push_shipping_method = true
+
+      shipping_methods.each do |shipping_method|
+        if shipping_method[:code] == selected_method
+          self.shipping_amount = shipping_method[:price]
+          break
+        end
+      end
+
+      save
+    end
+
+    # Set Quote shipping method in Magento.
+    #
+    # @return [Boolean]
+    def set_magento_shipping_method
+      response = API::SOAP::Checkout::Shipping.method(self, self.shipping_method)
 
       if response.success?
         return true
@@ -193,78 +260,25 @@ module Gemgento
       end
     end
 
-    # Set quote customer in Magento.
-    #
-    # @return [Boolean]
-    def set_magento_customer
-      response = API::SOAP::Checkout::Customer.set(self)
-
-      if response.success?
-        return true
-      else
-        self.errors.add(:base, response.body[:faultstring])
-        return false
-      end
-    end
-
-    # Fetch available shipping methods from Magento.
-    #
-    # @return [Array(Hash), nil]
-    def shipping_methods
-      response =  API::SOAP::Checkout::Shipping.list(self)
-
-      if response.success?
-        response.body[:result][:item] = [response.body[:result][:item]] unless response.body[:result][:item].is_a? Array
-
-        return response.body[:result][:item]
-      else
-        self.errors.add(:base, response.body[:faultstring])
-        return nil
-      end
-    end
-
-    # Set Quote shipping method in Magento.
-    #
-    # @return [Boolean]
-    def set_magento_shipping_method
-      response = API::SOAP::Checkout::Shipping.method(self, self.shipping_method)
-
-      if response.success?
-        return true
-      else
-        self.errors.add(:base, response.body[:faultstring])
-        return false
-      end
-    end
-
     # Convert a Quote to an Order.
     #
     # @return [Boolean]
     def convert(remote_ip = nil)
-      before_conversion
+      run_callbacks :before_convert
       response = API::SOAP::Checkout::Cart.order(self, self.payment, remote_ip)
 
       if response.success?
         order = API::SOAP::Sales::Order.fetch(self.increment_id) #grab all the new order information
 
         HeartBeat.perform_async if Rails.env.production?
-        after_conversion
+        run_callbacks :after_convert_success
 
         return true
       else
         errors.add(:base, response.body[:faultstring])
+        run_callbacks :after_convert_fail
         return false
       end
-    end
-
-    # Called immediately before Quote is converted into an Order
-    def before_conversion
-      # for application callbacks
-    end
-
-    # Called immediately after Quote is converted into an Order
-    def after_conversion
-      # for application callbacks
     end
 
     def as_json(options = nil)

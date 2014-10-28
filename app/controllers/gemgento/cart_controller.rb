@@ -1,7 +1,7 @@
 module Gemgento
   class CartController < ApplicationController
     before_action :set_quote
-    before_action :create_magento_quote, only: :create
+    before_action :create_magento_quote, only: :create, if: '@quote.new_record?'
     before_action :validate_line_item, only: [:update, :destroy]
 
     respond_to :js, :json, :html
@@ -42,24 +42,20 @@ module Gemgento
       @quote = current_quote
     end
 
-    # Create quote in magento if the quote doesn't have a magento_id.
+    # If this is a new quote, save the record first.
     #
     # @return [Boolean]
     def create_magento_quote
-      if @quote.magento_id.nil?
-        if @quote.push_cart
-          session[:quote] = @quote.id
-          return true
-        else
-          respond_to do |format|
-            format.html { render 'show' }
-            format.json { render json: { result: false, errors: @quote.errors.full_messages } }
-          end
-
-          return false
-        end
-      else
+      if @quote.save
+        session[:quote] = @quote.id
         return true
+      else
+        respond_to do |format|
+          format.html { render 'show' }
+          format.json { render json: { result: false, errors: @quote.errors.full_messages } }
+        end
+
+        return false
       end
     end
 
