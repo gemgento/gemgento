@@ -116,7 +116,7 @@ module Gemgento
 
             shipment_items.each do |shipment_item|
               items_qty << {
-                  'order_item_id' => shipment_item.order_item.magento_id,
+                  'line_item_id' => shipment_item.line_item.magento_id,
                   qty: shipment_item.quantity
               }
             end

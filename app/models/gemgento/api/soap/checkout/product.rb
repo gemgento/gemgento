@@ -7,12 +7,12 @@ module Gemgento
           # Add items to Magento quote.
           #
           # @param [Gemgento::Order] cart
-          # @param [Array(Gemgento::OrderItem)] order_items
+          # @param [Array(Gemgento::LineItem)] line_items
           # @return [Gemgento::MagentoResponse]
-          def self.add(cart, order_items)
+          def self.add(cart, line_items)
             message = {
                 quote_id: cart.magento_quote_id,
-                products: { item: compose_products_data(order_items) },
+                products: { item: compose_products_data(line_items) },
                 store_id: cart.store.magento_id
             }
             Gemgento::Magento.create_call(:shopping_cart_product_add, message)
@@ -21,12 +21,12 @@ module Gemgento
           # Update items in Magento quote.
           #
           # @param [Gemgento::Order] cart
-          # @param [Array(Gemgento::OrderItem)] order_items
+          # @param [Array(Gemgento::LineItem)] line_items
           # @return [Gemgento::MagentoResponse]
-          def self.update(cart, order_items)
+          def self.update(cart, line_items)
             message = {
                 quote_id: cart.magento_quote_id,
-                products: {item: compose_products_data(order_items)},
+                products: {item: compose_products_data(line_items)},
                 store_id: cart.store.magento_id
             }
             Gemgento::Magento.create_call(:shopping_cart_product_update, message)
@@ -35,12 +35,12 @@ module Gemgento
           # Remove items from Magento quote.
           #
           # @param [Gemgento::Order] cart
-          # @param [Array(Gemgento::OrderItem)] order_items
+          # @param [Array(Gemgento::LineItem)] line_items
           # @return [Gemgento::MagentoResponse]
-          def self.remove(cart, order_items)
+          def self.remove(cart, line_items)
             message = {
                 quote_id: cart.magento_quote_id,
-                products: {item: compose_products_data(order_items)},
+                products: {item: compose_products_data(line_items)},
                 store_id: cart.store.magento_id
             }
             Gemgento::Magento.create_call(:shopping_cart_product_remove, message)
@@ -68,18 +68,18 @@ module Gemgento
 
           private
 
-          def self.compose_products_data(order_items)
+          def self.compose_products_data(line_items)
             products_data = []
 
-            order_items.each do |order_item|
-              qty = order_item.qty_ordered
+            line_items.each do |line_item|
+              qty = line_item.qty_ordered
               qty = qty.to_i if qty.to_i == qty # use an integer to avoid issue with decimals and 1 remaining item
 
               products_data << {
-                  'product_id' => order_item.product.magento_id,
-                  sku: order_item.product.sku,
+                  'product_id' => line_item.product.magento_id,
+                  sku: line_item.product.sku,
                   qty: qty,
-                  options: { item: (compose_options_data(order_item.options) unless order_item.options.nil?) },
+                  options: { item: (compose_options_data(line_item.options) unless line_item.options.nil?) },
                   'bundle_option' => nil,
                   'bundle_option_qty' => nil,
                   links: nil

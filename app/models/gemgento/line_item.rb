@@ -1,5 +1,5 @@
 module Gemgento
-  class OrderItem < ActiveRecord::Base
+  class LineItem < ActiveRecord::Base
     belongs_to :order, touch: true
     belongs_to :product
 

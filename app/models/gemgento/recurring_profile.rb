@@ -10,7 +10,7 @@ module Gemgento
     validates :magento_id, uniqueness: true, presence: true
 
     serialize :order_info, Hash
-    serialize :order_item_info, Hash
+    serialize :line_item_info, Hash
     serialize :billing_address_info, Hash
     serialize :shipping_address_info, Hash
     serialize :profile_vendor_info, Hash

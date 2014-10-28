@@ -16,7 +16,7 @@ module Gemgento
 
     def generate
       Order.where('state != ? AND created_at >= ?', 'cart', @start_datetime).each do |order|
-        order.order_items.each do |order_item|
+        order.line_items.each do |line_item|
           line_item_details = []
 
           @order_attributes.each do |attribute|
@@ -24,11 +24,11 @@ module Gemgento
           end
 
           @product_attributes.each do |attribute|
-            line_item_details << order_item.product.attribute_value(attribute)
+            line_item_details << line_item.product.attribute_value(attribute)
           end
 
           @item_attributes.each do |attribute|
-            line_item_details << requested_value(order_item, attribute)
+            line_item_details << requested_value(line_item, attribute)
           end
 
           @report << line_item_details

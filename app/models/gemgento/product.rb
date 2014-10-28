@@ -7,7 +7,7 @@ module Gemgento
     has_many :assets, dependent: :destroy
     has_many :categories, -> { distinct }, through: :product_categories
     has_many :inventories
-    has_many :order_items
+    has_many :line_items
     has_many :product_attribute_values, dependent: :destroy
     has_many :product_attributes, through: :product_attribute_values
     has_many :product_attribute_options, through: :product_attribute_values

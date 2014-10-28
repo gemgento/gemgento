@@ -2,23 +2,23 @@ module Gemgento
   class Cart::AddItemWorker
     include Sidekiq::Worker
 
-    def perform(order_item_id)
-      order_item = Gemgento::OrderItem.find(order_item_id)
-      order = order_item.order
+    def perform(line_item_id)
+      line_item = Gemgento::LineItem.find(line_item_id)
+      order = line_item.order
 
       order.push_cart if order.magento_quote_id.nil?
 
       unless order.magento_quote_id.nil?
-        response = API::SOAP::Checkout::Product.add(order, [order_item])
+        response = API::SOAP::Checkout::Product.add(order, [line_item])
 
         if response.success?
           order.cart_item_errors << {
-            product_id: order_item.product_id,
+            product_id: line_item.product_id,
             error: result
           }
           order.save
 
-          order_item.destroy
+          line_item.destroy
         end
       end
     end

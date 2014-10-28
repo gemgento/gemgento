@@ -7,9 +7,9 @@ module Gemgento
     belongs_to :billing_address, foreign_key: 'billing_address_id', class_name: 'Gemgento::Address'
 
     has_many :api_jobs, class_name: 'Gemgento::ApiJob', as: :source
-    has_many :order_items
+    has_many :line_items
     has_many :order_statuses
-    has_many :products, through: :order_items
+    has_many :products, through: :line_items
     has_many :shipments
     has_many :shipment_tracks
 
@@ -72,29 +72,29 @@ module Gemgento
     def add_item(product, quantity = 1.0, options = nil, background_worker = false)
       raise 'Order not in cart state' if self.state != 'cart'
 
-      order_item = self.order_items.find_by(product: product)
+      line_item = self.line_items.find_by(product: product)
 
-      if order_item.nil?
-        order_item = OrderItem.new
-        order_item.product = product
-        order_item.qty_ordered = quantity
-        order_item.order = self
-        order_item.options = options
-        order_item.save
+      if line_item.nil?
+        line_item = LineItem.new
+        line_item.product = product
+        line_item.qty_ordered = quantity
+        line_item.order = self
+        line_item.options = options
+        line_item.save
 
         if background_worker
-          Gemgento::Cart::AddItemWorker.perform_async(order_item.id)
+          Gemgento::Cart::AddItemWorker.perform_async(line_item.id)
           return true
         else
           self.push_cart if self.magento_quote_id.nil?
 
           unless self.magento_quote_id.nil?
-            response = API::SOAP::Checkout::Product.add(self, [order_item])
+            response = API::SOAP::Checkout::Product.add(self, [line_item])
 
             if response.success?
               return true
             else
-              order_item.destroy
+              line_item.destroy
               self.errors.add(:base, response.body[:faultstring])
               return false
             end
@@ -103,7 +103,7 @@ module Gemgento
 
 
       else
-        return self.update_item(product, order_item.qty_ordered + quantity.to_f, options, background_worker)
+        return self.update_item(product, line_item.qty_ordered + quantity.to_f, options, background_worker)
       end
     end
 
@@ -116,27 +116,27 @@ module Gemgento
     def update_item(product, quantity = 1.0, options = nil, background_worker = false)
       raise 'Order not in cart state' if self.state != 'cart'
 
-      order_item = self.order_items.where(product: product).first
+      line_item = self.line_items.where(product: product).first
 
-      unless order_item.nil?
-        old_quantity = order_item.qty_ordered
-        order_item.qty_ordered = quantity.to_f
-        order_item.options = options
-        order_item.save
+      unless line_item.nil?
+        old_quantity = line_item.qty_ordered
+        line_item.qty_ordered = quantity.to_f
+        line_item.options = options
+        line_item.save
 
         unless self.magento_quote_id.nil?
 
           if background_worker
-            Gemgento::Cart::UpdateItemWorker.perform_async(order_item.id, old_quantity)
+            Gemgento::Cart::UpdateItemWorker.perform_async(line_item.id, old_quantity)
             return true
           else
-            response = API::SOAP::Checkout::Product.update(self, [order_item])
+            response = API::SOAP::Checkout::Product.update(self, [line_item])
 
             if response.success?
               return true
             else
-              order_item.qty_ordered = old_quantity
-              order_item.save
+              line_item.qty_ordered = old_quantity
+              line_item.save
               self.errors.add(:base, response.body[:faultstring])
               return false
             end
@@ -154,15 +154,15 @@ module Gemgento
     def remove_item(product)
       raise 'Order not in cart state' if self.state != 'cart'
 
-      if order_item = self.order_items.where(product: product).first
+      if line_item = self.line_items.where(product: product).first
         if self.magento_quote_id.nil?
-          order_item.destroy
+          line_item.destroy
           return true
         else
-          response = API::SOAP::Checkout::Product.remove(self, [order_item])
+          response = API::SOAP::Checkout::Product.remove(self, [line_item])
 
           if response.success?
-            order_item.destroy
+            line_item.destroy
             return true
           else
             self.errors.add(:base, response.body[:faultstring])
@@ -202,8 +202,8 @@ module Gemgento
       if self.state != 'cart'
         super
       else
-        if self.order_items.any?
-          prices = self.order_items.map do |oi|
+        if self.line_items.any?
+          prices = self.line_items.map do |oi|
             if oi.product.magento_type == 'giftvoucher'
               oi.product.gift_price.to_f * oi.qty_ordered.to_f
             else
@@ -222,7 +222,7 @@ module Gemgento
     #
     # @return [Float]
     def item_count
-      order_items.sum(:qty_ordered).to_f
+      line_items.sum(:qty_ordered).to_f
     end
 
     # Apply a gift card to the order.  Only works in when order is in cart state.
@@ -461,7 +461,7 @@ module Gemgento
     def as_json(options = nil)
       result = super
       result['user'] = self.user
-      result['order_items'] = self.order_items
+      result['line_items'] = self.line_items
       result['shipping_address'] = self.shipping_address
       result['billing_address'] = self.billing_address
       result['payment'] = self.order_payment
@@ -517,7 +517,7 @@ module Gemgento
     end
 
     def valid_stock?
-      self.order_items.each do |item|
+      self.line_items.each do |item|
         return false unless item.product.in_stock? item.qty_ordered, self.store
       end
 

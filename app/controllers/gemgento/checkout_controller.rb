@@ -2,7 +2,7 @@ module Gemgento
   class CheckoutController < Gemgento::ApplicationController
 
     before_action :set_order
-    before_action :validate_order_item_count
+    before_action :validate_line_item_count
     before_action :validate_order_user
 
     private
@@ -17,7 +17,7 @@ module Gemgento
     # Cart must have a quantity greater than 0.
     #
     # @return [Boolean]
-    def validate_order_item_count
+    def validate_line_item_count
       if current_order.item_count <= 0
         respond_to do |format|
           format.html { redirect_to cart_path, alert: 'You do not have any products in your cart.' }

@@ -20,7 +20,7 @@ module Gemgento
       profile.shipping_amount = data['shipping_amount']
       profile.tax_amount = data['tax_amount']
       profile.order_info = data['order_info']
-      profile.order_item_info = data['order_item_info']
+      profile.line_item_info = data['line_item_info']
       profile.billing_address_info = data['billing_address_info']
       profile.shipping_address_info = data['shipping_address_info']
       profile.profile_vendor_info = data['profile_vendor_info']

@@ -17,24 +17,24 @@
 						%th
 
 				%tbody
-					- if current_order.order_items.size > 0
-						- current_order.order_items.each do |order_item|
-							- total += order_item.qty_ordered.to_i * order_item.product.price.to_i
+					- if current_order.line_items.size > 0
+						- current_order.line_items.each do |line_item|
+							- total += line_item.qty_ordered.to_i * line_item.product.price.to_i
 
 							%tr
 								%td
-									- if !order_item.product.assets.empty?
-										= image_tag order_item.product.assets.first.asset_file.file.url(:default_index)
+									- if !line_item.product.assets.empty?
+										= image_tag line_item.product.assets.first.asset_file.file.url(:default_index)
 
-									- elsif !order_item.product.configurable_products.first.assets.empty?
-										= image_tag order_item.product.configurable_products.first.assets.first.asset_file.file.url(:default_index)
+									- elsif !line_item.product.configurable_products.first.assets.empty?
+										= image_tag line_item.product.configurable_products.first.assets.first.asset_file.file.url(:default_index)
 
-								%td= order_item.product.attribute_value('name')
-								%td= #"Size: #{order_item.product.attribute_value('size')}"
-								%td= number_with_precision(order_item.qty_ordered.to_i, precision: 0)
-								%td= number_to_currency(order_item.product.attribute_value('price'))
-								%td= number_to_currency((order_item.product.attribute_value('price').to_i * order_item.qty_ordered).to_i)
-								%td= link_to 'remove', gemgento.cart_url(:activity => 'remove_item', :product_id => order_item.product_id), :method => 'patch'
+								%td= line_item.product.attribute_value('name')
+								%td= #"Size: #{line_item.product.attribute_value('size')}"
+								%td= number_with_precision(line_item.qty_ordered.to_i, precision: 0)
+								%td= number_to_currency(line_item.product.attribute_value('price'))
+								%td= number_to_currency((line_item.product.attribute_value('price').to_i * line_item.qty_ordered).to_i)
+								%td= link_to 'remove', gemgento.cart_url(:activity => 'remove_item', :product_id => line_item.product_id), :method => 'patch'
 					- else
 						%tr
 							%td{colspan: 7}

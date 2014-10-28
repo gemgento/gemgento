@@ -4,8 +4,8 @@ json.user do |json|
   json.partial! 'gemgento/users/user', user: order.user
 end
 
-json.order_items do |json|
-  json.array! order.order_items, partial: 'gemgento/order_items/order_item', as: :order_item
+json.line_items do |json|
+  json.array! order.line_items, partial: 'gemgento/line_items/line_item', as: :line_item
 end
 
 json.shipping_address do |json|

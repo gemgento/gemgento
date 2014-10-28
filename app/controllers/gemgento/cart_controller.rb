@@ -2,7 +2,7 @@ module Gemgento
   class CartController < Gemgento::ApplicationController
     before_action :set_order
     before_action :create_magento_quote, only: :create
-    before_action :validate_order_item, only: [:update, :destroy]
+    before_action :validate_line_item, only: [:update, :destroy]
 
     respond_to :js, :json, :html
 
@@ -11,25 +11,25 @@ module Gemgento
     end
 
     def create
-      product = Gemgento::Product.find(params[:order_item][:product_id])
+      product = Gemgento::Product.find(params[:line_item][:product_id])
 
       if !@order.products.include? product # make sure the product isn't in the cart
-        @order_item = Gemgento::OrderItem.new(order_item_params)
-        @order_item.order = @order
-        respond @order_item.save
-      else # update the appropriate order_item if it is
-        @order_item = @order.order_items.find_by(product: product)
-        params[:order_item][:qty_ordered] = params[:order_item][:qty_ordered].to_d + @order_item.qty_ordered # increase existing qty by requested qty
-        respond @order_item.update(order_item_params)
+        @line_item = Gemgento::LineItem.new(line_item_params)
+        @line_item.order = @order
+        respond @line_item.save
+      else # update the appropriate line_item if it is
+        @line_item = @order.line_items.find_by(product: product)
+        params[:line_item][:qty_ordered] = params[:line_item][:qty_ordered].to_d + @line_item.qty_ordered # increase existing qty by requested qty
+        respond @line_item.update(line_item_params)
       end
     end
 
     def update
-      respond @order_item.update(order_item_params)
+      respond @line_item.update(line_item_params)
     end
 
     def destroy
-      respond @order_item.destroy
+      respond @line_item.destroy
     end
 
     def mini_bag
@@ -63,11 +63,11 @@ module Gemgento
       end
     end
 
-    # Initialize the order_item and verify it belongs to the order.
+    # Initialize the line_item and verify it belongs to the order.
     #
     # @return [Boolean]
-    def validate_order_item
-      if @order_item = @order.order_items.find(params[:id])
+    def validate_line_item
+      if @line_item = @order.line_items.find(params[:id])
         return true
       else
         flash.now[:alert] = 'Order item is not in your cart.'
@@ -79,8 +79,8 @@ module Gemgento
       end
     end
 
-    def order_item_params
-      params.require(:order_item).permit(:id, :product_id, :qty_ordered)
+    def line_item_params
+      params.require(:line_item).permit(:id, :product_id, :qty_ordered)
     end
 
     def respond(is_success)
@@ -90,7 +90,7 @@ module Gemgento
           format.json { render json: { result: true } }
         else
           format.html { render 'show' }
-          format.json { render json: { result: false, errors: @order_item.errors.full_messages }, status: 422 }
+          format.json { render json: { result: false, errors: @line_item.errors.full_messages }, status: 422 }
         end
       end
     end
