@@ -89,11 +89,11 @@ module Gemgento
     end
 
     def default_billing_address
-      self.addresses.where('user_address_id IS NOT NULL').find_by(is_default_billing: true)
+      self.addresses.where('user_address_id IS NOT NULL').find_by(is_billing: true)
     end
 
     def default_shipping_address
-      self.addresses.where('user_address_id IS NOT NULL').find_by(is_default_shipping: true)
+      self.addresses.where('user_address_id IS NOT NULL').find_by(is_shipping: true)
     end
 
     def password_confirmation=(value)

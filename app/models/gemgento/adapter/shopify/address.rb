@@ -26,8 +26,8 @@ module Gemgento::Adapter::Shopify
       address.telephone = shopify_address.phone
       address.region = Gemgento::Region.find_by(code: shopify_address.province_code)
       address.postcode = shopify_address.zip
-      address.is_default_billing = shopify_address.default ? true : false
-      address.is_default_shipping = shopify_address.default ? true : false
+      address.is_billing = shopify_address.default ? true : false
+      address.is_shipping = shopify_address.default ? true : false
       address.sync_needed = true
       address.save
 

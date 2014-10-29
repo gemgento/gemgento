@@ -9,7 +9,7 @@ module Gemgento
         @order.push_cart_customer_to_magento
       end
 
-      @order.push_cart if @order.magento_quote_id.nil?
+      @order.push_cart if @order.magento_id.nil?
 
       if user_signed_in?
         @order.set_default_billing_address(current_user) if @order.billing_address.nil?

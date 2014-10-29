@@ -27,7 +27,7 @@ module Gemgento
 
     before_destroy :destroy_magento
 
-    default_scope -> { order(is_default_billing: :desc, is_default_shipping: :desc, updated_at: :desc) }
+    default_scope -> { order(is_billing: :desc, is_shipping: :desc, updated_at: :desc) }
 
     # Pushes Address changes to Magento if the address belongs to a User.  Creates a new address if one does not exist
     # and updates existing addresses.
@@ -79,11 +79,11 @@ module Gemgento
     # @param user [User] the user who will be associated with the new address.
     # @param is_default [Boolean] true if the new address will be the default for it's type, false otherwise.
     # @return [Address] the newly created Address.
-    def self.copy_to_address_book(source, user, is_default_billing = false, is_default_shipping = false)
+    def self.copy_to_address_book(source, user, is_billing = false, is_shipping = false)
       address = source.dup
       address.user = user
-      address.is_default_billing = is_default_billing
-      address.is_default_shipping = is_default_shipping
+      address.is_billing = is_billing
+      address.is_shipping = is_shipping
       address.sync_needed = true
       address.save
 
@@ -105,8 +105,8 @@ module Gemgento
       address.region = self.region
       address.country = self.country
       address.user = nil
-      address.is_default_billing = false
-      address.is_default_shipping = false
+      address.is_billing = false
+      address.is_shipping = false
       address.increment_id = nil
       address.sync_needed = false
       address.user_address_id = nil
@@ -173,12 +173,12 @@ module Gemgento
     #
     # @return [void]
     def enforce_single_default
-      if self.is_default_billing
-        self.user.address_book.where('id != ?', self.id).update_all(is_default_billing: false)
+      if self.is_billing
+        self.user.address_book.where('id != ?', self.id).update_all(is_billing: false)
       end
 
-      if self.is_default_shipping
-        self.user.address_book.where('id != ?', self.id).update_all(is_default_shipping: false)
+      if self.is_shipping
+        self.user.address_book.where('id != ?', self.id).update_all(is_shipping: false)
       end
     end
 

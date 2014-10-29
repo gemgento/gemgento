@@ -199,8 +199,8 @@ module Gemgento
             address.street = source[:street]
             address.suffix = source[:suffix]
             address.telephone = source[:telephone]
-            address.is_default_billing = source[:is_default_billing]
-            address.is_default_shipping = source[:is_default_shipping]
+            address.is_billing = source[:is_default_billing]
+            address.is_shipping = source[:is_default_shipping]
             address.address_type = source[:address_type]
             address.sync_needed = false
             address.save validate: false

@@ -51,7 +51,6 @@ module Gemgento
       @order.customer_email = data[:customer_email]
       @order.customer_firstname = data[:customer_firstname]
       @order.customer_lastname = data[:customer_lastname]
-      @order.magento_quote_id = data[:quote_id] unless data[:quote_id].nil?
       @order.is_virtual = data[:is_virtual]
       @order.user_group = UserGroup.find_by(magento_id: data[:customer_group_id])
       @order.customer_note_notify = data[:customer_note_notify]
@@ -60,6 +59,11 @@ module Gemgento
       @order.increment_id = data[:increment_id]
       @order.placed_at = data[:created_at]
       @order.store = Store.find_by(magento_id: data[:store_id])
+
+      if quote = Gemgento::Quote.find_by(magento_id: data[:quote_id])
+        @order.quote = quote
+      end
+
       @order.save
 
       @order.shipping_address = sync_magento_address_to_local(data[:shipping_address], @order, @order.shipping_address)

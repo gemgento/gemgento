@@ -55,8 +55,8 @@ module Gemgento
       elsif quote_id.blank? && !user.nil?
         quote = Quote.where(store: store, user: user).
             where('created_at >= ?', Date.today - 30.days).
-            quote(updated_at: :desc).first_or_initialize
-        quote.reset_checkout unless quote.magento_quote_id.nil?
+            order(updated_at: :desc).first_or_initialize
+        quote.reset_checkout unless quote.magento_id.nil?
       else
         quote = Quote.new(store: store)
       end
@@ -97,7 +97,7 @@ module Gemgento
     # @param code [String] gift card code
     # @return [Boolean]
     def apply_gift_card(code)
-      response = API::SOAP::GiftCard.quote_add(self.magento_quote_id, code, self.store.magento_id)
+      response = API::SOAP::GiftCard.quote_add(self.magento_id, code, self.store.magento_id)
 
       if response.success?
         return true
@@ -112,7 +112,7 @@ module Gemgento
     # @param code [String] gift card code
     # @return [Boolean] true if the gift card was removed, otherwise an error message.
     def remove_gift_card(code)
-      response = API::SOAP::GiftCard.quote_remove(self.magento_quote_id, code, self.store.magento_id)
+      response = API::SOAP::GiftCard.quote_remove(self.magento_id, code, self.store.magento_id)
 
       if response.success?
         return true

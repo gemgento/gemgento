@@ -22,8 +22,8 @@ module Gemgento
         @address.street = data[:street]
         @address.suffix = data[:suffix]
         @address.telephone = data[:telephone]
-        @address.is_default_billing = data[:is_default_billing]
-        @address.is_default_shipping = data[:is_default_shipping]
+        @address.is_billing = data[:is_default_billing]
+        @address.is_shipping = data[:is_default_shipping]
         @address.sync_needed = false
         @address.save
       end

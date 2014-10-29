@@ -68,8 +68,8 @@ module Gemgento
                   'country_id' => address.country.magento_id,
                   telephone: address.telephone,
                   fax: address.fax,
-                  'is_default_billing' => address.is_default_billing ? 1 : 0,
-                  'is_default_shipping' => address.is_default_shipping ? 1 : 0
+                  'is_default_billing' => address.is_billing ? 1 : 0,
+                  'is_default_shipping' => address.is_shipping ? 1 : 0
               }
             end
 
