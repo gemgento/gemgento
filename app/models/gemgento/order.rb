@@ -387,6 +387,7 @@ module Gemgento
     end
 
     def reset_checkout
+      self.user_id = nil
       self.billing_address.destroy unless self.billing_address.nil?
       self.billing_address_id = nil
       self.shipping_address.destroy unless self.shipping_address.nil?

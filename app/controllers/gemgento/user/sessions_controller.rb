@@ -30,7 +30,7 @@ module Gemgento
       set_flash_message :notice, :signed_out if signed_out && is_navigational_format?
 
       # destroy the cart cookie when a user logs out
-      session.delete :cart
+      current_order.reset_checkout unless current_order.new_record?
 
       # We actually need to hardcode this as Rails default responder doesn't
       # support returning empty response on GET request
