@@ -8,13 +8,12 @@ module Gemgento
 
     has_one :shopify_adapter, class_name: 'Adapter::ShopifyAdapter', as: :gemgento_model
 
-    validates :first_name, :last_name, :street, :city, :country, :postcode, :telephone, presence: true
-    validates :region, presence: true, if: ->{ !self.country.nil? && !self.country.regions.empty? }
+    validates :region, presence: true, if: -> { !self.country.nil? && self.country.regions.any? }
 
     validates_uniqueness_of :user,
                             scope: [:street, :city, :country, :region, :postcode, :telephone],
                             message: 'address is not unique',
-                            if: ->{ !self.user.nil? }
+                            unless: -> { self.user.nil? }
 
     attr_accessor :address1, :address2, :address3
 
