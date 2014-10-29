@@ -6,45 +6,49 @@ module Gemgento
 
           # Set the cart customer.
           #
-          # @param [Order] cart
-          # @param [User] customer
-          # @return [Response]
-          def self.set(cart)
-            if cart.customer_is_guest
+          # @param [Gemgento::Quote] quote
+          # @param [Gemgento::User] customer
+          # @return [Gemgento::MagentoResponse]
+          def self.set(quote)
+            if quote.customer_is_guest
               customer = {
                   mode: 'guest',
-                  email: cart.customer_email,
-                  firstname: cart.billing_address.first_name,
-                  lastname: cart.billing_address.last_name,
+                  email: quote.customer_email,
+                  firstname: quote.billing_address.first_name,
+                  lastname: quote.billing_address.last_name,
                   'website_id' => '1'
               }
             else
               customer = {
                   mode: 'customer',
-                  'customer_id' => cart.user.magento_id,
-                  email: cart.user.email,
-                  firstname: cart.user.first_name,
-                  lastname: cart.user.last_name,
-                  password: cart.user.password,
+                  'customer_id' => quote.user.magento_id,
+                  email: quote.user.email,
+                  firstname: quote.user.first_name,
+                  lastname: quote.user.last_name,
+                  password: quote.user.password,
                   confirmation: true,
-                  'group_id' => cart.user.user_group.magento_id,
+                  'group_id' => quote.user.user_group.magento_id,
                   'website_id' => '1'
               }
             end
 
             message = {
-                quote_id: cart.magento_quote_id,
+                quote_id: quote.magento_id,
                 customer: customer,
-                store_id: cart.store.magento_id
+                store_id: quote.store.magento_id
             }
             Magento.create_call(:shopping_cart_customer_set, message)
           end
 
-          def self.address(cart)
+          # Set shipping and billing addreses for Quote in Magento.
+          #
+          # @param quote [Gemgento::Quote]
+          # @return [Gemgento::MagentoResponse]
+          def self.address(quote)
             message = {
-                quote_id: cart.magento_quote_id,
-                customer: {item: compose_address_data([cart.shipping_address, cart.billing_address])},
-                store_id: cart.store.magento_id
+                quote_id: quote.magento_id,
+                customer: {item: compose_address_data([quote.shipping_address, quote.billing_address])},
+                store_id: quote.store.magento_id
             }
             Magento.create_call(:shopping_cart_customer_addresses, message)
           end
@@ -56,7 +60,7 @@ module Gemgento
 
             addresses.each do |address|
               address_data << {
-                  mode: address.address_type,
+                  mode: address.is_billing ? 'billing' : (address.is_shipping ? 'shipping' : ''),
                   firstname: address.first_name,
                   lastname: address.last_name,
                   company: address.company,

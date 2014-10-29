@@ -12,24 +12,24 @@ module Gemgento
             shipping_methods: @shipping_methods,
             payment_methods: @payment_methods,
             saved_credit_cards: @saved_credit_cards,
-            totals: @order.totals
+            totals: @quote.totals
         } }
       end
     end
 
     def update
-      @payment = @order.payment.nil? ? Payment.new : @order.payment
+      @payment = @quote.payment.nil? ? Payment.new : @quote.payment
       @payment.attributes = payment_params
 
       respond_to do |format|
 
-        if @order.set_shipping_method(params[:shipping_method], JSON.parse(cookies[:shipping_methods]))
+        if @quote.set_shipping_method(params[:shipping_method], JSON.parse(cookies[:shipping_methods]))
 
-          if @payment.valid? && @order.set_payment(payment_params)
+          if @payment.valid? && @quote.set_payment(payment_params)
             session[:payment_data] = payment_params
 
             format.html { redirect_to checkout_confirm_path }
-            format.json { render json: { result: true, order: @order } }
+            format.json { render json: { result: true, order: @quote } }
           else
             initialize_shipping_variables
             initialize_payment_variables

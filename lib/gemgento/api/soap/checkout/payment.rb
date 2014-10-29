@@ -4,17 +4,26 @@ module Gemgento
       module Checkout
         class Payment
 
-          def self.list(cart)
+          # Get a list of payment methods available for a Quote from Magento.
+          #
+          # @param quote [Gemgento::Quote]
+          # @return [Gemgento::MagentoResponse]
+          def self.list(quote)
             message = {
-                quote_id: cart.magento_quote_id,
-                store_id: cart.store.magento_id
+                quote_id: quote.magento_id,
+                store_id: quote.store.magento_id
             }
             Magento.create_call(:shopping_cart_payment_list, message)
           end
 
-          def self.method(cart, payment)
+          # Set the payment method for a Quote in Magento.
+          #
+          # @param quote [Gemgento::Quote]
+          # @param payment [Gemgento::Payment]
+          # @return [Gemgento::MagentoResponse]
+          def self.method(quote, payment)
             message = {
-                quote_id: cart.magento_quote_id,
+                quote_id: quote.magento_id,
                 method: {
                     'po_number' => payment.po_number,
                     method: payment.method,
@@ -26,11 +35,15 @@ module Gemgento
                     'cc_exp_month' => payment.cc_exp_month,
                     'additional_information' => compose_additional_information(payment)
                 },
-                store_id: cart.store.magento_id
+                store_id: quote.store.magento_id
             }
             Magento.create_call(:shopping_cart_payment_method, message)
           end
 
+          # Compose additional payment attributes hash for Magento API call.
+          #
+          # @param payment [Gemgento::Payment]
+          # @return [Hash]
           def self.compose_additional_information(payment)
             additional_information = []
             additional_information << { key: 'save_card', value: payment.save_card } unless payment.save_card.nil?

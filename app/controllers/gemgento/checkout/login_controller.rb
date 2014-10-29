@@ -1,12 +1,15 @@
 module Gemgento
   class Checkout::LoginController < CheckoutController
-    skip_before_filter :validate_order_user
+    skip_before_filter :validate_quote_user
     before_filter :verify_guest
 
-    respond_to :json, :html
-
     def show
-      @user = @order.user || User.new
+      @user = @quote.user || User.new
+
+      respond_to do |format|
+        format.html
+        format.json { render json: { user: @user, quote: @quote } }
+      end
     end
 
     # Login user to an existing account and associate with current order.
@@ -14,17 +17,17 @@ module Gemgento
       respond_to do |format|
 
         if @user = User::is_valid_login(params[:email], params[:password])
-          @order.customer_is_guest = false
-          @order.user = @user
-          @order.push_cart_customer = true
+          @quote.customer_is_guest = false
+          @quote.user = @user
+          @quote.push_customer = true
 
-          if @order.save
+          if @quote.save
             sign_in(:user, @user)
             format.html { redirect_to checkout_address_path }
             format.json { render json: { result: true } }
           else # problem saving order
             format.html { render 'show' }
-            format.json { render json: { result: false, errors: @order.errors.full_messages }, status: 422 }
+            format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
           end
 
         else # failed login attempt
@@ -45,17 +48,17 @@ module Gemgento
       respond_to do |format|
 
         if @user.save
-          @order.customer_is_guest = false
-          @order.user = @user
-          @order.push_cart_customer = true
+          @quote.customer_is_guest = false
+          @quote.user = @user
+          @quote.push_customer = true
 
-          if @order.save
+          if @quote.save
             sign_in(:user, @user)
             format.html { redirect_to checkout_address_path }
             format.json { render json: { result: true } }
           else
             format.html { render 'show' }
-            format.json { render json: { result: false, errors: @order.errors.full_messages }, status: 422 }
+            format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
           end
 
         else # couldn't create user
@@ -67,17 +70,17 @@ module Gemgento
 
     # Continue with current order as guest
     def guest
-      @order.customer_is_guest = true
+      @quote.customer_is_guest = true
       @user = User.new
 
       respond_to do  |format|
 
-        if @order.update(order_params)
+        if @quote.update(quote_params)
           format.html { redirect_to checkout_address_path }
           format.json { render json: { result: true } }
         else # problem saving order
           format.html { render 'show' }
-          format.json { render json: { result: false, errors: @order.errors.full_messages }, status: 422 }
+          format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
         end
       end
     end
@@ -85,15 +88,20 @@ module Gemgento
     private
 
     def verify_guest
-      if user_signed_in? && (@order.user.nil? || @order.user == current_user)
-        @order.customer_is_guest = false
-        @order.user = current_user
-        @order.save
 
-        if @order.push_cart_customer_to_magento
-          respond_to do |format|
+      if user_signed_in? && (@quote.user.nil? || @quote.user == current_user)
+        @quote.customer_is_guest = false
+        @quote.user = current_user
+        @quote.push_customer
+
+        respond_to do |format|
+          if @quote.save
             format.html { redirect_to checkout_address_path }
-            format.json { render json: { result: true, user: @user, order: @order } }
+            format.json { render json: { result: true, user: @user, quote: @quote } }
+
+          else
+            format.html { render 'show' }
+            format.json { render json: { result: false, errors: @quote.errors } }
           end
         end
       end
@@ -103,8 +111,8 @@ module Gemgento
       params.require(:user).permit(:email, :password, :password_confirmation, :first_name, :last_name, :subscribe)
     end
 
-    def order_params
-      params.require(:order).permit(:customer_email, :subscribe)
+    def quote_params
+      params.require(:quote).permit(:customer_email, :subscribe)
     end
 
   end

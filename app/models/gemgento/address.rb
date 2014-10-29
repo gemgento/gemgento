@@ -28,6 +28,7 @@ module Gemgento
 
     default_scope -> { order(is_billing: :desc, is_shipping: :desc, updated_at: :desc) }
 
+
     # Pushes Address changes to Magento if the address belongs to a User.  Creates a new address if one does not exist
     # and updates existing addresses.
     #
@@ -130,6 +131,8 @@ module Gemgento
     #
     # @return [void]
     def explode_street_address
+      return if self.street.nil?
+
       address = self.street.split("\n")
       self.address1 = address[0] unless address[0].blank?
       self.address2 = address[1] unless address[1].blank?

@@ -41,7 +41,9 @@ class CreateGemgentoQuote < ActiveRecord::Migration
       t.decimal  :subtotal,                    precision: 12, scale: 4
       t.decimal  :base_subtotal,               precision: 12, scale: 4
       t.decimal  :base_subtotal_with_discount, precision: 12, scale: 4
+      t.string   :shipping_method
       t.text     :ext_shipping_info
+      t.decimal  :shipping_amount,              precision: 12, scale: 4
       t.references :gift_message
       t.decimal  :customer_balance_amount_used, precision: 12, scale: 4
       t.decimal  :base_customer_balance_amount_used, precision: 12, scale: 4

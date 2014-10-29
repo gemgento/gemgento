@@ -4,19 +4,28 @@ module Gemgento
       module Checkout
         class Shipping
 
-          def self.list(cart)
+          # Retrieve a list of shipping methods for a Quote from Magento.
+          #
+          # @param quote [Gemgento::Quote]
+          # @return [Gemgento::MagentoResponse]
+          def self.list(quote)
             message = {
-                quote_id: cart.magento_quote_id,
-                store_id: cart.store.magento_id
+                quote_id: quote.magento_id,
+                store_id: quote.store.magento_id
             }
             Magento.create_call(:shopping_cart_shipping_list, message)
           end
 
-          def self.method(cart, shipping_method)
+          # Set the Quote shipping method in Magento.
+          #
+          # @param quote [Gemgento::Quote]
+          # @param shipping_method [String]
+          # @return [Gemgento::MagentoResponse]
+          def self.method(quote, shipping_method)
             message = {
-                quote_id: cart.magento_quote_id,
+                quote_id: quote.magento_id,
                 method: shipping_method,
-                store_id: cart.store.magento_id
+                store_id: quote.store.magento_id
             }
             Magento.create_call(:shopping_cart_shipping_method, message)
           end

@@ -1,30 +1,30 @@
 module Gemgento
   class Quote < ActiveRecord::Base
-    include ActiveSupport::Callbacks
-
     belongs_to :store, class_name: 'Store'
     belongs_to :user, class_name: 'User'
     belongs_to :user_group, class_name: 'UserGroup'
-    belongs_to :shipping_address, foreign_key: 'shipping_address_id', class_name: 'Address'
-    belongs_to :billing_address, foreign_key: 'billing_address_id', class_name: 'Address'
 
     has_many :line_items, as: :itemizable
     has_many :products, through: :line_items
 
-    has_one :payment, as: :payable
     has_one :order
+    has_one :payment, as: :payable
+    has_one :billing_address, -> { where is_billing: true }, class_name: 'Address', as: :addressable
+    has_one :shipping_address, -> { where is_shipping: true }, class_name: 'Address', as: :addressable
 
     accepts_nested_attributes_for :billing_address
     accepts_nested_attributes_for :shipping_address
     accepts_nested_attributes_for :payment
 
-    attr_accessor :push_customer, :push_addresses, :push_shipping_method, :push_payment_method, :subscribe
+    attr_accessor :push_customer, :push_addresses, :push_shipping_method, :push_payment_method, :subscribe,
+                  :same_as_billing
 
     validates :customer_email, format: /@/, allow_nil: true
 
     before_create :create_magento_quote, if: 'magento_id.nil?'
 
     before_save :set_magento_customer, if: :push_customer
+    before_save :copy_billing_address_to_shipping_address, if: -> { self.same_as_billing && self.push_addresses }
     before_save :set_magento_addresses, if: :push_addresses
     before_save :set_magento_shipping_method, if: :push_shipping_method
 
@@ -56,7 +56,7 @@ module Gemgento
         quote = Quote.where(store: store, user: user).
             where('created_at >= ?', Date.today - 30.days).
             order(updated_at: :desc).first_or_initialize
-        quote.reset_checkout unless quote.magento_id.nil?
+        quote.reset unless quote.magento_id.nil?
       else
         quote = Quote.new(store: store)
       end
@@ -307,6 +307,27 @@ module Gemgento
       end
     end
 
+    # Total quantity of line items.
+    #
+    # @return [BigDecimal]
+    def item_quantity
+      line_items.sum(:qty_ordered).to_d
+    end
+
+    # Reset quote data to before checkout began.
+    #
+    # @return [Void]
+    def reset
+      self.user_id = nil
+      self.customer_email = nil
+      self.billing_address.destroy unless self.billing_address.nil?
+      self.shipping_address.destroy unless self.shipping_address.nil?
+      self.shipping_method = nil
+      self.shipping_amount = nil
+      self.payment.destroy unless self.payment.nil?
+      self.save
+    end
+
     private
 
     # Create the quote in Magento.  Used as a before_create callback.
@@ -322,6 +343,22 @@ module Gemgento
         errors.add :base, response.body[:faultstring]
         return false
       end
+    end
+
+    # Create a Subscriber from the Quote User.
+    #
+    # @return [Gemgento::Subscriber]
+    def create_subscriber
+      Subscriber.create(email: self.customer_email)
+    end
+
+    # Duplicate the billing address to use as shipping address.
+    #
+    # @return [Void]
+    def copy_billing_address_to_shipping_address
+      self.shipping_address = self.billing_address.duplicate
+      self.shipping_address.is_shipping = true
+      self.shipping_address.is_billing = false
     end
 
     # Set quote totals based on Magento API call.

@@ -7,20 +7,20 @@ module Gemgento
 
       respond_to do |format|
         format.html
-        format.json { render json: { order: @order, shipping_method: @shipping_method, totals: @order.totals } }
+        format.json { render json: { order: @quote, shipping_method: @shipping_method, totals: @quote.totals } }
       end
     end
 
     def update
-      @order.payment.update(session[:payment_data])
+      @quote.payment.update(session[:payment_data])
 
       respond_to do |format|
-        if @order.process(request.remote_ip)
+        if @quote.process(request.remote_ip)
           session.delete :payment_data
 
-          format.json { render json: { result: true, order: @order } }
+          format.json { render json: { result: true, order: @quote } }
           format.html do
-            cookies[:order] = @order.id
+            cookies[:order] = @quote.order.id
             redirect_to checkout_thank_you_path
           end
         else
@@ -28,7 +28,7 @@ module Gemgento
             set_order_component_vars
             render 'show'
           end
-          format.json { render json: { result: false, errors: @order.errors.full_messages }, status: 422 }
+          format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
         end
       end
 
@@ -37,9 +37,9 @@ module Gemgento
     private
 
     def set_order_component_vars
-      @shipping_address = @order.shipping_address
-      @billing_address = @order.billing_address
-      @payment = @order.payment
+      @shipping_address = @quote.shipping_address
+      @billing_address = @quote.billing_address
+      @payment = @quote.payment
 
       @shipping_method = get_magento_shipping_method
     end

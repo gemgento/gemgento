@@ -1,7 +1,7 @@
 module Gemgento
   class Checkout::ThankYouController < CheckoutController
     skip_before_filter :validate_line_item_count
-    skip_before_filter :validate_order_user
+    skip_before_filter :validate_quote_user
 
     respond_to :json, :html
 
