@@ -3,43 +3,30 @@ module Gemgento
   # @author Gemgento LLC
   class Address < ActiveRecord::Base
     belongs_to :addressable, polymorphic: true
-    belongs_to :user
     belongs_to :country
     belongs_to :region
 
     has_one :shopify_adapter, class_name: 'Adapter::ShopifyAdapter', as: :gemgento_model
 
-    validates :first_name, :last_name, :street, :city, :country, :postcode, :telephone, presence: true
-    validates :region, presence: true, if: ->{ !self.country.nil? && !self.country.regions.empty? }
-
-    validates_uniqueness_of :user,
-                            scope: [:street, :city, :country, :region, :postcode, :telephone],
-                            message: 'address is not unique',
-                            if: ->{ !self.user.nil? }
-
     attr_accessor :address1, :address2, :address3
+
+    validates :addressable, :first_name, :last_name, :street, :city, :country, :postcode, :telephone, presence: true
+    validates :region, presence: true, if: '!self.country.nil? && !self.country.regions.empty?'
+
+    validates_uniqueness_of :addressable_id,
+                            scope: [:addressable_type, :street, :city, :country, :region, :postcode, :telephone],
+                            message: 'address is not unique',
+                            if: "self.addressable_type == 'Gemgento::User'"
 
     after_find :explode_street_address
     before_validation :strip_whitespace, :implode_street_address
 
-    after_save :sync_local_to_magento
-    after_save :enforce_single_default, unless: ->{ self.user.nil? }
-
-    before_destroy :destroy_magento
+    before_create :create_magento_address, if: "self.addressable_type == 'Gemgento::User' && self.magento_id.nil?"
+    before_update :update_magento_address, if: "addressable_type == 'Gemgento::User' && !self.magento_id.nil? && self.sync_needed?"
+    after_save :enforce_single_default, if: "self.addressable_type == 'Gemgento::User'"
+    before_destroy :destroy_magento_address, if: "self.addressable_type == 'Gemgento::User' && !self.magento_id.nil?"
 
     default_scope -> { order(is_billing: :desc, is_shipping: :desc, updated_at: :desc) }
-
-    # Pushes Address changes to Magento if the address belongs to a User.  Creates a new address if one does not exist
-    # and updates existing addresses.
-    #
-    # @return [Boolean] if the push to Magneto was successful
-    def push
-      if self.user_address_id.nil?
-        API::SOAP::Customer::Address.create(self)
-      else
-        API::SOAP::Customer::Address.update(self)
-      end
-    end
 
     # Return the Address as JSON.
     #
@@ -104,12 +91,12 @@ module Gemgento
       address = self.dup
       address.region = self.region
       address.country = self.country
-      address.user = nil
+      address.addressable = nil
       address.is_billing = false
       address.is_shipping = false
       address.increment_id = nil
       address.sync_needed = false
-      address.user_address_id = nil
+      address.magento_id = nil
 
       return address
     end
@@ -149,23 +136,49 @@ module Gemgento
       self.street = street.join("\n") unless street.blank?
     end
 
-    # If a sync is required, push the address to Magento.  This is the after save callback method.
+    # Create address in Magento.  If the address cannot be created in Magento, errors are added to the model.
     #
-    # @return [void]
-    def sync_local_to_magento
-      if self.sync_needed
-        self.push
+    # @return [Boolean]
+    def create_magento_address
+      response = API::SOAP::Customer::Address.create(self)
+
+      if response.success?
+        self.magento_id = response.body[:result]
         self.sync_needed = false
-        self.save
+        return true
+      else
+        errors.add(:base, response.body[:faultstring])
+        return false
       end
     end
 
-    # Destroy the address in Magento.  This is the before destroy callback.
+    # Update address in Magento.  If the address cannot be updated in Magento, errors are added to the model.
     #
-    # @return [void]
-    def destroy_magento
-      unless self.user_address_id.nil?
-        API::SOAP::Customer::Address.delete(self.user_address_id)
+    # @return [Boolean]
+    def update_magento_address
+      response = API::SOAP::Customer::Address.update(self)
+
+      if response.success?
+        self.magento_id = response.body[:result]
+        self.sync_needed = false
+        return true
+      else
+        errors.add(:base, response.body[:faultstring])
+        return false
+      end
+    end
+
+    # Destroy the address in Magento. If the address cannot be destroyed in Magento, errors are added to the model.
+    #
+    # @return [Boolean]
+    def destroy_magento_address
+      response = API::SOAP::Customer::Address.delete(self.magento_id)
+
+      if response.success?
+        return true
+      else
+        errors.add(:base, response.body[:faultstring])
+        return false
       end
     end
 
@@ -174,11 +187,11 @@ module Gemgento
     # @return [void]
     def enforce_single_default
       if self.is_billing
-        self.user.address_book.where('id != ?', self.id).update_all(is_billing: false)
+        self.addressable.addresses.where('id != ?', self.id).update_all(is_billing: false)
       end
 
       if self.is_shipping
-        self.user.address_book.where('id != ?', self.id).update_all(is_shipping: false)
+        self.addressable.addresses.where('id != ?', self.id).update_all(is_shipping: false)
       end
     end
 

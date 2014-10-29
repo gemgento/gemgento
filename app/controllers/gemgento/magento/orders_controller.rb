@@ -104,7 +104,8 @@ module Gemgento
       address.street = source[:street]
       address.suffix = source[:suffix]
       address.telephone = source[:telephone]
-      address.address_type = source[:address_type]
+      address.is_billing = (source[:address_type] == 'billing')
+      address.is_shipping = (source[:address_type] == 'shipping')
       address.sync_needed = false
       address.save validate: false
 

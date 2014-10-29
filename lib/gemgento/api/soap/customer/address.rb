@@ -42,43 +42,29 @@ module Gemgento
 
           def self.create(address)
             message = {
-                customer_id: address.user.magento_id,
+                customer_id: address.addressable.magento_id,
                 address_data: compose_address_data(address)
             }
-            response = Magento.create_call(:customer_address_create, message)
-
-            if response.success?
-              address.user_address_id = response.body[:result]
-              address.sync_needed = false
-              address.save
-            end
-
-            return response.success?
+            Magento.create_call(:customer_address_create, message)
           end
 
           def self.update(address)
             message = {
-                address_id: address.user_address_id,
+                address_id: address.magento_id,
                 address_data: compose_address_data(address)
             }
-            response = Magento.create_call(:customer_address_update, message)
-
-            return response.success?
+            Magento.create_call(:customer_address_update, message)
           end
 
           def self.delete(address_id)
-            response = Magento.create_call(:customer_address_update, {address_id: address_id})
-
-            return response.success?
+            Magento.create_call(:customer_address_update, {address_id: address_id})
           end
 
           private
 
           # Save Magento users address to local
           def self.sync_magento_to_local(source, user)
-            address = Gemgento::Address.find_or_initialize_by(user_address_id: source[:customer_address_id])
-            address.user_address_id = source[:customer_address_id]
-            address.user = user
+            address = Gemgento::Address.find_or_initialize_by(magento_id: source[:customer_address_id], addressable: user)
             address.increment_id = source[:increment_id]
             address.city = source[:city]
             address.company = source[:company]

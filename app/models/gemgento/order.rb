@@ -3,8 +3,6 @@ module Gemgento
     belongs_to :store, class_name: 'Store'
     belongs_to :user, class_name: 'User'
     belongs_to :user_group, class_name: 'UserGroup'
-    belongs_to :shipping_address, foreign_key: 'shipping_address_id', class_name: 'Address'
-    belongs_to :billing_address, foreign_key: 'billing_address_id', class_name: 'Address'
     belongs_to :quote, class_name: 'Quote'
 
     has_many :api_jobs, class_name: 'ApiJob', as: :source
@@ -15,6 +13,8 @@ module Gemgento
     has_many :shipment_tracks
 
     has_one :payment, as: :payable
+    has_one :billing_address, -> { where is_billing: true }, class_name: 'Address', as: :addressable
+    has_one :shipping_address, -> { where is_shipping: true }, class_name: 'Address', as: :addressable
 
     accepts_nested_attributes_for :billing_address
     accepts_nested_attributes_for :shipping_address

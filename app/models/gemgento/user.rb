@@ -7,16 +7,16 @@ module Gemgento
 
     belongs_to :user_group
 
-    has_many :addresses
-    has_many :recurring_profiles
-    has_many :saved_credit_cards
+    has_many :addresses, as: :addressable, class_name: 'Address'
+    has_many :recurring_profiles, class_name: 'RecurringProfile'
+    has_many :saved_credit_cards, class_name: 'SavedCreditCard'
 
-    has_many :orders
+    has_many :orders, class_name: 'Order'
     accepts_nested_attributes_for :orders
 
     has_one :shopify_adapter, class_name: 'Adapter::ShopifyAdapter', as: :gemgento_model
 
-    has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_stores_users', class_name: 'Store'
+    has_and_belongs_to_many :stores, join_table: 'gemgento_stores_users', class_name: 'Store'
 
     attr_accessor :subscribe
 
@@ -84,16 +84,12 @@ module Gemgento
       self.save
     end
 
-    def address_book
-      self.addresses.where('user_address_id IS NOT NULL')
-    end
-
     def default_billing_address
-      self.addresses.where('user_address_id IS NOT NULL').find_by(is_billing: true)
+      self.addresses.find_by(is_billing: true)
     end
 
     def default_shipping_address
-      self.addresses.where('user_address_id IS NOT NULL').find_by(is_shipping: true)
+      self.addresses.find_by(is_shipping: true)
     end
 
     def password_confirmation=(value)
@@ -146,10 +142,16 @@ module Gemgento
 
     def magento_update
       self.stores.each do |store|
-        API::SOAP::Customer::Customer.update(self, store)
+        response = API::SOAP::Customer::Customer.update(self, store)
+
+        unless response.success?
+          self.errors.add(:base, response[:faultstring])
+          return false
+        end
       end
 
       self.sync_needed = false
+      return true
     end
 
   end

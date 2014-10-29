@@ -6,8 +6,8 @@ module Gemgento
       @user = User.find_by(magento_id: data[:customer_id])
 
       unless @user.nil?
-        @address = Address.find_or_initialize_by(user_address_id: data[:entity_id])
-        @address.user = @user
+        @address = Address.find_or_initialize_by(magento_id: data[:entity_id], addressable_type: 'Gemgento::User')
+        @address.addressable = @user
         @address.city = data[:city]
         @address.company = data[:company]
         @address.country = Country.where(magento_id: data[:country_id]).first
@@ -34,7 +34,7 @@ module Gemgento
     def destroy
       Address.skip_callback(:destroy, :before, :destroy_magento)
 
-      @address = Address.find_by(user_address_id: params[:id])
+      @address = Address.find_by(magento_id: params[:id], addressable_type: 'Gemgento::User')
       @address.destroy unless @address.nil?
 
       Address.set_callback(:destroy, :before, :destroy_magento)

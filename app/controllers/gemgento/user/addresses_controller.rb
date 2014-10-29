@@ -2,18 +2,8 @@ module Gemgento
   class User::AddressesController < User::BaseController
 
     def index
-      @new_shipping_address = Address.new
-      @default_shipping_address = current_user.default_shipping_address
-
-      @new_billing_address = Address.new
-      @default_billing_address = current_user.default_billing_address
-
-      @address_book = current_user.address_book
-
-      respond_to do |format|
-        format.html
-        format.json { render json: current_user.address_book }
-      end
+      @addresses = current_user.addresses
+      respond_with @addresses
     end
 
     def show
@@ -26,53 +16,53 @@ module Gemgento
     end
 
     def edit
-      @address = current_user.address_book.find(params[:id])
+      @address = current_user.addresses.find(params[:id])
       respond_with @address
     end
 
     def create
       @address = Address.new(address_params)
-      @address.user = current_user
-      @address.sync_needed = true
+      @address.addressable = current_user
 
       respond_to do |format|
+
         if @address.save
-          flash[:notice] = 'The new address was created successfully.'
-          format.html { redirect_to action: 'index' }
-          format.js { render '/gemgento/users/addresses/success' }
+          format.html { redirect_to user_addresses_path, notice: 'The was successfully created.' }
           format.json { render json: { result: true, address: @address } }
         else
           format.html { render 'new' }
-          format.js { render '/gemgento/users/addresses/errors' }
           format.json { render json: { result: false, errors: @address.errors.full_messages } }
         end
+
       end
     end
 
     def update
-      @address = current_user.address_book.find(params[:id])
+      @address = current_user.addresses.find(params[:id])
       @address.sync_needed = true
 
       respond_to do |format|
         if @address.update_attributes(address_params)
-          flash[:notice] = 'The new address was updated successfully.'
-          format.html { redirect_to action: 'index' }
-          format.js { render '/gemgento/users/addresses/success' }
+          format.html { redirect_to user_addresses_path, notice: 'The was successfully updated.' }
           format.json { render json: { result: true, address: @address } }
         else
           format.html { render 'edit' }
-          format.js { render '/gemgento/users/addresses/errors' }
           format.json { render json: { result: false, errors: @address.errors.full_messages } }
         end
       end
     end
 
     def destroy
-      current_user.address_book.find(params[:id]).destroy
-      flash[:notice] = 'The address was removed.'
+      @address = current_user.addresses.find(params[:id])
+
       respond_to do |format|
-        format.html { redirect_to action: 'index' }
-        format.json { render json: { result: true } }
+        if @address.destroy
+          format.html { redirect_to user_addresses_path, notice: 'The address was destroy.' }
+          format.json { render json: { result: true } }
+        else
+          format.html { render 'index' }
+          format.json { render json: { result: false, errors: @address.errors.full_messages } }
+        end
       end
     end
 
@@ -81,7 +71,7 @@ module Gemgento
     def address_params
       params.require(:address).permit(
           :first_name, :last_name, :address1, :address2, :address3, :country_id, :city, :region_id, :postcode,
-          :telephone, :is_shipping, :is_billing, :address_type
+          :telephone, :is_shipping, :is_billing
       )
     end
   end
