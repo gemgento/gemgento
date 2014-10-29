@@ -28,6 +28,20 @@ module Gemgento
 
     default_scope -> { order(is_billing: :desc, is_shipping: :desc, updated_at: :desc) }
 
+    default_scope -> { order(is_default_billing: :desc, is_default_shipping: :desc, updated_at: :desc) }
+
+    # Pushes Address changes to Magento if the address belongs to a User.  Creates a new address if one does not exist
+    # and updates existing addresses.
+    #
+    # @return [Boolean] if the push to Magneto was successful
+    def push
+      if self.user_address_id.nil?
+        API::SOAP::Customer::Address.create(self)
+      else
+        API::SOAP::Customer::Address.update(self)
+      end
+    end
+
     # Return the Address as JSON.
     #
     # @param options [Hash] an optional hash of options.
@@ -66,11 +80,11 @@ module Gemgento
     # @param user [User] the user who will be associated with the new address.
     # @param is_default [Boolean] true if the new address will be the default for it's type, false otherwise.
     # @return [Address] the newly created Address.
-    def self.copy_to_address_book(source, user, is_billing = false, is_shipping = false)
+    def self.copy_to_address_book(source, user, is_default_billing = false, is_default_shipping = false)
       address = source.dup
       address.user = user
-      address.is_billing = is_billing
-      address.is_shipping = is_shipping
+      address.is_default_billing = is_default_billing
+      address.is_default_shipping = is_default_shipping
       address.sync_needed = true
       address.save
 
@@ -91,12 +105,12 @@ module Gemgento
       address = self.dup
       address.region = self.region
       address.country = self.country
-      address.addressable = nil
-      address.is_billing = false
-      address.is_shipping = false
+      address.user = nil
+      address.is_default_billing = false
+      address.is_default_shipping = false
       address.increment_id = nil
       address.sync_needed = false
-      address.magento_id = nil
+      address.user_address_id = nil
 
       return address
     end
@@ -136,49 +150,23 @@ module Gemgento
       self.street = street.join("\n") unless street.blank?
     end
 
-    # Create address in Magento.  If the address cannot be created in Magento, errors are added to the model.
+    # If a sync is required, push the address to Magento.  This is the after save callback method.
     #
-    # @return [Boolean]
-    def create_magento_address
-      response = API::SOAP::Customer::Address.create(self)
-
-      if response.success?
-        self.magento_id = response.body[:result]
+    # @return [void]
+    def sync_local_to_magento
+      if self.sync_needed
+        self.push
         self.sync_needed = false
-        return true
-      else
-        errors.add(:base, response.body[:faultstring])
-        return false
+        self.save
       end
     end
 
-    # Update address in Magento.  If the address cannot be updated in Magento, errors are added to the model.
+    # Destroy the address in Magento.  This is the before destroy callback.
     #
-    # @return [Boolean]
-    def update_magento_address
-      response = API::SOAP::Customer::Address.update(self)
-
-      if response.success?
-        self.magento_id = response.body[:result]
-        self.sync_needed = false
-        return true
-      else
-        errors.add(:base, response.body[:faultstring])
-        return false
-      end
-    end
-
-    # Destroy the address in Magento. If the address cannot be destroyed in Magento, errors are added to the model.
-    #
-    # @return [Boolean]
-    def destroy_magento_address
-      response = API::SOAP::Customer::Address.delete(self.magento_id)
-
-      if response.success?
-        return true
-      else
-        errors.add(:base, response.body[:faultstring])
-        return false
+    # @return [void]
+    def destroy_magento
+      unless self.user_address_id.nil?
+        API::SOAP::Customer::Address.delete(self.user_address_id)
       end
     end
 
@@ -186,12 +174,12 @@ module Gemgento
     #
     # @return [void]
     def enforce_single_default
-      if self.is_billing
-        self.addressable.addresses.where('id != ?', self.id).update_all(is_billing: false)
+      if self.is_default_billing
+        self.user.address_book.where('id != ?', self.id).update_all(is_default_billing: false)
       end
 
-      if self.is_shipping
-        self.addressable.addresses.where('id != ?', self.id).update_all(is_shipping: false)
+      if self.is_default_shipping
+        self.user.address_book.where('id != ?', self.id).update_all(is_default_shipping: false)
       end
     end
 
