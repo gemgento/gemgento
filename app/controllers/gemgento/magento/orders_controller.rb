@@ -58,7 +58,7 @@ module Gemgento
       @order.increment_id = data[:increment_id]
       @order.placed_at = data[:created_at]
       @order.store = Store.find_by(magento_id: data[:store_id])
-
+      @order.quote = Gemgento::Quote.find_by(magento_id: data[:quote_id])
       @order.save
 
       sync_address(data[:shipping_address], @order.shipping_address)
@@ -74,10 +74,6 @@ module Gemgento
         data[:status_history].each do |status|
           sync_magento_order_status_to_local(status)
         end
-      end
-
-      if quote = Gemgento::Quote.find_by(magento_id: data[:quote_id])
-        quote.update(order: @order)
       end
 
       render nothing: true
