@@ -186,17 +186,18 @@ module Gemgento
 
     # Fetch available shipping methods from Magento.
     #
-    # @return [Array(Hash), nil]
+    # @return [Array(Hash)]
     def shipping_methods
       response =  API::SOAP::Checkout::Shipping.list(self)
 
       if response.success?
+        return [] if response.body[:result][:item].nil?
         response.body[:result][:item] = [response.body[:result][:item]] unless response.body[:result][:item].is_a? Array
 
         return response.body[:result][:item]
       else
         self.errors.add(:base, response.body[:faultstring])
-        return nil
+        return []
       end
     end
 
