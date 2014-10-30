@@ -20,7 +20,6 @@ module Gemgento
             response = info(increment_id)
 
             if response.success?
-              puts 'here'
               sync_magento_to_local(response.body[:result])
             else
               return nil
@@ -89,7 +88,6 @@ module Gemgento
 
           # Save Magento order to local
           def self.sync_magento_to_local(source)
-            puts source
             return nil if Store.find_by(magento_id: source[:store_id]).nil?
 
             order = ::Gemgento::Order.where(increment_id: source[:increment_id]).first_or_initialize
