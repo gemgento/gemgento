@@ -176,7 +176,8 @@ module Gemgento
       response = API::SOAP::Checkout::Customer.address(self)
 
       if response.success?
-        return true
+        # re-set magento customer if guest so that customer name can be pulled from billing address.
+        return self.customer_is_guest ? set_magento_customer : true
       else
         self.errors.add(:base, response.body[:faultstring])
         return false
