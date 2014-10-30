@@ -14,7 +14,7 @@ module Gemgento
       end
 
       if !valid
-        record.errors[:base] << 'Invalid card number'
+        record.errors[:cc_number] << 'is invalid'
       end
     end
 
