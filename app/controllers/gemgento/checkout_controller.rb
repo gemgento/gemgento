@@ -65,22 +65,14 @@ module Gemgento
       return nil
     end
 
-    def payment_params
-      params.require(:quote).require(:payment).permit(:method, :cc_cid, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month, :cc_owner, :save_card, :payment_id)
-    end
-
     def initialize_shipping_variables
       @shipping_methods = @quote.shipping_methods || []
       cookies[:shipping_methods] = @shipping_methods.to_json
     end
 
     def initialize_payment_variables
-      unless @payment
-        @quote.build_payment if @quote.payment.nil?
-        @payment = @quote.payment
-      end
-
       # @payment_methods = @quote.payment_methods
+      @quote.build_payment if @quote.payment.nil?
 
       unless @quote.customer_is_guest
         @saved_credit_cards = @quote.user.saved_credit_cards

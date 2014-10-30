@@ -4,13 +4,13 @@ module Gemgento
     belongs_to :user, class_name: 'User'
     belongs_to :user_group, class_name: 'UserGroup'
 
-    has_many :line_items, as: :itemizable
+    has_many :line_items, as: :itemizable, dependent: :destroy
     has_many :products, through: :line_items
 
     has_one :order
-    has_one :payment, as: :payable
-    has_one :billing_address, -> { where is_billing: true }, class_name: 'Address', as: :addressable
-    has_one :shipping_address, -> { where is_shipping: true }, class_name: 'Address', as: :addressable
+    has_one :payment, as: :payable, dependent: :destroy
+    has_one :billing_address, -> { where is_billing: true }, class_name: 'Address', as: :addressable, dependent: :destroy
+    has_one :shipping_address, -> { where is_shipping: true }, class_name: 'Address', as: :addressable, dependent: :destroy
 
     accepts_nested_attributes_for :billing_address
     accepts_nested_attributes_for :shipping_address
@@ -27,6 +27,7 @@ module Gemgento
     before_save :copy_billing_address_to_shipping_address, if: -> { self.same_as_billing && self.push_addresses }
     before_save :set_magento_addresses, if: :push_addresses
     before_save :set_magento_shipping_method, if: :push_shipping_method
+    before_save :set_magento_payment_method, if: :push_payment_method
 
     after_save :create_subscriber, if: :subscribe
 
@@ -195,25 +196,21 @@ module Gemgento
       end
     end
 
-    # Set the shipping method.
+    # Get the shipping method price.
     #
     # @param selected_method [String]
-    # @param shipping_methods [Array(Hash)]
-    # @return [Void]
-    def set_shipping_method(selected_method, shipping_methods = nil)
+    # @param shipping_methods [Array(Hash), nil]
+    # @return [BigDecimal]
+    def get_shipping_amount(selected_method, shipping_methods = nil)
       shipping_methods = self.shipping_methods if shipping_methods.blank?
-      self.shipping_method = selected_method
-      self.shipping_amount = 0
-      self.push_shipping_method = true
 
       shipping_methods.each do |shipping_method|
         if shipping_method[:code] == selected_method
-          self.shipping_amount = shipping_method[:price]
-          break
+          return shipping_method[:price].to_d
         end
       end
 
-      save
+      return 0.0
     end
 
     # Set Quote shipping method in Magento.
@@ -242,6 +239,17 @@ module Gemgento
       else
         self.errors.add(:base, response.body[:faultstring])
         return nil
+      end
+    end
+
+    def set_magento_payment_method
+      response = API::SOAP::Checkout::Payment.method(self, self.payment)
+
+      if response.success?
+        return true
+      else
+        self.errors.add(:base, response.body[:faultstring])
+        return false
       end
     end
 

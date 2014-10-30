@@ -8,7 +8,8 @@ module Gemgento
       respond_to do |format|
         format.html
         format.json { render json: {
-            payment_methods: @payment_methods,
+            quote: @quote,
+            payment_methods:(@payment_methods || nil),
             saved_credit_cards: @saved_credit_cards,
             totals: @quote.totals
         } }
@@ -16,24 +17,25 @@ module Gemgento
     end
 
     def update
-      @payment = @quote.payment.nil? ? Payment.new : @quote.payment
-      @payment.attributes = payment_params
+      @quote.push_payment_method = true
 
       respond_to do |format|
-        if @payment.valid? && @quote.set_payment(payment_params)
-          session[:payment_data] = payment_params
-
+        if @quote.update(quote_params)
+          session[:payment_data] = @quote.payment.attributes
           format.html { render checkout_confirm_path }
-          format.json { render json: { result: true, order: @quote } }
+          format.json { render json: { result: true, quote: @quote } }
         else
           initialize_payment_variables
-          format.html { render action: :show, alert: 'Invalid payment information. Please review all details and try again.' }
-          format.json { render json: {
-              result: false,
-              errors: @quote.payment.errors.any? ? @quote.payment.errors.full_messages : 'Invalid payment information. Please review all details and try again.'
-          } }
+          format.html { render 'show' }
+          format.json { render json: { result: false, errors: @quote.errors.full_messages}, status: 422 }
         end
       end
+    end
+
+    private
+
+    def quote_params
+      params.require(:quote).permit(payment_attributes: [:id, :method, :cc_cid, :cc_number, :cc_type, :cc_exp_year, :cc_exp_month, :cc_owner, :save_card, :payment_id])
     end
 
   end
