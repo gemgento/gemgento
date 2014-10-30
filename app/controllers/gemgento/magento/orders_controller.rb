@@ -6,8 +6,7 @@ module Gemgento
 
       @order = Order.where('id = ? OR magento_id = ?', params[:id], data[:order_id]).first_or_initialize
       @order.magento_id = data[:order_id]
-      @order.is_active = data[:is_active]
-      @order.user = User.where(magento_id: data[:customer_id]).first
+      @order.user = User.find_by(magento_id: data[:customer_id])
       @order.tax_amount = data[:tax_amount]
       @order.shipping_amount = data[:shipping_amount]
       @order.discount_amount = data[:discount_amount]
@@ -60,26 +59,25 @@ module Gemgento
       @order.placed_at = data[:created_at]
       @order.store = Store.find_by(magento_id: data[:store_id])
 
-      if quote = Gemgento::Quote.find_by(magento_id: data[:quote_id])
-        @order.quote = quote
-      end
-
       @order.save
 
-      @order.shipping_address = sync_magento_address_to_local(data[:shipping_address], @order, @order.shipping_address)
-      @order.billing_address = sync_magento_address_to_local(data[:billing_address], @order, @order.billing_address)
-      @order.save
+      sync_address(data[:shipping_address], @order.shipping_address)
+      sync_address(data[:billing_address], @order.billing_address)
 
       unless data[:items].nil?
         data[:items].each do |item|
-          sync_magento_line_item_to_local(item, @order)
+          sync_magento_line_item_to_local(item)
         end
       end
 
       unless data[:status_history].nil?
         data[:status_history].each do |status|
-          sync_magento_order_status_to_local(status, @order)
+          sync_magento_order_status_to_local(status)
         end
+      end
+
+      if quote = Gemgento::Quote.find_by(magento_id: data[:quote_id])
+        quote.update(order: @order)
       end
 
       render nothing: true
@@ -87,8 +85,9 @@ module Gemgento
 
     private
 
-    def sync_magento_address_to_local(source, order, address = nil)
+    def sync_address(source, address = nil)
       address = Address.new if address.nil?
+      address.addressable = @order
       address.increment_id = source[:increment_id]
       address.city = source[:city]
       address.company = source[:company]
@@ -106,15 +105,14 @@ module Gemgento
       address.telephone = source[:telephone]
       address.is_billing = (source[:address_type] == 'billing')
       address.is_shipping = (source[:address_type] == 'shipping')
-      address.sync_needed = false
-      address.save validate: false
+      address.save
 
-      address
+      return address
     end
 
-    def sync_magento_order_status_to_local(source, order)
-      order_status = OrderStatus.where(order: order, status: source[:status], comment: source[:comment]).first_or_initialize
-      order_status.order = order
+    def sync_magento_order_status_to_local(source)
+      order_status = OrderStatus.where(order: @order, status: source[:status], comment: source[:comment]).first_or_initialize
+      order_status.order = @order
       order_status.status = source[:status]
       order_status.is_active = source[:is_active]
       order_status.is_customer_notified = source[:is_customer_notified] == 2 ? nil : source[:is_customer_notified]
@@ -125,11 +123,10 @@ module Gemgento
       order_status
     end
 
-    def sync_magento_line_item_to_local(source, order)
+    def sync_magento_line_item_to_local(source)
       product = Product.find_by(magento_id: source[:product_id])
-      line_item = LineItem.find_or_initialize_by('magento_id = ? OR (order_id = ? AND product_id = ?)', source[:item_id], order.id, product.id)
-
-      line_item.itemizable = order
+      line_item = LineItem.where("magento_id = ? OR (itemizable_type = 'Gemgento::Order' AND itemizable_id = ? AND product_id = ?)", source[:item_id], @order.id, product.id).first_or_initialize
+      line_item.itemizable = @order
       line_item.magento_id = source[:item_id]
       line_item.quote_item_id = source[:quote_item_id]
       line_item.product = Product.find_by(magento_id: source[:product_id])
