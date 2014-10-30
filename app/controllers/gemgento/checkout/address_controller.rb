@@ -168,7 +168,7 @@ module Gemgento
       billing_address = current_user.default_billing_address if user_signed_in?
       billing_address = billing_address.nil? ? Address.new : billing_address.clone
       billing_address.is_billing = true
-      bulling_address.is_shipping = false
+      billing_address.is_shipping = false
       @quote.build_billing_address(billing_address.attributes)
     end
 
