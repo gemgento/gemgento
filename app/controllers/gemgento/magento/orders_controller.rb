@@ -4,8 +4,8 @@ module Gemgento
     def update
       data = params[:data]
 
-      @order = Order.where('id = ? OR order_id = ?', params[:id], data[:order_id]).first_or_initialize
-      @order.order_id = data[:order_id]
+      @order = Order.where('id = ? OR magento_id = ?', params[:id], data[:order_id]).first_or_initialize
+      @order.magento_id = data[:order_id]
       @order.is_active = data[:is_active]
       @order.user = User.where(magento_id: data[:customer_id]).first
       @order.tax_amount = data[:tax_amount]
@@ -113,7 +113,7 @@ module Gemgento
     end
 
     def sync_magento_order_status_to_local(source, order)
-      order_status = OrderStatus.where(order_id: order.id, status: source[:status], comment: source[:comment]).first_or_initialize
+      order_status = OrderStatus.where(order: order, status: source[:status], comment: source[:comment]).first_or_initialize
       order_status.order = order
       order_status.status = source[:status]
       order_status.is_active = source[:is_active]
