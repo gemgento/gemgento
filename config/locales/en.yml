@@ -1,7 +1,7 @@
 en:
   activerecord:
     attributes:
-      gemgento/order_payment:
+      gemgento/payment:
         cc_owner: Name on card
         cc_last4: Card number
         cc_exp_y: Expiration year
