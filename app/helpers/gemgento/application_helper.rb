@@ -23,7 +23,7 @@ module Gemgento
 
     def create_new_quote
       session.delete :quote
-      @current_quote = Order.current(current_store, nil, current_user)
+      @current_quote = Quote.current(current_store, nil, current_user)
     end
 
     def current_category

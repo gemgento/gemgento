@@ -5,9 +5,9 @@ module Gemgento
 
     validates :itemizable, :product, presence: true
 
-    before_save :push_magento_quote_item, if: "itemizable_type == 'Gemgento::Quote' && !async"
-    after_save :push_magento_quote_item_async, if: "itemizable_type == 'Gemgento::Quote' && async"
-    before_destroy :destroy_magento_quote_item
+    before_save :push_magento_quote_item, if: -> { itemizable_type == 'Gemgento::Quote' && !async }
+    after_save :push_magento_quote_item_async, if: -> { itemizable_type == 'Gemgento::Quote' && async }
+    before_destroy :destroy_magento_quote_item, if: -> { itemizable_type == 'Gemgento::Quote' }
 
     serialize :options, Hash
 

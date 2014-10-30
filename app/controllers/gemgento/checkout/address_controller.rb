@@ -30,8 +30,16 @@ module Gemgento
     def quote_params
       params.require(:quote).permit(
           :same_as_billing,
-          billing_address_attributes: [:id, :first_name, :last_name, :address1, :address2, :country_id, :city, :region_id, :postcode, :telephone],
-          shipping_address_attributes: [:id, :first_name, :last_name, :address1, :address2, :country_id, :city, :region_id, :postcode, :telephone]
+          billing_address_attributes:
+              [
+                  :id, :first_name, :last_name, :address1, :address2, :country_id, :city, :region_id, :postcode,
+                  :telephone, :is_billing, :is_shipping
+              ],
+          shipping_address_attributes:
+              [
+                  :id, :first_name, :last_name, :address1, :address2, :country_id, :city, :region_id, :postcode,
+                  :telephone, :is_billing, :is_shipping
+              ]
       )
     end
 
@@ -40,7 +48,7 @@ module Gemgento
       billing_address = billing_address.nil? ? Address.new : billing_address.clone
       billing_address.is_billing = true
       billing_address.is_shipping = false
-      @quote.build_billing_address(billing_address.attributes)
+      @quote.build_billing_address(billing_address.duplicate.attributes.reject{ |key| key == :id })
     end
 
     def build_shipping_address
@@ -48,7 +56,7 @@ module Gemgento
       shipping_address = shipping_address.nil? ? Address.new : shipping_address.clone
       shipping_address.is_shipping = true
       shipping_address.is_billing = false
-      @quote.build_shipping_address(shipping_address.attributes)
+      @quote.build_shipping_address(shipping_address.duplicate.attributes.reject{ |key| key == :id })
     end
 
   end

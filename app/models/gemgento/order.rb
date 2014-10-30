@@ -27,6 +27,7 @@ module Gemgento
     serialize :cart_item_errors, Array
 
     validates :customer_email, format: /@/, allow_nil: true
+    validates :billing_address, :shipping_address, presence: true
 
     def to_param
       self.increment_id

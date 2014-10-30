@@ -242,7 +242,6 @@ module Gemgento
 
         self.image_file_extensions.each do |extension|
           file_name = self.image_path + @row[@headers.index('image').to_i].to_s.strip + '_' + label + extension
-          Rails.logger.info file_name
           next unless File.exist?(file_name)
 
           types = []

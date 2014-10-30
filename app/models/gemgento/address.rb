@@ -21,7 +21,7 @@ module Gemgento
     before_validation :strip_whitespace, :implode_street_address
 
     before_create :create_magento_address, if: -> { self.addressable_type == 'Gemgento::User' && self.magento_id.nil? }
-    before_update :update_magento_address, if: -> { addressable_type == 'Gemgento::User' && !self.magento_id.nil? && self.sync_needed? }
+    before_update :update_magento_address, if: -> { self.addressable_type == 'Gemgento::User' && !self.magento_id.nil? && self.sync_needed? }
     before_destroy :destroy_magento_address, if: -> { self.addressable_type == 'Gemgento::User' && !self.magento_id.nil? }
 
     after_save :enforce_single_default, if: -> { self.addressable_type == 'Gemgento::User' }
@@ -104,12 +104,12 @@ module Gemgento
       address = self.dup
       address.region = self.region
       address.country = self.country
-      address.user = nil
-      address.is_default_billing = false
-      address.is_default_shipping = false
+      address.addressable = nil
+      address.is_billing = false
+      address.is_shipping = false
       address.increment_id = nil
       address.sync_needed = false
-      address.user_address_id = nil
+      address.magento_id = nil
 
       return address
     end

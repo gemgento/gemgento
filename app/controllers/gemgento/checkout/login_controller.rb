@@ -88,11 +88,10 @@ module Gemgento
     private
 
     def verify_guest
-
-      if user_signed_in? && (@quote.user.nil? || @quote.user == current_user)
+      if user_signed_in?
         @quote.customer_is_guest = false
         @quote.user = current_user
-        @quote.push_customer
+        @quote.push_customer = true
 
         respond_to do |format|
           if @quote.save

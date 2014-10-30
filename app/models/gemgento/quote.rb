@@ -20,16 +20,19 @@ module Gemgento
                   :same_as_billing
 
     validates :customer_email, format: /@/, allow_nil: true
+    validates :billing_address, :shipping_address, presence: true, if: -> { push_addresses }
+    validates :shipping_method, presence: true, if: -> { push_shipping_method }
 
-    before_create :create_magento_quote, if: 'magento_id.nil?'
+    before_validation :copy_billing_address_to_shipping_address, if: -> { same_as_billing }
 
-    before_save :set_magento_customer, if: :push_customer
-    before_save :copy_billing_address_to_shipping_address, if: -> { self.same_as_billing && self.push_addresses }
-    before_save :set_magento_addresses, if: :push_addresses
-    before_save :set_magento_shipping_method, if: :push_shipping_method
-    before_save :set_magento_payment_method, if: :push_payment_method
+    before_create :create_magento_quote, if: -> { magento_id.nil? }
 
-    after_save :create_subscriber, if: :subscribe
+    before_save :set_magento_customer, if: -> { push_customer }
+    before_save :set_magento_addresses, if: -> { push_addresses }
+    before_save :set_magento_shipping_method, if: -> { push_shipping_method }
+    before_save :set_magento_payment_method, if: -> { push_payment_method }
+
+    after_save :create_subscriber, if: -> { subscribe }
 
     # Get the current quote given a quote_id, Store, and User.
     #
@@ -367,9 +370,16 @@ module Gemgento
     #
     # @return [Void]
     def copy_billing_address_to_shipping_address
-      self.shipping_address = self.billing_address.duplicate
-      self.shipping_address.is_shipping = true
-      self.shipping_address.is_billing = false
+      self.shipping_address.attributes = self.billing_address.attributes.reject{ |k| k == :id }.merge(
+          {
+              id: self.shipping_address ? self.shipping_address.id : nil,
+              address1: self.billing_address.address1,
+              address2: self.billing_address.address2,
+              address3: self.billing_address.address3,
+              is_shipping: true,
+              is_billing: false
+          }
+      )
     end
 
     # Set quote totals based on Magento API call.

@@ -12,7 +12,6 @@ module Gemgento
     end
 
     def update
-      Rails.logger.info session[:payment_data]
       @quote.payment.update(session[:payment_data])
 
       respond_to do |format|
