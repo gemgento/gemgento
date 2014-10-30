@@ -18,14 +18,14 @@ module Gemgento
 
           # Process magento quote.
           #
-          # @param [Order] cart
+          # @param [Order] quote
           # @param [Payment] payment
           # @param [String] remote_ip
           # @return [MagentoResponse]
-          def self.order(cart, payment, remote_ip)
+          def self.order(quote, payment, remote_ip)
             message = {
-                quote_id: cart.magento_quote_id,
-                store_id: cart.store.magento_id,
+                quote_id: quote.magento_id,
+                store_id: quote.store.magento_id,
                 payment_data: {
                     'po_number' => payment.po_number,
                     method: payment.method,

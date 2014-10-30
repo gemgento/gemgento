@@ -7,9 +7,9 @@ module Gemgento
 
     def show
       if cookies[:order]
-        @order = Order.find(cookies[:order])
-        cookies.delete :order
-        create_new_cart
+        @order = Order.find(session[:order])
+        session.delete :order
+        create_new_quote
 
         respond_with @order
       else

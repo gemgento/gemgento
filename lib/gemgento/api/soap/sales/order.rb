@@ -20,6 +20,7 @@ module Gemgento
             response = info(increment_id)
 
             if response.success?
+              puts 'here'
               sync_magento_to_local(response.body[:result])
             else
               return nil
@@ -88,11 +89,11 @@ module Gemgento
 
           # Save Magento order to local
           def self.sync_magento_to_local(source)
+            puts source
             return nil if Store.find_by(magento_id: source[:store_id]).nil?
 
             order = ::Gemgento::Order.where(increment_id: source[:increment_id]).first_or_initialize
             order.order_id = source[:order_id]
-            order.is_active = source[:is_active]
             order.user = User.find_by(magento_id: source[:customer_id])
             order.tax_amount = source[:tax_amount]
             order.shipping_amount = source[:shipping_amount]
@@ -137,7 +138,7 @@ module Gemgento
             order.customer_email = source[:customer_email]
             order.customer_firstname = source[:customer_firstname]
             order.customer_lastname = source[:customer_lastname]
-            order.magento_quote_id = source[:quote_id]
+            order.quote = Quote.find_by(magento_id: source[:quote_id])
             order.is_virtual = source[:is_virtual]
             order.user_group = UserGroup.where(magento_id: source[:customer_group_id]).first
             order.customer_note_notify = source[:customer_note_notify]
@@ -183,7 +184,7 @@ module Gemgento
 
           def self.sync_magento_address_to_local(source, order, address = nil)
             address = Address.new if address.nil?
-            address.user = order.user
+            address.addressable = order
             address.increment_id = source[:increment_id]
             address.city = source[:city]
             address.company = source[:company]
@@ -199,9 +200,8 @@ module Gemgento
             address.street = source[:street]
             address.suffix = source[:suffix]
             address.telephone = source[:telephone]
-            address.is_billing = source[:is_default_billing]
-            address.is_shipping = source[:is_default_shipping]
-            address.address_type = source[:address_type]
+            address.is_billing = (source[:address_type] == 'billing')
+            address.is_shipping = (source[:address_type] == 'billing')
             address.sync_needed = false
             address.save validate: false
 

@@ -21,7 +21,7 @@ module Gemgento
 
       respond_to do |format|
         if @quote.update(quote_params)
-          session[:payment_data] = @quote.payment.attributes
+          session[:payment_data] = quote_params[:payment_attributes]
           format.html { render checkout_confirm_path }
           format.json { render json: { result: true, quote: @quote } }
         else

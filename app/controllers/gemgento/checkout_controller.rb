@@ -53,13 +53,13 @@ module Gemgento
 
     def get_magento_shipping_method
       if cookies[:shipping_methods].nil?
-        shipping_methods = @quote.get_shipping_methods
+        shipping_methods = @quote.shipping_methods
       else
-        shipping_methods = JSON.parse(cookies[:shipping_methods])
+        shipping_methods = JSON.parse(cookies[:shipping_methods], symbolize_names: true)
       end
 
       shipping_methods.each do |shipping_method|
-        return shipping_method if shipping_method['code'] == @quote.shipping_method
+        return shipping_method if shipping_method[:code] == @quote.shipping_method
       end
 
       return nil

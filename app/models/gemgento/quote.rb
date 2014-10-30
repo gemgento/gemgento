@@ -41,21 +41,21 @@ module Gemgento
 
       if !quote_id.blank? && user.nil?
         quote = Quote.where('created_at >= ?', Date.today - 30.days).
-            find_by(id: quote_id, store: store)
+            find_by(id: quote_id, store: store, converted_at: nil)
         quote = Quote.new(store: store) if quote.nil?
 
       elsif !quote_id.blank? && !user.nil?
         quote = Quote.where('created_at >= ?', Date.today - 30.days).
-            find_by(id: quote_id, store: store)
+            find_by(id: quote_id, store: store, converted_at: nil)
 
         if quote.nil? || (!quote.user.nil? && quote.user != user)
           quote = Quote.where('created_at >= ?', Date.today - 30.days).
-              find_by(id: quote_id, store: store, user: user)
+              find_by(id: quote_id, store: store, user: user, converted_at: nil)
           quote = Quote.new(store: store)
         end
       elsif quote_id.blank? && !user.nil?
-        quote = Quote.where(store: store, user: user).
-            where('created_at >= ?', Date.today - 30.days).
+        quote = Quote.where('created_at >= ?', Date.today - 30.days).
+            where(store: store, user: user, converted_at: nil).
             order(updated_at: :desc).first_or_initialize
         quote.reset unless quote.magento_id.nil?
       else
@@ -261,7 +261,10 @@ module Gemgento
       response = API::SOAP::Checkout::Cart.order(self, self.payment, remote_ip)
 
       if response.success?
-        self.order = API::SOAP::Sales::Order.fetch(self.increment_id) #grab all the new order information
+        increment_id = response.body[:result]
+        self.order = API::SOAP::Sales::Order.fetch(increment_id) #grab all the new order information
+        self.converted_at = Time.now
+        save
 
         HeartBeat.perform_async if Rails.env.production?
         after_convert_success

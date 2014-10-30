@@ -21,9 +21,9 @@ module Gemgento
       return @current_quote
     end
 
-    def create_new_cart
-      session.delete :cart
-      @current_quote = Order.get_cart(nil, current_store)
+    def create_new_quote
+      session.delete :quote
+      @current_quote = Order.current(current_store, nil, current_user)
     end
 
     def current_category

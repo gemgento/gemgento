@@ -3,40 +3,40 @@
     = render 'gemgento/checkout/checkout_header'
 
   .pages-content
-    = form_for current_quote, url: checkout_confirm_path, html: { id: 'checkout_confirm_method' } do |form|
+    = form_for @quote, url: checkout_confirm_path, html: { id: 'checkout_confirm_method' } do |form|
       .form-group
         .form-left.text
           .form-left
-            = @shipping_address.first_name + " " + @shipping_address.last_name
+            = @quote.shipping_address.first_name + " " + @shipping_address.last_name
             %br
-            = current_quote.customer_email
+            = @quote.customer_email
             %br
-            = @shipping_address.telephone
+            = @quote.shipping_address.telephone
             %br
-            = @shipping_address.address1
+            = @quote.shipping_address.address1
             %br
-            = @shipping_address.address2
+            = @quote.shipping_address.address2
             %br
-            = "#{@shipping_address.region.name}, " if @shipping_address.region
-            = "#{@shipping_address.city} #{@shipping_address.postcode}"
+            = "#{@quote.shipping_address.region.name}, " if @quote.shipping_address.region
+            = "#{@quote.shipping_address.city} #{@quote.shipping_address.postcode}"
             %br
-            = "#{@shipping_address.country.name}" if @shipping_address.country
+            = "#{@quote.shipping_address.country.name}" if @quote.shipping_address.country
 
           .form-left
-            = @billing_address.first_name + " " + @billing_address.last_name
+            = @quote.billing_address.first_name + " " + @quote.billing_address.last_name
             %br
-            = current_quote.customer_email
+            = @quote.customer_email
             %br
-            = @billing_address.telephone
+            = @quote.billing_address.telephone
             %br
-            = @billing_address.address1
+            = @quote.billing_address.address1
             %br
-            = @billing_address.address2
+            = @quote.billing_address.address2
             %br
-            = "#{@billing_address.region.name}, " if @billing_address.region
-            = "#{@billing_address.city} #{@billing_address.postcode}"
+            = "#{@quote.billing_address.region.name}, " if @quote.billing_address.region
+            = "#{@quote.billing_address.city} #{@quote.billing_address.postcode}"
             %br
-            = "#{@billing_address.country.name}" if @billing_address.country
+            = "#{@quote.billing_address.country.name}" if @quote.billing_address.country
 
         .form-left.text
           .form-left
@@ -44,16 +44,16 @@
             %br
             = "$#{@shipping_method[:price]}"
           .form-left
-            = "#{number_to_currency(@total)}"
+            = "#{number_to_currency(@quote.totals[:grand_total])}"
             %br
-            - if @payment
-              = "#{@payment.cc_type}"
+            - if @quote.payment
+              = "#{@quote.payment.cc_type}"
               %br
-              = "card ending #{@payment.cc_last4}"
+              = "card ending #{@quote.payment.cc_last4}"
 
         .clear
 
-        
+
       .form-group
         .form-left
           &nbsp;
