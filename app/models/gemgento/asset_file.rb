@@ -19,27 +19,5 @@ module Gemgento
       return res.code == '200'
     end
 
-    def save
-      # Dirty dirty dirty(S3Bug)..
-      begin
-        super
-      rescue Exception => e
-        puts 'Upload Failed once..'
-
-        begin
-          super
-        rescue Exception => e
-          puts 'Upload Failed twice..'
-
-          begin
-            super
-          rescue Exception => e
-            puts 'Upload Failed three times..'
-
-            super
-          end
-        end
-      end
-    end
   end
 end
