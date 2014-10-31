@@ -8,7 +8,8 @@ module Gemgento
 
     default_scope -> { order(:category_id, :position, :product_id, :id) }
 
-    after_save :sync_local_to_magento, :touch_product
+    before_save :update_magento_category_product, if: -> { sync_needed }
+    after_save :touch_product
 
     private
 
@@ -16,11 +17,15 @@ module Gemgento
       TouchProduct.perform_async([self.product.id]) if self.changed?
     end
 
-    def sync_local_to_magento
-      if self.sync_needed
-        API::SOAP::Catalog::Category.update_product(self)
+    def update_magento_category_product
+      response = API::SOAP::Catalog::Category.update_product(self)
+
+      if response.success?
         self.sync_needed = false
-        self.save
+        return true
+      else
+        errors.add(:base, response.body[:faultstring])
+        return false
       end
     end
   end

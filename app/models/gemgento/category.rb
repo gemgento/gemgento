@@ -24,7 +24,9 @@ module Gemgento
     validates_attachment_content_type :image, content_type: /\Aimage\/.*\Z/
 
     after_save :enforce_positioning, if: :position_changed?
-    after_save :sync_local_to_magento
+
+    before_save :create_magento_category, if: -> { magento_id.nil? }
+    before_save :update_magento_category, if: -> { sync_needed && !magento_id.nil? }
 
     # Create a string representation of the path from the root to the Category.
     #
@@ -133,27 +135,48 @@ module Gemgento
       end
     end
 
-    # If a sync is required, push the category to Magento.  This is the after save callback method.
-    #
-    # @return [void]
-    def sync_local_to_magento
-      if self.sync_needed && self.deleted_at.nil?
-        if !self.magento_id
-          API::SOAP::Catalog::Category.create(self, self.stores.first)
+    private
 
-          self.stores.each_with_index do |store, index|
-            next if index == 0
-            API::SOAP::Catalog::Category.update(self, store)
-          end
-        else
-          self.stores.each do |store|
-            API::SOAP::Catalog::Category.update(self, store)
-          end
+    # Create an associated Category in Magento.
+    #
+    # @return [Boolean]
+    def create_magento_category
+      response = API::SOAP::Catalog::Category.create(self, self.stores.first)
+
+      if response.success?
+        self.magento_id = response.body[:attribute_id]
+
+        self.stores.each_with_index do |store, index|
+          next if index == 0
+
+          # don't return false if an extra store update fails since it will prevent the creation, even though we have a
+          # magento_id set.  There should be some sort of way to report this error, but currently there is none.
+          API::SOAP::Catalog::Category.update(self, store)
         end
 
         self.sync_needed = false
-        self.save
+        return true
+      else
+        errors.add(:base, response.body[:faultstring])
+        return false
       end
+    end
+
+    # Update associate Magento category.
+    #
+    # @return [Boolean]
+    def update_magento_category
+      self.stores.each do |store|
+        response = API::SOAP::Catalog::Category.update(self, store)
+
+        unless response.success?
+          errors.add(:base, response.body[:faultstring])
+          return false
+        end
+      end
+
+      self.sync_needed = false
+      return true
     end
 
   end
