@@ -17,6 +17,7 @@ module Gemgento
     attr_accessor :image_file_extensions_raw
     attr_accessor :image_types_raw
 
+    validates_attachment_content_type :spreadsheet, content_type: ['application/vnd.ms-excel']
     validates :image_file_extensions, :image_labels, :image_path, presence: true
     validates_with ImageImportValidator
 

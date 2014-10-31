@@ -114,7 +114,7 @@ module Gemgento
             category =  Category.find_by(url_key: category_url_key, parent_id: parent.id)
 
             if category.nil?
-              errors << category_url_key
+              errors << category_url_key unless errors.include? category_url_key
             else
               parent = category
             end

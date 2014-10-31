@@ -9,6 +9,7 @@ module Gemgento
 
     serialize :import_errors, Array
 
+    validates_attachment_content_type :spreadsheet, content_type: ['application/vnd.ms-excel']
     validates_with InventoryImportValidator
 
     after_commit :process
