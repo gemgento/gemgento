@@ -24,14 +24,5 @@ module Gemgento
       end
     end
 
-    controller do
-      def permitted_params
-        params.permit(
-            :gemgento_store => [
-                :currency_code
-            ])
-      end
-    end
-
   end
 end
