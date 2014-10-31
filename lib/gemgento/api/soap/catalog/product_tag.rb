@@ -10,9 +10,16 @@ module Gemgento
           def self.fetch_all
             Product.not_deleted.where(magento_id: [391]).each do |product|
               product.stores.each do |store|
-                list(product, store).each do |tag|
-                  if info = info(tag[:tag_id], store)
-                    sync_magento_to_local(tag[:tag_id], info, store)
+                list_response = list product, store
+
+                if list_response.success?
+
+                  list_response.body[:result][:item].each do |tag|
+                    info_response = info tag[:tag_id], store
+
+                    if info_response.success?
+                      sync_magento_to_local tag[:tag_id], info_response.body[:result], store
+                    end
                   end
                 end
               end
@@ -23,7 +30,7 @@ module Gemgento
           #
           # @param product [Product]
           # @param store [Store]
-          # @return [Array(Hash), Boolean]
+          # @return [Gemgento::MagentoResponse]
           def self.list(product, store)
             message = {
                 product_id: product.magento_id,
@@ -32,29 +39,23 @@ module Gemgento
             response = Magento.create_call(:catalog_product_tag_list, message)
 
             if response.success?
-              unless response.body[:result][:item].is_a? Array
-                response.body[:result][:item] = [response.body[:result][:item]]
-              end
-
-              response.body[:result][:item]
-            else
-              return false
+              response.body[:result][:item] = [response.body[:result][:item]] unless response.body[:result][:item].is_a? Array
             end
+
+            return response
           end
 
           # Retrieve info on a specific tag.
           #
-          # @param magento_tag_id [Integer]
-          # @param store [Store]
-          # @return [Hash, Boolean]
+          # @param magento_tag_id [Gemgento::Integer]
+          # @param store [Gemgento::Store]
+          # @return [Gemgento::MagentoResponse]
           def self.info(magento_tag_id, store)
             message = {
                 tag_id: magento_tag_id,
                 store: store.magento_id
             }
-            response = Magento.create_call(:catalog_product_tag_info, message)
-
-            return response.success? ? response.body[:result] : false
+            Magento.create_call(:catalog_product_tag_info, message)
           end
 
           # Sync a Magento tag to Gemgento.
@@ -102,7 +103,7 @@ module Gemgento
           # @param products [Product]
           # @param store [Store]
           # @param user [User]
-          # @return [Boolean]
+          # @return [Gemgento::MagentoResponse]
           def self.add(tags, product, store, user = nil)
             message = {
                 tag: "'#{tags.map(&:name).join("', '")}'",
@@ -114,26 +115,17 @@ module Gemgento
             response = Magento.create_call(:catalog_product_tag_info, message)
 
             if response.success?
-              tag_ids = response.body[:result][:item].is_a?(Array) ? response.body[:result][:item] : [response.body[:result][:item]]
-
-              tag_ids.each do |tag_id|
-                tag = tags.select { |t| t.name == tag_id[:key] }.first
-                tag.magento_id = tag_id[:value]
-                tag.sync_needed = false
-                tag.save
-              end
-
-              return true
-            else
-              return false
+              response.body[:result][:item] = [response.body[:result][:item]] unless response.body[:result][:item].is_a?(Array)
             end
+
+            return response
           end
 
           # Manage a tag, this will create/update a tag with absolute values.
           #
           # @param tag [Tag]
           # @param store [Store]
-          # @return [Boolean]
+          # @return [Gemgento::MagentoResponse]
           def self.manage(tag, store)
             message = {
                 name: tag.name,
@@ -144,17 +136,7 @@ module Gemgento
             }
             message[:tag_id] = tag.magento_id unless tag.magento_id.nil?
 
-            response = Magento.create_call(:catalog_product_tag_manage, message)
-
-            if response.success?
-              tag.magento_id = response.body[:result]
-              tag.sync_needed = false
-              tag.save
-
-              return true
-            else
-              return false
-            end
+            Magento.create_call(:catalog_product_tag_manage, message)
           end
 
         end
