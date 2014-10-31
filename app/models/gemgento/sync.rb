@@ -31,10 +31,10 @@ module Gemgento
 
     def self.products(skip_existing = false)
       last_updated = Sync.where('subject IN (?) AND is_complete = ?', %w[products everything], 1).order('created_at DESC').first
-      last_updated = last_updated.created_at unless last_updated.nil?
+      last_updated = last_updated.created_at.to_s(:db) unless last_updated.nil?
       current = create_current('products')
 
-      API::SOAP::Catalog::Product.fetch_all(last_updated.to_s(:db))
+      API::SOAP::Catalog::Product.fetch_all last_updated
       API::SOAP::Catalog::Category.set_product_categories
 
       current.complete
@@ -48,21 +48,21 @@ module Gemgento
 
     def self.customers
       last_updated = Sync.where('subject IN (?) AND is_complete = ?', %w[customers everything], 1).order('created_at DESC').first
-      last_updated = last_updated.created_at unless last_updated.nil?
+      last_updated = last_updated.created_at.to_s(:db) unless last_updated.nil?
       current = create_current('customers')
 
       API::SOAP::Customer::Customer.fetch_all_customer_groups
-      API::SOAP::Customer::Customer.fetch_all last_updated.to_s(:db)
+      API::SOAP::Customer::Customer.fetch_all last_updated
 
       current.complete
     end
 
     def self.orders
       last_updated = Sync.where('subject IN (?) AND is_complete = ?', %w[orders everything], 1).order('created_at DESC').first
-      last_updated = last_updated.created_at unless last_updated.nil?
+      last_updated = last_updated.created_at.to_s(:db) unless last_updated.nil?
       current = create_current('orders')
 
-      API::SOAP::Sales::Order.fetch_all last_updated.to_s(:db)
+      API::SOAP::Sales::Order.fetch_all last_updated
 
       current.complete
     end

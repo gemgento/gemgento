@@ -24,7 +24,7 @@ module Gemgento
           end
 
           def self.fetch_all_media_types
-            ProductAttributeSet.all.each do |product_attribute_set|
+            ::Gemgento::ProductAttributeSet.all.each do |product_attribute_set|
               types(product_attribute_set).each do |media_type|
                 sync_magento_media_type_to_local(media_type, product_attribute_set)
               end

@@ -134,7 +134,7 @@ module Gemgento
 
                 product_category_ids = []
                 result.each do |item|
-                  product = Product.find_by(magento_id: item[:product_id])
+                  product = ::Gemgento::Product.find_by(magento_id: item[:product_id])
                   next if product.nil?
 
                   pairing = ProductCategory.unscoped.find_or_initialize_by(category: category, product: product, store: store)

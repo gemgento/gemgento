@@ -2,9 +2,9 @@ module Gemgento
 
   # @author Gemgento LLC
   class Address < ActiveRecord::Base
-    belongs_to :addressable, polymorphic: true
-    belongs_to :country
-    belongs_to :region
+    belongs_to :addressable, polymorphic: true, class_name: 'Address'
+    belongs_to :country, class_name: 'Country'
+    belongs_to :region, class_name: 'Region'
 
     has_one :shopify_adapter, class_name: 'Adapter::ShopifyAdapter', as: :gemgento_model
 
@@ -175,12 +175,12 @@ module Gemgento
     #
     # @return [void]
     def enforce_single_default
-      if self.is_default_billing
-        self.user.address_book.where('id != ?', self.id).update_all(is_default_billing: false)
+      if self.is_billing
+        self.addressable.addresses.where('id != ?', self.id).update_all(is_billing: false)
       end
 
-      if self.is_default_shipping
-        self.user.address_book.where('id != ?', self.id).update_all(is_default_shipping: false)
+      if self.is_shipping
+        self.addressable.addresses.where('id != ?', self.id).update_all(is_shipping: false)
       end
     end
 

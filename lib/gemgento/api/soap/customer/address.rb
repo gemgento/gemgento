@@ -76,7 +76,7 @@ module Gemgento
             address.postcode = source[:postcode]
             address.prefix = source[:prefix]
             address.region_name = source[:region]
-            address.region = Region.where(magento_id: source[:region_id]).first
+            address.region = ::Gemgento::Region.where(magento_id: source[:region_id]).first
             address.street = source[:street]
             address.suffix = source[:suffix]
             address.telephone = source[:telephone]

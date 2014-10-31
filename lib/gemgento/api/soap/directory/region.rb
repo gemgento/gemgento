@@ -5,7 +5,7 @@ module Gemgento
         class Region
 
           def self.fetch_all
-            Country.all.each do |country|
+            ::Gemgento::Country.all.each do |country|
               list(country.iso2_code).each do |region|
                 sync_magento_to_local(region, country)
               end
