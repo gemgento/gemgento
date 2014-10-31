@@ -8,6 +8,8 @@ module Gemgento
 
     has_attached_file :file, styles: { default_index: '200x266>' }
 
+    validates_attachment_content_type :file, content_type: /\Aimage\/.*\Z/
+
     def self.valid_url(url)
       url = URI.parse(url)
       req = Net::HTTP.new(url.host, url.port)

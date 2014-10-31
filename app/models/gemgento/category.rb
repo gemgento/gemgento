@@ -21,6 +21,8 @@ module Gemgento
     scope :root, -> { find_by(parent_id: nil) }
     scope :active, -> { where(is_active: true) }
 
+    validates_attachment_content_type :image, content_type: /\Aimage\/.*\Z/
+
     after_save :enforce_positioning, if: :position_changed?
     after_save :sync_local_to_magento
 
