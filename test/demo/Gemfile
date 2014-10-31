@@ -1,11 +1,7 @@
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 
-gem 'rails', '4.0.0'
-
+gem 'rails', '4.1.6'
 gem 'mysql2'
-
-# Gemgento
-gem 'gemgento', path: '~/Sites/gemgento'
-
-gem 'paperclip'
-gem 'activeadmin', github: 'mauinewyork/active_admin'
+gem 'gemgento', git: 'git@github.com:gemgento/gemgento.git'
+gem 'jbuilder', '~> 2.0'
+gem 'sdoc', '~> 0.4.0',          group: :doc

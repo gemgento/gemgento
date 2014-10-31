@@ -1,15 +1,22 @@
+---
 development:
-  site:
-    name: Oliver Peoples
-    url:  op.mny.mx
-
   magento:
-    url: ''
-    auth_username:  ''
-    auth_password:  ''
-    username: ''
+    url: http://www.gemgento.com
+    username: gemgento
     api_key: ''
-    api_type: ''
-    api_version: ''
-    debug: ''
-    encryption: ''
+    debug: false
+  layout: gemgento
+beta:
+  magento:
+    url: http://www.gemgento.com
+    username: gemgento
+    api_key: ''
+  layout: gemgento
+production:
+  magento:
+    url: http://www.gemgento.com
+    username: gemgento
+    api_key: ''
+    ip_whitelist: 127.0.0.1
+  layout: gemgento
+  require_ssl: true
