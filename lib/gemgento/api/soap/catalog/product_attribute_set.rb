@@ -4,22 +4,30 @@ module Gemgento
       module Catalog
         class ProductAttributeSet
 
+          # Pull all Magento ProductAttributeSet data into Gemgento.
+          #
+          # @return [Void]
           def self.fetch_all
-            list.each do |product_attribute_set|
-              sync_magento_to_local(product_attribute_set)
+            response = list
+
+            if response.success?
+              response[:result][:item].each do |product_attribute_set|
+                sync_magento_to_local(product_attribute_set)
+              end
             end
           end
 
+          # Get a list of ProductAttributeSets from Magento.
+          #
+          # @return [Gemgento::MagentoResponse]
           def self.list
             response = Magento.create_call(:catalog_product_attribute_set_list)
 
             if response.success?
-              unless response.body[:result][:item].is_a? Array
-                response.body[:result][:item] = [response.body[:result][:item]]
-              end
-
-              response.body[:result][:item]
+              response.body[:result][:item] = [response.body[:result][:item]] unless response.body[:result][:item].is_a? Array
             end
+
+            return response
           end
 
           # Create a new product attribute set in Magento
@@ -54,7 +62,9 @@ module Gemgento
 
           private
 
-          # Save Magento product attribute set to local
+          # Save Magento product attribute set to local.
+          #
+          # @return [Void]
           def self.sync_magento_to_local(source)
             product_attribute_set = ::Gemgento::ProductAttributeSet.where(magento_id: source[:set_id]).first_or_initialize
             product_attribute_set.magento_id = source[:set_id]
