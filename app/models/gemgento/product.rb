@@ -503,7 +503,7 @@ module Gemgento
 
       if response.success?
         self.magento_id = response.body[:result]
-        self.sync_needed = true
+        self.sync_needed = false
 
         stores.each_with_index do |store, index|
           next if index == 0
@@ -512,7 +512,7 @@ module Gemgento
           # If there was a problem updating on of the stores, then make sure the product will be synced on next save.
           # The product needs to be saved regardless, since a Magento product was created and the id must be set.  So,
           # this will not return false.
-          self.sync_needed = false unless response.success?
+          self.sync_needed = true unless response.success?
         end
 
         return true

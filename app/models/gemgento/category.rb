@@ -145,16 +145,19 @@ module Gemgento
 
       if response.success?
         self.magento_id = response.body[:attribute_id]
+        self.sync_needed = false
 
         self.stores.each_with_index do |store, index|
           next if index == 0
+          response = API::SOAP::Catalog::Category.update(self, store)
 
-          # don't return false if an extra store update fails since it will prevent the creation, even though we have a
-          # magento_id set.  There should be some sort of way to report this error, but currently there is none.
-          API::SOAP::Catalog::Category.update(self, store)
+          # If there was a problem updating on of the stores, then make sure the product will be synced on next save.
+          # The product needs to be saved regardless, since a Magento product was created and the id must be set.  So,
+          # this will not return false.
+          self.sync_needed = true unless response.success?
         end
 
-        self.sync_needed = false
+
         return true
       else
         errors.add(:base, response.body[:faultstring])
