@@ -5,22 +5,25 @@ module Gemgento
         class Rule
 
           def self.fetch_all
-            list.each do |rule|
-              website_ids = rule[:website_ids][:item].is_a?(Array) ? rule[:website_ids][:item] : [rule[:website_ids][:item]]
-              user_group_ids = rule[:customer_group_ids][:item].is_a?(Array) ? rule[:customer_group_ids][:item] : [rule[:customer_group_ids][:item]]
-              sync_magento_to_local(rule, website_ids, user_group_ids)
+            response = list
+
+            if response.success?
+              response.body[:result][:item].each do |rule|
+                website_ids = rule[:website_ids][:item].is_a?(Array) ? rule[:website_ids][:item] : [rule[:website_ids][:item]]
+                user_group_ids = rule[:customer_group_ids][:item].is_a?(Array) ? rule[:customer_group_ids][:item] : [rule[:customer_group_ids][:item]]
+                sync_magento_to_local(rule, website_ids, user_group_ids)
+              end
             end
           end
 
           def self.list
             response = Magento.create_call(:catalog_rule_list)
 
-            if response.success?
-              response.body[:result][:item] = [response.body[:result][:item]] unless response.body[:result][:item].is_a? Array
-              return response.body[:result][:item]
-            else
-              return false
+            if response.success? && !response.body[:result][:item].is_a?(Array)
+              response.body[:result][:item] = [response.body[:result][:item]]
             end
+
+            return response
           end
 
           def self.sync_magento_to_local(source, website_ids, user_group_ids)

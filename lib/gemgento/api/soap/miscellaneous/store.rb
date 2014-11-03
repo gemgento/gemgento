@@ -5,29 +5,24 @@ module Gemgento
         class Store
 
           def self.fetch_all
-            list.each do |store|
-              sync_magento_to_local(store)
+            response = list
+
+            if response.success?
+              response.body[:stores][:item].each do |store|
+                sync_magento_to_local(store)
+              end
             end
+
           end
 
           def self.list
             response = Magento.create_call(:store_list)
 
-            if response.success?
-              unless response.body[:stores][:item].is_a? Array
-                response.body[:stores][:item] = [response.body[:stores][:item]]
-              end
-
-              response.body[:stores][:item]
+            if response.success? && !response.body[:stores][:item].is_a?(Array)
+              response.body[:stores][:item] = [response.body[:stores][:item]]
             end
-          end
 
-          def self.info
-            response = Magento.create_call(:store_list)
-
-            if response.success?
-              response.body[:result]
-            end
+            return response
           end
 
           private

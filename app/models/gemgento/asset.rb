@@ -10,7 +10,8 @@ module Gemgento
 
     has_and_belongs_to_many :asset_types, join_table: 'gemgento_assets_asset_types'
 
-    after_save :sync_local_to_magento
+    before_save :create_magento_product_attribute_media, if: -> { sync_needed? && file.blank? }
+    before_save :update_magento_product_attribute_media, if: -> { sync_needed? && !file.blank? }
     after_save :touch_product
 
     before_destroy :delete_magento, :destroy_file
@@ -135,20 +136,32 @@ module Gemgento
 
     private
 
-    # Push Asset changes to Magento.  Creates the asset in Magento if it's new, or updates existing assets. This is an
-    # after save callback.
+    # Create an associated ProductAttributeMedia in Magento.
     #
-    # @return [void]
-    def sync_local_to_magento
-      if self.sync_needed
-        if self.file.nil? || self.file == ''
-          self.file = API::SOAP::Catalog::ProductAttributeMedia.create(self)
-        else
-          API::SOAP::Catalog::ProductAttributeMedia.update(self)
-        end
+    # @return [Boolean]
+    def create_magento_product_attribute_media
+      response = API::SOAP::Catalog::ProductAttributeMedia.create(self)
 
-        self.sync_needed = false
-        self.save
+      if response.success?
+        self.file = response.body[:result]
+        return true
+      else
+        errors.add(:base, response.body[:faultstring])
+        return false
+      end
+    end
+
+    # Create an associated ProductAttributeMedia in Magento.
+    #
+    # @return [Boolean]
+    def update_magento_product_attribute_media
+      response = API::SOAP::Catalog::ProductAttributeMedia.update(self)
+
+      if response.success?
+        return true
+      else
+        errors.add(:base, response.body[:faultstring])
+        return false
       end
     end
 

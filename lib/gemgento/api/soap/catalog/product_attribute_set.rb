@@ -11,7 +11,7 @@ module Gemgento
             response = list
 
             if response.success?
-              response[:result][:item].each do |product_attribute_set|
+              response.body[:result][:item].each do |product_attribute_set|
                 sync_magento_to_local(product_attribute_set)
               end
             end

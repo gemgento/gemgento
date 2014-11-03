@@ -4,42 +4,60 @@ module Gemgento
       module Customer
         class Address
 
+          # Fetch Customer Addresses for all Gemgento Users from Magento.
+          #
+          # @return [Void]
           def self.fetch_all
             User.all.each do |user|
               fetch(user)
             end
           end
 
+          # Fetch Customer Addresses for a User and sync them to Gemgento.
+          #
+          # @param user [Gemgento::User]
+          # @return [Void]
           def self.fetch(user)
-            list(user.magento_id).each do |address|
-              sync_magento_to_local(address, user)
+            response = list(user.magento_id)
+
+            if response.success?
+              response.body[:result][:item].each do |address|
+                sync_magento_to_local(address, user)
+              end
             end
           end
 
+          # Get a list of all Magento Addresses for a specific customer.
+          #
+          # @param customer_id [Integer] Magento Customer id.
+          # @return [Gemgento::MagentoResponse]
           def self.list(customer_id)
             response = Magento.create_call(:customer_address_list, {customer_id: customer_id})
 
             if response.success?
-              unless response.body[:result][:item].nil?
-                unless response.body[:result][:item].is_a? Array
-                  response.body[:result][:item] = [response.body[:result][:item]]
-                end
-              else
+              if response.body[:result][:item].nil?
                 response.body[:result][:item] = []
+              elsif !response.body[:result][:item].is_a? Array
+                response.body[:result][:item] = [response.body[:result][:item]]
               end
-
-              return response.body[:result][:item]
             end
+
+            return response
           end
 
+          # Get Magento Address data.
+          #
+          # @param address_id [Integer] Magento Address id.
+          # @return [Gemgento::MagentoReponse]
           def self.info(address_id)
-            response = Magento.create_call(:customer_address_list, {address_id: address_id})
-
-            if response.success?
-              return response.body[:result][:info]
-            end
+            Magento.create_call(:customer_address_list, { address_id: address_id })
+            # response.body[:result][:info]
           end
 
+          # Create a Customer Address in Magento.
+          #
+          # @param address [Gemgento::Address]
+          # @return [Gemgento::MagentoResponse]
           def self.create(address)
             message = {
                 customer_id: address.addressable.magento_id,
@@ -48,6 +66,10 @@ module Gemgento
             Magento.create_call(:customer_address_create, message)
           end
 
+          # Update a Customer Address in Magento.
+          #
+          # @param address [Gemgento::Address]
+          # @return [Gemgento::MagentoResponse]
           def self.update(address)
             message = {
                 address_id: address.magento_id,
@@ -56,6 +78,9 @@ module Gemgento
             Magento.create_call(:customer_address_update, message)
           end
 
+          # Delete a Customer Address in Magento.
+          #
+          # @return [Gemgento::MagentoResponse]
           def self.delete(address_id)
             Magento.create_call(:customer_address_update, {address_id: address_id})
           end

@@ -118,8 +118,12 @@ module Gemgento
             }
             response = Magento.create_call(:catalog_category_assigned_products, message)
 
-            if response.success? && !response.body[:result][:item].nil?
-              response.body[:result][:item] = [response.body[:result][:item]] unless result.is_a? Array
+            if response.success?
+              if response.body[:result][:item].nil?
+                response.body[:result][:item] = []
+              elsif !response.body[:result][:item].is_a? Array
+                response.body[:result][:item] = [response.body[:result][:item]]
+              end
             end
 
             return response
@@ -174,7 +178,6 @@ module Gemgento
                 product_identifier_type: 'id'
             }
             Magento.create_call(:catalog_category_update_product, message)
-            # response[:info]
           end
 
           private

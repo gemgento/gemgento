@@ -4,23 +4,30 @@ module Gemgento
       module Directory
         class Country
 
+          # Fetch all Countries from Magento and sync them to Gemgento.
+          #
+          # @return [Void]
           def self.fetch_all
-            list.each do |country|
-              sync_magento_to_local(country)
-            end
+            response = list
 
+            if response.success?
+              response.body[:countries][:item].each do |country|
+                sync_magento_to_local(country)
+              end
+            end
           end
 
+          # Get a list of Countries from Magento.
+          #
+          # @return [Gemgento::MagentoResponse]
           def self.list
             response = Magento.create_call(:directory_country_list)
 
-            if response.success?
-              unless response.body[:countries][:item].is_a? Array
-                response.body[:countries][:item] = [response.body[:countries][:item]]
-              end
-
-              response.body[:countries][:item]
+            if response.success? && !response.body[:countries][:item].is_a?(Array)
+              response.body[:countries][:item] = [response.body[:countries][:item]]
             end
+
+            return response
           end
 
           private

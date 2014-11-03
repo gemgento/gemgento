@@ -5,11 +5,16 @@ module Gemgento
         class Order
 
           def self.fetch_all(last_updated = nil)
-            list(last_updated).each do |order|
-              unless order.nil?
-                fetch(order[:increment_id])
+            response = list(last_updated)
+
+            if response.success?
+              response.body_overflow[:result][:item].each do |order|
+                unless order.nil?
+                  fetch(order[:increment_id])
+                end
               end
             end
+
           end
 
           # Fetch a Magento Order.
@@ -26,6 +31,10 @@ module Gemgento
             end
           end
 
+          # Get a list of orders from Magento.
+          #
+          # @param last_updated [String] db formatted datetime string.
+          # @return [Gemgento::MagentoResponse]
           def self.list(last_updated = nil)
             if last_updated.nil?
               message = {}
@@ -45,13 +54,11 @@ module Gemgento
 
             response = Magento.create_call(:sales_order_list, message)
 
-            if response.success?
-              unless response.body_overflow[:result][:item].is_a? Array
-                response.body_overflow[:result][:item] = [response.body_overflow[:result][:item]]
-              end
-
-              response.body_overflow[:result][:item]
+            if response.success? && !response.body_overflow[:result][:item].is_a?(Array)
+              response.body_overflow[:result][:item] = [response.body_overflow[:result][:item]]
             end
+
+            return response
           end
 
           # Get Order info from Magento.

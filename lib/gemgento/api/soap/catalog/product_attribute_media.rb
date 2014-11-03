@@ -14,10 +14,10 @@ module Gemgento
 
           def self.fetch(product, store = nil)
             store = Store.current if store.nil?
-            media_list = list(product, store)
+            response = list(product, store)
 
-            unless media_list.nil?
-              media_list.each do |product_attribute_media|
+            if response.success?
+              response.body[:result][:item].each do |product_attribute_media|
                 sync_magento_to_local(product_attribute_media, product, store)
               end
             end
@@ -25,8 +25,12 @@ module Gemgento
 
           def self.fetch_all_media_types
             ::Gemgento::ProductAttributeSet.all.each do |product_attribute_set|
-              types(product_attribute_set).each do |media_type|
-                sync_magento_media_type_to_local(media_type, product_attribute_set)
+              response = types(product_attribute_set)
+
+              if response.success?
+                response.body[:result][:item].each do |media_type|
+                  sync_magento_media_type_to_local(media_type, product_attribute_set)
+                end
               end
             end
           end
@@ -42,20 +46,22 @@ module Gemgento
             if response.success?
               if response.body[:result][:item].nil?
                 response.body[:result][:item] = []
-              end
-
-              unless response.body[:result][:item].is_a? Array
+              elsif !response.body[:result][:item].is_a? Array
                 response.body[:result][:item] = [response.body[:result][:item]]
               end
-
-              response.body[:result][:item]
             end
+
+            return response
           end
 
           def self.info
 
           end
 
+          # Create a Product Attribute Media in Magento.
+          #
+          # @param asset [Gemgento::Asset]
+          # @return [Gemgento::MagentoResponse]
           def self.create(asset)
             message = {
                 product: asset.product.magento_id,
@@ -63,15 +69,13 @@ module Gemgento
                 identifier_type: 'id',
                 store_view: asset.store.magento_id
             }
-            response = Magento.create_call(:catalog_product_attribute_media_create, message)
-
-            if response.success?
-              return response.body[:result]
-            else
-              return false
-            end
+            Magento.create_call(:catalog_product_attribute_media_create, message)
           end
 
+          # Update a Product Attribute Media in Magento.
+          #
+          # @param asset [Gemgento::Asset]
+          # @return [Gemgento::MagentoResponse]
           def self.update(asset)
             message = {
                 product: asset.product.magento_id,
@@ -80,34 +84,34 @@ module Gemgento
                 identifier_type: 'id',
                 store_view: asset.store.magento_id
             }
-            response = Magento.create_call(:catalog_product_attribute_media_update, message)
+            Magento.create_call(:catalog_product_attribute_media_update, message)
           end
 
+          # Remove Product Attribute Media in Magento.
+          #
+          # @param asset [Gemgento::Asset]
+          # @return [Gemgento::MagentoResponse]
           def self.remove(asset)
-            message = {product: asset.product.magento_id, file: asset.file, identifier_type: 'id'}
-            response = Magento.create_call(:catalog_product_attribute_media_remove, message)
-
-            return response.success?
+            message = { product: asset.product.magento_id, file: asset.file, identifier_type: 'id' }
+            Magento.create_call(:catalog_product_attribute_media_remove, message)
           end
 
+          # Get Product Attribute Media Types from Magento.
+          #
+          # @param product_attribute_set [Gemgento::ProductAttributeSet]
+          # @return [Gemgento::MagnetoRepsonse]
           def self.types(product_attribute_set)
             response = Magento.create_call(:catalog_product_attribute_media_types, {set_id: product_attribute_set.magento_id})
 
-            if response.success?
-              unless response.body[:result][:item].nil? # check if there are any options returned
-                unless response.body[:result][:item].is_a? Array # multiple options returned
-                  response.body[:result][:item] = [response.body[:result][:item]]
-                end
-              else
+            if response.success? &&
+              if response.body[:result][:item].nil?
                 response.body[:result][:item] = []
+              elsif !response.body[:result][:item].is_a?(Array)
+                response.body[:result][:item] = [response.body[:result][:item]]
               end
-
-              response.body[:result][:item]
             end
-          end
 
-          def self.current_store
-
+            return response
           end
 
           private

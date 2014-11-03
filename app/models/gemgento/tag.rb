@@ -7,7 +7,8 @@ module Gemgento
 
     validates :name, uniqueness: true
 
-    before_save :magento_magento_tag, if: -> { magento_id.nil? || sync_needed }
+    before_save :create_magento_tag, if: -> { magento_id.nil? }
+    before_save :update_magento_tag, if: -> { sync_needed && !magento_id.nil? }
 
     # Get the tag base popularity for a store.
     #
@@ -19,23 +20,43 @@ module Gemgento
 
     private
 
-    # Synchronize a Gemgento Tag with Magento.
+    # Create assocaited Magento Tag.
     #
     # @return [Boolean]
-    def sync_local_to_magento
+    def create_magento_tag
+      response = API::SOAP::Catalog::ProductTag.manage(self, stores.first)
+
+      if response.success?
+        self.magento_id = response.body[:result]
+        self.sync_needed = false
+
+        stores.each_with_index do |store, i|
+          next if i == 0
+          response = API::SOAP::Catalog::ProductTag.manage(self, store)
+          self.sync_needed = true unless response.success?
+        end
+
+        return true
+      else
+        return false
+      end
+    end
+
+    # Update associated Magento Tag.
+    #
+    # @return [Boolean]
+    def update_magento_tag
       self.stores.each do |store|
         response = API::SOAP::Catalog::ProductTag.manage(self, store)
 
-        if response.success?
-          self.magento_id = response.body[:result]
-        else
+        unless response.success?
           errors.add(:base, response.body[:faultstring])
           return false
         end
-
-        self.sync_needed = false
-        return true
       end
+
+      self.sync_needed = false
+      return true
     end
   end
 end

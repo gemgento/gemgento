@@ -15,16 +15,20 @@ module Gemgento
           end
 
           def self.fetch_all(last_updated = nil)
-            list(last_updated).each do |store_view|
+            response = list(last_updated)
 
-              unless store_view[:item].nil?
-                # enforce array
-                unless store_view[:item].is_a? Array
-                  store_view[:item] = [store_view[:item]]
-                end
+            if response.success?
+              response.body_overflow[:store_view].each do |store_view|
 
-                store_view[:item].each do |customer|
-                  sync_magento_to_local(customer)
+                unless store_view[:item].nil?
+                  # enforce array
+                  unless store_view[:item].is_a? Array
+                    store_view[:item] = [store_view[:item]]
+                  end
+
+                  store_view[:item].each do |customer|
+                    sync_magento_to_local(customer)
+                  end
                 end
               end
             end
@@ -49,6 +53,10 @@ module Gemgento
             end
           end
 
+          # Get a list of customers from Magento.
+          #
+          # @param last_updated [String] db formatted datetime string.
+          # @return [Gemgento::MagentoResponse]
           def self.list(last_updated = nil)
             if last_updated.nil?
               message = {}
@@ -68,14 +76,11 @@ module Gemgento
 
             response = Magento.create_call(:customer_customer_list, message)
 
-            if response.success?
-              # enforce array
-              unless response.body_overflow[:store_view].is_a? Array
-                response.body_overflow[:store_view] = [response.body_overflow[:store_view]]
-              end
-
-              response.body_overflow[:store_view]
+            if response.success? && !response.body_overflow[:store_view].is_a?(Array)
+              response.body_overflow[:store_view] = [response.body_overflow[:store_view]]
             end
+
+            return response
           end
 
           # Get customer info from Magento
