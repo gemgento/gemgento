@@ -372,7 +372,6 @@ module Gemgento
     #
     # @return [Void]
     def copy_billing_address_to_shipping_address
-      Rails.logger.info 'here'
       self.shipping_address.attributes = self.billing_address.attributes.reject{ |k| k == :id }.merge(
           {
               id: self.shipping_address ? self.shipping_address.id : nil,
