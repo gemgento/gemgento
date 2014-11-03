@@ -44,7 +44,9 @@ module Gemgento
 
     after_find :manage_cache_expires_at
 
-    after_save :sync_local_to_magento, :touch_categories, :touch_configurables
+    before_save :create_magento_product, if: -> { sync_needed? && !magento_id.nil? }
+    before_save :update_magento_product, if: -> { sync_needed? && magento_id.nil? }
+    after_save :touch_categories, :touch_configurables
 
     before_destroy :delete_associations
 
@@ -136,11 +138,6 @@ module Gemgento
       end
 
       return value
-    end
-
-    def self.check_magento(identifier, identifier_type, attribute_set, store = nil)
-      store = Store.current if store.nil?
-      API::SOAP::Catalog::Product.check_magento(identifier, identifier_type, attribute_set, store)
     end
 
     # Attempts to return relations before method missing response
@@ -485,23 +482,60 @@ module Gemgento
 
     # Push local product changes to magento
     def sync_local_to_magento
+
       if self.sync_needed && self.deleted_at.nil?
         if !self.magento_id
-          API::SOAP::Catalog::Product.create(self, self.stores.first)
 
-          self.stores.each_with_index do |store, index|
-            next if index == 0
-            API::SOAP::Catalog::Product.update(self, store)
-          end
         else
-          self.stores.each do |store|
-            API::SOAP::Catalog::Product.update(self, store)
-          end
+
         end
 
         self.sync_needed = false
         self.save
       end
+    end
+
+    # Create an associated magento Product.
+    #
+    # @return [Boolean]
+    def create_magento_product
+      response = API::SOAP::Catalog::Product.create(self, self.stores.first)
+
+      if response.success?
+        self.magento_id = response.body[:result]
+        self.sync_needed = true
+
+        stores.each_with_index do |store, index|
+          next if index == 0
+          response = API::SOAP::Catalog::Product.update(self, store)
+
+          # If there was a problem updating on of the stores, then make sure the product will be synced on next save.
+          # The product needs to be saved regardless, since a Magento product was created and the id must be set.  So,
+          # this will not return false.
+          self.sync_needed = false unless response.success?
+        end
+
+        return true
+      else
+        errors.add(:base, response.body[:faultstring])
+        return false
+      end
+    end
+
+    # Update associated Magento Product.
+    #
+    # @return [Boolean]
+    def update_magento_product
+      self.stores.each do |store|
+        response = API::SOAP::Catalog::Product.update(self, store)
+
+        unless response.success?
+          errors.add(:base, response.body[:faultstring])
+          return false
+        end
+      end
+
+      return true
     end
 
     def delete_associations

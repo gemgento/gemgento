@@ -119,10 +119,6 @@ module Gemgento
 
       product = Product.where(sku: sku).not_deleted.first_or_initialize
 
-      if product.nil? # If product isn't known locally, check with Magento
-        product = Product.check_magento(sku, 'sku', product_attribute_set)
-      end
-
       if product.magento_id.nil?
         self.count_created += 1
       else

@@ -6,27 +6,28 @@ module Gemgento
 
           # Synchronize local database with Magento database
           def self.fetch_all(last_updated = nil, skip_existing = false)
-            updates_made = false
-
             Store.all.each do |store|
-              list(store, last_updated).each do |product_list|
-                unless product_list == empty_product_list
-                  updates_made = true
+              response = list(store, last_updated)
 
-                  # enforce array
-                  product_list[:item] = [product_list[:item]] unless product_list[:item].is_a? Array
+              if response.success?
+                response.body_overflow[:store_view].each do |product_list|
+                  unless product_list == empty_product_list
 
-                  product_list[:item].each do |basic_product_info|
-                    if skip_existing
-                      product = ::Gemgento::Product.find_by(magento_id: basic_product_info[:product_id])
+                    # enforce array
+                    product_list[:item] = [product_list[:item]] unless product_list[:item].is_a? Array
 
-                      unless product.nil?
-                        next if product.stores.include? store
+                    product_list[:item].each do |basic_product_info|
+                      if skip_existing
+                        product = ::Gemgento::Product.find_by(magento_id: basic_product_info[:product_id])
+
+                        unless product.nil?
+                          next if product.stores.include? store
+                        end
                       end
-                    end
 
-                    attribute_set = ::Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
-                    fetch(basic_product_info[:product_id], attribute_set, store)
+                      attribute_set = ::Gemgento::ProductAttributeSet.where(magento_id: basic_product_info[:set]).first
+                      fetch(basic_product_info[:product_id], attribute_set, store)
+                    end
                   end
                 end
               end
@@ -45,13 +46,19 @@ module Gemgento
           end
 
           def self.fetch(product_id, attribute_set, store)
-            product_info = info(product_id, attribute_set, store)
+            response = info(product_id, attribute_set, store)
 
-            # update the product and grab the images
-            product = sync_magento_to_local(product_info, store)
-            API::SOAP::Catalog::ProductAttributeMedia.fetch(product, store)
+            if response.success?
+              product = sync_magento_to_local(response.body[:info], store)
+              API::SOAP::Catalog::ProductAttributeMedia.fetch(product, store)
+            end
           end
 
+          # Get a list of products from Magento.
+          #
+          # @param store [Gemgento::Store]
+          # @param last_updated [String] db formatted date string.
+          # @return [Gemgento::MagentoResponse]
           def self.list(store = nil, last_updated = nil)
             store = Store.current if store.nil?
 
@@ -73,19 +80,20 @@ module Gemgento
             end
 
             response = Magento.create_call(:catalog_product_list, message)
-            if response.success? && !response.body_overflow[:store_view].nil?
 
-              # enforce array
-              unless response.body_overflow[:store_view].is_a? Array
-                response.body_overflow[:store_view] = [response.body_overflow[:store_view]]
-              end
-
-              response.body_overflow[:store_view]
-            else
-              return []
+            if response.success? && !response.body_overflow[:store_view].nil? && !response.body_overflow[:store_view].is_a?(Array)
+              response.body_overflow[:store_view] = [response.body_overflow[:store_view]]
             end
+
+            return response
           end
 
+          # Get Product info from Magento.
+          #
+          # @param product_id [Integer] Magento product id.
+          # @param attribute_set [Gemgento::ProductAttributeSet]
+          # @param store [Gemgento::Store]
+          # @return [Gemgento::MagentoResponse]
           def self.info(product_id, attribute_set, store)
             additional_attributes = []
             attribute_set.product_attributes.each do |attribute|
@@ -97,18 +105,18 @@ module Gemgento
                 product_id: product_id, # >= Magento 1.8.0 and higher
                 productIdentifierType: 'id',
                 attributes: {
-                    'additional_attributes' => {'item' => additional_attributes}
+                    'additional_attributes' => { 'item' => additional_attributes }
                 },
                 store_view: store.magento_id
             }
-            response = Magento.create_call(:catalog_product_info, message)
-
-            if response.success?
-              return response.body[:info]
-            end
+            Magento.create_call(:catalog_product_info, message)
           end
 
-          # Create a new Product in Magento and set out magento_id
+          # Create a new Product in Magento.
+          #
+          # @param product [Gemgento::Product]
+          # @param store [Gemgento::Store]
+          # @return [Gemgento::MagentoResponse]
           def self.create(product, store)
             message = {
                 type: product.magento_type,
@@ -117,16 +125,14 @@ module Gemgento
                 product_data: compose_product_data(product, store),
                 store_view: store.magento_id
             }
-            response = Magento.create_call(:catalog_product_create, message)
-
-            if response.success?
-              product.magento_id = response.body[:result]
-            else
-              product.magento_id = nil
-            end
+            Magento.create_call(:catalog_product_create, message)
           end
 
-          # Update existing Magento Product
+          # Update existing Magento Product.
+          #
+          # @param product [Gemgento::Product]
+          # @param store [Gemgento::Store]
+          # @return [Gemgento::MagentoResponse]
           def self.update(product, store)
             message = {
                 product: product.magento_id,
@@ -134,16 +140,16 @@ module Gemgento
                 product_data: compose_product_data(product, store),
                 store_view: store.magento_id
             }
-            response = Magento.create_call(:catalog_product_update, message)
-
-            return response.success?
+            Magento.create_call(:catalog_product_update, message)
           end
 
+          # Delete a product in Magento.
+          #
+          # @param product [Gemgento::Product]
+          # @return [Gemgento::MagentoResponse]
           def self.delete(product)
             message = { product: product.magento_id, product_identifier_type: 'id' }
-            response = Magento.create_call(:catalog_product_delete, message)
-
-            return response.success?
+            Magento.create_call(:catalog_product_delete, message)
           end
 
           def self.check_magento(identifier, identifier_type, attribute_set, store)
