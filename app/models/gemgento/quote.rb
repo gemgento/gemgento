@@ -20,19 +20,19 @@ module Gemgento
                   :same_as_billing
 
     validates :customer_email, format: /@/, allow_nil: true
-    validates :billing_address, :shipping_address, presence: true, if: -> { push_addresses }
-    validates :shipping_method, presence: true, if: -> { push_shipping_method }
+    validates :billing_address, :shipping_address, presence: true, if: -> { push_addresses.to_bool }
+    validates :shipping_method, presence: true, if: -> { push_shipping_method.to_bool }
 
-    before_validation :copy_billing_address_to_shipping_address, if: -> { same_as_billing }
+    before_validation :copy_billing_address_to_shipping_address, if: -> { same_as_billing.to_bool }
 
     before_create :create_magento_quote, if: -> { magento_id.nil? }
 
-    before_save :set_magento_customer, if: -> { push_customer }
-    before_save :set_magento_addresses, if: -> { push_addresses }
-    before_save :set_magento_shipping_method, if: -> { push_shipping_method }
-    before_save :set_magento_payment_method, if: -> { push_payment_method }
+    before_save :set_magento_customer, if: -> { push_customer.to_bool }
+    before_save :set_magento_addresses, if: -> { push_addresses.to_bool }
+    before_save :set_magento_shipping_method, if: -> { push_shipping_method.to_bool }
+    before_save :set_magento_payment_method, if: -> { push_payment_method.to_bool }
 
-    after_save :create_subscriber, if: -> { subscribe }
+    after_save :create_subscriber, if: -> { subscribe.to_bool }
 
     # Get the current quote given a quote_id, Store, and User.
     #
@@ -372,6 +372,7 @@ module Gemgento
     #
     # @return [Void]
     def copy_billing_address_to_shipping_address
+      Rails.logger.info 'here'
       self.shipping_address.attributes = self.billing_address.attributes.reject{ |k| k == :id }.merge(
           {
               id: self.shipping_address ? self.shipping_address.id : nil,

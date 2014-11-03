@@ -24,7 +24,7 @@ module Gemgento
     before_validation :manage_subscribe
 
     before_create :magento_create, if: -> { magento_id.nil? }
-    after_save :magento_update, if: -> { sync_needed }
+    after_save :magento_update, if: -> { sync_needed? }
 
     default_scope -> { where(deleted_at: nil) }
 

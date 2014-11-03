@@ -11,20 +11,20 @@ module Gemgento
     attr_accessor :address1, :address2, :address3
 
     validates :addressable, presence: true
-    validates :region, presence: true, if: -> { !self.country.nil? && !self.country.regions.empty? }
+    validates :region, presence: true, if: -> { !country.nil? && !country.regions.empty? }
     validates_uniqueness_of :addressable_id,
                             scope: [:addressable_type, :street, :city, :country, :region, :postcode, :telephone],
                             message: 'address is not unique',
-                            if: -> { self.addressable_type == 'Gemgento::User' }
+                            if: -> { addressable_type == 'Gemgento::User' }
 
     after_find :explode_street_address
     before_validation :strip_whitespace, :implode_street_address
 
-    before_create :create_magento_address, if: -> { self.addressable_type == 'Gemgento::User' && self.magento_id.nil? }
-    before_update :update_magento_address, if: -> { self.addressable_type == 'Gemgento::User' && !self.magento_id.nil? && self.sync_needed? }
-    before_destroy :destroy_magento_address, if: -> { self.addressable_type == 'Gemgento::User' && !self.magento_id.nil? }
+    before_create :create_magento_address, if: -> { addressable_type == 'Gemgento::User' && magento_id.nil? }
+    before_update :update_magento_address, if: -> { addressable_type == 'Gemgento::User' && !magento_id.nil? && sync_needed? }
+    before_destroy :destroy_magento_address, if: -> { addressable_type == 'Gemgento::User' && !magento_id.nil? }
 
-    after_save :enforce_single_default, if: -> { self.addressable_type == 'Gemgento::User' }
+    after_save :enforce_single_default, if: -> { addressable_type == 'Gemgento::User' }
 
     default_scope -> { order(is_billing: :desc, is_shipping: :desc, updated_at: :desc) }
 
