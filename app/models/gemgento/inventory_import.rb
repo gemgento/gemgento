@@ -2,6 +2,8 @@ require 'spreadsheet'
 require 'open-uri'
 
 module Gemgento
+
+  # @author Gemgento LLC
   class InventoryImport < ActiveRecord::Base
     include ActiveModel::Validations
 
