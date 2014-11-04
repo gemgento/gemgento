@@ -1,5 +1,6 @@
 module Gemgento
   class User::RegistrationSessionController < User::BaseController
+    prepend_before_filter :require_no_authentication
 
     skip_before_filter :auth_user
     before_filter :set_user_instances
@@ -90,6 +91,12 @@ module Gemgento
 
     def after_register_path
       edit_user_registration_path
+    end
+
+    def require_no_authentication
+      if user_signed_in?
+        redirect_to after_sign_in_path, alert: 'Already signed in.'
+      end
     end
 
   end
