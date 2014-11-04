@@ -23,10 +23,16 @@ module Gemgento
 
     after_commit :process
 
+    # Check if there are any active image imports.
+    #
+    # @return [Boolean]
     def self.is_active?
-      ImageImport.where(is_active: true).count > 0
+      ImageImport.where(is_active: true).any?
     end
 
+    # Import the images.
+    #
+    # @return [Void]
     def process
       if self.spreadsheet.url =~ URI::regexp
         @worksheet = Spreadsheet.open(open(self.spreadsheet.url)).worksheet(0)
@@ -51,33 +57,58 @@ module Gemgento
       ImageImport.set_callback(:commit, :after, :process)
     end
 
+    # Create a string from the image_labels array.
+    #
+    # @return [String]
     def image_labels_raw
       self.image_labels.join("\n") unless self.image_labels.nil?
     end
 
+    # Set the image_labels array from a value string.
+    #
+    # @param values [String]
+    # @return [Void]
     def image_labels_raw=(values)
       self.image_labels = []
       self.image_labels = values.gsub("\r", '').split("\n")
     end
 
+    # Create a string from the image_file_extensions array.
+    #
+    # @return [Array]
     def image_file_extensions_raw
       self.image_file_extensions.join(', ') unless self.image_file_extensions.nil?
     end
 
+    # Set the image_file_extensions array from a value string.
+    #
+    # @param values [String]
+    # @return [Void]
     def image_file_extensions_raw=(values)
       self.image_file_extensions = []
       self.image_file_extensions = values.gsub(' ', '').split(',')
     end
 
+    # Create a string from the image_types array.
+    #
+    # @return [Array]
     def image_types_raw
       self.image_types.join("\n") unless self.image_types.nil?
     end
 
+    # Set the image_types array from a value string.
+    #
+    # @param values [String]
+    # @return [Void]
     def image_types_raw=(values)
       self.image_types = []
       self.image_types = values.gsub("\r", '').split("\n")
     end
 
+    # Set the image_path. A trailing '/' is added if it's missing from the supplied value.
+    #
+    # @param path [String]
+    # @return [Void]
     def image_path=(path)
       path = "#{path}/" unless path[-1, 1].to_s == '/'
       self[:image_path] = path
@@ -85,6 +116,9 @@ module Gemgento
 
     private
 
+    # Destroy all Assets associated with @product.
+    #
+    # @return [Void]
     def destroy_existing_assets
       @product.assets.where(store: self.store).find_each do |asset|
         begin
@@ -95,6 +129,9 @@ module Gemgento
       end
     end
 
+    # Get the headers row from the spreadsheet.
+    #
+    # @return [Array(String)]
     def get_headers
       accepted_headers = []
 
@@ -107,6 +144,9 @@ module Gemgento
       accepted_headers
     end
 
+    # Search for and create all possible images for a product.
+    #
+    # @return [Void]
     def create_images
       # find the correct image file name and path
       self.image_labels.each_with_index do |label, position|
@@ -130,6 +170,13 @@ module Gemgento
       end
     end
 
+    # Create an image for the product.
+    #
+    # @param file_name [String]
+    # @param types [Array(String)]
+    # @param position [Integer]
+    # @param label [String]
+    # @return [Void]
     def create_image(file_name, types, position, label)
       asset = Asset.new
       asset.product = @product
