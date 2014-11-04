@@ -1,6 +1,12 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class MagentoDB < ActiveRecord::Base
 
+    # Associate configurable and simple Products by reading directly from the Magento table with the association data.
+    #
+    # @param configurable_product [Gemgento::Product]
+    # @return [Array(Gemgento::Product)]
     def self.associated_simple_products(configurable_product)
       establish_connection("magento_#{Rails.env}".to_sym)
 
@@ -15,6 +21,10 @@ module Gemgento
       simple_products
     end
 
+    # Query the Magento database using ActiveRecord.
+    #
+    # @param table_name [String]
+    # @return [ActiveRecord::Result]
     def self.query(table_name)
       establish_connection("magento_#{Rails.env}".to_sym)
 
