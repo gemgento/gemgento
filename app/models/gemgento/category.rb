@@ -26,7 +26,7 @@ module Gemgento
     after_save :enforce_positioning, if: :position_changed?
 
     before_save :create_magento_category, if: -> { magento_id.nil? }
-    before_save :update_magento_category, if: -> { sync_needed && !magento_id.nil? }
+    before_save :update_magento_category, if: -> { sync_needed? && !magento_id.nil? }
 
     # Create a string representation of the path from the root to the Category.
     #
