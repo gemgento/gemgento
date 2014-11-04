@@ -16,10 +16,16 @@ module Gemgento
 
     after_commit :process
 
+    # Check if any InventoryImport is active.
+    #
+    # @return [Boolean]
     def self.is_active?
       InventoryImport.where(is_active: true).count > 0
     end
 
+    # Import all inventories from the spreadsheet.
+    #
+    # @return [Void]
     def process
       self.is_active = false
 
@@ -46,6 +52,9 @@ module Gemgento
 
     private
 
+    # Get the headers row from the spreadsheet.
+    #
+    # @return [Array(String)]
     def get_headers
       accepted_headers = []
 
@@ -58,6 +67,9 @@ module Gemgento
       accepted_headers
     end
 
+    # Set the Inventory for a Product.
+    #
+    # @return [Void]
     def set_inventory
       @stores.each do |store|
         inventory = Inventory.find_or_initialize_by(product: @product, store: store)
