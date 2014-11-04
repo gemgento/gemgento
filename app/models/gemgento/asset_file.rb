@@ -10,6 +10,10 @@ module Gemgento
 
     validates_attachment_content_type :file, content_type: /\Aimage\/.*\Z/
 
+    # Check that a url is valid.
+    #
+    # @param url [String]
+    # @return [Boolean]
     def self.valid_url(url)
       url = URI.parse(url)
       req = Net::HTTP.new(url.host, url.port)
