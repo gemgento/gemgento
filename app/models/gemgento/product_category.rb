@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class ProductCategory < ActiveRecord::Base
     belongs_to :product
     belongs_to :category

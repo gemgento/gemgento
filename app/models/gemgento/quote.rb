@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class Quote < ActiveRecord::Base
     belongs_to :store, class_name: 'Store'
     belongs_to :user, class_name: 'User'

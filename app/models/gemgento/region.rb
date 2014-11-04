@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class Region < ActiveRecord::Base
     belongs_to :country
 

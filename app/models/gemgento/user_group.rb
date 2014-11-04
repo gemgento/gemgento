@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class UserGroup < ActiveRecord::Base
     def self.index
       if UserGroup.all.size == 0

@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class ProductAttributeOption < ActiveRecord::Base
     belongs_to :product_attribute
     belongs_to :store

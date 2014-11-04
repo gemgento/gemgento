@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class Payment < ActiveRecord::Base
     belongs_to :payable, polymorphic: true
 

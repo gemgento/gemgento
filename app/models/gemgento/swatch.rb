@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class Swatch < ActiveRecord::Base
     has_many :products
 

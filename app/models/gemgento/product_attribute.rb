@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class ProductAttribute < ActiveRecord::Base
     has_and_belongs_to_many :product_attribute_sets, -> { uniq },
                             :join_table => 'gemgento_attribute_set_attributes'

@@ -2,6 +2,8 @@ require 'spreadsheet'
 require 'open-uri'
 
 module Gemgento
+
+  # @author Gemgento LLC
   class ProductImport < ActiveRecord::Base
     include ActiveModel::Validations
     belongs_to :product_attribute_set

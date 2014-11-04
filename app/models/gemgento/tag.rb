@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class Tag < ActiveRecord::Base
     has_many :store_tags, class_name: 'StoreTag'
     has_many :stores, through: :store_tags

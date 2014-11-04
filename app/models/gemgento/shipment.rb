@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class Shipment < ActiveRecord::Base
     belongs_to :order
 

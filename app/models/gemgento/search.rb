@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class Search
 
     def self.products(term)

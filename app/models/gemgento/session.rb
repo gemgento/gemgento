@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class Session < ActiveRecord::Base
 
     def self.get(client, force_new_session)

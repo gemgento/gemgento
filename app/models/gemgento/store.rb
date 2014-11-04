@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class Store < ActiveRecord::Base
     has_many :inventories
     has_many :orders

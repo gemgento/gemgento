@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class Sync < ActiveRecord::Base
     scope :active, -> { where(is_complete: false) }
 

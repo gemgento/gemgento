@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class Product < ActiveRecord::Base
 
     belongs_to :product_attribute_set
