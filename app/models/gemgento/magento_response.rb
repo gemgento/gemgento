@@ -4,10 +4,5 @@ module Gemgento
     serialize :body, Hash
 
     attr_accessor :body_overflow
-
-    def success?
-      self.success
-    end
-
   end
 end
