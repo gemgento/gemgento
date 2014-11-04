@@ -454,15 +454,6 @@ class GemgentoZeroNineZero < ActiveRecord::Migration
 
     add_index "gemgento_stores", ["magento_id"], name: "index_gemgento_stores_on_magento_id", unique: true, using: :btree
 
-    create_table "gemgento_swatches", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
-      t.string "name"
-      t.string "description"
-      t.string "image_file_name"
-      t.string "image_content_type"
-      t.integer "image_file_size"
-      t.datetime "image_updated_at"
-    end
-
     create_table "gemgento_syncs", options: 'ENGINE=InnoDB DEFAULT CHARSET=utf8', force: true do |t|
       t.string "subject"
       t.datetime "created_at"

@@ -4,7 +4,6 @@ module Gemgento
   class Product < ActiveRecord::Base
 
     belongs_to :product_attribute_set
-    belongs_to :swatch
 
     has_many :assets, dependent: :destroy
     has_many :categories, -> { distinct }, through: :product_categories
@@ -269,16 +268,6 @@ module Gemgento
       products = products.readonly(false)
 
       return products
-    end
-
-    def swatches
-      swatches = []
-
-      self.simple_products.each do |p|
-        swatches << p.swatch unless p.swatch.nil? || swatches.include?(p.swatch)
-      end
-
-      return swatches
     end
 
     # Get the product price.
