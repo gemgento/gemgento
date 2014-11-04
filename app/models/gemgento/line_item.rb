@@ -13,6 +13,10 @@ module Gemgento
 
     attr_accessor :async
 
+    # JSON representation of the LineItem.
+    #
+    # @param options [Hash]
+    # @return [Void]
     def as_json(options = nil)
       result = super
       result['product'] = self.product.as_json({ store: Store.find(self.itemizable.store.id) })
@@ -21,6 +25,9 @@ module Gemgento
 
     private
 
+    # Create or Update the associated Magento Quote Item.
+    #
+    # @return [Boolean]
     def push_magento_quote_item
       if new_record?
         response = API::SOAP::Checkout::Product.add(itemizable, [self])
@@ -36,6 +43,9 @@ module Gemgento
       end
     end
 
+    # Create or Update the associated Magento Quote Item asynchronously.
+    #
+    # @return [Void]
     def push_magento_quote_item_async
       if new_record?
         Cart::AddItemWorker.perform_async(self.id)
@@ -44,6 +54,9 @@ module Gemgento
       end
     end
 
+    # Destroy the associated Magento Quote Item.
+    #
+    # @return [Boolean]
     def destroy_magento_quote_item
       response = API::SOAP::Checkout::Product.remove(itemizable, [self])
 
