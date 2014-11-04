@@ -33,7 +33,7 @@ module Gemgento
 
     def security_code
       if (@record.cc_cid.length < 3 || @record.cc_cid.length > 4) || # between 3 and 4 digits
-          @record.cc_cid.gsub(/[^0-9a-z ]/i, '') != @record.cc_cid || # numbers only
+          @record.cc_cid.gsub(/\D/, '') != @record.cc_cid || # numbers only
           !(1..9999).include?(@record.cc_cid.to_i)
 
         @record.errors[:cc_cid] << 'is invalid'
