@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class LineItem < ActiveRecord::Base
     belongs_to :itemizable, polymorphic: true, touch: true
     belongs_to :product
