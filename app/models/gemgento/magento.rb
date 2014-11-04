@@ -1,11 +1,17 @@
 module Gemgento
   class Magento
-    # Log into the Magento API and setup the session and client
+    # Log into the Magento API and set the session and client.
+    #
+    # @param force_new_session [Boolean]
+    # @return [Void]
     def self.api_login(force_new_session = false)
       @client = Savon.client(client_config)
       @session = Session.get(@client, force_new_session)
     end
 
+    # Define the client configuration.
+    #
+    # @return [Hash]
     def self.client_config
       config = {
         wsdl: "#{Config[:magento][:url]}/index.php/api/v#{Config[:magento][:api_version]}_#{Config[:magento][:api_type]}/index/wsdl/1",
@@ -78,6 +84,10 @@ module Gemgento
       return magento_response
     end
 
+    # Fill in missing empty strings.  Empty strings are represented by { :'@xsi:type' => 'xsd:string' }.
+    #
+    # @param subject [Hash]
+    # @return [Hash]
     def self.replace_empty_strings(subject)
       if subject == { :'@xsi:type' => 'xsd:string' }
         return ''
@@ -90,6 +100,10 @@ module Gemgento
       end
     end
 
+    # Enforce string on subject.  If it's not a String, an empty string is returned.
+    #
+    # @param subject [*]
+    # @return [String]
     def self.enforce_savon_string(subject)
       if subject.is_a? String
         subject
@@ -98,6 +112,10 @@ module Gemgento
       end
     end
 
+    # Enforce an array on the subject.  If the subject is not an array, it is inserted into a single element array.
+    #
+    # @param subject [*]
+    # @return [Array]
     def self.enforce_savon_array(subject)
       if subject.is_a? Array
         subject
