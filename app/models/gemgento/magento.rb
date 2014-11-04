@@ -1,4 +1,6 @@
 module Gemgento
+
+  # @author Gemgento LLC
   class Magento
     # Log into the Magento API and set the session and client.
     #
