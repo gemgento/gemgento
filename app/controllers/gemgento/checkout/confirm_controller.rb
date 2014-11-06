@@ -2,8 +2,6 @@ module Gemgento
   class Checkout::ConfirmController < CheckoutController
     respond_to :json, :html
 
-    before_action :paypal_redirect, if: -> { @quote.payment.method == 'paypal' }
-
     def show
       @shipping_method = get_magento_shipping_method
 
@@ -20,8 +18,14 @@ module Gemgento
         if @quote.convert(request.remote_ip)
           session.delete :payment_data
           session[:order] = @quote.order.id
-          format.html { redirect_to checkout_thank_you_path }
-          format.json { render json: { result: true, order: @quote.order } }
+
+          if !@quote.payment.method.include?('paypal')
+            format.html { redirect_to checkout_thank_you_path }
+            format.json { render json: { result: true, order: @quote.order } }
+          else
+            format.html { redirect_to paypal_redirect_url }
+            format.json { render json: { result: true, paypal_redirect_url: paypal_redirect_url } }
+          end
         else
           @shipping_method = get_magento_shipping_method
           format.html { render 'show' }
@@ -33,8 +37,8 @@ module Gemgento
 
     private
 
-    def paypal_redirect
-      redirect_to "#{Gemgento::Config[:magento][:url]}/paypal/standard/redirect?quote_id=#{@quote.magento_id}"
+    def paypal_redirect_url
+      "#{Gemgento::Config[:magento][:url]}/paypal/standard/redirect?quote_id=#{@quote.magento_id}&store_id#{@quote.store.magento_id}"
     end
 
   end
