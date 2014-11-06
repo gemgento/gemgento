@@ -38,7 +38,7 @@ module Gemgento
     private
 
     def paypal_redirect_url
-      "#{Gemgento::Config[:magento][:url]}/paypal/standard/redirect?quote_id=#{@quote.magento_id}&store_id#{@quote.store.magento_id}"
+      "#{Gemgento::Config[:magento][:url]}/paypal/standard/redirect?quote_id=#{@quote.magento_id}&store_id=#{@quote.store.magento_id}"
     end
 
   end
