@@ -88,6 +88,11 @@ module Gemgento
             # TODO: update a product attribute set on Magento
           end
 
+          # Add an attribute option in Magento.
+          #
+          # @param product_attribute_option [Gemgento::ProductAttributeOption]
+          # @param product_attribute [Gemgento::ProductAttribute]
+          # @return [Gemgento::MagentoResponse]
           def self.add_option(product_attribute_option, product_attribute)
             message = {attribute: product_attribute.magento_id, data: {
                 label: {item: [{'store_id' => {item: Store.all.map { |s| s.magento_id.to_s } << 0}, value: product_attribute_option.label}]},
@@ -97,6 +102,8 @@ module Gemgento
 
             response = Magento.create_call(:catalog_product_attribute_add_option, message)
             fetch_all_options(product_attribute) if response.success?
+
+            return response
           end
 
           def self.remove_option
