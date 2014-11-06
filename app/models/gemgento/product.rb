@@ -45,8 +45,8 @@ module Gemgento
 
     after_find :manage_cache_expires_at
 
-    before_save :create_magento_product, if: -> { sync_needed? && !magento_id.nil? }
-    before_save :update_magento_product, if: -> { sync_needed? && magento_id.nil? }
+    before_save :create_magento_product, if: -> { sync_needed? && magento_id.nil? }
+    before_save :update_magento_product, if: -> { sync_needed? && !magento_id.nil? }
     after_save :touch_categories, :touch_configurables
 
     before_destroy :delete_associations
