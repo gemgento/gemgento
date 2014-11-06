@@ -2,6 +2,8 @@ module Gemgento
   class Checkout::ConfirmController < CheckoutController
     respond_to :json, :html
 
+    before_action :paypal_redirect, if: -> { @quote.payment.method == 'paypal' }
+
     def show
       @shipping_method = get_magento_shipping_method
 
@@ -27,6 +29,12 @@ module Gemgento
         end
       end
 
+    end
+
+    private
+
+    def paypal_redirect
+      redirect_to "#{Gemgento::Config[:magento][:url]}/paypal/standard/redirect?quote_id=#{@quote.magento_id}"
     end
 
   end

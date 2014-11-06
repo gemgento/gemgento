@@ -6,6 +6,6 @@ module Gemgento
 
     attr_accessor :cc_number, :cc_cid, :save_card, :payment_id
 
-    validates :payable, presence: true
+    validates :method, :payable, presence: true
   end
 end
