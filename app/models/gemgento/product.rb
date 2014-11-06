@@ -55,13 +55,12 @@ module Gemgento
 
     attr_accessor :configurable_attribute_ordering
 
-    def self.index
-      if Product.all.size == 0
-        API::SOAP::Catalog::Product.fetch_all
-      end
-      Product.all
-    end
-
+    # Set an attribute value.
+    #
+    # @param code [String] attribute code
+    # @param value [String, Boolean, Integer, Float, BigDecimal]
+    # @param store [Gemgento::Store]
+    # @return [Boolean]
     def set_attribute_value(code, value, store = nil)
       store = Store.current if store.nil?
 
@@ -109,6 +108,11 @@ module Gemgento
       end
     end
 
+    # Get an attribute value.
+    #
+    # @param code [String] attribute code
+    # @param store [Gemgento::Store]
+    # @return [String, Boolean, nil]
     def attribute_value(code, store = nil)
       store = Store.current if store.nil?
       product_attribute_value = self.product_attribute_values.select { |value| !value.product_attribute.nil? && value.product_attribute.code == code.to_s && value.store_id == store.id }.first
@@ -141,7 +145,7 @@ module Gemgento
       return value
     end
 
-    # Attempts to return relations before method missing response
+    # Attempts to return attribute_value before error.
     def method_missing(method, *args)
       begin
         return self.attribute_value(method)
@@ -150,6 +154,11 @@ module Gemgento
       end
     end
 
+    # Determine if product has a specific inventory level.
+    #
+    # @param quantity [Integer, BigDecimal, Float]
+    # @param store [Gemgento::Store]
+    # @return [Boolean]
     def in_stock?(quantity = 1, store = nil)
       store = Store.current if store.nil?
 
@@ -176,23 +185,32 @@ module Gemgento
       end
     end
 
+    # Mark a product deleted.
+    #
+    # @return [Void]
     def mark_deleted
       self.deleted_at = Time.now
       self.shopify_adapter.destroy if self.shopify_adapter
     end
 
+    # Mark a product deleted and save.
+    #
+    # @return [Void]
     def mark_deleted!
       mark_deleted
       self.save
     end
 
-    def related(relation_name)
-      relation_type = RelationType.find_by(name: relation_name)
-      raise "Unknown relation type - #{relation_name}" if relation_type.nil?
-
-      return self.relations.where(relation_type: relation_type).collect { |relation| relation.related_to }
-    end
-
+    # Filter products based on attribute values.
+    #
+    #   filter example:
+    #     {attribute: Gemgento::ProductAttribute.find_by(code: 'size'), value: 'large'})
+    #     or
+    #     {attribute: Gemgento::ProductAttribute.find_by(code: 'size'), value: %w[large small]})
+    #
+    # @param filters [Hash, Array(Hash)]
+    # @param store [Gemgento::Store]
+    # @return [ActiveRecord::Result]
     def self.filter(filters, store = nil)
       store = Store.current if store.nil?
 
@@ -227,6 +245,13 @@ module Gemgento
       return products
     end
 
+    # Order ActiveRecord result by attribute values.
+    #
+    # @param attribute [Gemgento::ProductAttribute]
+    # @param direction ['ASC', 'DESC']
+    # @param is_numeric [Boolean]
+    # @param store [Gemgento::Store]
+    # @return [ActiveRecord::Result]
     def self.order_by_attribute(attribute, direction = 'ASC', is_numeric = false, store = nil)
       store = Store.current if store.nil?
       raise 'Direction must be equivalent to ASC or DESC' if direction != 'ASC' and direction != 'DESC'
@@ -471,21 +496,6 @@ module Gemgento
       return ProductAttributeOption.find_by(product_attribute: product_attribute, label: option_label, store: store)
     end
 
-    # Push local product changes to magento
-    def sync_local_to_magento
-
-      if self.sync_needed && self.deleted_at.nil?
-        if !self.magento_id
-
-        else
-
-        end
-
-        self.sync_needed = false
-        self.save
-      end
-    end
-
     # Create an associated magento Product.
     #
     # @return [Boolean]
@@ -529,14 +539,23 @@ module Gemgento
       return true
     end
 
+    # Delete associations.
+    #
+    # @return [Void]
     def delete_associations
       self.configurable_attributes.destroy_all
     end
 
+    # Touch all associated categories.
+    #
+    # @return [Void]
     def touch_categories
       TouchCategory.perform_async(self.categories.pluck(:id)) if self.changed?
     end
 
+    # Touch associated configurable products.
+    #
+    # @return [Void]
     def touch_configurables
       self.configurable_products.update_all(updated_at: Time.now) if self.changed?
       TouchProduct.perform_async(self.configurable_products.pluck(:id)) if self.changed?
