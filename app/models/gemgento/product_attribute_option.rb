@@ -6,7 +6,7 @@ module Gemgento
     belongs_to :store
 
     has_many :product_attribute_values,
-              ->(join_or_model) {
+              Proc.new { |join_or_model|
                if join_or_model.is_a? ProductAttributeOption
                  where(product_attribute_id: join_or_model.product_attribute_id)
                else
