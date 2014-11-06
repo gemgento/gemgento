@@ -7,16 +7,16 @@ module Gemgento
     has_and_belongs_to_many :stores, join_table: 'gemgento_price_rules_stores', class_name: 'Store'
     has_and_belongs_to_many :user_groups, join_table: 'gemgento_price_rules_user_groups', class_name: 'UserGroup'
 
-    after_save :apply
+    after_save :apply, if: -> { changed? }
 
     default_scope ->{ order(sort_order: :asc) }
     scope :active, -> { where(is_active: true) }
 
     # Calculate a product price based on PriceRules.
     #
-    # @param [Product] product
-    # @param [User] user
-    # @param [Store] store
+    # @param product [Gemgento::Product]
+    # @param user [Gemgento::User]
+    # @param store [Gemgento::Store]
     # @return [Float]
     def self.calculate_price(product, user = nil, store = nil)
       store = Store.first if store.nil?
@@ -35,9 +35,9 @@ module Gemgento
 
     # Determines if the rule is valid for a product.
     #
-    # @param [Product] product
-    # @param [UserGroup] user_group
-    # @param [Store] store
+    # @param product [Gemgento::Product]
+    # @param user_group [Gemgento::UserGroup]
+    # @param store [Gemgento::Store]
     # @return [Boolean]
     def is_valid?(product, user_group, store)
       if !self.is_active?
@@ -57,7 +57,7 @@ module Gemgento
 
     # Calculate the discount based on rule actions.
     #
-    # @param [Float] price
+    # @param price [Float]
     # @return Float
     def calculate(price)
       case self.simple_action
@@ -76,9 +76,9 @@ module Gemgento
 
     # Determines if the condition is met.
     #
-    # @param [Hash] condition
-    # @param [Product] product
-    # @param [Store] store
+    # @param condition [Hash]
+    # @param product [Gemgento::Product]
+    # @param store [Gemgento::Store]
     # @return [Boolean]
     def self.meets_condition?(condition, product, store)
       if condition['type'] == 'catalogrule/rule_condition_combine'
@@ -92,9 +92,9 @@ module Gemgento
 
     # Determines if the combined child conditions are met.
     #
-    # @param [Hash] condition
-    # @param [Product] product
-    # @param [Store] store
+    # @param condition [Hash]
+    # @param product [Gemgento::Product]
+    # @param store [Gemgento::Store]
     # @return [Boolean]
     def self.meets_condition_combine?(condition, product, store)
       return true if condition['conditions'].nil?
@@ -126,9 +126,9 @@ module Gemgento
 
     # Determines if the product conditions are met.
     #
-    # @param [Hash] condition
-    # @param [Product] product
-    # @param [Store] store
+    # @param condition [Hash]
+    # @param product [Gemgento::Product]
+    # @param store [Gemgento::Store]
     # @return [Boolean]
     def self.meets_condition_product?(condition, product, store)
       if condition['attribute'] == 'category_ids'
@@ -142,9 +142,9 @@ module Gemgento
 
     # Determines if a product meets a category based condition.
     #
-    # @param [Hash] condition
-    # @param [Product] product
-    # @param [Store] store
+    # @param condition [Hash]
+    # @param product [Gemgento::Product]
+    # @param store [Gemgento::Store]
     # @return [Boolean]
     def self.meets_category_condition?(condition, product, store)
       magento_category_ids = ProductCategory.where(product: product, store: store).includes(:category).map{ |pc| pc.category.magento_id unless pc.category.nil? }.uniq
@@ -162,8 +162,8 @@ module Gemgento
 
     # Determines if a product meets an attribute set based condition.
     #
-    # @param [Hash] condition
-    # @param [Product] product
+    # @param condition [Hash]
+    # @param product [Gemgento::Product]
     # @return [Boolean]
     def self.meets_attribute_set_condition?(condition, product)
       magento_attribute_set_id = product.product_attribute_set.magento_id
@@ -181,9 +181,9 @@ module Gemgento
 
     # Determines if a product meets an attribute based condition.
     #
-    # @param [Hash] condition
-    # @param [Product] product
-    # @param [Store] store
+    # @param condition [Hash]
+    # @param product [Gemgento::Product]
+    # @param store [Gemgento::Store]
     # @return [Boolean]
     def self.meets_attribute_condition?(condition, product, store)
       return false unless attribute = ProductAttribute.find_by(code: condition['attribute'])
@@ -225,9 +225,9 @@ module Gemgento
 
     # Get the earliest date and time that a price rule will expire for a given product.
     #
-    # @param [Product] product
-    # @param [UserGroup] user_group
-    # @param [Store] store
+    # @param product [Gemgento::Product]
+    # @param user_group [Gemgento::UserGroup]
+    # @param store [Gemgento::Store]
     # @return [DateTime, nil]
     def self.first_to_expire(product, user_group, store)
       expires_at = nil
@@ -251,7 +251,7 @@ module Gemgento
     #
     # @return [Void]
     def apply
-      ApplyPriceRule.perform_async(self.id) if self.changed?
+      ApplyPriceRule.perform_async(self.id)
     end
 
   end
