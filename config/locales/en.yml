@@ -3,8 +3,22 @@ en:
     attributes:
       gemgento/payment:
         cc_owner: Name on card
-        cc_last4: Card number
+        cc_number: Card number
+        cc_last4: Last 4 numbers
         cc_exp_y: Expiration year
+        cc_exp_year: Expiration year
+        cc_exp_month: Expiration month
+        cc_exp_m: Expiration month
+        cc_type: Card type
+        cc_cid: CVV code
+
+      payment:
+        cc_owner: Name on card
+        cc_number: Card number
+        cc_last4: Last 4 numbers
+        cc_exp_y: Expiration year
+        cc_exp_year: Expiration year
+        cc_exp_month: Expiration month
         cc_exp_m: Expiration month
         cc_type: Card type
         cc_cid: CVV code
