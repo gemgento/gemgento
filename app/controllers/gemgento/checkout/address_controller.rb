@@ -33,12 +33,12 @@ module Gemgento
           billing_address_attributes:
               [
                   :id, :first_name, :last_name, :address1, :address2, :country_id, :city, :region_id, :postcode,
-                  :telephone, :is_billing, :is_shipping
+                  :telephone, :is_billing, :is_shipping, :copy_to_user
               ],
           shipping_address_attributes:
               [
                   :id, :first_name, :last_name, :address1, :address2, :country_id, :city, :region_id, :postcode,
-                  :telephone, :is_billing, :is_shipping
+                  :telephone, :is_billing, :is_shipping, :copy_to_user
               ]
       )
     end

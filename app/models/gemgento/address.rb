@@ -8,7 +8,7 @@ module Gemgento
 
     has_one :shopify_adapter, class_name: 'Adapter::ShopifyAdapter', as: :gemgento_model
 
-    attr_accessor :address1, :address2, :address3
+    attr_accessor :address1, :address2, :address3, :copy_to_user
 
     validates :addressable, presence: true
     validates :region, presence: true, if: -> { !country.nil? && !country.regions.empty? }
@@ -25,21 +25,9 @@ module Gemgento
     before_destroy :destroy_magento_address, if: -> { addressable_type == 'Gemgento::User' && !magento_id.nil? }
 
     after_save :enforce_single_default, if: -> { addressable_type == 'Gemgento::User' }
+    after_save :copy_from_quote_to_user, if: -> { addressable_type == 'Gemgento::Quote' && copy_to_user.to_bool }
 
     default_scope -> { order(is_billing: :desc, is_shipping: :desc, updated_at: :desc) }
-
-
-    # Pushes Address changes to Magento if the address belongs to a User.  Creates a new address if one does not exist
-    # and updates existing addresses.
-    #
-    # @return [Boolean] if the push to Magneto was successful
-    def push
-      if self.user_address_id.nil?
-        API::SOAP::Customer::Address.create(self)
-      else
-        API::SOAP::Customer::Address.update(self)
-      end
-    end
 
     # Return the Address as JSON.
     #
@@ -73,21 +61,15 @@ module Gemgento
       end
     end
 
-    # Copy an existing address to a user's address book.
+    # Duplicate address from quote to user.
     #
-    # @param source [Address] the existing address that will be copied.
-    # @param user [User] the user who will be associated with the new address.
-    # @param is_default [Boolean] true if the new address will be the default for it's type, false otherwise.
-    # @return [Address] the newly created Address.
-    def self.copy_to_address_book(source, user, is_default_billing = false, is_default_shipping = false)
-      address = source.dup
-      address.user = user
-      address.is_default_billing = is_default_billing
-      address.is_default_shipping = is_default_shipping
-      address.sync_needed = true
+    # @return [Void] the newly created Address.
+    def copy_from_quote_to_user
+      address = duplicate
+      address.addressable = addressable.user
+      address.is_billing = self.is_billing
+      address.is_shipping = self.is_shipping
       address.save
-
-      return address
     end
 
     # Set the street attribute.  Override required to explode the street into address lines.
@@ -151,23 +133,44 @@ module Gemgento
       self.street = street.join("\n") unless street.blank?
     end
 
-    # If a sync is required, push the address to Magento.  This is the after save callback method.
+    # Create an associated address in Magento.
     #
-    # @return [void]
-    def sync_local_to_magento
-      if self.sync_needed
-        self.push
-        self.sync_needed = false
-        self.save
+    # @return [Boolean]
+    def create_magento_address
+      response = API::SOAP::Customer::Address.create(self)
+      if response.success?
+        self.magento_id = response.body[:result]
+        return true
+      else
+        errors.add(:base, response.body[:faultstring])
+        return false
+      end
+    end
+
+    # Update associated address in Magento.
+    #
+    # @return [Boolean]
+    def update_magento_address
+      response = API::SOAP::Customer::Address.update(self)
+      if response.success?
+        return true
+      else
+        errors.add(:base, response.body[:faultstring])
+        return false
       end
     end
 
     # Destroy the address in Magento.  This is the before destroy callback.
     #
     # @return [void]
-    def destroy_magento
-      unless self.user_address_id.nil?
-        API::SOAP::Customer::Address.delete(self.user_address_id)
+    def destroy_magento_address
+      response = API::SOAP::Customer::Address.delete(self.magento_id)
+
+      if response.success?
+        return true
+      else
+        errors.add(:base, response.body[:faultstring])
+        return false
       end
     end
 
