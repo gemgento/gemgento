@@ -9,18 +9,20 @@ module Gemgento
     # @param [Boolean] affects_cache_expiration
     # @return [Void]
     def perform(product_ids, affects_cache_expiration = false)
-      Gemgento::Product.skip_callback(:save, :after, :sync_local_to_magento)
+      Gemgento::Product.skip_callback(:save, :before, :create_magento_product)
+      Gemgento::Product.skip_callback(:save, :before, :update_magento_product)
 
       Gemgento::Product.where(id: product_ids).each do |product|
         if affects_cache_expiration
-           product.set_cache_expires_at
+          product.set_cache_expires_at
         else
           product.updated_at = Time.now
           product.save
         end
       end
 
-      Gemgento::Product.set_callback(:save, :after, :sync_local_to_magento)
+      Gemgento::Product.set_callback(:save, :before, :create_magento_product)
+      Gemgento::Product.set_callback(:save, :before, :update_magento_product)
     end
   end
 end
