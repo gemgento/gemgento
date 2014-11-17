@@ -311,15 +311,7 @@ module Gemgento
     # @return [BigDecimal]
     def subtotal
       if self.line_items.any?
-        prices = self.line_items.map do |line_item|
-          if line_item.product.magento_type == 'giftvoucher'
-            line_item.product.gift_price.to_d * line_item.qty_ordered.to_d
-          else
-            line_item.product.price(self.user, self.store).to_d * line_item.qty_ordered.to_d
-          end
-        end
-
-        return prices.inject(&:+)
+        return self.line_items.map{ |li| li.product.price(self.user, self.store).to_d * li.qty_ordered.to_d }.inject(&:+)
       else
         return 0
       end

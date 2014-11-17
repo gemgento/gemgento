@@ -301,10 +301,25 @@ module Gemgento
     # @param store [Store]
     # @return Float
     def price(user = nil, store = nil)
-      if self.has_special?(store)
+      if self.magento_type == 'giftvoucher'
+        return calculate_gift_price(store)
+      elsif self.has_special?(store)
         return self.attribute_value('special_price', store).to_f
       else
         return PriceRule.calculate_price(self, user, store)
+      end
+    end
+
+    def calculate_gift_price(store = nil)
+      store = Gemgento::Store.current if store.nil?
+
+      case self.attribute_value('gift_price_type', store)
+      when 'Fixed number'
+        return self.attribute_value('gift_price', store).to_d
+      when 'Percent of Gift Card value'
+        return self.attribute_value('gift_value', store).to_d * (self.attribute_value('gift_price', store).to_d / 100.0)
+      else
+        return self.attribute_value('gift_value', store).to_d
       end
     end
 
