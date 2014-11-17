@@ -47,7 +47,10 @@ module Gemgento
       1.upto @worksheet.last_row_index do |index|
         puts "Working on row #{index}"
         @row = @worksheet.row(index)
-        @product = Product.not_deleted.find_by(sku: @row[@headers.index('sku').to_i].to_s.strip)
+        sku = @row[@headers.index('sku').to_i].to_s.strip
+        next if sku.blank?
+
+        @product = Product.not_deleted.find_by(sku: sku)
         API::SOAP::Catalog::ProductAttributeMedia.fetch(@product, self.store) # make sure we know about all existing images
 
         destroy_existing_assets if self.destroy_existing

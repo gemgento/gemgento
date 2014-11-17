@@ -35,6 +35,7 @@ module Gemgento
       1.upto @spreadsheet.last_row_index do |index|
         row = @spreadsheet.row(index)
         sku = row[@headers.index('sku').to_i].to_s.strip
+        next if sku.blank?
 
         if Gemgento::Product.unscoped.not_deleted.find_by(sku: sku).nil?
           errors << sku
