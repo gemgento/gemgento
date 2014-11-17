@@ -17,16 +17,22 @@ module Gemgento
              primary_key: 'value'
     has_many :products, through: :product_attribute_values
 
+    before_save :sync_local_to_magento, if: -> { sync_needed? }
+
     default_scope -> { order(:order) }
 
-    # Push local product changes to magento.
+    # Push local attribute option changes to magento.
     #
     # @return [Void]
     def sync_local_to_magento
-      if self.sync_needed
-        API::SOAP::Catalog::ProductAttribute.add_option(self, self.product_attribute)
+      response = API::SOAP::Catalog::ProductAttribute.add_option(self, self.product_attribute)
+
+      if response.success?
         self.sync_needed = false
-        self.save
+        return true
+      else
+        errors.add(:base, response.body[:faultstring])
+       return false
       end
     end
   end
