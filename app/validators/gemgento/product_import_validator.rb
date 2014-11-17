@@ -39,6 +39,8 @@ module Gemgento
         row = @spreadsheet.row(index)
         sku = row[@headers.index('sku').to_i].to_s.strip
 
+        next if sku.blank? # skip blank skus
+
         if skus.include? sku
           errors << sku
         else

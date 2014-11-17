@@ -53,6 +53,8 @@ module Gemgento
         puts "Working on row #{@index}"
         @row = @worksheet.row(@index)
 
+        next if @row[@headers.index('sku').to_i].to_s.strip.blank? # skip blank skus
+
         if @row[@headers.index('magento_type').to_i].to_s.strip.casecmp('simple') == 0
           associated_simple_products << create_simple_product
         else
@@ -151,10 +153,10 @@ module Gemgento
 
     def set_attribute_values(product)
       @headers.each do |attribute_code|
-        product_attribute = ProductAttribute.find_by(code: attribute_code) # try to load attribute associated with column header
+        next if %w[sku status image visibility magento_type category].include?(attribute_code)
 
         # apply the attribute value if the attribute exists
-        if !product_attribute.nil? && attribute_code != 'sku' && attribute_code != 'status' && attribute_code != 'image'
+        if product_attribute = ProductAttribute.find_by(code: attribute_code) # try to load attribute associated with column header
 
           if product_attribute.frontend_input == 'select'
             label = @row[@headers.index(attribute_code).to_i].to_s.strip.gsub('.0', '')
@@ -172,7 +174,7 @@ module Gemgento
           end
 
           product.set_attribute_value(product_attribute.code, value, self.store)
-        elsif product_attribute.nil? && attribute_code != 'sku' && attribute_code != 'magento_type' && attribute_code != 'category'
+        else
           self.import_errors << "ERROR - row #{@index} - Unknown attribute code, '#{attribute_code}'"
         end
       end
@@ -187,14 +189,9 @@ module Gemgento
       attribute_option.product_attribute = product_attribute
       attribute_option.label = option_label
       attribute_option.store = self.store
-      attribute_option.sync_needed = false
-      attribute_option.save
-
-      attribute_option.sync_needed = true
       attribute_option.sync_local_to_magento
-      attribute_option.destroy
 
-      return ProductAttributeOption.where(product_attribute: product_attribute, label: option_label, store: self.store).first
+      return ProductAttributeOption.find_by(product_attribute: product_attribute, label: option_label, store: self.store)
     end
 
     def set_default_attribute_values(product)
