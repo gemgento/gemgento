@@ -19,7 +19,7 @@ module Gemgento
     cattr_accessor :current
 
     def self.current
-      @@current = Store.first if @@current.nil?
+      @@current = Store.where.not(code: 'admin').first if @@current.nil?
       return @@current
     end
 
