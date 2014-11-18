@@ -6,6 +6,7 @@ module Gemgento
     belongs_to :product
 
     validates :itemizable, :product, presence: true
+    validates_with InventoryValidator, if: -> { itemizable_type == 'Gemgento::Quote' }
 
     before_save :push_magento_quote_item, if: -> { itemizable_type == 'Gemgento::Quote' && !async.to_bool }
     after_save :push_magento_quote_item_async, if: -> { itemizable_type == 'Gemgento::Quote' && async.to_bool }
