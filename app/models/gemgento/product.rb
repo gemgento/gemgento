@@ -207,6 +207,12 @@ module Gemgento
     #     {attribute: Gemgento::ProductAttribute.find_by(code: 'size'), value: 'large'})
     #     or
     #     {attribute: Gemgento::ProductAttribute.find_by(code: 'size'), value: %w[large small]})
+    #     or
+    #     {attribute: [Gemgento::ProductAttribute.find_by(code: 'size'), Gemgento::ProductAttribute.find_by(code: 'dimension')], value: 'large'})
+    #     or
+    #     {attribute: [Gemgento::ProductAttribute.find_by(code: 'size'), Gemgento::ProductAttribute.find_by(code: 'dimension')], value: %w[large small]})
+    #     or
+    #     [{attribute: Gemgento::ProductAttribute.find_by(code: 'size'), value: 'large'}), {attribute: Gemgento::ProductAttribute.find_by(code: 'color'), value: 'red'})]
     #
     # @param filters [Hash, Array(Hash)]
     # @param store [Gemgento::Store]
