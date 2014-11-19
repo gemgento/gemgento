@@ -2,7 +2,7 @@ module Gemgento
   class User::OrdersController < User::BaseController
 
     def index
-      @orders = current_user.orders.order('created_at DESC')
+      @orders = current_user.orders.where.not(status: [nil, '']).order('created_at DESC')
 
       respond_with @orders
     end
