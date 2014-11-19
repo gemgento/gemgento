@@ -19,7 +19,7 @@ module Gemgento
     # @param store [Gemgento::Store]
     # @return [Float]
     def self.calculate_price(product, user = nil, store = nil)
-      store = Store.first if store.nil?
+      store = Store.current if store.nil?
       price = product.attribute_value('price', store).to_f
       user_group = user.nil? ? UserGroup.find_by(magento_id: 0) : user.user_group
 

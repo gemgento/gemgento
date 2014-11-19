@@ -160,7 +160,7 @@ module Gemgento::Adapter::Sellect
         when 'usd'
           store = Gemgento::Store.find_by(code: 'us')
         else
-          store = Gemgento::Store.first
+          store = Gemgento::Store.current
       end
 
       return store

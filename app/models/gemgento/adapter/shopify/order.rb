@@ -176,7 +176,7 @@ module Gemgento::Adapter::Shopify
     # @param order [ShopifyAPI::Order]
     # @return [Gemgento::Store]
     def self.store(order)
-      return Gemgento::Store.first
+      return Gemgento::Store.current
     end
 
     # Calculate the various totals for an order.
