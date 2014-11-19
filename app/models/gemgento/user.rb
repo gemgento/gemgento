@@ -116,9 +116,21 @@ module Gemgento
 
     def saved_credit_cards
       if Config[:extensions]['authorize-net-cim-payment-module']
-        return API::SOAP::AuthorizeNetCim.payment_profiles(self.magento_id)
+        return authnetcim_saved_cards
       else
         super
+      end
+    end
+
+    def authnetcim_saved_cards
+      response = API::SOAP::Authnetcim::Payment.list(self.magento_id)
+
+      if response.success?
+        if response.body[:response][:item].nil?
+          return []
+        else
+          return response.body[:response][:item].is_a?(Array) ? response.body[:response][:item] : [response.body[:response][:item]]
+        end
       end
     end
 
