@@ -6,26 +6,26 @@ module Gemgento
 
           # Add Coupon code to a Magento Quote.
           #
-          # @param cart [Gemgento::Quote]
+          # @param quote [Gemgento::Quote]
           # @param coupon_code [String]
           # @return [Gemgento::MagentoResponse]
-          def self.add(cart, coupon_code)
+          def self.add(quote, coupon_code)
             message = {
-                quote_id: cart.id,
+                quote_id: quote.magento_id,
                 coupon_code: coupon_code,
-                store_id: cart.store.magento_id
+                store_id: quote.store.magento_id
             }
             Magento.create_call(:shopping_cart_coupon_add, message)
           end
 
           # Remove coupon codes from a Magento Quote.
           #
-          # @param cart [Gemgento::Quote]
+          # @param quote [Gemgento::Quote]
           # @return [Gemgento::MagentoResponse]
-          def self.remove(cart)
+          def self.remove(quote)
             message = {
-                quote_id: cart.id,
-                store_id: cart.store.magento_id
+                quote_id: quote.magento_id,
+                store_id: quote.store.magento_id
             }
             Magento.create_call(:shopping_cart_coupon_remove, message)
           end
