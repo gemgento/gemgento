@@ -11,7 +11,7 @@ module Gemgento
           # @return [Gemgento::MagentoResponse]
           def self.add(cart, coupon_code)
             message = {
-                quote_id: cart.magento_quote_id,
+                quote_id: cart.id,
                 coupon_code: coupon_code,
                 store_id: cart.store.magento_id
             }
@@ -24,7 +24,7 @@ module Gemgento
           # @return [Gemgento::MagentoResponse]
           def self.remove(cart)
             message = {
-                quote_id: cart.magento_quote_id,
+                quote_id: cart.id,
                 store_id: cart.store.magento_id
             }
             Magento.create_call(:shopping_cart_coupon_remove, message)
