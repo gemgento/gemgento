@@ -21,6 +21,7 @@ module Gemgento
     attr_accessor :tax, :total, :push_cart_customer, :subscribe
 
     validates :customer_email, format: /@/, allow_nil: true
+    validates :status, presence: true
 
     # Return the increment_id instead of id.  This is for privacy purposes.
     #
