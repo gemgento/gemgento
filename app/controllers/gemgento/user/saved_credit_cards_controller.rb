@@ -43,11 +43,11 @@ module Gemgento
 
     def saved_credit_card_params
       params.require(:saved_credit_card).permit(
-          :id, :cc_type, :cc_number, :cc_exp_month, :cc_exp_year,
+          :id, :cc_type, :cc_number, :exp_month, :exp_year, :cc_cid,
           address_attributes:
               [
                   :id, :first_name, :last_name, :address1, :address2, :country_id, :city, :region_id, :postcode,
-                  :telephone, :is_billing, :is_shipping, :copy_to_user
+                  :telephone
               ],
       )
     end

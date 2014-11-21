@@ -10,7 +10,6 @@ module Gemgento
 
     attr_accessor :address1, :address2, :address3, :copy_to_user
 
-    validates :addressable, presence: true
     validates :region, presence: true, if: -> { !country.nil? && !country.regions.empty? }
     validates_uniqueness_of :addressable_id,
                             scope: [:addressable_type, :street, :city, :country, :region, :postcode, :telephone],
