@@ -10,7 +10,7 @@ module Gemgento
 
     has_many :addresses, as: :addressable, class_name: 'Address'
     has_many :recurring_profiles, class_name: 'RecurringProfile'
-    has_many :saved_credit_cards, class_name: 'SavedCreditCard'
+    has_many :saved_credit_cards, class_name: 'SavedCreditCard', dependent: :destroy
 
     has_many :orders, class_name: 'Order'
     accepts_nested_attributes_for :orders
@@ -114,26 +114,6 @@ module Gemgento
       Subscriber.manage self, self.subscribe
     end
 
-    def saved_credit_cards
-      if Config[:extensions]['authorize-net-cim-payment-module']
-        return authnetcim_saved_cards
-      else
-        super
-      end
-    end
-
-    def authnetcim_saved_cards
-      response = API::SOAP::Authnetcim::Payment.list(self.magento_id)
-
-      if response.success?
-        if response.body[:response][:item].nil?
-          return []
-        else
-          return response.body[:response][:item].is_a?(Array) ? response.body[:response][:item] : [response.body[:response][:item]]
-        end
-      end
-    end
-
     private
 
     # Create the user in Magento.  Called as a before_save callback, a failure to create new user in Magento will cancel
@@ -158,7 +138,7 @@ module Gemgento
         response = API::SOAP::Customer::Customer.update(self, store)
 
         unless response.success?
-          self.errors.add(:base, response[:faultstring])
+          self.errors.add(:base, response.body[:faultstring])
           return false
         end
       end

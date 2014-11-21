@@ -39,6 +39,7 @@ module Gemgento
       end
 
       @user.stores << store unless @user.stores.include?(store)
+      API::SOAP::Authnetcim::Payment.fetch(@user) if Config[:extensions]['authorize-net-cim-payment-module']
 
       render nothing: true
     end

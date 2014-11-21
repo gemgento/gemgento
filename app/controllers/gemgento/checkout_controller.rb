@@ -75,6 +75,7 @@ module Gemgento
       @quote.build_payment if @quote.payment.nil?
 
       unless @quote.customer_is_guest
+        API::SOAP::Authnetcim::Payment.fetch(@user) if Config[:extensions]['authorize-net-cim-payment-module']
         @saved_credit_cards = @quote.user.saved_credit_cards
       else
         @saved_credit_cards = []

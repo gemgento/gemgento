@@ -62,9 +62,10 @@ Gemgento::Engine.routes.draw do
 
   # - User Account Actions - #
   namespace :user do
-    resources :orders, only: [:index, :show]
     resources :addresses
+    resources :orders, only: [:index, :show]
     resources :recurring_profiles, only: [:index, :destroy]
+    resources :saved_credit_cards, only: [:index, :new, :create, :destroy]
 
     get '', to: 'home#index', as: 'home'
 

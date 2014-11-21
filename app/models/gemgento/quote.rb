@@ -274,6 +274,7 @@ module Gemgento
         save
 
         HeartBeat.perform_async if Rails.env.production?
+        API::SOAP::Authnetcim::Payment.fetch(self.user) if self.user && Config[:extensions]['authorize-net-cim-payment-module']
         after_convert_success
 
         return true
