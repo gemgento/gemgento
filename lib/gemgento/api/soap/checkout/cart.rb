@@ -37,7 +37,8 @@ module Gemgento
                     'cc_exp_month' => payment.cc_exp_month,
                     'additional_information' => API::SOAP::Checkout::Payment.compose_additional_information(payment)
                 },
-                remote_ip: remote_ip
+                remote_ip: remote_ip,
+                send_email: !payment.is_redirecting_payment_method? # don't send emails for payment methods that require a redirect.
             }
             Magento.create_call(:shopping_cart_order, message)
           end
