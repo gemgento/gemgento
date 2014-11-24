@@ -27,7 +27,7 @@ if defined?(ActiveAdmin)
           f.input :spreadsheet, as: :file, label: 'Spreadsheet'
           f.input :product_attribute_set, as: :select, :include_blank => false, collection: ProductAttributeSet.all.map { |as| [as.name, as.id] }
           f.input :root_category, as: :select, :include_blank => false, collection: Category.all.map { |c| [c.name, c.id] }
-          f.input :store, as: :select, :include_blank => false, collection: Store.all.map { |s| [s.name, s.id] }
+          f.input :store, as: :select, :include_blank => false, collection: Store.where.not(code: 'admin').map { |s| [s.name, s.id] }
           f.input :configurable_attributes,
                   as: :check_boxes,
                   multiple: true,
