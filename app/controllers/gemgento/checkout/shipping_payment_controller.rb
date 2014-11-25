@@ -27,8 +27,14 @@ module Gemgento
 
         if @quote.update(quote_params)
           session[:payment_data] = quote_params[:payment_attributes]
-          format.html { redirect_to checkout_confirm_path }
-          format.json { render json: { result: true, order: @quote, totals: @quote.totals } }
+
+          if !@quote.payment.is_redirecting_payment_method?('payment')
+            format.html { redirect_to checkout_confirm_path }
+            format.json { render json: { result: true, order: @quote, totals: @quote.totals } }
+          else
+            format.html { redirect_to payment_redirect_url }
+            format.json { render json: { result: true, payment_redirect_url: paypal_redirect_url } }
+          end
 
         else
           initialize_shipping_variables

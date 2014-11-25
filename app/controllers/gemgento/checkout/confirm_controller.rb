@@ -19,12 +19,12 @@ module Gemgento
           session.delete :payment_data
           session[:order] = @quote.order.id
 
-          if !@quote.payment.is_redirecting_payment_method?
+          if !@quote.payment.is_redirecting_payment_method?('confirm')
             format.html { redirect_to checkout_thank_you_path }
             format.json { render json: { result: true, order: @quote.order } }
           else
             format.html { redirect_to payment_redirect_url }
-            format.json { render json: { result: true, paypal_redirect_url: paypal_redirect_url } }
+            format.json { render json: { result: true, payment_redirect_url: paypal_redirect_url } }
           end
         else
           @shipping_method = get_magento_shipping_method
@@ -36,17 +36,6 @@ module Gemgento
     end
 
     private
-
-    def payment_redirect_url
-      case @quote.payment.method
-        when 'paypal_standard'
-          "#{Gemgento::Config[:magento][:url]}/paypal/standard/redirect?quote_id=#{@quote.magento_id}&store_id=#{@quote.store.magento_id}"
-        when 'paypal_express'
-          ''
-        else
-          checkout_thank_you_path
-      end
-    end
 
   end
 end

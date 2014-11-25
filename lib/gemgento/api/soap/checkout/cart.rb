@@ -45,16 +45,10 @@ module Gemgento
 
           def self.info(cart)
             message = {
-                quote_id: cart.magento_quote_id,
+                quote_id: cart.magento_id,
                 store_id: cart.store.magento_id
             }
-            response = Magento.create_call(:shopping_cart_info, message)
-
-            if response.success?
-              return response.body[:result]
-            else
-              return false
-            end
+            Magento.create_call(:shopping_cart_info, message)
           end
 
           # Mage a Magento API call to get quote totals.

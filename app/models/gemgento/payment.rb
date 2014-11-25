@@ -8,10 +8,24 @@ module Gemgento
 
     validates :method, :payable, presence: true
 
-    REDIRECTING_PAYMENT_METHODS = ['paypal_standard']
+    REDIRECTING_PAYMENT_METHODS = {
+        paypal_standard: { step: 'confirm' },
+        paypal_express: { step: 'payment' }
+    }
 
-    def is_redirecting_payment_method?
-      REDIRECTING_PAYMENT_METHODS.include? method
+    def is_redirecting_payment_method?(step = nil)
+      puts step
+      if REDIRECTING_PAYMENT_METHODS.has_key?(self.method.to_sym)
+        if step.blank?
+          return true
+        else
+          puts REDIRECTING_PAYMENT_METHODS[self.method.to_sym][:step]
+          return REDIRECTING_PAYMENT_METHODS[self.method.to_sym][:step] == step
+        end
+      else
+        return false
+      end
     end
+
   end
 end

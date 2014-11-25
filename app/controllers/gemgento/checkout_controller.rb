@@ -82,5 +82,16 @@ module Gemgento
       end
     end
 
+    def payment_redirect_url
+      case @quote.payment.method
+        when 'paypal_standard'
+          "#{Gemgento::Config[:magento][:url]}/paypal/standard/redirect?quote_id=#{@quote.magento_id}&store_id=#{@quote.store.magento_id}"
+        when 'paypal_express'
+          "#{Gemgento::Config[:magento][:url]}/paypal/express/start?quote_id=#{@quote.magento_id}&store_id=#{@quote.store.magento_id}#{("&customer_id=#{@quote.user.magento_id}" if @quote.user)}"
+        else
+          checkout_confirm_path
+      end
+    end
+
   end
 end
