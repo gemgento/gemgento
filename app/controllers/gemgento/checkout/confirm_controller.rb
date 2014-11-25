@@ -2,6 +2,8 @@ module Gemgento
   class Checkout::ConfirmController < CheckoutController
     respond_to :json, :html
 
+    before_action :confirm_before_redirect, only: :update
+
     def show
       @shipping_method = get_magento_shipping_method
 
@@ -17,14 +19,13 @@ module Gemgento
       respond_to do |format|
         if @quote.convert(request.remote_ip)
           session.delete :payment_data
-          session[:order] = @quote.order.id
 
-          if !@quote.payment.is_redirecting_payment_method?('confirm')
+          if !@quote.payment.is_redirecting_payment_method?('confirm_after')
             format.html { redirect_to checkout_thank_you_path }
             format.json { render json: { result: true, order: @quote.order } }
           else
-            format.html { redirect_to payment_redirect_url }
-            format.json { render json: { result: true, payment_redirect_url: paypal_redirect_url } }
+            format.html { redirect_to confirm_after_redirect_url }
+            format.json { render json: { result: true, payment_redirect_url: confirm_after_redirect_url } }
           end
         else
           @shipping_method = get_magento_shipping_method
@@ -36,6 +37,33 @@ module Gemgento
     end
 
     private
+
+    def confirm_before_redirect
+      if @quote.payment.is_redirecting_payment_method?('confirm_before')
+        respond_to do |format|
+          format.html { redirect_to confirm_before_redirect_url }
+          format.json { render json: { result: true, payment_redirect_url: confirm_before_redirect_url } }
+        end
+      end
+    end
+
+    def confirm_before_redirect_url
+      case @quote.payment.method
+        when 'paypal_express'
+          "#{Gemgento::Config[:magento][:url]}/paypal/express/placeOrder"
+        else
+          checkout_confirm_path
+      end
+    end
+
+    def confirm_after_redirect_url
+      case @quote.payment.method
+        when 'paypal_standard'
+          "#{Gemgento::Config[:magento][:url]}/paypal/standard/redirect?quote_id=#{@quote.magento_id}&store_id=#{@quote.store.magento_id}"
+        else
+          checkout_confirm_path
+      end
+    end
 
   end
 end
