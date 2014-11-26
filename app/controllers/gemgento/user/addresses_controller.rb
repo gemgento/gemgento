@@ -27,7 +27,7 @@ module Gemgento
       respond_to do |format|
 
         if @address.save
-          format.html { redirect_to user_addresses_path, notice: 'The was successfully created.' }
+          format.html { redirect_to user_addresses_path, notice: 'The address has been added successfully.' }
           format.json { render json: { result: true, address: @address } }
         else
           format.html { render 'new' }
@@ -43,7 +43,7 @@ module Gemgento
 
       respond_to do |format|
         if @address.update_attributes(address_params)
-          format.html { redirect_to user_addresses_path, notice: 'The was successfully updated.' }
+          format.html { redirect_to user_addresses_path, notice: 'The address has been updated successfully.' }
           format.json { render json: { result: true, address: @address } }
         else
           format.html { render 'edit' }
@@ -57,7 +57,7 @@ module Gemgento
 
       respond_to do |format|
         if @address.destroy
-          format.html { redirect_to user_addresses_path, notice: 'The address was destroy.' }
+          format.html { redirect_to user_addresses_path, notice: 'The address has been deleted from your address book.' }
           format.json { render json: { result: true } }
         else
           format.html { render 'index' }
