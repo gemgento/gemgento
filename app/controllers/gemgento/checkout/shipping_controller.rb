@@ -17,7 +17,7 @@ module Gemgento
       @quote.push_shipping_method = true
 
       respond_to do |format|
-        if @quote.set_shipping_method(params[:shipping_method], JSON.parse(cookies[:shipping_methods]))
+        if @quote.update(quote_params)
           format.html { redirect_to checkout_payment_path }
           format.json { render json: { result: true, order: @quote, totals: @quote.totals } }
         else
