@@ -30,12 +30,5 @@ module Gemgento
       self.increment_id
     end
 
-    # Push the gift_message to Magento as a comment.
-    #
-    # @return [Void]
-    def push_gift_message_comment
-      API::SOAP::Sales::Order.add_comment(self.increment_id, self.status, "Gemgento Gift Message: #{self.gift_message}")
-    end
-
   end
 end

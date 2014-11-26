@@ -339,6 +339,14 @@ module Gemgento
       self.save
     end
 
+    # Push the gift_message to associated Magento Order as a comment.
+    #
+    # @return [Void]
+    def push_gift_message_comment
+      API::SOAP::Sales::Order.add_comment(self.order.increment_id, self.order.status, "Gemgento Gift Message: #{self.gift_message}")
+      order.update(gift_message: self.gift_message)
+    end
+
     private
 
     # Create the quote in Magento.  Used as a before_create callback.
