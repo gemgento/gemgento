@@ -73,14 +73,13 @@ module Gemgento
             item = products.select { |p| p[:product_id].to_i == product.magento_id }.first
             pairing.position = item[:position].nil? ? 1 : item[:position][0]
             pairing.store = store
+            pairing.sync_needed = false
             pairing.save
 
             product_category_ids << pairing.id
           end
 
-          ProductCategory.unscoped.
-              where('store_id = ? AND category_id = ? AND id NOT IN (?)', store.id, category.id, product_category_ids).
-              destroy_all
+          ProductCategory.where(store: store, category: category).where.not(id: product_category_ids).destroy_all
         end
       end
     end
