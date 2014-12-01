@@ -3,8 +3,7 @@ module Gemgento
     respond_to :json, :html
 
     def show
-      @shipping_methods = @quote.get_shipping_methods
-      cookies[:shipping_methods] = @shipping_methods.to_json
+      initialize_shipping_variables
 
       respond_to do |format|
         format.html
@@ -21,9 +20,9 @@ module Gemgento
           format.html { redirect_to checkout_payment_path }
           format.json { render json: { result: true, order: @quote, totals: @quote.totals } }
         else
-          flash[:error] = 'Please select a shipping method'
-          format.html { redirect_to checkout_shipping_path }
-          format.json { render json: { result: false, errors: 'Please select a shipping method' }, status: 422 }
+          initialize_shipping_variables
+          format.html { render action: :show }
+          format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
         end
       end
     end

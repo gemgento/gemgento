@@ -19,27 +19,32 @@ module Gemgento
           # Process magento quote.
           #
           # @param [Order] quote
-          # @param [Payment] payment
+          # @param [Gemgento::Payment] payment
           # @param [String] remote_ip
           # @return [MagentoResponse]
           def self.order(quote, payment, remote_ip)
             message = {
                 quote_id: quote.magento_id,
                 store_id: quote.store.magento_id,
-                payment_data: {
-                    'po_number' => payment.po_number,
-                    method: payment.method,
-                    'cc_cid' => payment.cc_cid,
-                    'cc_owner' => payment.cc_owner,
-                    'cc_number' => payment.cc_number,
-                    'cc_type' => payment.cc_type,
-                    'cc_exp_year' => payment.cc_exp_year,
-                    'cc_exp_month' => payment.cc_exp_month,
-                    'additional_information' => API::SOAP::Checkout::Payment.compose_additional_information(payment)
-                },
-                remote_ip: remote_ip,
-                send_email: !payment.is_redirecting_payment_method? # don't send emails for payment methods that require a redirect.
+                remote_ip: remote_ip
             }
+
+            if payment
+              message[:payment_data] = {
+                  'po_number' => payment.po_number,
+                  method: payment.method,
+                  'cc_cid' => payment.cc_cid,
+                  'cc_owner' => payment.cc_owner,
+                  'cc_number' => payment.cc_number,
+                  'cc_type' => payment.cc_type,
+                  'cc_exp_year' => payment.cc_exp_year,
+                  'cc_exp_month' => payment.cc_exp_month,
+                  'additional_information' => API::SOAP::Checkout::Payment.compose_additional_information(payment)
+              }
+
+              message[:send_email] = !payment.is_redirecting_payment_method? # don't send emails for payment methods that require a redirect.
+            end
+
             Magento.create_call(:shopping_cart_order, message)
           end
 

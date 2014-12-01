@@ -14,7 +14,7 @@ module Gemgento
     end
 
     def update
-      @quote.payment.update(session[:payment_data])
+      @quote.payment.update(session[:payment_data]) if @quote.payment && session[:payment_data]
 
       respond_to do |format|
         if @quote.convert(request.remote_ip)
@@ -39,7 +39,7 @@ module Gemgento
     private
 
     def confirm_before_redirect
-      if @quote.payment.is_redirecting_payment_method?('confirm_before')
+      if @quote.payment && @quote.payment.is_redirecting_payment_method?('confirm_before')
         respond_to do |format|
           format.html { redirect_to confirm_before_redirect_url }
           format.json { render json: { result: true, payment_redirect_url: confirm_before_redirect_url } }
