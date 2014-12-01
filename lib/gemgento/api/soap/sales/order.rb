@@ -152,9 +152,10 @@ module Gemgento
             order.increment_id = source[:increment_id]
             order.placed_at = source[:created_at]
             order.store = Store.find_by(magento_id: source[:store_id])
-            order.shipping_address = sync_magento_address_to_local(source[:shipping_address], order, order.shipping_address) unless source[:shipping_address][:address_id].nil?
-            order.billing_address = sync_magento_address_to_local(source[:billing_address], order, order.billing_address) unless source[:billing_address][:address_id].nil?
             order.save
+
+            sync_magento_address_to_local(source[:shipping_address], order, order.shipping_address) unless source[:shipping_address][:address_id].nil?
+            sync_magento_address_to_local(source[:billing_address], order, order.billing_address) unless source[:billing_address][:address_id].nil?
 
             sync_magento_payment_to_local(source[:payment], order)
 

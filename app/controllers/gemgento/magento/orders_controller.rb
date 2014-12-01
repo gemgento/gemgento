@@ -101,7 +101,7 @@ module Gemgento
       address.telephone = source[:telephone]
       address.is_billing = (source[:address_type] == 'billing')
       address.is_shipping = (source[:address_type] == 'shipping')
-      address.save
+      address.save validate: false
 
       return address
     end
