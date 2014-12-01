@@ -10,6 +10,7 @@ module Gemgento::Adapter::Shopify
       page = 1
       ShopifyAPI::Base.site = Gemgento::Adapter::ShopifyAdapter.api_url
       shopify_collections = ShopifyAPI::CustomCollection.where(limit: 250, page: page)
+
       while shopify_collections.any?
         shopify_collections.each do |collection|
           sync_shopify_category(collection)
@@ -37,7 +38,7 @@ module Gemgento::Adapter::Shopify
       category.image = URI.parse(collection.image) if collection.has_attribute? :image
       category.is_active = collection.published_at ? true : false
       category.include_in_menu = false
-      category.stores = Gemgento::Store.all
+      category.stores = Gemgento::Store.where.not(code: 'admin')
       category.sync_needed = true
       category.save
 
