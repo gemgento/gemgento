@@ -23,11 +23,20 @@ module Gemgento
     validates :customer_email, format: /@/, allow_nil: true
     validates :status, presence: true
 
+    after_save :mark_quote_converted, if: -> { quote && quote.converted_at.nil? && !state.blank? }
+
     # Return the increment_id instead of id.  This is for privacy purposes.
     #
     # @return [String]
     def to_param
       self.increment_id
+    end
+
+    # Set associated quote converted_at.
+    #
+    # @return [Void]
+    def mark_quote_converted
+      quote.update(converted_at: Time.now)
     end
 
   end
