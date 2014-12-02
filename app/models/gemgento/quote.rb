@@ -44,25 +44,27 @@ module Gemgento
     # @return [Gemgento:Quote]
     def self.current(store, quote_id = nil, user = nil)
 
-      if !quote_id.blank? && user.nil?
+      if !quote_id.blank? && user.nil? # quote_id but no current_user
         quote = Quote.where('created_at >= ?', Date.today - 30.days).
             find_by(id: quote_id, store: store, converted_at: nil)
         quote = Quote.new(store: store) if quote.nil?
 
-      elsif !quote_id.blank? && !user.nil?
+      elsif !quote_id.blank? && !user.nil? # quote_id and current_user
         quote = Quote.where('created_at >= ?', Date.today - 30.days).
             find_by(id: quote_id, store: store, converted_at: nil)
 
-        if quote.nil? || (!quote.user.nil? && quote.user != user)
+        if quote.nil? || (!quote.user.nil? && quote.user != user) # when quote does not belong to user
           quote = Quote.where('created_at >= ?', Date.today - 30.days).
               find_by(id: quote_id, store: store, user: user, converted_at: nil)
-          quote = Quote.new(store: store)
+          quote = Quote.new(store: store) if quote.nil?
         end
-      elsif quote_id.blank? && !user.nil?
+
+      elsif quote_id.blank? && !user.nil? # no quote id and a current_user
         quote = Quote.where('created_at >= ?', Date.today - 30.days).
             where(store: store, user: user, converted_at: nil).
             order(updated_at: :desc).first_or_initialize
         quote.reset unless quote.magento_id.nil?
+
       else
         quote = Quote.new(store: store)
       end
