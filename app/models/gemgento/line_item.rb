@@ -41,7 +41,7 @@ module Gemgento
       if response.success?
         return true
       else
-        errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return false
       end
     end
@@ -66,8 +66,18 @@ module Gemgento
       if response.success?
         return true
       else
-        errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return false
+      end
+    end
+
+    def handle_magento_response(response)
+      if response.body[:faultcode].to_i == 1002 && itemizable_type == 'Gemgento::Quote' # quote doesn't exist in Magento.
+        LineItem.skip_callback(:destroy, :before, :destroy_magento_quote_item)
+        self.itemizable.destroy
+        LineItem.set_callback(:destroy, :before, :destroy_magento_quote_item)
+      else
+        self.errors.add(:base, response.body[:faultstring])
       end
     end
 

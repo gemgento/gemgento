@@ -88,7 +88,7 @@ module Gemgento
       if response.success?
         return response.body[:result][:item]
       else
-        self.errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return nil
       end
     end
@@ -110,7 +110,7 @@ module Gemgento
       if response.success?
         return true
       else
-        errors.add :base, response.body[:faultstring]
+        handle_magento_response(response)
         return false
       end
     end
@@ -125,7 +125,7 @@ module Gemgento
       if response.success?
         return true
       else
-        errors.add :base, response.body[:faultstring]
+        handle_magento_response(response)
         return false
       end
     end
@@ -140,7 +140,7 @@ module Gemgento
       if response.success?
         return true
       else
-        errors.add :base, response.body[:faultstring]
+        handle_magento_response(response)
         return false
       end
     end
@@ -154,7 +154,7 @@ module Gemgento
       if response.success?
         return true
       else
-        errors.add :base, response.body[:faultstring]
+        handle_magento_response(response)
         return false
       end
     end
@@ -168,7 +168,7 @@ module Gemgento
       if response.success?
         return true
       else
-        self.errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return false
       end
     end
@@ -183,7 +183,7 @@ module Gemgento
         # re-set magento customer if guest so that customer name can be pulled from billing address.
         return self.customer_is_guest ? set_magento_customer : true
       else
-        self.errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return false
       end
     end
@@ -200,7 +200,7 @@ module Gemgento
 
         return response.body[:result][:item]
       else
-        self.errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return []
       end
     end
@@ -231,7 +231,7 @@ module Gemgento
       if response.success?
         return true
       else
-        self.errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return false
       end
     end
@@ -246,7 +246,7 @@ module Gemgento
       if response.success?
         return response.body[:result]
       else
-        self.errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return nil
       end
     end
@@ -257,7 +257,7 @@ module Gemgento
       if response.success?
         return true
       else
-        self.errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return false
       end
     end
@@ -281,7 +281,7 @@ module Gemgento
 
         return true
       else
-        errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         after_convert_fail
         return false
       end
@@ -361,7 +361,7 @@ module Gemgento
         self.magento_id = response.body[:quote_id]
         return true
       else
-        errors.add :base, response.body[:faultstring]
+        handle_magento_response(response)
         return false
       end
     end
@@ -455,6 +455,16 @@ module Gemgento
       end
 
       return totals
+    end
+
+    def handle_magento_response(response)
+      if response.body[:faultcode].to_i == 1002 # quote doesn't exist in Magento.
+        LineItem.skip_callback(:destroy, :before, :destroy_magento_quote_item)
+        self.destroy
+        LineItem.set_callback(:destroy, :before, :destroy_magento_quote_item)
+      else
+        self.errors.add(:base, response.body[:faultstring])
+      end
     end
 
   end
