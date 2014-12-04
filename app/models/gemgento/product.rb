@@ -557,6 +557,7 @@ module Gemgento
         end
       end
 
+      self.sync_needed = false
       return true
     end
 
