@@ -64,8 +64,6 @@ module Gemgento
           break if configurable_product.errors.any?
           associated_simple_products = []
         end
-
-        sleep(1) # give Magento a chance to update indices.
       end
 
       ProductImport.skip_callback(:commit, :after, :process)

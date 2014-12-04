@@ -9,22 +9,25 @@ module Gemgento
       data = params[:data]
 
       @product = Product.not_deleted.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).first_or_initialize
-      @product.magento_id = data[:product_id]
-      @product.magento_type = data[:type]
-      @product.sku = data[:sku]
-      @product.sync_needed = false
-      @product.product_attribute_set = ProductAttributeSet.where(magento_id: data[:set]).first
-      @product.magento_type = data[:type]
-      @product.save
 
-      set_stores(data[:stores], @product) unless data[:stores].nil?
+      unless @product.sync_needed
+        @product.magento_id = data[:product_id]
+        @product.magento_type = data[:type]
+        @product.sku = data[:sku]
+        @product.sync_needed = false
+        @product.product_attribute_set = ProductAttributeSet.where(magento_id: data[:set]).first
+        @product.magento_type = data[:type]
+        @product.save
 
-      unless data[:additional_attributes].nil?
-        set_assets(data[:additional_attributes], @product)
-        set_attribute_values_from_magento(data[:additional_attributes], @product)
+        set_stores(data[:stores], @product) unless data[:stores].nil?
+
+        unless data[:additional_attributes].nil?
+          set_assets(data[:additional_attributes], @product)
+          set_attribute_values_from_magento(data[:additional_attributes], @product)
+        end
+
+        set_associated_products(data[:simple_product_ids], data[:configurable_product_ids], @product)
       end
-
-      set_associated_products(data[:simple_product_ids], data[:configurable_product_ids], @product)
 
       render nothing: true
     end
