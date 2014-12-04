@@ -21,6 +21,9 @@ module Gemgento
     attr_accessor :push_customer, :push_addresses, :push_shipping_method, :push_payment_method, :subscribe,
                   :same_as_billing
 
+    serialize :coupon_codes, Array
+    serialize :gift_card_codes, Array
+
     validates :customer_email, format: /@/, allow_nil: true
     validates :billing_address, :shipping_address, presence: true, if: -> { push_addresses.to_bool }
     validates :shipping_method, presence: true, if: -> { push_shipping_method.to_bool }
@@ -108,6 +111,8 @@ module Gemgento
       response = API::SOAP::GiftCard.quote_add(self.magento_id, code, self.store.magento_id)
 
       if response.success?
+        self.gift_card_codes << code unless self.gift_card_codes.include? code
+        save
         return true
       else
         handle_magento_response(response)
@@ -123,6 +128,8 @@ module Gemgento
       response = API::SOAP::GiftCard.quote_remove(self.magento_id, code, self.store.magento_id)
 
       if response.success?
+        self.gift_card_codes = self.gift_card_codes.delete code
+        save
         return true
       else
         handle_magento_response(response)
@@ -138,6 +145,8 @@ module Gemgento
       response = API::SOAP::Checkout::Coupon.add(self, code)
 
       if response.success?
+        self.coupon_codes << code unless self.coupon_codes.include? code
+        save
         return true
       else
         handle_magento_response(response)
@@ -152,6 +161,8 @@ module Gemgento
       response = API::SOAP::Checkout::Coupon.remove(self)
 
       if response.success?
+        self.coupon_codes = []
+        self.save
         return true
       else
         handle_magento_response(response)
