@@ -9,7 +9,9 @@ module Gemgento
       response = API::SOAP::Checkout::Product.add(quote, [line_item])
 
       if !response.success?
+        Gemgento::LineItem.skip_callback(:destroy, :before, :destroy_magento_quote_item)
         line_item.destroy
+        Gemgento::LineItem.set_callback(:destroy, :before, :destroy_magento_quote_item)
       end
     end
 
