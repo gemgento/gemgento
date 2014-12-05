@@ -53,7 +53,7 @@ module Gemgento
       if new_record?
         Cart::AddItemWorker.perform_async(self.id)
       else
-        Cart::UpdateItemWorker.perform_async(self.id, self.qty_itemizableed_was)
+        Cart::UpdateItemWorker.perform_async(self.id, self.qty_ordered_was)
       end
     end
 
