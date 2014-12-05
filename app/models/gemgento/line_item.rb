@@ -50,7 +50,7 @@ module Gemgento
     #
     # @return [Void]
     def push_magento_quote_item_async
-      if new_record?
+      if id_was.nil?
         Cart::AddItemWorker.perform_async(self.id)
       else
         Cart::UpdateItemWorker.perform_async(self.id, self.qty_ordered_was)
