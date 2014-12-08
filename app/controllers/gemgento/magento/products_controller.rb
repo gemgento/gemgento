@@ -10,7 +10,7 @@ module Gemgento
 
       @product = Product.not_deleted.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).first_or_initialize
 
-      unless @product.sync_needed
+      if !@product.sync_needed? || @product.new_record?
         @product.magento_id = data[:product_id]
         @product.magento_type = data[:type]
         @product.sku = data[:sku]
