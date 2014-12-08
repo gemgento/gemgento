@@ -325,7 +325,7 @@ module Gemgento
     # @return [BigDecimal]
     def subtotal
       if self.line_items.any?
-        return self.line_items.map{ |li| li.product.price(self.user, self.store).to_d * li.qty_ordered.to_d }.inject(&:+)
+        return self.line_items.map{ |li| li.price * li.qty_ordered.to_d }.inject(&:+)
       else
         return 0
       end

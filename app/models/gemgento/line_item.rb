@@ -26,6 +26,20 @@ module Gemgento
       return result
     end
 
+    # Get the associated Product price.
+    #
+    # @return [BigDecimal]
+    def price
+      return super.to_d unless super.nil?
+
+      if product.magento_type == 'giftvoucher'
+        self.options[:amount].to_d
+      else
+        product.price(itemizable.user, itemizable.store).to_d
+      end
+
+    end
+
     private
 
     # Create or Update the associated Magento Quote Item.
