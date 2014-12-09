@@ -20,7 +20,7 @@ if defined?(ActiveAdmin)
       form as: :gemgento_image_import, multipart: true do |f|
         f.inputs do
           f.input :spreadsheet, as: :file, label: 'Spreadsheet'
-          f.input :store, as: :select, :include_blank => false, collection: Store.all.map { |s| [s.name, s.id] }
+          f.input :store, as: :select, include_blank: false, collection: Store.where.not(code: 'admin').map { |s| [s.name, s.id] }
           f.input :destroy_existing
           f.input :image_path
           f.input :image_file_extensions_raw, as: :string, label: 'Image File Extensions', hint: 'Enter expected image file extensions. Separate extensions with a comma.  E.g. .jpg, .png, .gif'
