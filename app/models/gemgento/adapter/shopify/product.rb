@@ -321,7 +321,7 @@ module Gemgento::Adapter::Shopify
         tag.sync_needed = false
         tag.save
 
-        Gemgento::Store.all.each do |store|
+        Gemgento::Store.where.not(code: 'admin').each do |store|
           next if tag.stores.include? store
           tag.store_tags.create(store: store)
         end
