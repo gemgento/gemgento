@@ -45,6 +45,8 @@ module Gemgento
         next if sku.blank?
 
         @product = Product.not_deleted.find_by(sku: sku)
+        next if @product.magento_type == 'configurable'
+
         set_inventory
       end
 
