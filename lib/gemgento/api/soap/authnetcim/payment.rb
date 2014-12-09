@@ -13,12 +13,12 @@ module Gemgento
 
             # filter and enforce the array of cards on success
             if response.success?
-              if response.body[:result].nil?
-                response.body[:result] = {item: []}
-              elsif response.body[:result][:item].nil?
-                response.body[:result][:item] = []
-              elsif !response.body[:result][:item].is_a? Array
-                response.body[:result][:item] = [response.body[:result][:item]]
+              if response.body[:response].nil?
+                response.body[:response] = {item: []}
+              elsif response.body[:response][:item].nil?
+                response.body[:response][:item] = []
+              elsif !response.body[:response][:item].is_a? Array
+                response.body[:response][:item] = [response.body[:response][:item]]
               end
             end
 
