@@ -323,6 +323,7 @@ module Gemgento::Adapter::Shopify
 
         Gemgento::Store.where.not(code: 'admin').each do |store|
           next if tag.stores.include? store
+          
           tag.store_tags.create(store: store)
         end
 

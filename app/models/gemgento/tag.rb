@@ -9,7 +9,7 @@ module Gemgento
 
     validates :name, uniqueness: true
 
-    before_save :create_magento_tag, if: -> { magento_id.nil? }
+    before_save :create_magento_tag, if: -> { sync_needed && magento_id.nil? }
     before_save :update_magento_tag, if: -> { sync_needed && !magento_id.nil? }
 
     # Get the tag base popularity for a store.
