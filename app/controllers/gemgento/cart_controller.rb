@@ -76,7 +76,7 @@ module Gemgento
     end
 
     def line_item_params
-      params.require(:line_item).permit(:id, :product_id, :qty_ordered)
+      params.require(:line_item).permit(:id, :product_id, :qty_ordered, :async)
     end
 
     def respond(is_success)

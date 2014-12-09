@@ -58,15 +58,10 @@ if defined?(ActiveAdmin)
             link_to import.spreadsheet.instance_read(:file_name), import.spreadsheet.url
           end
 
-          row :root_category do
-            import.root_category.name unless import.store.nil?
-          end
-
-          row :store do
-            import.store.name unless import.store.nil?
-          end
-
+          row :root_category
+          row :store
           row :configurable_attributes
+          row :import_errors
         end
       end
 

@@ -10,16 +10,17 @@ module Gemgento
 
     has_and_belongs_to_many :asset_types, join_table: 'gemgento_assets_asset_types'
 
+    validates :asset_file, :product_id, :store_id, presence: true
+    validates_uniqueness_of :product_id, scope: [:asset_file_id, :store_id, :file]
+
     before_save :create_magento_product_attribute_media, if: -> { sync_needed? && file.blank? }
     before_save :update_magento_product_attribute_media, if: -> { sync_needed? && !file.blank? }
+
     after_save :touch_product
 
     before_destroy :delete_magento, :destroy_file
 
     default_scope -> { includes(:asset_file).order(:position).references(:asset_file) }
-
-    validates :asset_file, :product_id, :store_id, presence: true
-    validates_uniqueness_of :product_id, scope: [:asset_file_id, :store_id, :file]
 
     # Associate an image file with the Asset.  If the same file is already associated to a related Asset in a
     # different store, then the Asset will be associated with the existing AssetFile.

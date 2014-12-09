@@ -437,7 +437,7 @@ module Gemgento
       simple_product_ids = []
 
       magento_ids.each do |magento_id|
-        simple_product = Product.find_by(magento_id: magento_id)
+        simple_product = Product.active.find_by(magento_id: magento_id)
         next if simple_product.nil?
 
         self.simple_products << simple_product unless self.simple_products.include? simple_product
@@ -455,7 +455,7 @@ module Gemgento
       configurable_product_ids = []
 
       magento_ids.each do |magento_id|
-        configurable_product = Product.find_by(magento_id: magento_id)
+        configurable_product = Product.active.find_by(magento_id: magento_id)
         next if configurable_product.nil?
 
         self.configurable_products << configurable_product unless self.configurable_products.include? configurable_product
@@ -557,6 +557,7 @@ module Gemgento
         end
       end
 
+      self.sync_needed = false
       return true
     end
 

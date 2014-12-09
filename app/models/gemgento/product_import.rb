@@ -56,9 +56,12 @@ module Gemgento
         next if @row[@headers.index('sku').to_i].to_s.strip.blank? # skip blank skus
 
         if @row[@headers.index('magento_type').to_i].to_s.strip.casecmp('simple') == 0
+          simple_product = create_simple_product
+          break if simple_product.errors.any?
           associated_simple_products << create_simple_product
         else
-          create_configurable_product(associated_simple_products)
+          configurable_product = create_configurable_product(associated_simple_products)
+          break if configurable_product.errors.any?
           associated_simple_products = []
         end
       end
@@ -118,6 +121,9 @@ module Gemgento
       accepted_headers
     end
 
+    # Create/Update a simple product.
+    #
+    # @return [Gemgento::Product]
     def create_simple_product
       sku = @row[@headers.index('sku').to_i].to_s.strip
 
@@ -144,11 +150,15 @@ module Gemgento
       set_categories(product)
 
       product.sync_needed = true
-      product.save
 
-      create_images(product) if self.include_images
+      if !product.save
+        self.import_errors << "ERROR - row #{@index} - COULD NOT CREATE MAGENTO PRODUCT'"
+        self.import_errors << product.errors.full_messages.join(', ')
+      else
+        create_images(product) if self.include_images
+      end
 
-      product
+      return product
     end
 
     def set_attribute_values(product)
@@ -281,6 +291,9 @@ module Gemgento
       image
     end
 
+    # Create/Update a configurable product.
+    #
+    # @return [Gemgento::Product]
     def create_configurable_product(simple_products)
       sku = @row[@headers.index('sku').to_i].to_s.strip
 
@@ -320,11 +333,16 @@ module Gemgento
 
       # push to magento
       configurable_product.sync_needed = true
-      configurable_product.save
 
-      # add the images
-      create_configurable_images(configurable_product) if include_images
+      if !configurable_product.save
+        self.import_errors << "ERROR - row #{@index} - COULD NOT CREATE MAGENTO PRODUCT'"
+        self.import_errors << configurable_product.errors.full_messages.join(', ')
+      else
+        # add the images
+        create_configurable_images(configurable_product) if include_images
+      end
 
+      return configurable_product
     end
 
     def create_configurable_images(configurable_product)

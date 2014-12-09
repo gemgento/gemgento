@@ -26,6 +26,7 @@ module Gemgento
       respond_to do |format|
 
         if @quote.update(quote_params)
+          @quote.gift_card_codes.each { |code| @quote.apply_coupon(code) }
           session[:payment_data] = quote_params[:payment_attributes]
 
           if !@quote.payment.is_redirecting_payment_method?('payment_after')

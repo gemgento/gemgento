@@ -12,6 +12,13 @@ module Gemgento
     # @return [Gemgento::Quote]
     def set_quote
       @quote = current_quote
+
+      if @quote.new_record?
+        respond_to do |format|
+          format.html { redirect_to cart_path, alert: 'Shopping cart is no longer valid.  Please create a new order.' }
+          format.json { render json: { result: false, errors: 'Shopping cart is no longer valid.  Please create a new order.' }, status: 422 }
+        end
+      end
     end
 
     # Cart must have a quantity greater than 0.

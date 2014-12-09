@@ -13,6 +13,8 @@ module Gemgento
       Gemgento::Product.skip_callback(:save, :before, :update_magento_product)
 
       Gemgento::Product.where(id: product_ids).each do |product|
+        next if product.sync_needed = true
+
         if affects_cache_expiration
           product.set_cache_expires_at
         else

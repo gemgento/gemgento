@@ -21,6 +21,9 @@ module Gemgento
     attr_accessor :push_customer, :push_addresses, :push_shipping_method, :push_payment_method, :subscribe,
                   :same_as_billing
 
+    serialize :coupon_codes, Array
+    serialize :gift_card_codes, Array
+
     validates :customer_email, format: /@/, allow_nil: true
     validates :billing_address, :shipping_address, presence: true, if: -> { push_addresses.to_bool }
     validates :shipping_method, presence: true, if: -> { push_shipping_method.to_bool }
@@ -44,25 +47,27 @@ module Gemgento
     # @return [Gemgento:Quote]
     def self.current(store, quote_id = nil, user = nil)
 
-      if !quote_id.blank? && user.nil?
+      if !quote_id.blank? && user.nil? # quote_id but no current_user
         quote = Quote.where('created_at >= ?', Date.today - 30.days).
             find_by(id: quote_id, store: store, converted_at: nil)
         quote = Quote.new(store: store) if quote.nil?
 
-      elsif !quote_id.blank? && !user.nil?
+      elsif !quote_id.blank? && !user.nil? # quote_id and current_user
         quote = Quote.where('created_at >= ?', Date.today - 30.days).
             find_by(id: quote_id, store: store, converted_at: nil)
 
-        if quote.nil? || (!quote.user.nil? && quote.user != user)
+        if quote.nil? || (!quote.user.nil? && quote.user != user) # when quote does not belong to user
           quote = Quote.where('created_at >= ?', Date.today - 30.days).
               find_by(id: quote_id, store: store, user: user, converted_at: nil)
-          quote = Quote.new(store: store)
+          quote = Quote.new(store: store) if quote.nil?
         end
-      elsif quote_id.blank? && !user.nil?
+
+      elsif quote_id.blank? && !user.nil? # no quote id and a current_user
         quote = Quote.where('created_at >= ?', Date.today - 30.days).
             where(store: store, user: user, converted_at: nil).
             order(updated_at: :desc).first_or_initialize
         quote.reset unless quote.magento_id.nil?
+
       else
         quote = Quote.new(store: store)
       end
@@ -86,7 +91,7 @@ module Gemgento
       if response.success?
         return response.body[:result][:item]
       else
-        self.errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return nil
       end
     end
@@ -106,9 +111,11 @@ module Gemgento
       response = API::SOAP::GiftCard.quote_add(self.magento_id, code, self.store.magento_id)
 
       if response.success?
+        self.gift_card_codes << code unless self.gift_card_codes.include? code
+        save
         return true
       else
-        errors.add :base, response.body[:faultstring]
+        handle_magento_response(response)
         return false
       end
     end
@@ -121,9 +128,11 @@ module Gemgento
       response = API::SOAP::GiftCard.quote_remove(self.magento_id, code, self.store.magento_id)
 
       if response.success?
+        self.gift_card_codes = self.gift_card_codes.delete code
+        save
         return true
       else
-        errors.add :base, response.body[:faultstring]
+        handle_magento_response(response)
         return false
       end
     end
@@ -136,9 +145,11 @@ module Gemgento
       response = API::SOAP::Checkout::Coupon.add(self, code)
 
       if response.success?
+        self.coupon_codes << code unless self.coupon_codes.include? code
+        save
         return true
       else
-        errors.add :base, response.body[:faultstring]
+        handle_magento_response(response)
         return false
       end
     end
@@ -150,9 +161,11 @@ module Gemgento
       response = API::SOAP::Checkout::Coupon.remove(self)
 
       if response.success?
+        self.coupon_codes = []
+        self.save
         return true
       else
-        errors.add :base, response.body[:faultstring]
+        handle_magento_response(response)
         return false
       end
     end
@@ -166,7 +179,7 @@ module Gemgento
       if response.success?
         return true
       else
-        self.errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return false
       end
     end
@@ -181,7 +194,7 @@ module Gemgento
         # re-set magento customer if guest so that customer name can be pulled from billing address.
         return self.customer_is_guest ? set_magento_customer : true
       else
-        self.errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return false
       end
     end
@@ -198,7 +211,7 @@ module Gemgento
 
         return response.body[:result][:item]
       else
-        self.errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return []
       end
     end
@@ -229,7 +242,7 @@ module Gemgento
       if response.success?
         return true
       else
-        self.errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return false
       end
     end
@@ -244,7 +257,7 @@ module Gemgento
       if response.success?
         return response.body[:result]
       else
-        self.errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return nil
       end
     end
@@ -255,7 +268,7 @@ module Gemgento
       if response.success?
         return true
       else
-        self.errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return false
       end
     end
@@ -279,7 +292,7 @@ module Gemgento
 
         return true
       else
-        errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         after_convert_fail
         return false
       end
@@ -312,7 +325,7 @@ module Gemgento
     # @return [BigDecimal]
     def subtotal
       if self.line_items.any?
-        return self.line_items.map{ |li| li.product.price(self.user, self.store).to_d * li.qty_ordered.to_d }.inject(&:+)
+        return self.line_items.map{ |li| li.price * li.qty_ordered.to_d }.inject(&:+)
       else
         return 0
       end
@@ -359,7 +372,7 @@ module Gemgento
         self.magento_id = response.body[:quote_id]
         return true
       else
-        errors.add :base, response.body[:faultstring]
+        handle_magento_response(response)
         return false
       end
     end
@@ -453,6 +466,16 @@ module Gemgento
       end
 
       return totals
+    end
+
+    def handle_magento_response(response)
+      if response.body[:faultcode].to_i == 1002 # quote doesn't exist in Magento.
+        LineItem.skip_callback(:destroy, :before, :destroy_magento_quote_item)
+        self.destroy
+        LineItem.set_callback(:destroy, :before, :destroy_magento_quote_item)
+      else
+        self.errors.add(:base, response.body[:faultstring])
+      end
     end
 
   end

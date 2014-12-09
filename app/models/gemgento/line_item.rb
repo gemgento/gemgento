@@ -26,6 +26,20 @@ module Gemgento
       return result
     end
 
+    # Get the associated Product price.
+    #
+    # @return [BigDecimal]
+    def price
+      return super.to_d unless super.nil?
+
+      if product.magento_type == 'giftvoucher'
+        self.options[:amount].to_d
+      else
+        product.price(itemizable.user, itemizable.store).to_d
+      end
+
+    end
+
     private
 
     # Create or Update the associated Magento Quote Item.
@@ -41,7 +55,7 @@ module Gemgento
       if response.success?
         return true
       else
-        errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return false
       end
     end
@@ -50,10 +64,10 @@ module Gemgento
     #
     # @return [Void]
     def push_magento_quote_item_async
-      if new_record?
+      if id_was.nil?
         Cart::AddItemWorker.perform_async(self.id)
       else
-        Cart::UpdateItemWorker.perform_async(self.id, self.qty_itemizableed_was)
+        Cart::UpdateItemWorker.perform_async(self.id, self.qty_ordered_was)
       end
     end
 
@@ -66,8 +80,18 @@ module Gemgento
       if response.success?
         return true
       else
-        errors.add(:base, response.body[:faultstring])
+        handle_magento_response(response)
         return false
+      end
+    end
+
+    def handle_magento_response(response)
+      if response.body[:faultcode].to_i == 1002 && itemizable_type == 'Gemgento::Quote' # quote doesn't exist in Magento.
+        LineItem.skip_callback(:destroy, :before, :destroy_magento_quote_item)
+        self.itemizable.destroy
+        LineItem.set_callback(:destroy, :before, :destroy_magento_quote_item)
+      else
+        self.errors.add(:base, response.body[:faultstring])
       end
     end
 
