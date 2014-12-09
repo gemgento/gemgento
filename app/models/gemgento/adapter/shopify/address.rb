@@ -15,7 +15,7 @@ module Gemgento::Adapter::Shopify
         address = Gemgento::Address.new
       end
 
-      address.user = user
+      address.addressable = user
       address.address1 = shopify_address.address1
       address.address2 = shopify_address.address2
       address.city = shopify_address.city
