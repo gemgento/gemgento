@@ -13,7 +13,7 @@ Gemgento::Engine.routes.draw do
   # - Category - #
   get 'shop/:parent_url_key/:url_key',  to: 'categories#show', as: 'shop_by_parent_and_key'
   get 'shop/:url_key',                  to: 'categories#show', as: 'shop_by_key'
-  get 'shop',                           to: 'categories#show', as: 'shop'
+  get 'shop',                           to: 'categories#index', as: 'shop'
 
   # - SEARCH - #
   get '/search', to: 'search#index'
@@ -34,6 +34,7 @@ Gemgento::Engine.routes.draw do
   # - Cart - #
   get '/cart', to: 'cart#show'
   post '/cart', to: 'cart#create', as: :cart_add_item
+  patch '/cart', to: 'cart#create', as: :cart_add_item_patch
   resources :cart, only: :update, as: :cart_update_item
   resources :cart, only: :destroy, as: :cart_remove_item
   get '/cart/mini-bag', to: 'cart#mini_bag'

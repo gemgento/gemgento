@@ -12,6 +12,3 @@
           = link_to product.name, "/products/#{product.url_key}"
         .product-price
           = number_to_currency(product.price)
-        .product-swatches
-          - product.swatches.each do |swatch|
-            = image_tag swatch.image.url(:original)
