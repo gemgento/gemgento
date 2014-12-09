@@ -11,12 +11,17 @@ module Gemgento
     default_scope -> { order(:category_id, :position, :product_id, :id) }
 
     before_save :update_magento_category_product, if: -> { sync_needed }
-    after_save :touch_product
+    after_save :touch_product, :touch_category, if: -> { changed? }
+    after_destroy :touch_category, :touch_product
 
     private
 
     def touch_product
-      TouchProduct.perform_async([self.product.id]) if self.changed?
+      TouchProduct.perform_async [self.product.id]
+    end
+
+    def touch_category
+      TouchCategory.perform_async [self.category.id]
     end
 
     def update_magento_category_product
