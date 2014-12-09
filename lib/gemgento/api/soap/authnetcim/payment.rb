@@ -11,9 +11,13 @@ module Gemgento
           def self.list(customer_id)
             response = Magento.create_call(:authnetcim_payment_list, { customer_id: customer_id })
 
-            # enforce the array of cards on success
-            if response.success? && !response.body[:response][:item].is_a?(Array)
-              response.body[:response][:item] = [response.body[:response][:item]]
+            # filter and enforce the array of cards on success
+            if response.success?
+              if response.body[:result][:item].nil?
+                response.body[:result][:item] = []
+              elsif !response.body[:result][:item].is_a? Array
+                response.body[:result][:item] = [response.body[:result][:item]]
+              end
             end
 
             return response
