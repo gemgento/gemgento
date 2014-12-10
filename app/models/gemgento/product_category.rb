@@ -21,7 +21,7 @@ module Gemgento
     end
 
     def touch_category
-      TouchCategory.perform_async [self.category.id]
+      TouchCategory.perform_async (self.product.product_categories.pluck(:category_id) << self.category.id).uniq
     end
 
     def update_magento_category_product
