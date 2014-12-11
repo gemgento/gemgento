@@ -19,7 +19,7 @@ module Gemgento
     accepts_nested_attributes_for :payment
 
     attr_accessor :push_customer, :push_addresses, :push_shipping_method, :push_payment_method, :subscribe,
-                  :same_as_billing
+                  :same_as_billing, :destroy_after_rollback
 
     serialize :coupon_codes, Array
     serialize :gift_card_codes, Array
@@ -38,6 +38,8 @@ module Gemgento
     before_save :set_magento_payment_method, if: -> { push_payment_method.to_bool }
 
     after_save :create_subscriber, if: -> { subscribe.to_bool }
+
+    after_rollback :self_destruct, if: -> { destroy_after_rollback == true }
 
     # Get the current quote given a quote_id, Store, and User.
     #
@@ -468,14 +470,22 @@ module Gemgento
       return totals
     end
 
+    # Handle the Magento create/update/destroy response.  Mark self for destruction if it no longer exists in Magento.
+    #
+    # @param response [Gemgento::MagentoResponse]
+    # @return [Void]
     def handle_magento_response(response)
       if response.body[:faultcode].to_i == 1002 # quote doesn't exist in Magento.
-        LineItem.skip_callback(:destroy, :before, :destroy_magento_quote_item)
-        self.destroy
-        LineItem.set_callback(:destroy, :before, :destroy_magento_quote_item)
+         self.destroy_after_rollback = true
       else
         self.errors.add(:base, response.body[:faultstring])
       end
+    end
+
+    def self_destruct
+      LineItem.skip_callback(:destroy, :before, :destroy_magento_quote_item)
+      self.destroy
+      LineItem.set_callback(:destroy, :before, :destroy_magento_quote_item)
     end
 
   end

@@ -9,12 +9,16 @@ module Gemgento
     validates_with InventoryValidator, if: -> { itemizable_type == 'Gemgento::Quote' }
 
     before_save :push_magento_quote_item, if: -> { itemizable_type == 'Gemgento::Quote' && !async.to_bool }
+
     after_save :push_magento_quote_item_async, if: -> { itemizable_type == 'Gemgento::Quote' && async.to_bool }
+
     before_destroy :destroy_magento_quote_item, if: -> { itemizable_type == 'Gemgento::Quote' }
+
+    after_rollback :destroy_quote, if: -> { destroy_quote_after_rollback == true && itemizable_type == 'Gemgento::Quote' }
 
     serialize :options, Hash
 
-    attr_accessor :async
+    attr_accessor :async, :destroy_quote_after_rollback
 
     # JSON representation of the LineItem.
     #
@@ -85,14 +89,25 @@ module Gemgento
       end
     end
 
+    # Handle the Magento create/update/destroy response.  Mark quote for destroy if it no longer exists in Magento.
+    #
+    # @param response [Gemgento::MagentoResponse]
+    # @return [Void]
     def handle_magento_response(response)
       if response.body[:faultcode].to_i == 1002 && itemizable_type == 'Gemgento::Quote' # quote doesn't exist in Magento.
-        LineItem.skip_callback(:destroy, :before, :destroy_magento_quote_item)
-        self.itemizable.destroy
-        LineItem.set_callback(:destroy, :before, :destroy_magento_quote_item)
+        self.destroy_quote_after_rollback = true
       else
         self.errors.add(:base, response.body[:faultstring])
       end
+    end
+
+    # Destroy the associated quote.
+    #
+    # @return [Void]
+    def destroy_quote
+      LineItem.skip_callback(:destroy, :before, :destroy_magento_quote_item)
+      self.itemizable.destroy
+      LineItem.set_callback(:destroy, :before, :destroy_magento_quote_item)
     end
 
   end
