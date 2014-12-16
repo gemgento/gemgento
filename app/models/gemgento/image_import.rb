@@ -173,6 +173,9 @@ module Gemgento
           create_image(file_name, types, position, label)
         end
       end
+      
+      # clear the cache
+      Rails.cache.clear
     end
 
     # Create an image for the product.
