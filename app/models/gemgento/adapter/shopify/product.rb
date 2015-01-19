@@ -64,7 +64,8 @@ module Gemgento::Adapter::Shopify
     # @param is_catalog_visible [Boolean]
     # @return [Gemgento::Product]
     def self.create_simple_product(base_product, variant, is_catalog_visible)
-      product = initialize_product(variant, base_product, variant.sku, 'simple', is_catalog_visible)
+      product = initialize_product(variant, base_product, variant.sku, 'simple', is_catalog_visible, !base_product.published_at.nil?)
+
       product.set_attribute_value('barcode', variant.barcode)
       product.set_attribute_value('compare_at_price', variant.compare_at_price)
       product.set_attribute_value('fulfillment_service', variant.fulfillment_service)
@@ -103,7 +104,7 @@ module Gemgento::Adapter::Shopify
     # @param simple_products [Array(Gemgento::Product)]
     # @return [Gemgento::Product]
     def self.create_configurable_product(base_product, simple_products)
-      product = initialize_product(base_product, base_product, "#{simple_products.first.sku}_base", 'configurable', true)
+      product = initialize_product(base_product, base_product, "#{simple_products.first.sku}_base", 'configurable', true, !base_product.published_at.nil?)
 
       product.set_attribute_value('barcode', simple_products.first.barcode)
       product.set_attribute_value('compare_at_price', simple_products.first.compare_at_price)
@@ -146,8 +147,9 @@ module Gemgento::Adapter::Shopify
     # @param sku [String]
     # @param magento_type [String]
     # @param is_catalog_visible [Boolean]
+    # @param status [Boolean]
     # @return [Gemgento::Product]
-    def self.initialize_product(shopify_model, base_product, sku, magento_type, is_catalog_visible)
+    def self.initialize_product(shopify_model, base_product, sku, magento_type, is_catalog_visible, status)
       if shopify_adapter = Gemgento::Adapter::ShopifyAdapter.find_by_shopify_model(shopify_model)
         product = shopify_adapter.gemgento_model
       else
@@ -157,6 +159,7 @@ module Gemgento::Adapter::Shopify
       product.magento_type = magento_type
       product.visibility = is_catalog_visible ? 4 : 1
       product.product_attribute_set = Gemgento::ProductAttributeSet.first
+      product.status = status
       product.sync_needed = false
       product.save
 
