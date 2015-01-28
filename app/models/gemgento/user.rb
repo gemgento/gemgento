@@ -11,6 +11,8 @@ module Gemgento
     has_many :addresses, as: :addressable, class_name: 'Address'
     has_many :recurring_profiles, class_name: 'RecurringProfile'
     has_many :saved_credit_cards, class_name: 'SavedCreditCard', dependent: :destroy
+    has_many :wishlist_items
+    has_many :products, through: :wishlist_items
 
     has_many :orders, class_name: 'Order'
     accepts_nested_attributes_for :orders

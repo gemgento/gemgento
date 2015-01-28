@@ -15,6 +15,8 @@ module Gemgento
     has_many :product_categories, -> { distinct }, dependent: :destroy
     has_many :relations, as: :relatable, class_name: 'Relation', dependent: :destroy
     has_many :shipment_items
+    has_many :wishlist_items
+    has_many :users, through: :wishlist_items
 
     has_one :shopify_adapter, class_name: 'Adapter::ShopifyAdapter', as: :gemgento_model
 
