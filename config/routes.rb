@@ -67,7 +67,12 @@ Gemgento::Engine.routes.draw do
     resources :orders, only: [:index, :show]
     resources :recurring_profiles, only: [:index, :destroy]
     resources :saved_credit_cards, only: [:index, :new, :create, :destroy]
-    resources :wishlist_items, only: [:index, :create, :destroy]
+
+    # wishlist
+    get 'wishlist', to: 'wishlist_items#index', as: 'wishlist'
+    get 'wishlist/:product_id', to: 'wishlist_items#create'
+    post 'wishlist/:product_id', to: 'wishlist_items#create', as: 'create_wishlist_item'
+    delete 'wishlist/:id', to: 'wishlist_items#destroy', as: 'destroy_wishlist_item'
 
     get '', to: 'home#index', as: 'home'
 
