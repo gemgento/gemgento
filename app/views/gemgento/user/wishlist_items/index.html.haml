@@ -1,0 +1,62 @@
+.checkout-container.row
+  = render partial: "gemgento/user/account_header"
+.wishlist-container#cart-container.row
+  = render partial: 'shared/flash_messages'
+  - if @wishlist_items.count > 0
+    #cart-header.col-sm-12.hidden-xs
+      .cart-header-block.col-sm-3.gold-text
+        .item-count
+          = pluralize(@wishlist_items.count, 'item').upcase
+      .cart-header-block.col-sm-3.gold-text.desc
+        .desc
+          DESCRIPTION
+      .cart-header-block.col-sm-3.gold-text.details
+        .details
+          DETAILS
+      .cart-header-block.col-sm-3.gold-text.price
+        .price
+          PRICE
+    #cart-items.col-sm-12
+      - @wishlist_items.each_with_index do |item, i|
+        .cart-item-container.col-sm-12{id: "wishlist-item-#{i}"}
+          .item-image.col-sm-3
+            = link_to product_path(item.product) do
+              = product_image_tag item.product, 'image', 'medium'
+          .item-desc.col-sm-3
+            .name-container
+              - if item.product.color
+                = "#{item.product.color.upcase} #{item.product.name.upcase}"
+              - else
+                = item.product.name.upcase
+            - if item.product.in_stock?
+              .add-to-bag-button.submit-btn{data: {item_index: i, product_id: item.product.magento_type == "configurable" ? item.product.in_stock_simples.first.id : item.product.id}}
+                ADD TO BAG
+            - else
+              .out-of-stock-button.submit-btn.added-to-bag
+                OUT OF STOCK
+          .item-details.col-sm-3
+            .details-container
+              .qty
+                = 'QTY '
+                .cart-select
+                  = select_tag :qty, options_for_select(1..5, 1), class: 'cart-select'
+              - if item.product.magento_type == "configurable" && item.product.in_stock?
+                .size
+                  = 'SIZE '
+                  .cart-select
+                    = select_tag :size, options_for_select(item.product.in_stock_simples.map {|p| ["#{p.size}", p.id]}), class: "cart-select", data: {item_index: i}
+
+          .item-price.col-sm-3
+            .price-container
+              = number_to_currency item.product.price, precision: 2
+              .remove-item-icon
+                = link_to "/user/wishlist/#{item.product.id}", method: :delete do
+                  .small-x
+  - else
+    #no-items-message.col-lg-12
+      .title.gold-text.col-lg-12
+        No items in your wishlist
+      .link.col-lg-12
+        = link_to "add some", "/shop"
+
+= render partial: "shared/footer"
