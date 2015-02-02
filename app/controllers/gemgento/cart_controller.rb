@@ -25,7 +25,11 @@ module Gemgento
     end
 
     def update
-      respond @line_item.update(line_item_params)
+      if params[:line_item][:qty_ordered].to_f > 0
+        respond @line_item.update(line_item_params)
+      else
+        respond @line_item.destroy
+      end
     end
 
     def destroy
