@@ -12,8 +12,8 @@ module Gemgento
           format.html { redirect_to cart_path, notice: 'The coupon was successfully applied.' }
           format.json { render json: { result: true, order: @quote, totals: @quote.totals } }
         else
-          format.html { redirect_to cart_path, alert: result }
-          format.json { render json: { result: false, errors: result }, status: 422 }
+          format.html { redirect_to cart_path, alert: @quote.errors[:base].to_sentence }
+          format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
         end
       end
     end
@@ -26,8 +26,8 @@ module Gemgento
           format.html { redirect_to cart_path, notice: 'The coupons have been removed.' }
           format.json { render json: { result: true, order: @quote, totals: @quote.totals } }
         else
-          format.html { redirect_to cart_path, alert: result }
-          format.json { render json: { result: false, errors: result }, status: 422 }
+          format.html { redirect_to cart_path, alert: @quote.errors[:base].to_sentence }
+          format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
         end
       end
     end
