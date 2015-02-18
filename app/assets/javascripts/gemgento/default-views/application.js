@@ -13,4 +13,5 @@
 //= require jquery
 //= require jquery_ujs
 //= require gemgento/default-views/base
+= javascript_include_tag 'picturefill.all'
 //= require_tree .

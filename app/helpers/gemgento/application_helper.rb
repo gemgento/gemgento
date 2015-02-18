@@ -66,5 +66,14 @@ module Gemgento
       }
     end
 
+    def product_asset(product, asset_type_code)
+      asset = Gemgento::Asset.find_by_code(product, asset_type_code)
+
+      if asset.nil? && product.magento_type == 'simple' && product.configurable_products.active.any? # check the configurable if the simple doesn't have images.
+        asset = Gemgento::Asset.find_by_code(product.configurable_products.active.first, asset_type_code)
+      elsif asset.nil?
+        asset = product.assets.first.image
+      end
+    end
   end
 end

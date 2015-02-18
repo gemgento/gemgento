@@ -1,0 +1,8 @@
+- asset = product_asset(product, "image")
+= picturefill(asset.image.url, product.name) do
+  = image(asset.image.url(:small))
+  = image(asset.image.url(:small_2x), ratio: 2.0)
+  = image(asset.image.url(:medium), min: 400)
+  = image(asset.image.url(:medium_2x), min: 400, ratio: 2.0)
+  = image(asset.image.url(:large), min: 800)
+  = image(asset.image.url(:large_2x), min: 800, ratio: 2.0)

@@ -6,7 +6,10 @@ module Gemgento
     has_many :products, through: :assets
     has_many :stores, through: :assets
 
-    has_attached_file :file, styles: { default_index: '200x266>' }
+    has_attached_file :file, styles: { thumb: "200x", thumb_2x: "400x",
+                                       small: "400x", small_2x: "800x",
+                                       medium: "800x", medium_2x: "1600x",
+                                       large: "1600x", large_2x: "3200x"}
 
     validates_attachment_content_type :file, content_type: /\Aimage\/.*\Z/
 
