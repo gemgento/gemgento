@@ -74,6 +74,8 @@ module Gemgento
       elsif asset.nil?
         asset = product.assets.first.image
       end
+
+      return asset
     end
   end
 end
