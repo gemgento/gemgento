@@ -28,15 +28,15 @@ module Gemgento
 
     end
 
-    ### BREAKING CHANGE - INCLUDE IN 2.0 ###
-    # # Append migrations direction to Application
-    # initializer :append_migrations do |app|
-    #   unless app.root.to_s.match root.to_s
-    #     config.paths['db/migrate'].expanded.each do |expanded_path|
-    #       app.config.paths['db/migrate'] << expanded_path
-    #     end
-    #   end
-    # end
+    ## BREAKING CHANGE - INCLUDE IN 2.0 ###
+    # Append migrations direction to Application
+    initializer :append_migrations do |app|
+      unless app.root.to_s.match root.to_s
+        config.paths['db/migrate'].expanded.each do |expanded_path|
+          app.config.paths['db/migrate'] << expanded_path
+        end
+      end
+    end
 
     # filter logging of sensitive fields
     initializer 'gemgento.params.filter' do |app|

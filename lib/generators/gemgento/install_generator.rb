@@ -2,12 +2,6 @@ module Gemgento
   class InstallGenerator < Rails::Generators::Base
     source_root File.expand_path("../templates", __FILE__)
 
-    desc 'Copies migrations to your application.'
-
-    def copy_migrations
-      rake('gemgento:install:migrations')
-    end
-
     desc 'Add the Gemgento routes'
 
     def add_routes
