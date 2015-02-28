@@ -27,6 +27,7 @@ module Gemgento
         end
 
         set_associated_products(data[:simple_product_ids], data[:configurable_product_ids], @product)
+        set_bundle_options(data[:bundle_options], @product)
       end
 
       render nothing: true
@@ -148,6 +149,32 @@ module Gemgento
 
       unless configurable_magento_product_ids.nil?
         product.set_configurable_products_by_magento_ids(configurable_magento_product_ids)
+      end
+    end
+
+    def set_bundle_options(bundle_options_data, product)
+      bundle_options_data.each do |bundle_option_data|
+        bundle_option = product.bundle_options.find_or_initialize_by(magento_id: bundle_option_data[:id])
+        bundle_option.is_required = bundle_option_data[:required].to_i == 1 ? true : false
+        bundle_option.position = bundle_option_data[:position]
+        bundle_option.name = bundle_option_data[:default_title]
+
+        bundle_option_data[:type] = 'selection' if bundle_option_data[:type] == 'select'
+        bundle_option.input_type = Gemgento::Bundle::Option.input_types[bundle_option_data[:type].to_sym]
+
+        bundle_option.save
+
+        bundle_option_data[:selections].each do |selection|
+          bundle_item = bundle_option.items.find_or_initialize_by(magento_id: selection[:id])
+          bundle_item.product = Gemgento::Product.find_by(magento_id: selection[:product_id])
+          bundle_item.price_type = selection[:price_type].to_i
+          bundle_item.price_value = selection[:price_value].to_f
+          bundle_item.default_quantity = selection[:qty].to_f
+          bundle_item.is_user_defined_quantity = selection[:can_change_qty].to_i == 1
+          bundle_item.position = selection[:position]
+          bundle_item.is_default = selection[:is_default].to_i == 1
+          bundle_item.save
+        end
       end
     end
 

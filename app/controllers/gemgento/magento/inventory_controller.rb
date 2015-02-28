@@ -8,7 +8,13 @@ module Gemgento
       default_values = nil
 
       if !@product.nil? && !data[:inventories].nil?
+
+        # If stock data for only one website was pushed, and the website id is 0, rails thinks data[:inventories]
+        # is an array and not a hash, so make it a Hash
+        data[:inventories] = { 0 => data[:inventories][0] } if data[:inventories].is_a? Array
+
         data[:inventories].each do |website_id, stock_data|
+
           store = Store.find_by(website_id: website_id.blank? ? nil : website_id)
           next if stock_data[:qty].nil?
 
