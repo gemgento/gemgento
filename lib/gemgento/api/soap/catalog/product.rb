@@ -209,6 +209,8 @@ module Gemgento
             Gemgento::Product.skip_callback(:save, :after, :touch_categories)
             Gemgento::Product.skip_callback(:save, :after, :touch_configurables)
 
+            pp subject
+
             product = Gemgento::Product.where(magento_id: subject[:product_id]).not_deleted.first_or_initialize
             product.magento_id = subject[:product_id]
             product.magento_type = subject[:type]
@@ -242,6 +244,7 @@ module Gemgento
             set_categories(subject[:categories][:item], product, store) if subject[:categories][:item]
             set_attribute_values_from_magento(subject[:additional_attributes][:item], product, store) if (subject[:additional_attributes] and subject[:additional_attributes][:item])
             set_associated_products(subject[:simple_product_ids], subject[:configurable_product_ids], product)
+            set_bundle_options(subject[:bundle_options][:item], product) if subject[:bundle_options] && subject[:bundle_options][:item]
 
             Gemgento::Product.set_callback(:save, :after, :touch_categories)
             Gemgento::Product.set_callback(:save, :after, :touch_configurables)
@@ -423,6 +426,34 @@ module Gemgento
             if !configurable_magento_product_ids.nil? && !configurable_magento_product_ids[:item].nil?
               ids = Magento.enforce_savon_array(configurable_magento_product_ids[:item])
               product.set_configurable_products_by_magento_ids(ids)
+            end
+          end
+
+          def self.set_bundle_options(bundle_options_data, product)
+            bundle_options_data.each do |bundle_option_data|
+              bundle_option = product.bundle_options.find_or_initialize_by(magento_id: bundle_option_data[:id])
+              bundle_option.is_required = bundle_option_data[:required].to_i == 1 ? true : false
+              bundle_option.position = bundle_option_data[:position]
+              bundle_option.name = bundle_option_data[:default_title]
+
+              bundle_option_data[:type] = 'selection' if bundle_option_data[:type] == 'select'
+              bundle_option.input_type = Gemgento::Bundle::Option.input_types[bundle_option_data[:type].to_sym]
+
+              bundle_option.save
+
+              if bundle_option_data[:selections] && bundle_option_data[:selections][:item]
+                bundle_option_data[:selections][:item].each do |selection|
+                  bundle_item = bundle_option.items.find_or_initialize_by(magento_id: selection[:id])
+                  bundle_item.product = Gemgento::Product.find_by(magento_id: selection[:product_id])
+                  bundle_item.price_type = selection[:price_type].to_i
+                  bundle_item.price_value = selection[:price_value].to_f
+                  bundle_item.default_quantity = selection[:qty].to_f
+                  bundle_item.is_user_defined_quantity = selection[:can_change_qty].to_i == 1
+                  bundle_item.position = selection[:position]
+                  bundle_item.is_default = selection[:is_default].to_i == 1
+                  bundle_item.save
+                end
+              end
             end
           end
 
