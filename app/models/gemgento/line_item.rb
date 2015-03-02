@@ -5,6 +5,8 @@ module Gemgento
     belongs_to :itemizable, polymorphic: true, touch: true
     belongs_to :product
 
+    has_many :bundle_options, class_name: 'Gemgento::LineItemOption', foreign_key: :line_item_id
+
     validates :itemizable, :product, presence: true
     validates_with InventoryValidator, if: -> { itemizable_type == 'Gemgento::Quote' }
 
@@ -19,6 +21,8 @@ module Gemgento
     serialize :options, Hash
 
     attr_accessor :async, :destroy_quote_after_rollback
+
+    accepts_nested_attributes_for :bundle_options
 
     # JSON representation of the LineItem.
     #
