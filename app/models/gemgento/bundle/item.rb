@@ -10,6 +10,15 @@ module Gemgento
 
       validates :option, :product, presence: true
       validates :product, uniqueness: { scope: :product }
+
+      after_save :touch_product, if: -> { self.changed? }
+
+      private
+
+      def touch_option_product
+        TouchProduct.perform_async([self.option.product.id])
+      end
+
     end
   end
 end

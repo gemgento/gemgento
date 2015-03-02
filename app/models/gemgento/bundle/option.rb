@@ -11,6 +11,14 @@ module Gemgento
       has_many :products, through: :items, class_name: 'Gemgento::Product'
 
       validates :product, presence: true
+
+      after_save :touch_product, if: -> { self.changed? }
+
+      private
+
+      def touch_option_product
+        TouchProduct.perform_async([self.product.id])
+      end
     end
   end
 end
