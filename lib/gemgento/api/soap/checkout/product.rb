@@ -26,7 +26,7 @@ module Gemgento
           def self.update(quote, line_items)
             message = {
                 quote_id: quote.magento_id,
-                products: {item: compose_products_data(line_items)},
+                products: { item: compose_products_data(line_items) },
                 store_id: quote.store.magento_id
             }
             Magento.create_call(:shopping_cart_product_update, message)
@@ -40,7 +40,7 @@ module Gemgento
           def self.remove(quote, line_items)
             message = {
                 quote_id: quote.magento_id,
-                products: {item: compose_products_data(line_items)},
+                products: { item: compose_products_data(line_items) },
                 store_id: quote.store.magento_id
             }
             Magento.create_call(:shopping_cart_product_remove, message)
@@ -60,6 +60,10 @@ module Gemgento
 
           private
 
+          # An array with the list of shoppingCartProductEntity
+          #
+          # @param line_items [Array(Gemgento::LineItem)]
+          # @return [Array(Hash)]
           def self.compose_products_data(line_items)
             products_data = []
 
@@ -72,8 +76,8 @@ module Gemgento
                   sku: line_item.product.sku,
                   qty: qty,
                   options: { item: (compose_options_data(line_item.options) unless line_item.options.nil?) },
-                  'bundle_option' => nil,
-                  'bundle_option_qty' => nil,
+                  'bundle_option' => line_item.bundle_options.any? ? { item: bundle_option(line_item) } : nil,
+                  'bundle_option_qty' => line_item.bundle_options.any? ? { item: bundle_option_qty(line_item) } : nil,
                   links: nil
               }
             end
@@ -91,6 +95,40 @@ module Gemgento
             end
 
             return options_data
+          end
+
+          # Create array of bundle item options.
+          #
+          # @param line_item [Gemgento::LineItem]
+          # @return [Hash]
+          def self.bundle_option(line_item)
+            bundle_options = []
+
+            line_item.bundle_options.each do |line_item_option|
+              bundle_options << {
+                  key: line_item_option.bundle_item.option.magento_id,
+                  value: line_item_option.bundle_item.magento_id
+              }
+            end
+
+            return bundle_options
+          end
+
+          # Create array of bundle items quantity .
+          #
+          # @param line_item [Gemgento::LineItem]
+          # @return [Array]
+          def self.bundle_option_qty(line_item)
+            bundle_option_qty = []
+
+            line_item.bundle_options.each do |line_item_option|
+              bundle_option_qty << {
+                  key: line_item_option.bundle_item.option.magento_id,
+                  value: line_item_option.quantity
+              }
+            end
+
+            return bundle_option_qty
           end
 
         end
