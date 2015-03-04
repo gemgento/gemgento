@@ -4,7 +4,7 @@ if defined?(ActiveAdmin)
       menu priority: 100, parent: 'Gemgento', label: 'Sync'
       permit_params :subject
 
-      actions :all, :except => [:edit, :destroy]
+      actions :all, except: [:edit, :destroy]
 
       form do |f|
         f.inputs do
@@ -15,7 +15,7 @@ if defined?(ActiveAdmin)
 
       controller do
         def create
-          Gemgento::Sync.send(params[:gemgento_sync][:subject])
+          Gemgento::Sync.send(params[:sync][:subject])
 
           redirect_to admin_gemgento_syncs_url
         end
