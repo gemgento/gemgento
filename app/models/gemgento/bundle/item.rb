@@ -11,7 +11,7 @@ module Gemgento
       validates :option, :product, presence: true
       validates :product, uniqueness: { scope: :product }
 
-      after_save :touch_product, if: -> { self.changed? }
+      after_save :touch_option_product, if: -> { self.changed? }
 
       private
 
