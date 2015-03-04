@@ -16,7 +16,7 @@ module Gemgento
 
       private
 
-      def touch_option_product
+      def touch_product
         TouchProduct.perform_async([self.product.id])
       end
     end
