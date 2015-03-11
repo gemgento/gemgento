@@ -42,7 +42,7 @@ module Gemgento
     private
 
     def set_options(product_attribute, options)
-      attribute_option_ids = []
+      option_ids = []
       options.each do |store_options|
         next if store_options[:options].nil?
 
@@ -50,23 +50,18 @@ module Gemgento
 
         if store
           store_options[:options].each_with_index do |option, index|
-            product_attribute_option = ProductAttributeOption.find_or_initialize_by(value: option[:value], product_attribute: product_attribute, store: store)
-            product_attribute_option.product_attribute = product_attribute
-            product_attribute_option.value = option[:value]
+            product_attribute_option = ProductAttributeOption.find_or_initialize_by(product_attribute: product_attribute, store: store, value: option[:value])
             product_attribute_option.label = option[:label]
             product_attribute_option.order = index
-            product_attribute_option.store = store
             product_attribute_option.sync_needed = false
             product_attribute_option.save
 
-            attribute_option_ids << product_attribute_option.id
+            option_ids << product_attribute_option.id
           end
         end
       end
 
-      product_attribute.product_attribute_options.
-          where('id NOT IN (?)', attribute_option_ids).
-          destroy_all
+      product_attribute.product_attribute_options.where.not(id: option_ids).destroy_all
     end
 
   end
