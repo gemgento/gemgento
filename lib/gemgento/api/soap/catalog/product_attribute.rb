@@ -18,22 +18,24 @@ module Gemgento
           end
 
           def self.fetch_all_options(product_attribute)
+            option_ids = []
+
             # add attribute options if there are any
             Store.all.each do |store|
               options(product_attribute.magento_id, store).each_with_index do |attribute_option, index|
                 label = Magento.enforce_savon_string(attribute_option[:label])
                 value = Magento.enforce_savon_string(attribute_option[:value])
 
-                product_attribute_option = ProductAttributeOption.where(product_attribute: product_attribute, label: label, value: value, store: store).first_or_initialize
-                product_attribute_option.label = label
-                product_attribute_option.value = value
-                product_attribute_option.product_attribute = product_attribute
+                product_attribute_option = ProductAttributeOption.find_or_initialize_by(product_attribute: product_attribute, label: label, value: value, store: store)
                 product_attribute_option.order = index
-                product_attribute_option.store = store
                 product_attribute_option.sync_needed = false
                 product_attribute_option.save
+
+                option_ids << product_attribute_option.id
               end
             end
+
+            product_attribute.product_attribute_options.where.not(id: option_ids).destroy_all
           end
 
           def self.list(product_attribute_set)
