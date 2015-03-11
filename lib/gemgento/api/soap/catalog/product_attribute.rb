@@ -26,7 +26,8 @@ module Gemgento
                 label = Magento.enforce_savon_string(attribute_option[:label])
                 value = Magento.enforce_savon_string(attribute_option[:value])
 
-                product_attribute_option = ProductAttributeOption.find_or_initialize_by(product_attribute: product_attribute, label: label, value: value, store: store)
+                product_attribute_option = ProductAttributeOption.find_or_initialize_by(product_attribute: product_attribute, value: value, store: store)
+                product_attribute_option.label = label
                 product_attribute_option.order = index
                 product_attribute_option.sync_needed = false
                 product_attribute_option.save
