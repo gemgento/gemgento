@@ -78,23 +78,6 @@ module Gemgento
           ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store).where('id != ?', product_attribute_values.first.id).destroy_all
         end
 
-        # if there are option values, get the actual value instead of label
-        if product_attribute.frontend_input == 'select'
-          return true if value.nil?
-          attribute_option = ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: value, store: store)
-
-          if attribute_option.nil?
-            attribute_option = ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, value: value, store: store)
-
-            if attribute_option.nil?
-              attribute_option = create_attribute_option(product_attribute, value, store)
-              return false if attribute_option.nil?
-            end
-          end
-
-          value = attribute_option.value
-        end
-
         # set the attribute value
         product_attribute_value = ProductAttributeValue.where(product_id: self.id, product_attribute_id: product_attribute.id, store: store).first_or_initialize
         product_attribute_value.product = self
@@ -102,7 +85,6 @@ module Gemgento
         product_attribute_value.value = value
         product_attribute_value.store = store
         product_attribute_value.save
-
 
         self.product_attribute_values << product_attribute_value unless self.product_attribute_values.include?(product_attribute_value)
 
