@@ -2,6 +2,9 @@ module Gemgento
   module Magento
     class AddressesController < Gemgento::Magento::BaseController
 
+      before_action :skip_callbacks
+      after_action :set_callbacks
+
       def update
         data = params[:data]
         @user = User.find_by(magento_id: data[:customer_id])
@@ -33,14 +36,24 @@ module Gemgento
       end
 
       def destroy
-        Address.skip_callback(:destroy, :before, :destroy_magento)
-
         @address = Address.find_by(magento_id: params[:id], addressable_type: 'Gemgento::User')
         @address.destroy unless @address.nil?
 
-        Address.set_callback(:destroy, :before, :destroy_magento)
-
         render nothing: true
+      end
+
+      private
+
+      def skip_callbacks
+        Address.skip_callback(:create, :before, :create_magento_address)
+        Address.skip_callback(:update, :before, :update_magento_address)
+        Address.skip_callback(:destroy, :before, :destroy_magento_address)
+      end
+
+      def set_callbacks
+        Address.set_callback(:create, :before, :create_magento_address)
+        Address.set_callback(:update, :before, :update_magento_address)
+        Address.set_callback(:destroy, :before, :destroy_magento_address)
       end
 
     end
