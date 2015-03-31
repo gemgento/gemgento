@@ -79,7 +79,7 @@ module Gemgento
               }
             end
 
-            response = Magento.create_call(:catalog_product_list, message)
+            response = MagentoApi.create_call(:catalog_product_list, message)
 
             if response.success? && !response.body_overflow[:store_view].nil? && !response.body_overflow[:store_view].is_a?(Array)
               response.body_overflow[:store_view] = [response.body_overflow[:store_view]]
@@ -109,7 +109,7 @@ module Gemgento
                 },
                 store_view: store.magento_id
             }
-            Magento.create_call(:catalog_product_info, message)
+            MagentoApi.create_call(:catalog_product_info, message)
           end
 
           # Create a new Product in Magento.
@@ -125,7 +125,7 @@ module Gemgento
                 product_data: compose_product_data(product, store),
                 store_view: store.magento_id
             }
-            Magento.create_call(:catalog_product_create, message)
+            MagentoApi.create_call(:catalog_product_create, message)
           end
 
           # Update existing Magento Product.
@@ -140,7 +140,7 @@ module Gemgento
                 product_data: compose_product_data(product, store),
                 store_view: store.magento_id
             }
-            Magento.create_call(:catalog_product_update, message)
+            MagentoApi.create_call(:catalog_product_update, message)
           end
 
           # Delete a product in Magento.
@@ -149,7 +149,7 @@ module Gemgento
           # @return [Gemgento::MagentoResponse]
           def self.delete(product)
             message = { product: product.magento_id, product_identifier_type: 'id' }
-            Magento.create_call(:catalog_product_delete, message)
+            MagentoApi.create_call(:catalog_product_delete, message)
           end
 
           def self.check_magento(identifier, identifier_type, attribute_set, store)
@@ -166,7 +166,7 @@ module Gemgento
                 }
             }
 
-            response = Magento.create_call(:catalog_product_info, message)
+            response = MagentoApi.create_call(:catalog_product_info, message)
 
             unless response.success?
               return ::Gemgento::Product.new
@@ -417,12 +417,12 @@ module Gemgento
 
           def self.set_associated_products(simple_magento_product_ids, configurable_magento_product_ids, product)
             if !simple_magento_product_ids.nil? && !simple_magento_product_ids[:item].nil?
-              ids = Magento.enforce_savon_array(simple_magento_product_ids[:item])
+              ids = MagentoApi.enforce_savon_array(simple_magento_product_ids[:item])
               product.set_simple_products_by_magento_ids(ids)
             end
 
             if !configurable_magento_product_ids.nil? && !configurable_magento_product_ids[:item].nil?
-              ids = Magento.enforce_savon_array(configurable_magento_product_ids[:item])
+              ids = MagentoApi.enforce_savon_array(configurable_magento_product_ids[:item])
               product.set_configurable_products_by_magento_ids(ids)
             end
           end

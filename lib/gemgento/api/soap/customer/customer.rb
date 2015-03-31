@@ -5,7 +5,7 @@ module Gemgento
         class Customer
 
           def self.authnet_cim_cards(customer_id)
-            response = Magento.create_call(:customer_customer_authnet_cim_cards, { customer_id: customer_id })
+            response = MagentoApi.create_call(:customer_customer_authnet_cim_cards, { customer_id: customer_id })
 
             if response.success?
               return response.body
@@ -74,7 +74,7 @@ module Gemgento
               }
             end
 
-            response = Magento.create_call(:customer_customer_list, message)
+            response = MagentoApi.create_call(:customer_customer_list, message)
 
             if response.success? && !response.body_overflow[:store_view].is_a?(Array)
               response.body_overflow[:store_view] = [response.body_overflow[:store_view]]
@@ -88,7 +88,7 @@ module Gemgento
           # @param [Integer] customer_id
           # @return [MagentoResponse]
           def self.info(customer_id)
-            Magento.create_call(:customer_customer_info, { customer_id: customer_id })
+            MagentoApi.create_call(:customer_customer_info, { customer_id: customer_id })
           end
 
           # Create customer in Magento.
@@ -100,7 +100,7 @@ module Gemgento
             message = {
                 customer_data: compose_customer_data(customer, store)
             }
-            Magento.create_call(:customer_customer_create, message)
+            MagentoApi.create_call(:customer_customer_create, message)
           end
 
           # Update customer in Magento.
@@ -113,7 +113,7 @@ module Gemgento
                 customer_id: customer.magento_id,
                 customer_data: compose_customer_data(customer, store)
             }
-            Magento.create_call(:customer_customer_update, message)
+            MagentoApi.create_call(:customer_customer_update, message)
           end
 
           # Delete customer in Magento.
@@ -124,11 +124,11 @@ module Gemgento
             message = {
                 customer_id: customer.magento_id
             }
-            Magento.create_call(:customer_customer_delete, message)
+            MagentoApi.create_call(:customer_customer_delete, message)
           end
 
           def self.group
-            response = Magento.create_call(:customer_group_list)
+            response = MagentoApi.create_call(:customer_group_list)
 
             if response.success?
               unless response.body[:result][:item].is_a? Array

@@ -21,7 +21,7 @@ module Gemgento
           #
           # @return [Gemgento::MagentoResponse]
           def self.list
-            response = Magento.create_call(:directory_country_list)
+            response = MagentoApi.create_call(:directory_country_list)
 
             if response.success? && !response.body[:countries][:item].is_a?(Array)
               response.body[:countries][:item] = [response.body[:countries][:item]]

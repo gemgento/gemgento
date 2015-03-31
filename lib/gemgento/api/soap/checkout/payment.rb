@@ -13,7 +13,7 @@ module Gemgento
                 quote_id: quote.magento_id,
                 store_id: quote.store.magento_id
             }
-            Magento.create_call(:shopping_cart_payment_list, message)
+            MagentoApi.create_call(:shopping_cart_payment_list, message)
           end
 
           # Set the payment method for a Quote in Magento.
@@ -37,7 +37,7 @@ module Gemgento
                 },
                 store_id: quote.store.magento_id
             }
-            Magento.create_call(:shopping_cart_payment_method, message)
+            MagentoApi.create_call(:shopping_cart_payment_method, message)
           end
 
           # Compose additional payment attributes hash for Magento API call.

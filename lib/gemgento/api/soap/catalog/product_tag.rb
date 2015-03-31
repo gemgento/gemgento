@@ -36,7 +36,7 @@ module Gemgento
                 product_id: product.magento_id,
                 store: store.magento_id
             }
-            response = Magento.create_call(:catalog_product_tag_list, message)
+            response = MagentoApi.create_call(:catalog_product_tag_list, message)
 
             if response.success?
               response.body[:result][:item] = [response.body[:result][:item]] unless response.body[:result][:item].is_a? Array
@@ -55,7 +55,7 @@ module Gemgento
                 tag_id: magento_tag_id,
                 store: store.magento_id
             }
-            Magento.create_call(:catalog_product_tag_info, message)
+            MagentoApi.create_call(:catalog_product_tag_info, message)
           end
 
           # Sync a Magento tag to Gemgento.
@@ -112,7 +112,7 @@ module Gemgento
             }
             message[:customer_id] = user.magento_id unless user.nil?
 
-            response = Magento.create_call(:catalog_product_tag_info, message)
+            response = MagentoApi.create_call(:catalog_product_tag_info, message)
 
             if response.success?
               response.body[:result][:item] = [response.body[:result][:item]] unless response.body[:result][:item].is_a?(Array)
@@ -136,7 +136,7 @@ module Gemgento
             }
             message[:tag_id] = tag.magento_id unless tag.magento_id.nil?
 
-            Magento.create_call(:catalog_product_tag_manage, message)
+            MagentoApi.create_call(:catalog_product_tag_manage, message)
           end
 
         end

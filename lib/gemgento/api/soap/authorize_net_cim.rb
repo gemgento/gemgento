@@ -4,7 +4,7 @@ module Gemgento
       class AuthorizeNetCim
 
         def self.payment_profiles(customer_id)
-          response = Magento.create_call(:customer_customer_authnet_cim_cards, { customer_id: customer_id })
+          response = MagentoApi.create_call(:customer_customer_authnet_cim_cards, { customer_id: customer_id })
 
           if response.success?
             return response.body[:response][:item].is_a?(Array) ? response.body[:response][:item] : [response.body[:response][:item]]

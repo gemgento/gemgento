@@ -22,7 +22,7 @@ module Gemgento
           end
 
           def self.tokens(customer_id)
-            response = Magento.create_call(:globalcollect_tokens, {customer_id: customer_id})
+            response = MagentoApi.create_call(:globalcollect_tokens, {customer_id: customer_id})
 
             if response.success?
               if response.body[:result][:item].nil?

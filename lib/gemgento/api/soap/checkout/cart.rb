@@ -13,7 +13,7 @@ module Gemgento
                 store_id: cart.store.magento_id,
                 gemgento_id: cart.id
             }
-            Magento.create_call(:shopping_cart_create, message)
+            MagentoApi.create_call(:shopping_cart_create, message)
           end
 
           # Process magento quote.
@@ -45,7 +45,7 @@ module Gemgento
               message[:send_email] = !payment.is_redirecting_payment_method? # don't send emails for payment methods that require a redirect.
             end
 
-            Magento.create_call(:shopping_cart_order, message)
+            MagentoApi.create_call(:shopping_cart_order, message)
           end
 
           def self.info(cart)
@@ -53,7 +53,7 @@ module Gemgento
                 quote_id: cart.magento_id,
                 store_id: cart.store.magento_id
             }
-            Magento.create_call(:shopping_cart_info, message)
+            MagentoApi.create_call(:shopping_cart_info, message)
           end
 
           # Mage a Magento API call to get quote totals.
@@ -65,7 +65,7 @@ module Gemgento
                 quote_id: quote.magento_id,
                 store_id: quote.store.magento_id
             }
-            Magento.create_call(:shopping_cart_totals, message)
+            MagentoApi.create_call(:shopping_cart_totals, message)
           end
 
           def self.license(cart)
@@ -73,7 +73,7 @@ module Gemgento
                 quote_id: cart.magento_quote_id,
                 store_id: cart.store.magento_id
             }
-            response = Magento.create_call(:shopping_cart_license, message)
+            response = MagentoApi.create_call(:shopping_cart_license, message)
 
             if response.success?
               response.body[:result][:item]

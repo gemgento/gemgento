@@ -15,7 +15,7 @@ module Gemgento
                 coupon_code: coupon_code,
                 store_id: quote.store.magento_id
             }
-            Magento.create_call(:shopping_cart_coupon_add, message)
+            MagentoApi.create_call(:shopping_cart_coupon_add, message)
           end
 
           # Remove coupon codes from a Magento Quote.
@@ -27,7 +27,7 @@ module Gemgento
                 quote_id: quote.magento_id,
                 store_id: quote.store.magento_id
             }
-            Magento.create_call(:shopping_cart_coupon_remove, message)
+            MagentoApi.create_call(:shopping_cart_coupon_remove, message)
           end
 
         end

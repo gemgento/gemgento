@@ -21,7 +21,7 @@ module Gemgento
             message = {
                 products: {item: product_ids},
             }
-            response = Magento.create_call(:catalog_inventory_stock_item_list, message)
+            response = MagentoApi.create_call(:catalog_inventory_stock_item_list, message)
 
             if response.success?
               if response.body[:result][:item].nil?
@@ -42,7 +42,7 @@ module Gemgento
                 data: compose_inventory_data(inventory, include_website)
             }
 
-            response = Magento.create_call(:catalog_inventory_stock_item_update, message)
+            response = MagentoApi.create_call(:catalog_inventory_stock_item_update, message)
 
             return response.success?
           end

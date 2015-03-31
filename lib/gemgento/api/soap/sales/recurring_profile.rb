@@ -20,7 +20,7 @@ module Gemgento
           #
           # @return [Array(Hash), Boolean]
           def self.list
-            response = Magento.create_call(:sales_recurring_profile_list)
+            response = MagentoApi.create_call(:sales_recurring_profile_list)
 
             if response.success?
               return response.body[:result][:item].is_a?(Array) ? response.body[:result][:item] : [response.body[:result][:item]]
@@ -39,7 +39,7 @@ module Gemgento
                 profile_id: profile_id,
                 state: state
             }
-            response = Magento.create_call(:sales_recurring_profile_update_state, message)
+            response = MagentoApi.create_call(:sales_recurring_profile_update_state, message)
 
             if response.success?
               return true

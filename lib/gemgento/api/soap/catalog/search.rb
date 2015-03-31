@@ -5,7 +5,7 @@ module Gemgento
         class Search
 
           def self.results(query)
-            response = Magento.create_call(:product_search_results, {query: query})
+            response = MagentoApi.create_call(:product_search_results, {query: query})
 
             if response.success?
               result = response.body[:result][:item]

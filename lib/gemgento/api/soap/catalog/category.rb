@@ -24,7 +24,7 @@ module Gemgento
             message = {
                 store_view: store.magento_id
             }
-            Magento.create_call(:catalog_category_tree, message)
+            MagentoApi.create_call(:catalog_category_tree, message)
           end
 
           # Get Category info from Magento.
@@ -37,7 +37,7 @@ module Gemgento
                 category_id: magento_id,
                 store_view: store.magento_id
             }
-            Magento.create_call(:catalog_category_info, message)
+            MagentoApi.create_call(:catalog_category_info, message)
           end
 
           # Create Category in Magento.
@@ -61,7 +61,7 @@ module Gemgento
                 category_data: data,
                 store_view: store.magento_id
             }
-            Magento.create_call(:catalog_category_create, message)
+            MagentoApi.create_call(:catalog_category_create, message)
           end
 
           def self.update(category, store)
@@ -77,7 +77,7 @@ module Gemgento
                 category_data: data,
                 store_view: store.magento_id
             }
-            Magento.create_call(:catalog_category_update, message)
+            MagentoApi.create_call(:catalog_category_update, message)
           end
 
           # Update Category Product positions in Magento.
@@ -103,7 +103,7 @@ module Gemgento
                 store_id: store.magento_id
             }
 
-            Magento.create_call(:catalog_category_update_product_positions, message)
+            MagentoApi.create_call(:catalog_category_update_product_positions, message)
           end
 
           # Get Products assigned to a Category in Magento.
@@ -116,7 +116,7 @@ module Gemgento
                 category_id: category.magento_id,
                 store_id: store.magento_id
             }
-            response = Magento.create_call(:catalog_category_assigned_products, message)
+            response = MagentoApi.create_call(:catalog_category_assigned_products, message)
 
             if response.success?
               if response.body[:result][:item].nil?
@@ -177,7 +177,7 @@ module Gemgento
                 position: product_category.position,
                 product_identifier_type: 'id'
             }
-            Magento.create_call(:catalog_category_update_product, message)
+            MagentoApi.create_call(:catalog_category_update_product, message)
           end
 
           private

@@ -15,7 +15,7 @@ module Gemgento
                 products: { item: compose_products_data(line_items) },
                 store_id: quote.store.magento_id
             }
-            Magento.create_call(:shopping_cart_product_add, message)
+            MagentoApi.create_call(:shopping_cart_product_add, message)
           end
 
           # Update items in Magento quote.
@@ -29,7 +29,7 @@ module Gemgento
                 products: { item: compose_products_data(line_items) },
                 store_id: quote.store.magento_id
             }
-            Magento.create_call(:shopping_cart_product_update, message)
+            MagentoApi.create_call(:shopping_cart_product_update, message)
           end
 
           # Remove items from Magento quote.
@@ -43,7 +43,7 @@ module Gemgento
                 products: { item: compose_products_data(line_items) },
                 store_id: quote.store.magento_id
             }
-            Magento.create_call(:shopping_cart_product_remove, message)
+            MagentoApi.create_call(:shopping_cart_product_remove, message)
           end
 
           # List all items in a quote
@@ -55,7 +55,7 @@ module Gemgento
                 quote_id: quote.magento_id,
                 store_id: quote.store.magento_id
             }
-            Magento.create_call(:shopping_cart_product_list, message)
+            MagentoApi.create_call(:shopping_cart_product_list, message)
           end
 
           private

@@ -16,7 +16,7 @@ module Gemgento
           end
 
           def self.list
-            response = Magento.create_call(:store_list)
+            response = MagentoApi.create_call(:store_list)
 
             if response.success? && !response.body[:stores][:item].is_a?(Array)
               response.body[:stores][:item] = [response.body[:stores][:item]]

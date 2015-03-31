@@ -41,7 +41,7 @@ module Gemgento
                 identifier_type: 'id',
                 store_view: store.magento_id
             }
-            response = Magento.create_call(:catalog_product_attribute_media_list, message)
+            response = MagentoApi.create_call(:catalog_product_attribute_media_list, message)
 
             if response.success?
               if response.body[:result][:item].nil?
@@ -69,7 +69,7 @@ module Gemgento
                 identifier_type: 'id',
                 store_view: asset.store.magento_id
             }
-            Magento.create_call(:catalog_product_attribute_media_create, message)
+            MagentoApi.create_call(:catalog_product_attribute_media_create, message)
           end
 
           # Update a Product Attribute Media in Magento.
@@ -84,7 +84,7 @@ module Gemgento
                 identifier_type: 'id',
                 store_view: asset.store.magento_id
             }
-            Magento.create_call(:catalog_product_attribute_media_update, message)
+            MagentoApi.create_call(:catalog_product_attribute_media_update, message)
           end
 
           # Remove Product Attribute Media in Magento.
@@ -93,7 +93,7 @@ module Gemgento
           # @return [Gemgento::MagentoResponse]
           def self.remove(asset)
             message = { product: asset.product.magento_id, file: asset.file, identifier_type: 'id' }
-            Magento.create_call(:catalog_product_attribute_media_remove, message)
+            MagentoApi.create_call(:catalog_product_attribute_media_remove, message)
           end
 
           # Get Product Attribute Media Types from Magento.
@@ -101,7 +101,7 @@ module Gemgento
           # @param product_attribute_set [Gemgento::ProductAttributeSet]
           # @return [Gemgento::MagnetoRepsonse]
           def self.types(product_attribute_set)
-            response = Magento.create_call(:catalog_product_attribute_media_types, {set_id: product_attribute_set.magento_id})
+            response = MagentoApi.create_call(:catalog_product_attribute_media_types, {set_id: product_attribute_set.magento_id})
 
             if response.success? &&
               if response.body[:result][:item].nil?
@@ -123,7 +123,7 @@ module Gemgento
             asset = Asset.find_or_initialize_by(product_id: product.id, file: source[:file], store_id: store.id)
             asset.url = source[:url]
             asset.position = source[:position]
-            asset.label = Magento.enforce_savon_string(source[:label])
+            asset.label = MagentoApi.enforce_savon_string(source[:label])
             asset.file = source[:file]
             asset.product = product
             asset.sync_needed = false
@@ -133,7 +133,7 @@ module Gemgento
 
             # assign AssetTypes
             asset_type_codes = source[:types][:item]
-            asset_type_codes = [Magento.enforce_savon_string(asset_type_codes)] unless asset_type_codes.is_a? Array
+            asset_type_codes = [MagentoApi.enforce_savon_string(asset_type_codes)] unless asset_type_codes.is_a? Array
             asset.set_types_by_codes(asset_type_codes)
           end
 

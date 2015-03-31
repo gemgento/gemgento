@@ -21,7 +21,7 @@ module Gemgento
           #
           # @return [Gemgento::MagentoResponse]
           def self.list
-            response = Magento.create_call(:catalog_product_attribute_set_list)
+            response = MagentoApi.create_call(:catalog_product_attribute_set_list)
 
             if response.success?
               response.body[:result][:item] = [response.body[:result][:item]] unless response.body[:result][:item].is_a? Array

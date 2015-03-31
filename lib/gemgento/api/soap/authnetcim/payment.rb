@@ -9,7 +9,7 @@ module Gemgento
           # @param customer_id [Integer] Magento customer id.
           # @return [Gemgento::MagentoResponse]
           def self.list(customer_id)
-            response = Magento.create_call(:authnetcim_payment_list, { customer_id: customer_id })
+            response = MagentoApi.create_call(:authnetcim_payment_list, { customer_id: customer_id })
 
             # filter and enforce the array of cards on success
             if response.success?
@@ -47,7 +47,7 @@ module Gemgento
                 }
             }
 
-            Magento.create_call(:authnetcim_payment_create, message)
+            MagentoApi.create_call(:authnetcim_payment_create, message)
           end
 
           # Destroy a saved payment method for a customer.
@@ -60,7 +60,7 @@ module Gemgento
                 customer_id: customer_id,
                 payment_profile_id: payment_profile_id
             }
-            Magento.create_call(:authnetcim_payment_destroy, message)
+            MagentoApi.create_call(:authnetcim_payment_destroy, message)
           end
 
           # Fetch and sync all user saved credit cards.

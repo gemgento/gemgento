@@ -52,7 +52,7 @@ module Gemgento
               }
             end
 
-            response = Magento.create_call(:sales_order_list, message)
+            response = MagentoApi.create_call(:sales_order_list, message)
 
             if response.success? && !response.body_overflow[:result][:item].is_a?(Array)
               response.body_overflow[:result][:item] = [response.body_overflow[:result][:item]]
@@ -66,7 +66,7 @@ module Gemgento
           # @param increment_id [String]
           # @return [Gemgento::MagentoResponse]
           def self.info(increment_id)
-            Magento.create_call(:sales_order_info, { order_increment_id: increment_id })
+            MagentoApi.create_call(:sales_order_info, { order_increment_id: increment_id })
           end
 
           def self.hold
@@ -88,7 +88,7 @@ module Gemgento
               comment: comment,
               notify: notify
             }
-            Magento.create_call(:sales_order_add_comment, message)
+            MagentoApi.create_call(:sales_order_add_comment, message)
           end
 
           private

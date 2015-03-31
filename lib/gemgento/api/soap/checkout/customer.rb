@@ -37,7 +37,7 @@ module Gemgento
                 customer: customer,
                 store_id: quote.store.magento_id
             }
-            Magento.create_call(:shopping_cart_customer_set, message)
+            MagentoApi.create_call(:shopping_cart_customer_set, message)
           end
 
           # Set shipping and billing addreses for Quote in Magento.
@@ -50,7 +50,7 @@ module Gemgento
                 customer: {item: compose_address_data([quote.shipping_address, quote.billing_address])},
                 store_id: quote.store.magento_id
             }
-            Magento.create_call(:shopping_cart_customer_addresses, message)
+            MagentoApi.create_call(:shopping_cart_customer_addresses, message)
           end
 
           private

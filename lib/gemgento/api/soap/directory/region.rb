@@ -18,7 +18,7 @@ module Gemgento
           end
 
           def self.list(country)
-            response = Magento.create_call(:directory_region_list, {country: country})
+            response = MagentoApi.create_call(:directory_region_list, {country: country})
 
             if response.success?
               if response.body[:countries][:item].nil?

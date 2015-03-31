@@ -1,7 +1,7 @@
 module Gemgento
 
   # @author Gemgento LLC
-  class Magento
+  class MagentoApi
     # Log into the Magento API and set the session and client.
     #
     # @param force_new_session [Boolean]

@@ -17,7 +17,7 @@ module Gemgento
           end
 
           def self.list
-            response = Magento.create_call(:catalog_rule_list)
+            response = MagentoApi.create_call(:catalog_rule_list)
 
             if response.success? && !response.body[:result][:item].is_a?(Array)
               response.body[:result][:item] = [response.body[:result][:item]]

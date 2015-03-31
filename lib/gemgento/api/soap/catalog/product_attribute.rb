@@ -23,8 +23,8 @@ module Gemgento
             # add attribute options if there are any
             Store.all.each do |store|
               options(product_attribute.magento_id, store).each_with_index do |attribute_option, index|
-                label = Magento.enforce_savon_string(attribute_option[:label])
-                value = Magento.enforce_savon_string(attribute_option[:value])
+                label = MagentoApi.enforce_savon_string(attribute_option[:label])
+                value = MagentoApi.enforce_savon_string(attribute_option[:value])
 
                 product_attribute_option = ProductAttributeOption.find_or_initialize_by(product_attribute: product_attribute, value: value, store: store)
                 product_attribute_option.label = label
@@ -40,7 +40,7 @@ module Gemgento
           end
 
           def self.list(product_attribute_set)
-            response = Magento.create_call(:catalog_product_attribute_list, {set_id: product_attribute_set.magento_id})
+            response = MagentoApi.create_call(:catalog_product_attribute_list, {set_id: product_attribute_set.magento_id})
 
             if response.success?
               unless response.body[:result][:item].is_a? Array
@@ -52,7 +52,7 @@ module Gemgento
           end
 
           def self.info(attribute_id)
-            response = Magento.create_call(:catalog_product_attribute_info, {attribute: attribute_id})
+            response = MagentoApi.create_call(:catalog_product_attribute_info, {attribute: attribute_id})
 
             if response.success?
               response.body[:result]
@@ -64,7 +64,7 @@ module Gemgento
                 attributeId: product_attribute_id,
                 storeView: store.magento_id
             }
-            response = Magento.create_call(:catalog_product_attribute_options, message)
+            response = MagentoApi.create_call(:catalog_product_attribute_options, message)
 
             if response.success?
               if response.body[:result][:item].nil?
@@ -103,7 +103,7 @@ module Gemgento
                 'is_default' => '0'
             }}
 
-            response = Magento.create_call(:catalog_product_attribute_add_option, message)
+            response = MagentoApi.create_call(:catalog_product_attribute_add_option, message)
             fetch_all_options(product_attribute) if response.success?
 
             return response

@@ -32,7 +32,7 @@ module Gemgento
           # @param customer_id [Integer] Magento Customer id.
           # @return [Gemgento::MagentoResponse]
           def self.list(customer_id)
-            response = Magento.create_call(:customer_address_list, {customer_id: customer_id})
+            response = MagentoApi.create_call(:customer_address_list, {customer_id: customer_id})
 
             if response.success?
               if response.body[:result][:item].nil?
@@ -50,7 +50,7 @@ module Gemgento
           # @param address_id [Integer] Magento Address id.
           # @return [Gemgento::MagentoReponse]
           def self.info(address_id)
-            Magento.create_call(:customer_address_list, { address_id: address_id })
+            MagentoApi.create_call(:customer_address_list, { address_id: address_id })
             # response.body[:result][:info]
           end
 
@@ -63,7 +63,7 @@ module Gemgento
                 customer_id: address.addressable.magento_id,
                 address_data: compose_address_data(address)
             }
-            Magento.create_call(:customer_address_create, message)
+            MagentoApi.create_call(:customer_address_create, message)
           end
 
           # Update a Customer Address in Magento.
@@ -75,14 +75,14 @@ module Gemgento
                 address_id: address.magento_id,
                 address_data: compose_address_data(address)
             }
-            Magento.create_call(:customer_address_update, message)
+            MagentoApi.create_call(:customer_address_update, message)
           end
 
           # Delete a Customer Address in Magento.
           #
           # @return [Gemgento::MagentoResponse]
           def self.delete(address_id)
-            Magento.create_call(:customer_address_update, {address_id: address_id})
+            MagentoApi.create_call(:customer_address_update, {address_id: address_id})
           end
 
           private

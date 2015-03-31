@@ -13,7 +13,7 @@ module Gemgento
                 quote_id: quote.magento_id,
                 store_id: quote.store.magento_id
             }
-            Magento.create_call(:shopping_cart_shipping_list, message)
+            MagentoApi.create_call(:shopping_cart_shipping_list, message)
           end
 
           # Set the Quote shipping method in Magento.
@@ -27,7 +27,7 @@ module Gemgento
                 method: shipping_method,
                 store_id: quote.store.magento_id
             }
-            Magento.create_call(:shopping_cart_shipping_method, message)
+            MagentoApi.create_call(:shopping_cart_shipping_method, message)
           end
 
         end
