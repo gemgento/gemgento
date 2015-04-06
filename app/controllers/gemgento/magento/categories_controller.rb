@@ -16,7 +16,11 @@ module Gemgento
         @category.sync_needed = false
 
         if data.key? :image
+          begin
             @category.image = magento_image(data[:image][:value])
+          rescue
+            @category.image = nil
+          end
         end
 
         @category.save
