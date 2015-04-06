@@ -92,6 +92,8 @@ module Gemgento
           url = url.gsub('://', "://#{Gemgento::Config[:magento][:auth_username]}:#{Gemgento::Config[:magento][:auth_password]}@")
         end
 
+        puts url
+
         return url
       end
 
