@@ -17,7 +17,7 @@ module Gemgento
 
         if data.key? :image
           begin
-            @category.image = open("#{Config[:magento][:url]}/media/catalog/category/#{data[:image][:value]}")
+            @category.image = open(magento_image_url(data[:image][:value]))
           rescue
             @category.image = nil
           end
@@ -84,6 +84,17 @@ module Gemgento
           end
         end
       end
+
+      def magento_image_url(file_name)
+        url = "#{Gemgento::Config[:magento][:url]}/media/catalog/category/#{file_name}"
+
+        if !Gemgento::Config[:magento][:auth_username].blank?
+          url = url.gsub('://', "://#{Gemgento::Config[:magento][:auth_username]}:#{Gemgento::Config[:magento][:auth_password]}@")
+        end
+
+        return url
+      end
+
     end
   end
 end
