@@ -16,11 +16,7 @@ module Gemgento
         @category.sync_needed = false
 
         if data.key? :image
-          begin
-            @category.image = open(magento_image_url(data[:image][:value]))
-          rescue
-            @category.image = nil
-          end
+            @category.image = magento_image(data[:image][:value])
         end
 
         @category.save
@@ -85,16 +81,17 @@ module Gemgento
         end
       end
 
-      def magento_image_url(file_name)
+      def magento_image(file_name)
         url = "#{Gemgento::Config[:magento][:url]}/media/catalog/category/#{file_name}"
 
-        if !Gemgento::Config[:magento][:auth_username].blank?
-          url = url.gsub('://', "://#{Gemgento::Config[:magento][:auth_username]}:#{Gemgento::Config[:magento][:auth_password]}@")
+        if Gemgento::Config[:magento][:auth_username].blank?
+          open(url)
+        else
+          open(url,
+               http_basic_authentication:
+                   [ Gemgento::Config[:magento][:auth_username], Gemgento::Config[:magento][:auth_password] ]
+               )
         end
-
-        puts url
-
-        return url
       end
 
     end
