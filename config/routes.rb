@@ -93,7 +93,12 @@ Gemgento::Engine.routes.draw do
 
     # - Emails - #
     resources :emails, only: :new
-    resources :orders, :invoices, :credit_memos, :shipments, only: :new, namespace: :email
+
+    namespace :email do
+      namespace :sales do
+        resources :orders, :invoices, :credit_memos, :shipments, only: :create
+      end
+    end
   end
 
   # - Gemgento Resources - #
