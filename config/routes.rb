@@ -90,6 +90,10 @@ Gemgento::Engine.routes.draw do
     resources :stores, only: :update
     resources :users, only: [:update, :destroy]
     resources :user_groups, only: [:update, :destroy]
+
+    # - Emails - #
+    resources :emails, only: :new
+    resources :orders, :invoices, :credit_memos, :shipments, only: :new, namespace: :email
   end
 
   # - Gemgento Resources - #
