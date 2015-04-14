@@ -5,8 +5,12 @@ module Gemgento
         class ShipmentsController < Gemgento::Magento::BaseController
 
           def create
-            @order = Gemgento::Order.find_by(magento_id: params[:data][:order_id])
-            Gemgento::SalesMailer.shipment_email(@order, params[:data][:email], params[:data][:name]).deliver
+            Gemgento::SalesMailer.shipment_email(
+                params[:data][:recipients],
+                params[:data][:sender],
+                params[:data][:order],
+                params[:data][:shipment]
+            )
             render nothing: true
           end
 

@@ -5,8 +5,12 @@ module Gemgento
         class CreditMemosController < Gemgento::Magento::BaseController
 
           def create
-            @order = Gemgento::Order.find_by(magento_id: params[:data][:order_id])
-            Gemgento::SalesMailer.credit_memo_email(@order, params[:data][:email], params[:data][:name]).deliver
+            Gemgento::SalesMailer.credit_memo_email(
+                params[:data][:recipients],
+                params[:data][:sender],
+                params[:data][:order],
+                params[:data][:credit_memo]
+            )
             render nothing: true
           end
 
