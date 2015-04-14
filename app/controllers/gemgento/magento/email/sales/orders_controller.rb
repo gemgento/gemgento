@@ -2,7 +2,7 @@ module Gemgento
   module Magento
     module Email
       module Sales
-        class OrdersController < Gemgento::Magento::EmailsController
+        class OrdersController < Gemgento::Magento::Email::SalesController
 
         end
       end
