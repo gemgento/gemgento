@@ -42,6 +42,8 @@ module Gemgento
 
       if product.magento_type == 'giftvoucher'
         self.options[:amount].to_d
+      elsif self.options[:custom_price]
+        self.options[:custom_price].to_d
       else
         product.price(itemizable.user, itemizable.store).to_d
       end
