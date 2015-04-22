@@ -283,10 +283,7 @@ module Gemgento
       response = API::SOAP::Checkout::Cart.order(self, self.payment, remote_ip)
 
       if response.success?
-        increment_id = response.body[:result]
-        self.order = API::SOAP::Sales::Order.fetch(increment_id) #grab all the new order information
-        self.converted_at = Time.now
-        save
+        self.mark_converted!(response.body[:result])
 
         HeartBeat.perform_async if Rails.env.production?
         API::SOAP::Authnetcim::Payment.fetch(self.user) if self.user && Config[:extensions]['authorize-net-cim-payment-module']
@@ -298,6 +295,12 @@ module Gemgento
         after_convert_fail
         return false
       end
+    end
+
+    def mark_converted!(increment_id)
+      self.order = API::SOAP::Sales::Order.fetch(increment_id) #grab all the new order information
+      self.converted_at = Time.now
+      self.save
     end
 
     def before_convert
