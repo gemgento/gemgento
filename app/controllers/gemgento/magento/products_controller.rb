@@ -28,7 +28,7 @@ module Gemgento
           end
 
           set_associated_products(data[:simple_product_ids], data[:configurable_product_ids], @product)
-          set_bundle_options(data[:bundle_options], @product)
+          set_bundle_options(data[:bundle_options], @product) if data[:bundle_options]
         end
 
         render nothing: true
