@@ -23,6 +23,7 @@ module Gemgento
           if !@quote.payment.is_redirecting_payment_method?('confirm_after')
             format.html { redirect_to checkout_thank_you_path }
             format.json { render json: { result: true, order: @quote.order } }
+
           else
             format.html { redirect_to confirm_after_redirect_url }
             format.json { render json: { result: true, payment_redirect_url: confirm_after_redirect_url } }

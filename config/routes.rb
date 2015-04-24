@@ -59,6 +59,9 @@ Gemgento::Engine.routes.draw do
     resource :shipping_payment, only: [:show, :update], controller: 'shipping_payment'
     resource :confirm, only: [:show, :update], controller: 'confirm'
     resource :thank_you, only: [:show], controller: 'thank_you'
+
+    # PayPal placeOrder callback
+    get '/paypal/:increment_id', to: 'paypal#update'
   end
 
   # - User Account Actions - #
