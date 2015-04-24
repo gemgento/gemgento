@@ -1,5 +1,5 @@
 module Gemgento
-  class Checkout::PayPalController < CheckoutController
+  class Checkout::PaypalController < CheckoutController
     skip_before_filter :set_quote
     skip_before_filter :validate_item_quantity
     skip_before_filter :validate_quote_user
