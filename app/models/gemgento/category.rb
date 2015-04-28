@@ -17,7 +17,7 @@ module Gemgento
     default_scope -> { where(deleted_at: nil).order(:position) }
 
     scope :top_level, -> { where(parent: Gemgento::Category.find_by(parent_id: nil), is_active: true) }
-    scope :bottom_level, -> { where(is_active: true).where.not(id: Gemgento::Category.all.pluck(:parent_id).uniq) }
+    scope :bottom_level, -> { where(is_active: true).where.not(id: Gemgento::Category.all.pluck(:parent_id).uniq.compact) }
     scope :navigation, -> { where(include_in_menu: true) }
     scope :root, -> { find_by(parent_id: nil) }
     scope :active, -> { where(is_active: true) }
@@ -65,6 +65,14 @@ module Gemgento
       end
 
       return options
+    end
+
+    def descendents
+      @descendents ||= begin
+        children.includes(:children).map do |child|
+          [child] + child.descendents
+        end.flatten
+      end
     end
 
     # Get the option value and any subsequent child values as a path.
