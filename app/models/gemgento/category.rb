@@ -16,7 +16,8 @@ module Gemgento
 
     default_scope -> { where(deleted_at: nil).order(:position) }
 
-    scope :top_level, -> { where(parent: Category.find_by(parent_id: nil), is_active: true) }
+    scope :top_level, -> { where(parent: Gemgento::Category.find_by(parent_id: nil), is_active: true) }
+    scope :bottom_level, -> { where(is_active: true).where.not(id: Gemgento::Category.all.pluck(:parent_id).uniq) }
     scope :navigation, -> { where(include_in_menu: true) }
     scope :root, -> { find_by(parent_id: nil) }
     scope :active, -> { where(is_active: true) }
