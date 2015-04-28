@@ -33,7 +33,7 @@ module Gemgento
     # @return [String]
     def tree_path
       root = Category.root
-      parent = self.parent.includes(:parent)
+      parent = self.parent
       path = self.name
 
       while !parent.nil? && parent != root do
