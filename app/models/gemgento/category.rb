@@ -36,7 +36,7 @@ module Gemgento
       parent = self.parent
       path = self.name
 
-      while parent != root do
+      while !parent.nil? && parent != root do
         path = "#{parent.name} > #{path}"
         parent = parent.parent
       end
