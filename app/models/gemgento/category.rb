@@ -33,7 +33,7 @@ module Gemgento
     # @return [String]
     def tree_path
       root = Category.root
-      parent = self.parent
+      parent = self.parent.includes(:parent)
       path = self.name
 
       while !parent.nil? && parent != root do
@@ -51,21 +51,36 @@ module Gemgento
     def self.grouped_options
       options = []
 
-      Category.top_level.each do |parent|
+      Gemgento::Category.top_level.each do |parent|
 
         child_options = [["#{parent.name} (parent)", parent.id]]
 
-        parent.children.where(is_active: true).each do |child|
+        parent.children.where(is_active: true, parent: parent).each do |child|
           child_options << [child.name, child.id]
-
-          if child.children.where(is_active: true)
-            child.children.where(is_active: true).each do |second_child|
-              child_options << [second_child.name, second_child.id]
-            end
-          end
+          child_options << grouped_option(child) if child.children.where(is_active: true).any?
         end
 
         options << [parent.name, child_options]
+      end
+
+      return options
+    end
+
+    # Get the option value and any subsequent child values as a path.
+    #
+    # @param category [Gemgento::Category]
+    # @return [Array(String, Integer)]
+    def self.grouped_option(category)
+      options = []
+
+      category.children.where(is_active: true, parent: category).each do |child|
+        options << [child.name, child.id]
+
+        child.children.where(is_active: true).each do |nested_child|
+          path = nested_child.tree_path
+          path = path.slice((path.index("> #{child.name} >") + 2)..-1)
+          options << [path, nested_child.id]
+        end
       end
 
       return options
