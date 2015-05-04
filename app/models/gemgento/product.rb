@@ -199,6 +199,8 @@ module Gemgento
     #     or
     #     [{attribute: Gemgento::ProductAttribute.find_by(code: 'size'), value: 'large'}), {attribute: Gemgento::ProductAttribute.find_by(code: 'color'), value: 'red'})]
     #
+    #   Filters can also take an optional operand, the default operand is '=' or 'IN' for an array
+    #
     # @param filters [Hash, Array(Hash)]
     # @param store [Gemgento::Store]
     # @return [ActiveRecord::Result]
@@ -210,10 +212,12 @@ module Gemgento
 
       filters.each_with_index do |filter, index|
         filter[:attribute] = [filter[:attribute]] unless filter[:attribute].is_a? Array
+        operand = filter[:value].is_a?(Array) ? 'IN' : ( filter.has_key?(:operand) ? filter[:operand] : '=' )
+        value_placeholder = filter[:value].is_a?(Array) ? '(?)' : '?'
 
         unless filter[:attribute][0].frontend_input == 'select'
           products = products.joins(ActiveRecord::Base.escape_sql(
-                                        "INNER JOIN gemgento_product_attribute_values AS value#{index} ON value#{index}.product_id = gemgento_products.id AND value#{index}.value IN (?) AND value#{index}.store_id = ?
+                                        "INNER JOIN gemgento_product_attribute_values AS value#{index} ON value#{index}.product_id = gemgento_products.id AND value#{index}.value #{operand} #{value_placeholder} AND value#{index}.store_id = ?
                     INNER JOIN gemgento_product_attributes AS attribute#{index} ON attribute#{index}.id = value#{index}.product_attribute_id AND attribute#{index}.id IN (?)",
                                         filter[:value],
                                         store.id,
@@ -226,7 +230,7 @@ module Gemgento
                       AND attribute#{index}.id IN (?)
                     INNER JOIN gemgento_product_attribute_options AS option#{index} ON option#{index}.product_attribute_id = attribute#{index}.id
                       AND value#{index}.value = option#{index}.value
-                      AND option#{index}.label IN (?)",
+                      AND option#{index}.label #{operand} #{value_placeholder}",
                                         filter[:attribute].map { |a| a.id },
                                         filter[:value]
                                     )).distinct.readonly(false) # does not compare against values
