@@ -25,6 +25,7 @@ module Gemgento
     validates_attachment_content_type :image, content_type: /\Aimage\/.*\Z/
 
     after_save :enforce_positioning, if: :position_changed?
+    after_save :touch_parent, if: -> { changed? && !parent.nil? }
 
     before_save :create_magento_category, if: -> { magento_id.nil? }
     before_save :update_magento_category, if: -> { sync_needed? && !magento_id.nil? }
@@ -204,6 +205,10 @@ module Gemgento
 
       self.sync_needed = false
       return true
+    end
+
+    def touch_parent
+      Gemgento::TouchCategory(self.parent_id)
     end
 
   end
