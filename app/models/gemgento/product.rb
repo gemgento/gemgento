@@ -218,7 +218,7 @@ module Gemgento
                                         filter[:value],
                                         store.id,
                                         filter[:attribute].map { |a| a.id }
-                                    )).readonly(false)
+                                    )).distinct.readonly(false)
         else
           products = products.joins(ActiveRecord::Base.escape_sql(
                                         "INNER JOIN gemgento_product_attribute_values AS value#{index} ON value#{index}.product_id = gemgento_products.id
@@ -229,7 +229,7 @@ module Gemgento
                       AND option#{index}.label IN (?)",
                                         filter[:attribute].map { |a| a.id },
                                         filter[:value]
-                                    )).readonly(false) # does not compare against values
+                                    )).distinct.readonly(false) # does not compare against values
         end
       end
 
