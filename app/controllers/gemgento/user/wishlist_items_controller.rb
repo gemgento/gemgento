@@ -8,7 +8,7 @@ module Gemgento
     end
 
     def create
-      @wishlist_item = current_user.wishlist_items.create(product_id: params[:product_id])
+      @wishlist_item = current_user.wishlist_items.create(wishlist_item_params)
 
       respond_to do |format|
         if @wishlist_item.save
@@ -33,6 +33,12 @@ module Gemgento
           format.json{ render json: { result: false, errors: @wishlist_item.errors.full_messages } }
         end
       end
+    end
+
+    private
+
+    def wishlist_item_params
+      params.require(:wishlist_item).permit(:product_id)
     end
   end
 end
