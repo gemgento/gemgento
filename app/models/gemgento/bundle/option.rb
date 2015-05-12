@@ -14,6 +14,8 @@ module Gemgento
 
       after_save :touch_product, if: -> { self.changed? }
 
+      default_scope -> { order :position }
+
       private
 
       def touch_product
