@@ -6,6 +6,7 @@ module Gemgento
     belongs_to :product_attribute_set
 
     has_many :assets, dependent: :destroy
+    has_many :bundle_items, class_name: 'Gemgento::Bundle::Item', dependent: :destroy
     has_many :bundle_options, class_name: 'Gemgento::Bundle::Option', dependent: :destroy
     has_many :categories, through: :product_categories, class_name: 'Gemgento::Category'
     has_many :inventories, class_name: 'Gemgento::Inventory'
