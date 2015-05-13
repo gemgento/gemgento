@@ -165,16 +165,18 @@ module Gemgento
 
           bundle_option.save
 
-          bundle_option_data[:selections].each do |selection|
-            bundle_item = bundle_option.items.find_or_initialize_by(magento_id: selection[:id])
-            bundle_item.product = Gemgento::Product.find_by(magento_id: selection[:product_id])
-            bundle_item.price_type = selection[:price_type].to_i
-            bundle_item.price_value = selection[:price_value].to_f
-            bundle_item.default_quantity = selection[:qty].to_f
-            bundle_item.is_user_defined_quantity = selection[:can_change_qty].to_i == 1
-            bundle_item.position = selection[:position]
-            bundle_item.is_default = selection[:is_default].to_i == 1
-            bundle_item.save
+          unless bundle_option_data[:selections].nil?
+            bundle_option_data[:selections].each do |selection|
+              bundle_item = bundle_option.items.find_or_initialize_by(magento_id: selection[:id])
+              bundle_item.product = Gemgento::Product.find_by(magento_id: selection[:product_id])
+              bundle_item.price_type = selection[:price_type].to_i
+              bundle_item.price_value = selection[:price_value].to_f
+              bundle_item.default_quantity = selection[:qty].to_f
+              bundle_item.is_user_defined_quantity = selection[:can_change_qty].to_i == 1
+              bundle_item.position = selection[:position]
+              bundle_item.is_default = selection[:is_default].to_i == 1
+              bundle_item.save
+            end
           end
         end
       end
