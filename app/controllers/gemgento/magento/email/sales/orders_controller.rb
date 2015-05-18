@@ -9,7 +9,7 @@ module Gemgento
                 params[:data][:recipients],
                 params[:data][:sender],
                 params[:data][:order]
-            )
+            ).deliver
             render nothing: true
           end
 

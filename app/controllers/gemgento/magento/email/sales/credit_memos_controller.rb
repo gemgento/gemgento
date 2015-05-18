@@ -10,7 +10,7 @@ module Gemgento
                 params[:data][:sender],
                 params[:data][:order],
                 params[:data][:credit_memo]
-            )
+            ).deliver
             render nothing: true
           end
 
