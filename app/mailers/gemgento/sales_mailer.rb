@@ -11,7 +11,7 @@ module Gemgento
           cc: recipients[:cc],
           bcc: recipients[:bcc],
           from: from,
-          subject: "Confirmation for Order #{@order.increment_id}"
+          subject: order_email_subject
       ).deliver
     end
 
@@ -25,7 +25,7 @@ module Gemgento
           cc: recipients[:cc],
           bcc: recipients[:bcc],
           from: from,
-          subject: "Invoice for Order #{@order.increment_id}"
+          subject: invoice_email_subject
       ).deliver
     end
 
@@ -39,7 +39,7 @@ module Gemgento
           cc: recipients[:cc],
           bcc: recipients[:bcc],
           from: from,
-          subject: "Shipment for Order #{@order.increment_id}"
+          subject: shipment_email_subject
       ).deliver
     end
 
@@ -53,8 +53,24 @@ module Gemgento
           cc: recipients[:cc],
           bcc: recipients[:bcc],
           from: from,
-          subject: "Credit Memo for Order #{@order.increment_id}"
+          subject: credit_memo_email_subject
       ).deliver
+    end
+
+    def order_email_subject
+      "Confirmation for Order #{@order.increment_id}"
+    end
+
+    def invoice_email_subject
+      "Invoice for Order #{@order.increment_id}"
+    end
+
+    def shipment_email_subject
+      "Shipment for Order #{@order.increment_id}"
+    end
+
+    def credit_memo_email_subject
+      "Credit Memo for Order #{@order.increment_id}"
     end
 
   end
