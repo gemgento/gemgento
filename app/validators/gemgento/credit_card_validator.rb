@@ -7,15 +7,20 @@ module Gemgento
       security_code
     end
 
+    # Validate credit card number with a Luhn test.
+    # Based on http://rosettacode.org/wiki/Luhn_test_of_credit_card_numbers#Ruby
     def card_number
-      digits =  @record.cc_number.gsub(/\D/, '').split('').map(&:to_i)
-      check = digits.pop
+      s1 = s2 = 0
 
-      sum = digits.reverse.each_slice(2).map do |x, y|
-        [(x * 2).divmod(10), y || 0]
-      end.flatten.inject(:+) || 0
+      @record.cc_number.to_s.reverse.chars.each_slice(2) do |odd, even|
+        s1 += odd.to_i
 
-      if (10 - sum % 10) != check
+        double = even.to_i * 2
+        double -= 9 if double >= 10
+        s2 += double
+      end
+
+      if (s1 + s2) % 10 != 0
         @record.errors[:cc_number] << 'is invalid'
       end
     end
