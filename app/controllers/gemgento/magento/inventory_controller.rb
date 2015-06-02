@@ -16,7 +16,7 @@ module Gemgento
 
           data[:inventories].each do |website_id, stock_data|
 
-            store = Store.find_by(website_id: website_id.blank? ? nil : website_id)
+            store = Store.find_by(website_id: website_id.to_i.zero? ? nil : website_id)
             next if stock_data[:qty].nil?
 
             if store.nil?
