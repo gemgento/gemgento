@@ -7,10 +7,12 @@ module Gemgento
     index do
       column :source_type
       column 'source_id' do |api_job|
-        if api_job.source_type == 'Gemgento::Order'
-          api_job.source.increment_id
-        else
-          api_job.source_id
+        if api_job.source
+          if api_job.source_type == 'Gemgento::Order'
+            api_job.source.increment_id
+          else
+            api_job.source_id
+          end
         end
       end
       column :state
