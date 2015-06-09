@@ -5,15 +5,15 @@ module Gemgento
         class ProductAttributeMedia
 
           def self.fetch_all
-            Store.all.each do |store|
-              Product.active.each do |product|
+            ::Gemgento::Store.all.each do |store|
+              ::Gemgento::Product.active.each do |product|
                 fetch(product, store)
               end
             end
           end
 
           def self.fetch(product, store = nil)
-            store = Store.current if store.nil?
+            store = ::Gemgento::Store.current if store.nil?
             response = list(product, store)
 
             if response.success?
@@ -41,7 +41,7 @@ module Gemgento
                 identifier_type: 'id',
                 store_view: store.magento_id
             }
-            response = MagentoApi.create_call(:catalog_product_attribute_media_list, message)
+            response = ::Gemgento::MagentoApi.create_call(:catalog_product_attribute_media_list, message)
 
             if response.success?
               if response.body[:result][:item].nil?
@@ -69,7 +69,7 @@ module Gemgento
                 identifier_type: 'id',
                 store_view: asset.store.magento_id
             }
-            MagentoApi.create_call(:catalog_product_attribute_media_create, message)
+            ::Gemgento::MagentoApi.create_call(:catalog_product_attribute_media_create, message)
           end
 
           # Update a Product Attribute Media in Magento.
@@ -84,7 +84,7 @@ module Gemgento
                 identifier_type: 'id',
                 store_view: asset.store.magento_id
             }
-            MagentoApi.create_call(:catalog_product_attribute_media_update, message)
+            ::Gemgento::MagentoApi.create_call(:catalog_product_attribute_media_update, message)
           end
 
           # Remove Product Attribute Media in Magento.
@@ -93,7 +93,7 @@ module Gemgento
           # @return [Gemgento::MagentoResponse]
           def self.remove(asset)
             message = { product: asset.product.magento_id, file: asset.file, identifier_type: 'id' }
-            MagentoApi.create_call(:catalog_product_attribute_media_remove, message)
+            ::Gemgento::MagentoApi.create_call(:catalog_product_attribute_media_remove, message)
           end
 
           # Get Product Attribute Media Types from Magento.
@@ -101,7 +101,7 @@ module Gemgento
           # @param product_attribute_set [Gemgento::ProductAttributeSet]
           # @return [Gemgento::MagnetoRepsonse]
           def self.types(product_attribute_set)
-            response = MagentoApi.create_call(:catalog_product_attribute_media_types, {set_id: product_attribute_set.magento_id})
+            response = ::Gemgento::MagentoApi.create_call(:catalog_product_attribute_media_types, {set_id: product_attribute_set.magento_id})
 
             if response.success? &&
               if response.body[:result][:item].nil?
@@ -118,12 +118,12 @@ module Gemgento
 
           # Save Magento product attribute set to local
           def self.sync_magento_to_local(source, product, store)
-            return false unless AssetFile.valid_url(source[:url])
+            return false unless ::Gemgento::AssetFile.valid_url(source[:url])
 
-            asset = Asset.find_or_initialize_by(product_id: product.id, file: source[:file], store_id: store.id)
+            asset = ::Gemgento::Asset.find_or_initialize_by(product_id: product.id, file: source[:file], store_id: store.id)
             asset.url = source[:url]
             asset.position = source[:position]
-            asset.label = MagentoApi.enforce_savon_string(source[:label])
+            asset.label = ::Gemgento::MagentoApi.enforce_savon_string(source[:label])
             asset.file = source[:file]
             asset.product = product
             asset.sync_needed = false
@@ -133,12 +133,12 @@ module Gemgento
 
             # assign AssetTypes
             asset_type_codes = source[:types][:item]
-            asset_type_codes = [MagentoApi.enforce_savon_string(asset_type_codes)] unless asset_type_codes.is_a? Array
+            asset_type_codes = [::Gemgento::MagentoApi.enforce_savon_string(asset_type_codes)] unless asset_type_codes.is_a? Array
             asset.set_types_by_codes(asset_type_codes)
           end
 
           def self.sync_magento_media_type_to_local(source, product_attribute_set)
-            asset_type = AssetType.find_or_initialize_by(product_attribute_set: product_attribute_set, code: source[:code])
+            asset_type = ::Gemgento::AssetType.find_or_initialize_by(product_attribute_set: product_attribute_set, code: source[:code])
             asset_type.scope = source[:scope]
             asset_type.save
           end
