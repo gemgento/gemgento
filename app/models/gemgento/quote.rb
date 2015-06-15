@@ -402,6 +402,7 @@ module Gemgento
     #
     # @return [Void]
     def copy_billing_address_to_shipping_address
+      self.build_shipping_address if self.shipping_address.nil?
       self.shipping_address.attributes = self.billing_address.attributes.reject{ |k| k == :id }.merge(
           {
               id: self.shipping_address ? self.shipping_address.id : nil,
@@ -418,14 +419,15 @@ module Gemgento
     #
     # @return [Void]
     def copy_shipping_address_to_billing_address
-      self.billing_address.attributes = self.billing_address.attributes.reject{ |k| k == :id }.merge(
+      self.build_billing_address if self.billing_address.nil?
+      self.billing_address.attributes = self.shipping_address.attributes.reject{ |k| k == :id }.merge(
           {
               id: self.billing_address ? self.billing_address.id : nil,
               address1: self.shipping_address.address1,
               address2: self.shipping_address.address2,
               address3: self.shipping_address.address3,
-              is_shipping: true,
-              is_billing: false
+              is_shipping: false,
+              is_billing: true
           }
       )
     end
