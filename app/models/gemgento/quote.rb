@@ -191,11 +191,13 @@ module Gemgento
     #
     # @return [Boolean]
     def set_magento_addresses
+      # re-set magento customer if guest so that customer name can be pulled from addresses.
+      return false if self.customer_is_guest && !self.set_magento_customer
+
       response = API::SOAP::Checkout::Customer.address(self)
 
       if response.success?
-        # re-set magento customer if guest so that customer name can be pulled from billing address.
-        return self.customer_is_guest ? set_magento_customer : true
+        return true
       else
         handle_magento_response(response)
         return false
