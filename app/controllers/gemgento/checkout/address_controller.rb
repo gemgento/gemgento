@@ -30,6 +30,7 @@ module Gemgento
     def quote_params
       params.require(:quote).permit(
           :same_as_billing,
+          :same_as_shipping,
           billing_address_attributes:
               [
                   :id, :first_name, :last_name, :address1, :address2, :country_id, :city, :region_id, :postcode,

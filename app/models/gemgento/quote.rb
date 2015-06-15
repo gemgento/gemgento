@@ -19,7 +19,7 @@ module Gemgento
     accepts_nested_attributes_for :payment
 
     attr_accessor :push_customer, :push_addresses, :push_shipping_method, :push_payment_method, :subscribe,
-                  :same_as_billing, :destroy_after_rollback
+                  :same_as_billing, :same_as_shipping, :destroy_after_rollback
 
     serialize :coupon_codes, Array
     serialize :gift_card_codes, Array
@@ -29,6 +29,7 @@ module Gemgento
     validates :shipping_method, presence: true, if: -> { push_shipping_method.to_bool }
 
     before_validation :copy_billing_address_to_shipping_address, if: -> { same_as_billing.to_bool }
+    before_validation :copy_shipping_address_to_billing_address, if: -> { same_as_shipping.to_bool }
 
     before_create :create_magento_quote, if: -> { magento_id.nil? }
 
@@ -405,6 +406,22 @@ module Gemgento
               address1: self.billing_address.address1,
               address2: self.billing_address.address2,
               address3: self.billing_address.address3,
+              is_shipping: true,
+              is_billing: false
+          }
+      )
+    end
+
+    # Duplicate the shipping address to use as billing address.
+    #
+    # @return [Void]
+    def copy_shipping_address_to_billing_address
+      self.billing_address.attributes = self.billing_address.attributes.reject{ |k| k == :id }.merge(
+          {
+              id: self.billing_address ? self.billing_address.id : nil,
+              address1: self.shipping_address.address1,
+              address2: self.shipping_address.address2,
+              address3: self.shipping_address.address3,
               is_shipping: true,
               is_billing: false
           }
