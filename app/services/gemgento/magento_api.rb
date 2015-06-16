@@ -65,11 +65,10 @@ module Gemgento
         # only save successful responses if debugging is enabled
         magento_response.save if Config[:magento][:debug]
 
-        Rails.logger.debug '^^^ Success ^^^'
       else
         magento_response.success = false
         magento_response.body = response.body[:fault]
-        Rails.logger.warn '^^^ Failure ^^^'
+        Rails.logger.error "Magento API Call failure - #{magento_response.body[:faultcode]} - #{magento_response.body[:faultstring]}"
 
         if !magento_response.body[:faultcode].nil? && magento_response.body[:faultcode].to_i == 5
           Rails.logger.debug '--- Attempting To Start New Session ---'
