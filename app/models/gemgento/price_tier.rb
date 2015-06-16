@@ -9,6 +9,16 @@ module Gemgento
 
     after_save :touch_product, if: -> { changed? }
 
+    # Check if PriceTier is valid for the given quantity and user.
+    #
+    # @param quantity [Float]
+    # @param user [Gemgento::User]
+    def is_valid?(quantity, user = nil)
+      return false unless self.user_group.nil? || (!user.nil? && self.user_group != user.user_group)
+      return false unless quantity >= self.quantity
+      return true
+    end
+
     private
 
     def touch_product
