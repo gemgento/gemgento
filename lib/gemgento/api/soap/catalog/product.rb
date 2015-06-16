@@ -97,6 +97,7 @@ module Gemgento
           def self.info(product_id, attribute_set, store)
             additional_attributes = []
             attribute_set.product_attributes.each do |attribute|
+              next if %w[tier_price group_price].include? attribute.code
               additional_attributes << attribute.code
             end
 
@@ -155,6 +156,7 @@ module Gemgento
           def self.check_magento(identifier, identifier_type, attribute_set, store)
             additional_attributes = []
             attribute_set.product_attributes.each do |attribute|
+              next if %w[tier_price group_price].include? attribute.code
               additional_attributes << attribute.code
             end
 
