@@ -42,9 +42,7 @@ module Gemgento
                 data: compose_inventory_data(inventory, include_website)
             }
 
-            response = MagentoApi.create_call(:catalog_inventory_stock_item_update, message)
-
-            return response.success?
+            return MagentoApi.create_call(:catalog_inventory_stock_item_update, message)
           end
 
           private
