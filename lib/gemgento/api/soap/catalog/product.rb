@@ -245,6 +245,7 @@ module Gemgento
             set_attribute_values_from_magento(subject[:additional_attributes][:item], product, store) if (subject[:additional_attributes] and subject[:additional_attributes][:item])
             set_associated_products(subject[:simple_product_ids], subject[:configurable_product_ids], product)
             set_bundle_options(subject[:bundle_options][:item], product) if subject[:bundle_options] && subject[:bundle_options][:item]
+            set_tier_prices(subject[:tier_price][:item], product, store) if subject[:tier_price] && subject[:tier_price][:item]
 
             Gemgento::Product.set_callback(:save, :after, :touch_categories)
             Gemgento::Product.set_callback(:save, :after, :touch_configurables)
@@ -455,6 +456,31 @@ module Gemgento
                 end
               end
             end
+          end
+
+          def self.set_tier_prices(tier_prices, product, store)
+            tier_prices = [tier_prices] unless tier_prices.is_a?(Array)
+            prices = []
+
+            tier_prices.each do |source|
+              price = product.price_tiers.find_or_create_by(magento_id: source[:price_id])
+              price.store = store
+              price.quantity = source[:price_qty]
+              price.price = source[:website_price]
+
+              if source[:all_groups]
+                price.user_group = nil
+              else
+                price.user_group = Gemgento::UserGroup.find_by(magento_id: source[:cust_group])
+              end
+
+              price.save!
+
+              prices << price
+            end
+
+            # remove unused price tiers related to the product and store
+            Gemgento::PriceTier.where(store: store, product: product).where.not(id: price.map(&:id)).destroy_all
           end
 
         end
