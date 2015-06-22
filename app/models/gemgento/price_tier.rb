@@ -12,11 +12,22 @@ module Gemgento
     # Check if PriceTier is valid for the given quantity and user.
     #
     # @param quantity [Float]
-    # @param user [Gemgento::User]
-    def is_valid?(quantity, user = nil)
-      return false unless self.user_group.nil? || (!user.nil? && self.user_group != user.user_group)
-      return false unless quantity >= self.quantity
-      return true
+    # @param user_group [Gemgento::UserGroup]
+    def is_valid?(quantity, user_group)
+      return quantity >= self.quantity && user_group == self.user_group
+    end
+
+    def calculate_price(product, quantity = 1.0, user = nil, store = nil)
+      store = Store.current if store.nil?
+      price = product.attribute_value('price', store).to_f
+      user_group = user.nil? ? UserGroup.find_by(magento_id: 0) : user.user_group
+
+      product.price_tiers.where(store: store).each do |price_tier|
+        next unless price_tier.is_valid? quantity, user_group
+        price = price_tier.price if price_tier.price < price
+      end
+
+      return price
     end
 
     private

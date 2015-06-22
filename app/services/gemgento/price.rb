@@ -1,22 +1,24 @@
 module Gemgento
   class Price
 
-    attr_accessor :product, :store, :user
+    attr_accessor :product, :store, :user, :quantity
 
-    def initialize(product, user, store)
+    def initialize(product, user, store, quantity = 1.0)
       @product = product
       @store = store
       @user = user
+      @quantity = quantity
     end
 
     def calculate
-      if product.magento_type == 'giftvoucher'
-        return gift_price
-      elsif self.has_special?
-        return product.attribute_value('special_price', store).to_f
-      else
-        return Gemgento::PriceRule.calculate_price(product, user, store)
-      end
+      return gift_price if product.magento_type == 'giftvoucher'
+
+      prices = []
+      prices << product.attribute_value('special_price', store).to_f if has_special?
+      prices << Gemgento::PriceRule.calculate_price(product, user, store)
+      prices << Gemgento::PriceTier.calculate_price(product, quantity, user, store)
+
+      return prices.min
     end
 
     # If product is a gift, determine gift value.

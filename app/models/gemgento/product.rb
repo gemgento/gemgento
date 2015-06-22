@@ -11,6 +11,7 @@ module Gemgento
     has_many :categories, through: :product_categories, class_name: 'Gemgento::Category'
     has_many :inventories, class_name: 'Gemgento::Inventory'
     has_many :line_items, class_name: 'Gemgento::LineItem'
+    has_many :price_tiers, class_name: 'Gemgento::PriceTier'
     has_many :product_attribute_values, class_name: 'Gemgento::ProductAttributeValue', dependent: :destroy
     has_many :product_attributes, through: :product_attribute_values, class_name: 'Gemgento::ProductAttribute'
     has_many :product_attribute_options, through: :product_attribute_values, class_name: 'Gemgento::ProductAttributeOption'
