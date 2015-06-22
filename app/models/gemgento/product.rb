@@ -148,16 +148,8 @@ module Gemgento
     def in_stock?(quantity = 1, store = nil)
       store = Store.current if store.nil?
 
-      if self.magento_type == 'simple'
-        inventory = self.inventories.find_by(store: store)
-        if inventory.nil? # no inventory means inventory is not tracked
-          return true;
-        else
-          return inventory.in_stock?(quantity)
-        end
-      else # check configurable product inventory
-        # load inventories with out completely loading the associated simple products
-        inventories = Inventory.where(product_id: self.simple_products.select(:id), store: store)
+      if self.magento_type == 'configurable'
+        inventories = Inventory.where(product_id: self.simple_products.active.select(:id), store: store)
 
         if inventories.empty? # no inventories means inventory is not tracked
           return true
@@ -167,6 +159,13 @@ module Gemgento
           end
 
           return false
+        end
+
+      else
+        if inventory = self.inventories.find_by(store: store)
+          return inventory.in_stock?(quantity)
+        else
+          return true
         end
       end
     end

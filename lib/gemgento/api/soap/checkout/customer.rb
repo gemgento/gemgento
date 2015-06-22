@@ -15,7 +15,7 @@ module Gemgento
                   mode: 'guest',
                   email: quote.customer_email,
                   firstname: (quote.billing_address.first_name || quote.shipping_address.first_name),
-                  lastname: (quote.billing_address.first_name || quote.shipping_address.first_name),
+                  lastname: (quote.billing_address.last_name || quote.shipping_address.last_name),
                   'website_id' => '1'
               }
             else
