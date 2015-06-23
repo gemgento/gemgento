@@ -2,14 +2,10 @@ module Gemgento
   module Magento
     class ProductsController < Gemgento::Magento::BaseController
 
-      def new
-        @product = Product.new
-      end
-
       def update
         data = params[:data]
 
-        @product = Product.not_deleted.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).first_or_initialize
+        @product = Gemgento::Product.not_deleted.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).first_or_initialize
 
         if @product.new_record? || !@product.magento_id.nil?
           @product.magento_id = data[:product_id]
@@ -29,6 +25,7 @@ module Gemgento
 
           set_associated_products(data[:simple_product_ids], data[:configurable_product_ids], @product)
           set_bundle_options(data[:bundle_options], @product) if data[:bundle_options]
+          set_tier_prices(data[:tier_price], @product) if data[:tier_price]
         end
 
         render nothing: true
@@ -191,6 +188,31 @@ module Gemgento
         end
 
         return url, file
+      end
+
+      def set_tier_prices(tier_prices, product)
+        prices = []
+
+
+        tier_prices.each do |source|
+          next if source[:delete].to_bool
+
+          user_group = Gemgento::UserGroup.find_by(magento_id: source[:cust_group])
+          store = Gemgento::Store.find_by(website_id: source[:website_id])
+          stores = store.code == 'admin' ? Gemgento::Store.all : [store]
+
+          stores.each do |store|
+            prices << product.price_tiers.find_or_create_by(
+                user_group: user_group,
+                store: store,
+                quantity: source[:price_qty],
+                price: source[:price]
+            )
+          end
+        end
+
+        # remove unused product price tiers for the store
+        product.price_tiers.where.not(id: prices.map(&:id)).destroy_all
       end
 
     end

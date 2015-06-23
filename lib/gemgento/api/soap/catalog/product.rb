@@ -463,24 +463,25 @@ module Gemgento
             prices = []
 
             tier_prices.each do |source|
-              price = product.price_tiers.find_or_create_by(magento_id: source[:price_id])
-              price.store = store
-              price.quantity = source[:price_qty]
-              price.price = source[:website_price]
 
               if source[:all_groups]
-                price.user_group = nil
+                user_group = nil
               else
-                price.user_group = Gemgento::UserGroup.find_by(magento_id: source[:cust_group])
+                user_group = Gemgento::UserGroup.find_by(magento_id: source[:cust_group])
               end
 
-              price.save!
+              price = product.price_tiers.find_or_create_by(
+                  user_group: user_group,
+                  store: store,
+                  quantity: source[:price_qty],
+                  price: source[:website_price]
+              )
 
               prices << price
             end
 
-            # remove unused price tiers related to the product and store
-            Gemgento::PriceTier.where(store: store, product: product).where.not(id: price.map(&:id)).destroy_all
+            # remove unused product price tiers for the store
+            product.price_tiers.where(store: store).where.not(id: prices.map(&:id)).destroy_all
           end
 
         end

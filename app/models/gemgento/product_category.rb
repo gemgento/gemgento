@@ -6,7 +6,8 @@ module Gemgento
     belongs_to :category
     belongs_to :store
 
-    validates :product_id, :category_id, :store_id, presence: true
+    validates :product, :category, :store, presence: true
+    validates :product, uniqueness: { scope: [:category, :store] }
 
     default_scope -> { order(:category_id, :position, :product_id, :id) }
 
@@ -17,11 +18,13 @@ module Gemgento
     private
 
     def touch_product
-      TouchProduct.perform_async [self.product.id]
+      TouchProduct.perform_async([self.product.id]) if self.product
     end
 
     def touch_category
-      TouchCategory.perform_async (self.product.product_categories.pluck(:category_id) << self.category_id).uniq
+      category_ids = [self.category_id]
+      category_ids += self.product.categories.pluck(:id) if self.product
+      TouchCategory.perform_async(category_ids)
     end
 
     def update_magento_category_product
