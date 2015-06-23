@@ -11,7 +11,7 @@ module Gemgento
     # 2 - allow qty below 0 and notify customer
     validates :backorders, inclusion: 0..2
 
-    after_save :touch_product, :sync_local_to_magento
+    after_save :touch_product
     before_save :sync_local_to_magento, if: -> { sync_needed? }
 
     # Push the inventory data to Magento.
@@ -48,15 +48,15 @@ module Gemgento
     #
     # @return [Void]
     def sync_local_to_magento
-        response = API::SOAP::CatalogInventory::StockItem.update(self)
+      response = API::SOAP::CatalogInventory::StockItem.update(self)
 
-        if response.success?
-          self.sync_needed = false
-          return true
-        else
-          errors.add(:base, response.body[:faultstring])
-          return false
-        end
+      if response.success?
+        self.sync_needed = false
+        return true
+      else
+        errors.add(:base, response.body[:faultstring])
+        return false
+      end
     end
 
   end
