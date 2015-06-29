@@ -17,8 +17,9 @@ module Gemgento
       return quantity >= self.quantity && user_group == self.user_group
     end
 
-    def calculate_price(product, quantity = 1.0, user = nil, store = nil)
-      store = Store.current if store.nil?
+    # @param product [Gemgento::Product]
+    def self.calculate_price(product, quantity = 1.0, user = nil, store = nil)
+      store = Gemgento::Store.current if store.nil?
       price = product.attribute_value('price', store).to_f
       user_group = user.nil? ? UserGroup.find_by(magento_id: 0) : user.user_group
 

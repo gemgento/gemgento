@@ -19,4 +19,24 @@ RSpec.describe Gemgento::PriceTier, type: :model do
 
   end
 
+  describe 'calculate_price' do
+
+    let!(:product) { FactoryGirl.create(:gemgento_product_with_attributes) }
+    let!(:price_tier_1) { FactoryGirl.create(:gemgento_price_tier, quantity: 10, price: 10, product: product, store: product.stores.first!) }
+    let!(:price_tier_2) { FactoryGirl.create(:gemgento_price_tier, quantity: 5, price: 5, product: product, store: product.stores.first!) }
+
+    it 'returns product price if no valid price tier' do
+      expect(Gemgento::PriceTier.calculate_price(product)).to eq(product.attribute_value('price').to_f)
+    end
+
+    it 'returns only the valid tier price' do
+      expect(Gemgento::PriceTier.calculate_price(product, 5)).to eq(5)
+    end
+
+    it 'returns the cheapest price tier' do
+      expect(Gemgento::PriceTier.calculate_price(product, 10)).to eq(5)
+    end
+
+  end
+
 end

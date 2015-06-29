@@ -2,3 +2,5 @@
 .idea/
 public/system/
 /Gemfile.lock
+
+spec/dummy/log
