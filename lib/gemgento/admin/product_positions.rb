@@ -3,7 +3,7 @@ ActiveAdmin.register_page 'Product Positions' do
 
   page_action :update, method: :post
 
-  action_item do
+  action_item(:edit) do
     link_to 'Save Positions', admin_product_positions_update_path, method: :post, id: 'submit-product-positions'
   end
 
@@ -12,7 +12,7 @@ ActiveAdmin.register_page 'Product Positions' do
   end
 
   controller do
-    def index      
+    def index
       if params[:category_id]
         @category = Gemgento::Category.find(params[:category_id])
       elsif Gemgento::Category.top_level.navigation.any?

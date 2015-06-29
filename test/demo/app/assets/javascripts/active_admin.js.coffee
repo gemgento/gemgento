@@ -1,1 +1,0 @@
-# Custom ActiveAdmin CMS javascript goes here

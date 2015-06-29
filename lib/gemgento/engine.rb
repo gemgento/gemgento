@@ -6,7 +6,7 @@ module Gemgento
     engine_name 'gemgento'
 
     config.autoload_paths += %W(#{config.root}/lib)
-    
+
     # load decorators
     config.to_prepare do
       Dir.glob(Rails.root + 'app/decorators/**/*_decorator*.rb').each do |c|
@@ -47,6 +47,13 @@ module Gemgento
           :cc_exp_month,
           :cc_exp_year
       ]
+    end
+
+    config.generators do |g|
+      g.test_framework      :rspec,        fixture: false
+      g.fixture_replacement :factory_girl, dir: 'spec/factories'
+      g.assets false
+      g.helper false
     end
 
   end

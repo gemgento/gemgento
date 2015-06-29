@@ -1,0 +1,1311 @@
+  [1m[36m (2.1ms)[0m  [1mCREATE TABLE `schema_migrations` (`version` varchar(255) NOT NULL) ENGINE=InnoDB[0m
+  [1m[35m (6.2ms)[0m  CREATE UNIQUE INDEX `unique_schema_migrations`  ON `schema_migrations` (`version`) 
+  [1m[36mActiveRecord::SchemaMigration Load (0.1ms)[0m  [1mSELECT `schema_migrations`.* FROM `schema_migrations`[0m
+Migrating to GemgentoZeroNineZero (20131114161934)
+  [1m[35m (6.8ms)[0m  CREATE TABLE `gemgento_addresses` (`id` int(11) auto_increment PRIMARY KEY, `user_address_id` int(11), `user_id` int(11), `increment_id` varchar(255), `city` varchar(255), `company` varchar(255), `country_id` int(11), `fax` varchar(255), `fname` varchar(255), `mname` varchar(255), `lname` varchar(255), `postcode` varchar(255), `prefix` varchar(255), `suffix` varchar(255), `region_name` varchar(255), `region_id` int(11), `street` varchar(255), `telephone` varchar(255), `address_type` varchar(255), `sync_needed` tinyint(1) DEFAULT 1 NOT NULL, `created_at` datetime, `updated_at` datetime, `order_address_id` int(11), `order_id` int(11), `is_default` tinyint(1) DEFAULT 0) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (3.2ms)[0m  [1mCREATE TABLE `gemgento_asset_types` (`id` int(11) auto_increment PRIMARY KEY, `product_attribute_set_id` int(11), `code` varchar(255), `scope` varchar(255), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (1.9ms)[0m  CREATE TABLE `gemgento_assets` (`id` int(11) auto_increment PRIMARY KEY, `product_id` int(11), `url` varchar(255), `position` int(11), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `file` varchar(255), `label` varchar(255), `sync_needed` tinyint(1) DEFAULT 1 NOT NULL, `attachment_file_name` varchar(255), `attachment_content_type` varchar(255), `attachment_file_size` int(11), `attachment_updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (1.4ms)[0m  [1mCREATE TABLE `gemgento_assets_asset_types` (`asset_id` int(11) DEFAULT 0 NOT NULL, `asset_type_id` int(11) DEFAULT 0 NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (1.3ms)[0m  CREATE TABLE `gemgento_attribute_set_attributes` (`attribute_set_id` int(11) DEFAULT 0 NOT NULL, `attribute_id` int(11) DEFAULT 0 NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (1.6ms)[0m  [1mCREATE TABLE `gemgento_categories` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `name` varchar(255), `url_key` varchar(255), `parent_id` int(11), `position` int(11), `is_active` tinyint(1), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `all_children` text, `children_count` int(11), `sync_needed` tinyint(1) DEFAULT 1 NOT NULL, `include_in_menu` tinyint(1) DEFAULT 1 NOT NULL, `image_file_name` varchar(255), `image_content_type` varchar(255), `image_file_size` int(11), `image_updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (8.4ms)[0m  CREATE UNIQUE INDEX `index_gemgento_categories_on_magento_id` USING btree ON `gemgento_categories` (`magento_id`) 
+  [1m[36m (3.0ms)[0m  [1mCREATE TABLE `gemgento_categories_products` (`product_id` int(11) DEFAULT 0 NOT NULL, `category_id` int(11) DEFAULT 0 NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (2.1ms)[0m  CREATE TABLE `gemgento_configurable_attributes` (`product_id` int(11) DEFAULT 0 NOT NULL, `product_attribute_id` int(11) DEFAULT 0 NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (2.0ms)[0m  [1mCREATE TABLE `gemgento_configurable_simple_relations` (`configurable_product_id` int(11) DEFAULT 0 NOT NULL, `simple_product_id` int(11) DEFAULT 0 NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (2.1ms)[0m  CREATE TABLE `gemgento_countries` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` varchar(255) NOT NULL, `iso2_code` varchar(255), `iso3_code` varchar(255), `name` varchar(255), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (1.6ms)[0m  [1mCREATE TABLE `gemgento_gift_messages` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `to` varchar(255), `from` varchar(255), `message` text) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (3.1ms)[0m  CREATE TABLE `gemgento_inventories` (`id` int(11) auto_increment PRIMARY KEY, `product_id` int(11) NOT NULL, `quantity` int(11) DEFAULT 0 NOT NULL, `is_in_stock` tinyint(1) DEFAULT 0 NOT NULL, `sync_needed` tinyint(1) DEFAULT 1 NOT NULL, `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (2.7ms)[0m  [1mCREATE TABLE `gemgento_magento_responses` (`id` int(11) auto_increment PRIMARY KEY, `request` text, `body` mediumtext, `created_at` datetime, `updated_at` datetime, `success` tinyint(1) DEFAULT 1 NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (2.5ms)[0m  CREATE TABLE `gemgento_order_addresses` (`id` int(11) auto_increment PRIMARY KEY, `order_id` int(11) NOT NULL, `increment_id` int(11), `is_active` tinyint(1) DEFAULT 1 NOT NULL, `address_type` varchar(255), `fname` varchar(255), `lname` varchar(255), `company_name` varchar(255), `street` varchar(255), `city` varchar(255), `region_name` varchar(255), `region_id` int(11), `postcode` varchar(255), `country_id` int(11), `telephone` varchar(255), `fax` varchar(255), `address_id` int(11), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (2.1ms)[0m  [1mCREATE TABLE `gemgento_order_items` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `order_id` int(11), `quote_item_id` int(11), `product_id` int(11), `product_type` varchar(255), `product_options` text, `weight` decimal(12,4), `is_virtual` tinyint(1), `sku` varchar(255), `name` varchar(255), `applied_rule_ids` varchar(255), `free_shipping` tinyint(1), `is_qty_decimal` tinyint(1), `no_discount` tinyint(1), `qty_canceled` decimal(12,4), `qty_invoiced` decimal(12,4), `qty_ordered` decimal(12,4), `qty_refunded` decimal(12,4), `qty_shipped` decimal(12,4), `cost` decimal(12,4), `price` decimal(12,4), `base_price` decimal(12,4), `original_price` decimal(12,4), `base_original_price` decimal(12,4), `tax_percent` decimal(12,4), `tax_amount` decimal(12,4), `base_tax_amount` decimal(12,4), `tax_invoiced` decimal(12,4), `base_tax_invoiced` decimal(12,4), `discount_percent` decimal(12,4), `discount_amount` decimal(12,4), `base_discount_amount` decimal(12,4), `discount_invoiced` decimal(12,4), `base_discount_invoiced` decimal(12,4), `amount_refunded` decimal(12,4), `base_amount_refunded` decimal(12,4), `row_total` decimal(12,4), `base_row_total` decimal(12,4), `row_invoiced` decimal(12,4), `base_row_invoiced` decimal(12,4), `row_weight` decimal(12,4), `gift_message_id` varchar(255), `gift_message` varchar(255), `gift_message_available` varchar(255), `base_tax_before_discount` decimal(12,4), `tax_before_discount` decimal(12,4), `weee_tax_applied` decimal(12,4), `weee_tax_applied_amount` decimal(12,4), `weee_tax_applied_row_amount` decimal(12,4), `base_weee_tax_applied_amount` decimal(12,4), `base_weee_tax_applied_row_amount` decimal(12,4), `weee_tax_disposition` decimal(12,4), `weee_tax_row_disposition` decimal(12,4), `base_weee_tax_disposition` decimal(12,4), `base_weee_tax_row_disposition` decimal(12,4), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (2.8ms)[0m  CREATE TABLE `gemgento_order_payments` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `order_id` int(11) NOT NULL, `increment_id` int(11), `is_active` tinyint(1) DEFAULT 1, `amount_ordered` decimal(12,4), `shipping_amount` decimal(12,4), `base_amount_ordered` decimal(12,4), `base_shipping_amount` decimal(12,4), `method` varchar(255), `po_number` varchar(255), `cc_type` varchar(255), `cc_number_enc` varchar(255), `cc_last4` varchar(255), `cc_owner` varchar(255), `cc_exp_month` varchar(255), `cc_exp_year` varchar(255), `cc_ss_start_month` varchar(255), `cc_ss_start_year` varchar(255), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (1.7ms)[0m  [1mCREATE TABLE `gemgento_order_statuses` (`id` int(11) auto_increment PRIMARY KEY, `order_id` int(11) NOT NULL, `increment_id` int(11), `is_active` tinyint(1) DEFAULT 1, `is_customer_notified` int(11) DEFAULT 1, `status` varchar(255), `comment` varchar(255), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (4.2ms)[0m  CREATE TABLE `gemgento_orders` (`id` int(11) auto_increment PRIMARY KEY, `order_id` int(11), `store_id` int(11) NOT NULL, `is_active` tinyint(1), `user_id` int(11), `tax_amount` decimal(12,4), `shipping_amount` decimal(12,4), `discount_amount` decimal(12,4), `subtotal` decimal(12,4), `grand_total` decimal(12,4), `total_paid` decimal(12,4), `total_refunded` decimal(12,4), `total_qty_ordered` decimal(12,4), `total_canceled` decimal(12,4), `total_invoiced` decimal(12,4), `total_online_refunded` decimal(12,4), `total_offline_refunded` decimal(12,4), `base_tax_amount` decimal(12,4), `base_shipping_amount` decimal(12,4), `base_discount_amount` decimal(12,4), `base_subtotal` decimal(12,4), `base_grand_total` decimal(12,4), `base_total_paid` decimal(12,4), `base_total_refunded` decimal(12,4), `base_total_qty_ordered` decimal(12,4), `base_total_canceled` decimal(12,4), `base_total_invoiced` decimal(12,4), `base_total_online_refunded` decimal(12,4), `base_total_offline_refunded` decimal(12,4), `billing_address_id` int(11), `billing_fname` varchar(255), `billing_lname` varchar(255), `shipping_address_id` int(11), `shipping_fname` varchar(255), `shipping_lname` varchar(255), `billing_name` varchar(255), `shipping_name` varchar(255), `store_to_base_rate` varchar(255), `store_to_order_rate` varchar(255), `base_to_global_rate` varchar(255), `base_to_order_rate` varchar(255), `weight` decimal(12,4), `store_name` varchar(255), `remote_ip` varchar(255), `status` varchar(255), `state` varchar(255), `applied_rule_ids` varchar(255), `global_currency_code` varchar(255), `base_currency_code` varchar(255), `store_currency_code` varchar(255), `order_currency_code` varchar(255), `shipping_method` varchar(255), `shipping_description` varchar(255), `customer_email` varchar(255), `customer_firstname` varchar(255), `customer_lastname` varchar(255), `magento_quote_id` varchar(255), `is_virtual` tinyint(1), `user_group_id` int(11), `customer_note_notify` varchar(255), `customer_is_guest` tinyint(1), `email_sent` tinyint(1), `increment_id` varchar(255), `gift_message_id` varchar(255), `gift_message` varchar(255), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (3.5ms)[0m  [1mCREATE TABLE `gemgento_product_attribute_options` (`id` int(11) auto_increment PRIMARY KEY, `product_attribute_id` int(11), `label` varchar(255), `value` varchar(255), `sync_needed` tinyint(1) DEFAULT 1 NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `order` int(11)) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (1.9ms)[0m  CREATE TABLE `gemgento_product_attribute_sets` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `name` varchar(255), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `sync_needed` tinyint(1) DEFAULT 1 NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (2.6ms)[0m  [1mCREATE TABLE `gemgento_product_attribute_values` (`id` int(11) auto_increment PRIMARY KEY, `product_id` int(11), `product_attribute_id` int(11), `value` text, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (1.7ms)[0m  CREATE TABLE `gemgento_product_attributes` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `code` varchar(255), `frontend_input` varchar(255), `scope` varchar(255), `is_unique` tinyint(1), `is_required` tinyint(1), `is_configurable` tinyint(1), `is_searchable` tinyint(1), `is_visible_in_advanced_search` tinyint(1), `is_comparable` tinyint(1), `is_used_for_promo_rules` tinyint(1), `is_visible_on_front` tinyint(1), `used_in_product_listing` tinyint(1), `sync_needed` tinyint(1) DEFAULT 1 NOT NULL, `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `default_value` text) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (2.4ms)[0m  [1mCREATE TABLE `gemgento_product_categories` (`id` int(11) auto_increment PRIMARY KEY, `category_id` int(11), `product_id` int(11), `position` int(11) DEFAULT 0 NOT NULL, `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (3.4ms)[0m  CREATE TABLE `gemgento_product_imports` (`id` int(11) auto_increment PRIMARY KEY, `import_errors` text, `created_at` datetime, `updated_at` datetime, `spreadsheet_file_name` varchar(255), `spreadsheet_content_type` varchar(255), `spreadsheet_file_size` int(11), `spreadsheet_updated_at` datetime, `include_images` tinyint(1), `image_path` varchar(255), `image_labels` text, `store_id` int(11), `root_category_id` int(11), `product_attribute_set_id` int(11), `count_created` int(11), `count_updated` int(11), `simple_product_visibility` int(11), `configurable_product_visibility` int(11), `image_file_extensions` text) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (3.4ms)[0m  [1mCREATE TABLE `gemgento_product_imports_configurable_attributes` (`product_import_id` int(11) DEFAULT 0 NOT NULL, `product_attribute_id` int(11) DEFAULT 0 NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (1.8ms)[0m  CREATE TABLE `gemgento_products` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `magento_type` varchar(255), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL, `sku` varchar(255), `product_attribute_set_id` varchar(255), `store_id` varchar(255), `sync_needed` tinyint(1) DEFAULT 1 NOT NULL, `status` tinyint(1) DEFAULT 1, `visibility` int(11) DEFAULT 4, `deleted_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (1.2ms)[0m  [1mCREATE TABLE `gemgento_regions` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11) NOT NULL, `code` varchar(255), `name` varchar(255), `country_id` int(11), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (1.7ms)[0m  CREATE TABLE `gemgento_relation_types` (`id` int(11) auto_increment PRIMARY KEY, `name` varchar(255), `description` text, `applies_to` varchar(255), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (2.4ms)[0m  [1mCREATE TABLE `gemgento_relations` (`id` int(11) auto_increment PRIMARY KEY, `relation_type_id` int(11), `relatable_id` int(11), `relatable_type` varchar(255), `related_to_id` int(11), `related_to_type` varchar(255), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (1.5ms)[0m  CREATE TABLE `gemgento_sessions` (`id` int(11) auto_increment PRIMARY KEY, `session_id` varchar(255), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (2.5ms)[0m  [1mCREATE TABLE `gemgento_stores` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11) NOT NULL, `code` varchar(255), `group_id` int(11), `name` varchar(255), `sort_order` int(11), `is_active` tinyint(1) DEFAULT 1 NOT NULL, `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (6.5ms)[0m  CREATE UNIQUE INDEX `index_gemgento_stores_on_magento_id` USING btree ON `gemgento_stores` (`magento_id`) 
+  [1m[36m (3.0ms)[0m  [1mCREATE TABLE `gemgento_syncs` (`id` int(11) auto_increment PRIMARY KEY, `subject` varchar(255), `created_at` datetime, `updated_at` datetime, `is_complete` tinyint(1) DEFAULT 0) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (2.0ms)[0m  CREATE TABLE `gemgento_user_groups` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `code` varchar(255), `created_at` datetime NOT NULL, `updated_at` datetime NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (3.2ms)[0m  [1mCREATE TABLE `gemgento_users` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `store_id` int(11), `created_in` varchar(255), `email` varchar(255) DEFAULT '' NOT NULL, `fname` varchar(255), `lname` varchar(255), `mname` varchar(255), `user_group_id` int(11), `prefix` varchar(255), `suffix` varchar(255), `dob` date, `taxvat` varchar(255), `confirmation` tinyint(1), `magento_password` varchar(255), `sync_needed` tinyint(1) DEFAULT 1 NOT NULL, `created_at` datetime, `updated_at` datetime, `increment_id` int(11), `encrypted_password` varchar(255) DEFAULT '' NOT NULL, `reset_password_token` varchar(255), `reset_password_sent_at` datetime, `remember_created_at` datetime, `sign_in_count` int(11) DEFAULT 0, `current_sign_in_at` datetime, `last_sign_in_at` datetime, `current_sign_in_ip` varchar(255), `last_sign_in_ip` varchar(255), `unencrypted_password` varchar(255), `type` varchar(255)) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (8.2ms)[0m  CREATE UNIQUE INDEX `index_gemgento_users_on_email` USING btree ON `gemgento_users` (`email`) 
+  [1m[36m (6.0ms)[0m  [1mCREATE UNIQUE INDEX `index_gemgento_users_on_magento_id` USING btree ON `gemgento_users` (`magento_id`) [0m
+  [1m[35m (8.9ms)[0m  CREATE UNIQUE INDEX `index_gemgento_users_on_reset_password_token` USING btree ON `gemgento_users` (`reset_password_token`) 
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.2ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20131114161934')
+  [1m[36m (1.5ms)[0m  [1mCOMMIT[0m
+Migrating to AddStoreIdToProductAttributeOptions (20131122133642)
+  [1m[35m (3.6ms)[0m  ALTER TABLE `gemgento_product_attribute_options` ADD `store_id` int(11)
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20131122133642')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to RenameAttributeSetJoinTableColumns (20131122145637)
+  [1m[35m (4.2ms)[0m  ALTER TABLE `gemgento_attribute_set_attributes` CHANGE `attribute_set_id` `product_attribute_set_id` int(11) DEFAULT 0 NOT NULL
+  [1m[36m (3.0ms)[0m  [1mALTER TABLE `gemgento_attribute_set_attributes` CHANGE `attribute_id` `product_attribute_id` int(11) DEFAULT 0 NOT NULL[0m
+  [1m[35m (0.0ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20131122145637')[0m
+  [1m[35m (0.2ms)[0m  COMMIT
+Migrating to AddWebsiteIdToGemgentoStores (20131122183022)
+  [1m[36m (4.1ms)[0m  [1mALTER TABLE `gemgento_stores` ADD `website_id` int(11)[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20131122183022')[0m
+  [1m[35m (0.2ms)[0m  COMMIT
+Migrating to CreateGemgentoStoresProducts (20131213161143)
+  [1m[36m (2.4ms)[0m  [1mCREATE TABLE `gemgento_stores_products` (`id` int(11) auto_increment PRIMARY KEY, `product_id` int(11), `store_id` int(11)) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (4.0ms)[0m  ALTER TABLE `gemgento_products` DROP `store_id`
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20131213161143')
+  [1m[36m (0.3ms)[0m  [1mCOMMIT[0m
+Migrating to AddStoresToProductAttributeValues (20131213163410)
+  [1m[35m (3.1ms)[0m  ALTER TABLE `gemgento_product_attribute_values` ADD `store_id` int(11)
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20131213163410')
+  [1m[36m (0.8ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoCategoriesStores (20131213172603)
+  [1m[35m (1.4ms)[0m  CREATE TABLE `gemgento_categories_stores` (`id` int(11) auto_increment PRIMARY KEY, `category_id` int(11), `store_id` int(11)) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (2.7ms)[0m  [1mALTER TABLE `gemgento_product_categories` ADD `store_id` int(11)[0m
+  [1m[35m (0.5ms)[0m  DROP TABLE `gemgento_categories_products`
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20131213172603')
+  [1m[36m (1.1ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoStoresUsers (20131220141725)
+  [1m[35m (3.1ms)[0m  CREATE TABLE `gemgento_stores_users` (`id` int(11) auto_increment PRIMARY KEY, `store_id` int(11), `user_id` int(11)) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (4.1ms)[0m  [1mALTER TABLE `gemgento_users` DROP `store_id`[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20131220141725')[0m
+  [1m[35m (0.3ms)[0m  COMMIT
+Migrating to CreateGemgentoAssetFiles (20131220160544)
+  [1m[36m (4.2ms)[0m  [1mALTER TABLE `gemgento_assets` ADD `store_id` int(11)[0m
+  [1m[35m (2.7ms)[0m  ALTER TABLE `gemgento_assets` ADD `asset_file_id` int(11)
+  [1m[36m (2.8ms)[0m  [1mCREATE TABLE `gemgento_asset_files` (`id` int(11) auto_increment PRIMARY KEY, `file_file_name` varchar(255), `file_content_type` varchar(255), `file_file_size` int(11), `file_updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (4.3ms)[0m  ALTER TABLE `gemgento_assets` DROP `attachment_file_name`
+  [1m[36m (2.6ms)[0m  [1mALTER TABLE `gemgento_assets` DROP `attachment_content_type`[0m
+  [1m[35m (3.0ms)[0m  ALTER TABLE `gemgento_assets` DROP `attachment_file_size`
+  [1m[36m (3.1ms)[0m  [1mALTER TABLE `gemgento_assets` DROP `attachment_updated_at`[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20131220160544')[0m
+  [1m[35m (0.2ms)[0m  COMMIT
+Migrating to AddImageTypesToGemgentoProductImport (20131223181709)
+  [1m[36m (3.5ms)[0m  [1mALTER TABLE `gemgento_product_imports` ADD `image_types` text[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20131223181709')[0m
+  [1m[35m (0.6ms)[0m  COMMIT
+Migrating to AddStoreIdToGemgentoInventories (20140116154244)
+  [1m[36m (4.6ms)[0m  [1mALTER TABLE `gemgento_inventories` ADD `store_id` int(11)[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140116154244')[0m
+  [1m[35m (0.2ms)[0m  COMMIT
+Migrating to AddUseDefaultWebsiteValuesToGemgentoInventories (20140120124655)
+  [1m[36m (3.5ms)[0m  [1mALTER TABLE `gemgento_inventories` ADD `use_default_website_stock` tinyint(1) DEFAULT 1[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140120124655')[0m
+  [1m[35m (1.0ms)[0m  COMMIT
+Migrating to CreateGemgentoApiJobs (20140120144719)
+  [1m[36m (1.3ms)[0m  [1mCREATE TABLE `gemgento_api_jobs` (`id` int(11) auto_increment PRIMARY KEY, `source_id` int(11), `kind` varchar(255), `state` varchar(255), `source_type` varchar(255), `url` varchar(255), `request` text, `response` text, `locked` tinyint(1), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140120144719')[0m
+  [1m[35m (0.6ms)[0m  COMMIT
+Migrating to DropGemgentoOrderAddresses (20140121164640)
+  [1m[36m (1.2ms)[0m  [1mDROP TABLE `gemgento_order_addresses`[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140121164640')[0m
+  [1m[35m (1.4ms)[0m  COMMIT
+Migrating to RecreateGemgentoApiJobs (20140121174243)
+  [1m[36m (1.2ms)[0m  [1mDROP TABLE `gemgento_api_jobs`[0m
+  [1m[35m (4.9ms)[0m  CREATE TABLE `gemgento_api_jobs` (`id` int(11) auto_increment PRIMARY KEY, `source_id` int(11), `kind` varchar(255), `state` varchar(255), `source_type` varchar(255), `request_url` varchar(255), `request` text, `response` text, `locked` tinyint(1), `request_body` text, `request_status` varchar(255), `response_status` varchar(255), `type` varchar(255), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (0.0ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140121174243')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to AddCurrencyCodeToGemgentoStores (20140127215049)
+  [1m[35m (4.5ms)[0m  ALTER TABLE `gemgento_stores` ADD `currency_code` varchar(255) DEFAULT 'usd'
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140127215049')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoSubscriber (20140129220352)
+  [1m[35m (2.5ms)[0m  CREATE TABLE `gemgento_subscribers` (`id` int(11) auto_increment PRIMARY KEY, `fname` varchar(255), `lname` varchar(255), `email` varchar(255), `country_id` int(11), `city` varchar(255), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.2ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140129220352')
+  [1m[36m (0.5ms)[0m  [1mCOMMIT[0m
+Migrating to RenameNames (20140130180722)
+  [1m[35m (4.6ms)[0m  ALTER TABLE `gemgento_addresses` CHANGE `fname` `first_name` varchar(255) DEFAULT NULL
+  [1m[36m (4.3ms)[0m  [1mALTER TABLE `gemgento_addresses` CHANGE `lname` `last_name` varchar(255) DEFAULT NULL[0m
+  [1m[35m (5.9ms)[0m  ALTER TABLE `gemgento_addresses` CHANGE `mname` `middle_name` varchar(255) DEFAULT NULL
+  [1m[36m (5.1ms)[0m  [1mALTER TABLE `gemgento_orders` CHANGE `billing_fname` `billing_first_name` varchar(255) DEFAULT NULL[0m
+  [1m[35m (3.7ms)[0m  ALTER TABLE `gemgento_orders` CHANGE `billing_lname` `billing_last_name` varchar(255) DEFAULT NULL
+  [1m[36m (9.0ms)[0m  [1mALTER TABLE `gemgento_orders` CHANGE `shipping_fname` `shipping_first_name` varchar(255) DEFAULT NULL[0m
+  [1m[35m (5.2ms)[0m  ALTER TABLE `gemgento_orders` CHANGE `shipping_lname` `shipping_last_name` varchar(255) DEFAULT NULL
+  [1m[36m (4.1ms)[0m  [1mALTER TABLE `gemgento_users` CHANGE `fname` `first_name` varchar(255) DEFAULT NULL[0m
+  [1m[35m (3.7ms)[0m  ALTER TABLE `gemgento_users` CHANGE `lname` `last_name` varchar(255) DEFAULT NULL
+  [1m[36m (3.0ms)[0m  [1mALTER TABLE `gemgento_users` CHANGE `mname` `middle_name` varchar(255) DEFAULT NULL[0m
+  [1m[35m (4.1ms)[0m  ALTER TABLE `gemgento_subscribers` CHANGE `fname` `first_name` varchar(255) DEFAULT NULL
+  [1m[36m (3.1ms)[0m  [1mALTER TABLE `gemgento_subscribers` CHANGE `lname` `last_name` varchar(255) DEFAULT NULL[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140130180722')[0m
+  [1m[35m (0.6ms)[0m  COMMIT
+Migrating to AddGenderToGemgentoUsers (20140201185453)
+  [1m[36m (3.0ms)[0m  [1mALTER TABLE `gemgento_users` ADD `gender` varchar(255)[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140201185453')[0m
+  [1m[35m (0.2ms)[0m  COMMIT
+Migrating to AddSyncNeededToGemgentoProductCategories (20140203201046)
+  [1m[36m (2.5ms)[0m  [1mALTER TABLE `gemgento_product_categories` ADD `sync_needed` tinyint(1) DEFAULT 0[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140203201046')[0m
+  [1m[35m (0.3ms)[0m  COMMIT
+Migrating to AddGemgentoIndexes (20140207154554)
+  [1m[36m (7.4ms)[0m  [1mCREATE  INDEX `index_gemgento_assets_on_product_id`  ON `gemgento_assets` (`product_id`) [0m
+  [1m[35m (5.6ms)[0m  CREATE  INDEX `index_gemgento_assets_on_store_id`  ON `gemgento_assets` (`store_id`) 
+  [1m[36m (7.2ms)[0m  [1mCREATE UNIQUE INDEX `attribute_set_attributes_index`  ON `gemgento_attribute_set_attributes` (`product_attribute_set_id`, `product_attribute_id`) [0m
+  [1m[35m (6.6ms)[0m  CREATE  INDEX `attribute_set_product_attributes_index`  ON `gemgento_attribute_set_attributes` (`product_attribute_id`) 
+  [1m[36m (4.9ms)[0m  [1mCREATE UNIQUE INDEX `categories_index`  ON `gemgento_categories_stores` (`category_id`, `store_id`) [0m
+  [1m[35m (6.3ms)[0m  CREATE  INDEX `category_store_index`  ON `gemgento_categories_stores` (`store_id`) 
+  [1m[36m (6.9ms)[0m  [1mCREATE UNIQUE INDEX `configurable_attributes_index`  ON `gemgento_configurable_attributes` (`product_id`, `product_attribute_id`) [0m
+  [1m[35m (5.4ms)[0m  CREATE  INDEX `configurable_attribute_product_attribute_index`  ON `gemgento_configurable_attributes` (`product_attribute_id`) 
+  [1m[36m (6.2ms)[0m  [1mCREATE UNIQUE INDEX `inventories_index`  ON `gemgento_inventories` (`product_id`, `store_id`) [0m
+  [1m[35m (6.4ms)[0m  CREATE  INDEX `inventory_store_index`  ON `gemgento_inventories` (`store_id`) 
+  [1m[36m (6.3ms)[0m  [1mCREATE  INDEX `order_items_index`  ON `gemgento_order_items` (`order_id`) [0m
+  [1m[35m (5.3ms)[0m  CREATE  INDEX `order_payments_index`  ON `gemgento_order_payments` (`order_id`) 
+  [1m[36m (7.0ms)[0m  [1mCREATE  INDEX `order_statuses_index`  ON `gemgento_order_statuses` (`order_id`) [0m
+  [1m[35m (5.8ms)[0m  CREATE  INDEX `attribute_options_index`  ON `gemgento_product_attribute_options` (`product_attribute_id`, `store_id`) 
+  [1m[36m (6.8ms)[0m  [1mCREATE  INDEX `product_attribute_option_store_index`  ON `gemgento_product_attribute_options` (`store_id`) [0m
+  [1m[35m (6.7ms)[0m  CREATE  INDEX `product_attribute_values_index`  ON `gemgento_product_attribute_values` (`product_id`) 
+  [1m[36m (7.2ms)[0m  [1mCREATE  INDEX `product_attribute_values_product_attribute_index`  ON `gemgento_product_attribute_values` (`product_attribute_id`) [0m
+  [1m[35m (8.4ms)[0m  CREATE UNIQUE INDEX `configurable_simple_index`  ON `gemgento_configurable_simple_relations` (`configurable_product_id`, `simple_product_id`) 
+  [1m[36m (10.8ms)[0m  [1mCREATE  INDEX `product_categories_category_index`  ON `gemgento_product_categories` (`category_id`) [0m
+  [1m[35m (7.2ms)[0m  CREATE  INDEX `product_categories_product_index`  ON `gemgento_product_categories` (`product_id`) 
+  [1m[36m (5.6ms)[0m  [1mCREATE UNIQUE INDEX `stores_products_index`  ON `gemgento_stores_products` (`product_id`, `store_id`) [0m
+  [1m[35m (11.4ms)[0m  CREATE  INDEX `store_product_store_index`  ON `gemgento_stores_products` (`store_id`) 
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140207154554')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoShipment (20140208233651)
+  [1m[35m (1.8ms)[0m  CREATE TABLE `gemgento_shipments` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `order_id` int(11), `increment_id` varchar(255), `store_id` int(11), `shipping_address_id` int(11), `total_qty` float, `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (5.5ms)[0m  [1mCREATE  INDEX `shipments_order_index`  ON `gemgento_shipments` (`order_id`) [0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140208233651')[0m
+  [1m[35m (0.6ms)[0m  COMMIT
+Migrating to CreateGemegentoShipmentItem (20140209000330)
+  [1m[36m (1.6ms)[0m  [1mCREATE TABLE `gemegento_shipment_items` (`id` int(11) auto_increment PRIMARY KEY, `shipment_id` int(11), `sku` varchar(255), `name` varchar(255), `order_item_id` int(11), `product_id` int(11), `weight` float, `price` float, `qty` float, `magento_id` int(11)) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (7.6ms)[0m  CREATE  INDEX `shipment_items_shipment_id`  ON `gemegento_shipment_items` (`shipment_id`) 
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140209000330')
+  [1m[36m (0.7ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoShipmentTrack (20140209001048)
+  [1m[35m (1.6ms)[0m  CREATE TABLE `gemgento_shipment_tracks` (`id` int(11) auto_increment PRIMARY KEY, `shipment_id` int(11), `carrier_code` varchar(255), `title` varchar(255), `number` varchar(255), `order_id` int(11), `magento_id` int(11)) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (5.3ms)[0m  [1mCREATE  INDEX `shipment_tracks_shipment_index`  ON `gemgento_shipment_tracks` (`shipment_id`) [0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140209001048')[0m
+  [1m[35m (0.3ms)[0m  COMMIT
+Migrating to CreateGemgentoShipmentComment (20140209003043)
+  [1m[36m (3.5ms)[0m  [1mCREATE TABLE `gemgento_shipment_comments` (`id` int(11) auto_increment PRIMARY KEY, `shipment_id` int(11), `comment` text, `is_customer_notified` tinyint(1), `magento_id` int(11), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140209003043')[0m
+  [1m[35m (0.6ms)[0m  COMMIT
+Migrating to ChangeGemgentoApiJobTextFieldsToLongText (20140209233713)
+  [1m[36m (2.8ms)[0m  [1mALTER TABLE `gemgento_api_jobs` CHANGE `response` `response` longtext DEFAULT NULL[0m
+  [1m[35m (2.4ms)[0m  ALTER TABLE `gemgento_api_jobs` CHANGE `request` `request` longtext DEFAULT NULL
+  [1m[36m (2.6ms)[0m  [1mALTER TABLE `gemgento_api_jobs` CHANGE `request_body` `request_body` longtext DEFAULT NULL[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140209233713')[0m
+  [1m[35m (0.3ms)[0m  COMMIT
+Migrating to AddPlacedAtToGemgentoOrders (20140227172710)
+  [1m[36m (5.8ms)[0m  [1mALTER TABLE `gemgento_orders` ADD `placed_at` datetime[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140227172710')[0m
+  [1m[35m (0.3ms)[0m  COMMIT
+Migrating to AddDeletedAtToGemgentoCategory (20140310142243)
+  [1m[36m (2.9ms)[0m  [1mALTER TABLE `gemgento_categories` ADD `deleted_at` datetime[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140310142243')[0m
+  [1m[35m (0.2ms)[0m  COMMIT
+Migrating to AddDeletedAtToGemgentoUsers (20140310144408)
+  [1m[36m (3.0ms)[0m  [1mALTER TABLE `gemgento_users` ADD `deleted_at` datetime[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140310144408')[0m
+  [1m[35m (0.7ms)[0m  COMMIT
+Migrating to RemoveEmailIndexFromGemgentoUsers (20140310150145)
+  [1m[36m (5.2ms)[0m  [1mDROP INDEX `index_gemgento_users_on_email` ON `gemgento_users`[0m
+  [1m[35m (6.9ms)[0m  CREATE UNIQUE INDEX `users_email_deleted_index`  ON `gemgento_users` (`email`, `deleted_at`) 
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140310150145')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to AddDeletedAtToGemgentoProductAttribute (20140310162000)
+  [1m[35m (2.8ms)[0m  ALTER TABLE `gemgento_product_attributes` ADD `deleted_at` datetime
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140310162000')
+  [1m[36m (0.6ms)[0m  [1mCOMMIT[0m
+Migrating to AddDeletedAtToGemgentoProductAttributeSet (20140310162017)
+  [1m[35m (2.9ms)[0m  ALTER TABLE `gemgento_product_attribute_sets` ADD `deleted_at` datetime
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.2ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140310162017')
+  [1m[36m (0.5ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoSavedCreditCard (20140312131230)
+  [1m[35m (2.7ms)[0m  CREATE TABLE `gemgento_saved_credit_cards` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `user_id` int(11), `token` varchar(255), `cc_number` varchar(255), `exp_month` int(11), `exp_year` int(11), `cc_type` varchar(255), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140312131230')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to AddDefaultsToGemgentoAddresses (20140422140433)
+  [1m[35m (3.5ms)[0m  ALTER TABLE `gemgento_addresses` CHANGE `is_default` `is_default_billing` tinyint(1) DEFAULT '0'
+  [1m[36m (2.7ms)[0m  [1mALTER TABLE `gemgento_addresses` ADD `is_default_shipping` tinyint(1) DEFAULT 0[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140422140433')[0m
+  [1m[35m (0.2ms)[0m  COMMIT
+Migrating to CreateGemgentoImageImports (20140429191504)
+  [1m[36m (2.2ms)[0m  [1mCREATE TABLE `gemgento_image_imports` (`id` int(11) auto_increment PRIMARY KEY, `import_errors` text, `spreadsheet_file_name` varchar(255), `spreadsheet_content_type` varchar(255), `spreadsheet_file_size` int(11), `spreadsheet_updated_at` datetime, `destroy_existing` tinyint(1) DEFAULT 0, `store_id` int(11), `count_created` int(11), `count_updated` int(11), `image_path` varchar(255), `image_labels` text, `image_file_extensions` text, `image_types` text, `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140429191504')[0m
+  [1m[35m (0.2ms)[0m  COMMIT
+Migrating to AddIsActiveToGemgentoImageImport (20140430190229)
+  [1m[36m (4.9ms)[0m  [1mALTER TABLE `gemgento_image_imports` ADD `is_active` tinyint(1) DEFAULT 0[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140430190229')[0m
+  [1m[35m (0.9ms)[0m  COMMIT
+Migrating to AddMetaToAttachedImages (20140508125933)
+  [1m[36m (2.6ms)[0m  [1mALTER TABLE `gemgento_asset_files` ADD `file_meta` text[0m
+  [1m[35m (2.9ms)[0m  ALTER TABLE `gemgento_categories` ADD `image_meta` text
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140508125933')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to CreateAdminUsers (20140513194044)
+  [1m[35m (2.4ms)[0m  CREATE TABLE `admin_users` (`id` int(11) auto_increment PRIMARY KEY, `email` varchar(255) DEFAULT '' NOT NULL, `encrypted_password` varchar(255) DEFAULT '' NOT NULL, `reset_password_token` varchar(255), `reset_password_sent_at` datetime, `remember_created_at` datetime, `sign_in_count` int(11) DEFAULT 0 NOT NULL, `current_sign_in_at` datetime, `last_sign_in_at` datetime, `current_sign_in_ip` varchar(255), `last_sign_in_ip` varchar(255), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (8.6ms)[0m  [1mCREATE UNIQUE INDEX `index_admin_users_on_email`  ON `admin_users` (`email`) [0m
+  [1m[35m (6.1ms)[0m  CREATE UNIQUE INDEX `index_admin_users_on_reset_password_token`  ON `admin_users` (`reset_password_token`) 
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mAdminUser Exists (0.3ms)[0m  SELECT  1 AS one FROM `admin_users` WHERE `admin_users`.`email` = BINARY 'admin@example.com' LIMIT 1
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `admin_users` (`email`, `encrypted_password`, `created_at`, `updated_at`) VALUES ('admin@example.com', '$2a$04$TgS.dp7ag5Si2M1EkBPmIenyb4.vAPSlucT4YdRBvt8Jb78iW68JG', '2015-06-29 17:40:08', '2015-06-29 17:40:08')[0m
+  [1m[35m (1.0ms)[0m  COMMIT
+  [1m[36m (0.0ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140513194044')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to CreateActiveAdminComments (20140513194047)
+  [1m[35m (2.0ms)[0m  CREATE TABLE `active_admin_comments` (`id` int(11) auto_increment PRIMARY KEY, `namespace` varchar(255), `body` text, `resource_id` varchar(255) NOT NULL, `resource_type` varchar(255) NOT NULL, `author_id` int(11), `author_type` varchar(255), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  [1m[36m (11.9ms)[0m  [1mCREATE  INDEX `index_active_admin_comments_on_namespace`  ON `active_admin_comments` (`namespace`) [0m
+  [1m[35m (7.4ms)[0m  CREATE  INDEX `index_active_admin_comments_on_author_type_and_author_id`  ON `active_admin_comments` (`author_type`, `author_id`) 
+  [1m[36m (8.9ms)[0m  [1mCREATE  INDEX `index_active_admin_comments_on_resource_type_and_resource_id`  ON `active_admin_comments` (`resource_type`, `resource_id`) [0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20140513194047')[0m
+  [1m[35m (0.3ms)[0m  COMMIT
+Migrating to AddBackordersToGemgentoInventories (20140605141601)
+  [1m[36m (4.5ms)[0m  [1mALTER TABLE `gemgento_inventories` ADD `backorders` int(11) DEFAULT 0 NOT NULL[0m
+  [1m[35m (2.5ms)[0m  ALTER TABLE `gemgento_inventories` ADD `use_config_backorders` tinyint(1) DEFAULT 1 NOT NULL
+  [1m[36m (2.3ms)[0m  [1mALTER TABLE `gemgento_inventories` ADD `min_qty` int(11) DEFAULT 0 NOT NULL[0m
+  [1m[35m (3.1ms)[0m  ALTER TABLE `gemgento_inventories` ADD `use_config_min_qty` tinyint(1) DEFAULT 1 NOT NULL
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140605141601')
+  [1m[36m (0.5ms)[0m  [1mCOMMIT[0m
+Migrating to AddQuantityToGemegentoShipmentItems (20140625141601)
+  [1m[35m (4.8ms)[0m  ALTER TABLE `gemegento_shipment_items` ADD `quantity` decimal DEFAULT 0 NOT NULL
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140625141601')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to RenameGemegentoShipmentItems (20140625141630)
+  [1m[35m (0.4ms)[0m  RENAME TABLE `gemegento_shipment_items` TO `gemgento_shipment_items`
+  [1m[36m (0.0ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140625141630')
+  [1m[36m (1.0ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoAdapterShopifyAdapter (20140707180118)
+  [1m[35m (1.4ms)[0m  CREATE TABLE `gemgento_shopify_adapters` (`id` int(11) auto_increment PRIMARY KEY, `gemgento_model_id` int(11), `gemgento_model_type` varchar(255), `shopify_model_type` varchar(255), `shopify_model_id` int(11), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB
+  [1m[36m (5.7ms)[0m  [1mCREATE  INDEX `gemgento_model_index`  ON `gemgento_shopify_adapters` (`gemgento_model_id`, `gemgento_model_type`) [0m
+  [1m[35m (7.2ms)[0m  CREATE  INDEX `shopify_model_index`  ON `gemgento_shopify_adapters` (`shopify_model_id`, `shopify_model_type`) 
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140707180118')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoTags (20140710200747)
+  [1m[35m (1.4ms)[0m  CREATE TABLE `gemgento_tags` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `name` varchar(255), `status` varchar(255) DEFAULT '0', `sync_needed` tinyint(1) DEFAULT 0) ENGINE=InnoDB
+  [1m[36m (0.0ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140710200747')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoProductsTags (20140710200830)
+  [1m[35m (1.8ms)[0m  CREATE TABLE `gemgento_products_tags` (`product_id` int(11), `tag_id` int(11)) ENGINE=InnoDB
+  [1m[36m (5.4ms)[0m  [1mCREATE  INDEX `index_gemgento_products_tags_on_product_id_and_tag_id`  ON `gemgento_products_tags` (`product_id`, `tag_id`) [0m
+  [1m[35m (7.5ms)[0m  CREATE  INDEX `index_gemgento_products_tags_on_tag_id`  ON `gemgento_products_tags` (`tag_id`) 
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140710200830')
+  [1m[36m (0.3ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoStoreTags (20140711135514)
+  [1m[35m (2.1ms)[0m  CREATE TABLE `gemgento_store_tags` (`id` int(11) auto_increment PRIMARY KEY, `store_id` int(11), `tag_id` int(11), `base_popularity` int(11) DEFAULT 0,  INDEX `index_gemgento_store_tags_on_store_id`  (`store_id`) ,  INDEX `index_gemgento_store_tags_on_tag_id`  (`tag_id`) ) ENGINE=InnoDB
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140711135514')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoPriceRules (20140724152337)
+  [1m[35m (2.3ms)[0m  CREATE TABLE `gemgento_price_rules` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `name` varchar(255), `description` text, `from_date` datetime, `to_date` datetime, `is_active` tinyint(1) DEFAULT 0 NOT NULL, `stop_rules_processing` tinyint(1) DEFAULT 1 NOT NULL, `sort_order` int(11), `simple_action` varchar(255), `discount_amount` decimal, `sub_is_enable` tinyint(1) DEFAULT 0 NOT NULL, `sub_simple_action` varchar(255), `sub_discount_amount` decimal, `conditions` text) ENGINE=InnoDB
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.2ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140724152337')
+  [1m[36m (0.5ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoPriceRulesStores (20140724203223)
+  [1m[35m (3.2ms)[0m  CREATE TABLE `gemgento_price_rules_stores` (`price_rule_id` int(11), `store_id` int(11)) ENGINE=InnoDB
+  [1m[36m (5.1ms)[0m  [1mCREATE  INDEX `index_gemgento_price_rules_stores_on_price_rule_id_and_store_id`  ON `gemgento_price_rules_stores` (`price_rule_id`, `store_id`) [0m
+  [1m[35m (5.7ms)[0m  CREATE  INDEX `index_gemgento_price_rules_stores_on_store_id`  ON `gemgento_price_rules_stores` (`store_id`) 
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140724203223')
+  [1m[36m (0.3ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoPriceRulesUserGroups (20140724203510)
+  [1m[35m (2.8ms)[0m  CREATE TABLE `gemgento_price_rules_user_groups` (`id` int(11) auto_increment PRIMARY KEY, `price_rule_id` int(11), `user_group_id` int(11)) ENGINE=InnoDB
+  [1m[36m (6.1ms)[0m  [1mCREATE  INDEX `price_rule_user_group_index`  ON `gemgento_price_rules_user_groups` (`price_rule_id`, `user_group_id`) [0m
+  [1m[35m (5.2ms)[0m  CREATE  INDEX `user_group_index`  ON `gemgento_price_rules_user_groups` (`user_group_id`) 
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140724203510')
+  [1m[36m (0.9ms)[0m  [1mCOMMIT[0m
+Migrating to AddManageStockToGemgentoInventories (20140725141407)
+  [1m[35m (7.1ms)[0m  ALTER TABLE `gemgento_inventories` ADD `manage_stock` tinyint(1) DEFAULT 1
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140725141407')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoRecurringProfiles (20140730192804)
+  [1m[35m (1.9ms)[0m  CREATE TABLE `gemgento_recurring_profiles` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `state` varchar(255), `user_id` int(11), `store_id` int(11), `method_code` varchar(255), `reference_id` int(11), `subscriber_name` varchar(255), `start_datetime` datetime, `internal_reference_id` varchar(255), `schedule_description` varchar(255), `period_unit` varchar(255), `period_frequency` int(11), `billing_amount` decimal, `currency_code` varchar(255), `shipping_amount` decimal, `tax_amount` decimal, `order_info` text, `order_item_info` text, `billing_address_info` text, `shipping_address_info` text, `profile_vendor_info` text, `additional_info` text,  INDEX `index_gemgento_recurring_profiles_on_user_id`  (`user_id`) ,  INDEX `index_gemgento_recurring_profiles_on_store_id`  (`store_id`) ) ENGINE=InnoDB
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140730192804')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoOrdersRecurringProfiles (20140730192852)
+  [1m[35m (1.4ms)[0m  CREATE TABLE `gemgento_orders_recurring_profiles` (`order_id` int(11), `recurring_profile_id` int(11)) ENGINE=InnoDB
+  [1m[36m (9.4ms)[0m  [1mCREATE  INDEX `order_recurring_profile_index`  ON `gemgento_orders_recurring_profiles` (`order_id`, `recurring_profile_id`) [0m
+  [1m[35m (5.9ms)[0m  CREATE  INDEX `recurring_profile_index`  ON `gemgento_orders_recurring_profiles` (`recurring_profile_id`) 
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140730192852')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to AddCacheExpiresAtToGemgentoProducts (20140804161106)
+  [1m[35m (2.6ms)[0m  ALTER TABLE `gemgento_products` ADD `cache_expires_at` datetime
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140804161106')
+  [1m[36m (0.7ms)[0m  [1mCOMMIT[0m
+Migrating to AddOptionsToGemgentoOrderItems (20140815143812)
+  [1m[35m (4.2ms)[0m  ALTER TABLE `gemgento_order_items` ADD `options` text
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.2ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140815143812')
+  [1m[36m (0.5ms)[0m  [1mCOMMIT[0m
+Migrating to CreateAdminStore (20140828184800)
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO `gemgento_stores` (`magento_id`, `code`, `group_id`, `website_id`, `name`, `sort_order`, `created_at`, `updated_at`) VALUES (0, 'admin', 0, 0, 'Admin', 0, '2015-06-29 17:40:08', '2015-06-29 17:40:08')[0m
+  [1m[35m (1.1ms)[0m  COMMIT
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140828184800')
+  [1m[36m (0.7ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoInventoryImports (20140829172323)
+  [1m[35m (2.8ms)[0m  CREATE TABLE `gemgento_inventory_imports` (`id` int(11) auto_increment PRIMARY KEY, `spreadsheet_file_name` varchar(255), `spreadsheet_content_type` varchar(255), `spreadsheet_file_size` int(11), `spreadsheet_updated_at` datetime, `import_errors` text, `is_active` tinyint(1) DEFAULT 1) ENGINE=InnoDB
+  [1m[36m (0.2ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.5ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140829172323')
+  [1m[36m (1.5ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoStockNotifications (20140905155652)
+  [1m[35m (2.2ms)[0m  CREATE TABLE `gemgento_stock_notifications` (`id` int(11) auto_increment PRIMARY KEY, `product_id` int(11), `product_name` varchar(255), `product_url` varchar(255), `name` varchar(255), `email` varchar(255), `phone` varchar(255), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140905155652')
+  [1m[36m (0.8ms)[0m  [1mCOMMIT[0m
+Migrating to AddCartItemErrorsToGemgentoOrders (20140910121424)
+  [1m[35m (3.9ms)[0m  ALTER TABLE `gemgento_orders` ADD `cart_item_errors` text
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140910121424')
+  [1m[36m (0.9ms)[0m  [1mCOMMIT[0m
+Migrating to UpdateGemgentoRecurringProfileDecimals (20140926153739)
+  [1m[35m (6.2ms)[0m  ALTER TABLE `gemgento_recurring_profiles` CHANGE `billing_amount` `billing_amount` decimal(8,2) DEFAULT NULL
+  [1m[36m (4.0ms)[0m  [1mALTER TABLE `gemgento_recurring_profiles` CHANGE `shipping_amount` `shipping_amount` decimal(8,2) DEFAULT NULL[0m
+  [1m[35m (6.3ms)[0m  ALTER TABLE `gemgento_recurring_profiles` CHANGE `tax_amount` `tax_amount` decimal(8,2) DEFAULT NULL
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20140926153739')
+  [1m[36m (0.3ms)[0m  [1mCOMMIT[0m
+Migrating to RemoveOrderAddressIdFromGemgentoAddresses (20141027191313)
+  [1m[35m (3.2ms)[0m  ALTER TABLE `gemgento_addresses` DROP `order_address_id`
+  [1m[36m (0.0ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141027191313')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to RenameGemgentoOrderItemsToGemgentoLineItems (20141028144819)
+  [1m[35m (0.8ms)[0m  RENAME TABLE `gemgento_order_items` TO `gemgento_line_items`
+  [1m[36m (0.0ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141028144819')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to ConvertGemgentoLineItemToPolymorphicItemizable (20141028150806)
+  [1m[35m (4.2ms)[0m  ALTER TABLE `gemgento_line_items` CHANGE `order_id` `itemizable_id` int(11) DEFAULT NULL
+  [1m[36m (5.0ms)[0m  [1mALTER TABLE `gemgento_line_items` ADD `itemizable_type` varchar(255) DEFAULT 'Gemgento::Order' AFTER `magento_id`[0m
+  [1m[35m (7.1ms)[0m  CREATE  INDEX `index_gemgento_line_items_on_itemizable_type_and_itemizable_id`  ON `gemgento_line_items` (`itemizable_type`, `itemizable_id`) 
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141028150806')
+  [1m[36m (0.9ms)[0m  [1mCOMMIT[0m
+Migrating to RenameGemgentoOrderPaymentToGemgentoPayment (20141028153303)
+  [1m[35m (0.5ms)[0m  RENAME TABLE `gemgento_order_payments` TO `gemgento_payments`
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141028153303')
+  [1m[36m (0.4ms)[0m  [1mCOMMIT[0m
+Migrating to ConvertGemgentoPaymentToPayablePolymorphic (20141028154735)
+  [1m[35m (5.2ms)[0m  ALTER TABLE `gemgento_payments` CHANGE `order_id` `payable_id` int(11) NOT NULL
+  [1m[36m (3.5ms)[0m  [1mALTER TABLE `gemgento_payments` ADD `payable_type` varchar(255) DEFAULT 'Gemgento::Order' AFTER `magento_id`[0m
+  [1m[35m (6.0ms)[0m  CREATE  INDEX `index_gemgento_payments_on_payable_type_and_payable_id`  ON `gemgento_payments` (`payable_type`, `payable_id`) 
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141028154735')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to CreateGemgentoQuote (20141028160826)
+  [1m[35m (2.7ms)[0m  CREATE TABLE `gemgento_quotes` (`id` int(11) auto_increment PRIMARY KEY, `magento_id` int(11), `store_id` int(11), `user_id` int(11), `user_group_id` int(11), `order_id` int(11), `converted_at` datetime, `created_at` datetime, `updated_at` datetime, `is_active` tinyint(1) DEFAULT 1, `is_virtual` tinyint(1) DEFAULT 0, `is_multi_shipping` tinyint(1) DEFAULT 0, `original_order_id` varchar(255), `store_to_base_rate` decimal(12,4) DEFAULT 1, `store_to_quote_rate` decimal(12,4) DEFAULT 1, `base_currency_code` varchar(255), `store_currency_code` varchar(255), `quote_currency_code` varchar(255), `grand_total` decimal(12,4), `base_grand_total` decimal(12,4), `checkout_method` varchar(255), `customer_email` varchar(255), `customer_prefix` varchar(255), `customer_first_name` varchar(255), `customer_middle_name` varchar(255), `customer_last_name` varchar(255), `customer_suffix` varchar(255), `customer_note` text, `customer_note_notify` tinyint(1) DEFAULT 0, `customer_is_guest` tinyint(1) DEFAULT 0, `applied_rule_ids` varchar(255), `reserved_order_id` varchar(255), `password_hash` varchar(255), `coupon_code` varchar(255), `global_currency_code` varchar(255), `base_to_global_rate` decimal(12,4) DEFAULT 1, `base_to_order_rate` decimal(12,4) DEFAULT 1, `customer_taxvat` varchar(255), `customer_gender` varchar(255), `subtotal` decimal(12,4), `base_subtotal` decimal(12,4), `base_subtotal_with_discount` decimal(12,4), `shipping_method` varchar(255), `ext_shipping_info` text, `shipping_amount` decimal(12,4), `gift_message_id` int(11), `customer_balance_amount_used` decimal(12,4), `base_customer_balance_amount_used` decimal(12,4), `use_customer_balance` tinyint(1) DEFAULT 0, `gift_cards_amount` decimal(12,4), `base_gift_cards_amount` decimal(12,4), `use_reward_points` tinyint(1) DEFAULT 0, `reward_points_balance` decimal(12,4), `reward_currency_amount` decimal(12,4), `base_reward_currency_amount` decimal(12,4)) ENGINE=InnoDB
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141028160826')
+  [1m[36m (0.7ms)[0m  [1mCOMMIT[0m
+Migrating to AddQuoteReferenceToGemgentoOrder (20141028203630)
+  [1m[35m (5.6ms)[0m  ALTER TABLE `gemgento_orders` ADD `quote_id` int(11)
+  [1m[36m (5.8ms)[0m  [1mCREATE  INDEX `index_gemgento_orders_on_quote_id`  ON `gemgento_orders` (`quote_id`) [0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20141028203630')[0m
+  [1m[35m (0.8ms)[0m  COMMIT
+Migrating to RemoveCartsFromGemgentoOrders (20141028203943)
+  [1m[36mGemgento::Order Load (0.2ms)[0m  [1mSELECT `gemgento_orders`.* FROM `gemgento_orders` WHERE `gemgento_orders`.`state` = 'cart'[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20141028203943')[0m
+  [1m[35m (0.9ms)[0m  COMMIT
+Migrating to RemoveQuoteAttributesFromGemgentoOrders (20141028204310)
+  [1m[36m (4.0ms)[0m  [1mALTER TABLE `gemgento_orders` DROP `magento_quote_id`[0m
+  [1m[35m (6.0ms)[0m  ALTER TABLE `gemgento_orders` DROP `is_active`
+  [1m[36m (3.7ms)[0m  [1mALTER TABLE `gemgento_orders` DROP `cart_item_errors`[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20141028204310')[0m
+  [1m[35m (0.2ms)[0m  COMMIT
+Migrating to AddGiftMessageToGemgentoQuote (20141028215239)
+  [1m[36m (3.5ms)[0m  [1mALTER TABLE `gemgento_quotes` ADD `gift_message` text AFTER `gift_message_id`[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20141028215239')[0m
+  [1m[35m (0.2ms)[0m  COMMIT
+Migrating to AddAddressableToGemgentoAddresses (20141029151716)
+  [1m[36m (9.6ms)[0m  [1mALTER TABLE `gemgento_addresses` ADD `addressable_id` int(11) AFTER `id`[0m
+  [1m[35m (3.1ms)[0m  ALTER TABLE `gemgento_addresses` ADD `addressable_type` varchar(255) AFTER `id`
+  [1m[36m (5.6ms)[0m  [1mCREATE  INDEX `index_gemgento_addresses_on_addressable_type_and_addressable_id`  ON `gemgento_addresses` (`addressable_type`, `addressable_id`) [0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20141029151716')[0m
+  [1m[35m (0.8ms)[0m  COMMIT
+Migrating to RenameGemgentoAddressIsDefaults (20141029152921)
+  [1m[36m (4.9ms)[0m  [1mALTER TABLE `gemgento_addresses` CHANGE `is_default_shipping` `is_shipping` tinyint(1) DEFAULT '0'[0m
+  [1m[35m (4.3ms)[0m  ALTER TABLE `gemgento_addresses` CHANGE `is_default_billing` `is_billing` tinyint(1) DEFAULT '0'
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141029152921')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to ConvertGemgentoAddressesToPolymorphicAssociations (20141029160052)
+Scoped order and limit are ignored, it's forced to be batch order and batch size
+  [1m[35mGemgento::Address Load (0.2ms)[0m  SELECT  `gemgento_addresses`.* FROM `gemgento_addresses`  ORDER BY `gemgento_addresses`.`id` ASC LIMIT 1000
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141029160052')
+  [1m[36m (1.3ms)[0m  [1mCOMMIT[0m
+Migrating to RemoveGemgentoAddressesAddressType (20141029172426)
+  [1m[35m (3.1ms)[0m  ALTER TABLE `gemgento_addresses` DROP `address_type`
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141029172426')
+  [1m[36m (0.6ms)[0m  [1mCOMMIT[0m
+Migrating to RemoveGemgentoAddressesOrderId (20141029172700)
+  [1m[35m (2.9ms)[0m  ALTER TABLE `gemgento_addresses` DROP `order_id`
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141029172700')
+  [1m[36m (0.3ms)[0m  [1mCOMMIT[0m
+Migrating to RenameGemgentoAddressesUserAddressIdToMagentoId (20141029172836)
+  [1m[35m (5.0ms)[0m  ALTER TABLE `gemgento_addresses` CHANGE `user_address_id` `magento_id` int(11) DEFAULT NULL
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141029172836')
+  [1m[36m (0.8ms)[0m  [1mCOMMIT[0m
+Migrating to RenameGemgentoOrdersIdToMagentoId (20141030150545)
+  [1m[35m (4.0ms)[0m  ALTER TABLE `gemgento_orders` CHANGE `order_id` `magento_id` int(11) DEFAULT NULL
+  [1m[36m (0.0ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141030150545')
+  [1m[36m (0.8ms)[0m  [1mCOMMIT[0m
+Migrating to RemoveOrderIdFromGemgentoQuotes (20141030204444)
+  [1m[35m (4.4ms)[0m  ALTER TABLE `gemgento_quotes` DROP `order_id`
+  [1m[36m (0.2ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.3ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141030204444')
+  [1m[36m (1.0ms)[0m  [1mCOMMIT[0m
+Migrating to RemoveUserIdFromGemgentoAddresses (20141030205035)
+  [1m[35m (3.0ms)[0m  ALTER TABLE `gemgento_addresses` DROP `user_id`
+  [1m[36m (0.0ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141030205035')
+  [1m[36m (0.2ms)[0m  [1mCOMMIT[0m
+Migrating to RenameGemgentoShipmentItemOrderItemToLineItem (20141119155605)
+  [1m[35m (6.9ms)[0m  ALTER TABLE `gemgento_shipment_items` CHANGE `order_item_id` `line_item_id` int(11) DEFAULT NULL
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.2ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141119155605')
+  [1m[36m (1.2ms)[0m  [1mCOMMIT[0m
+Migrating to AddIsInUseToGemgentoSavedCreditCards (20141121162052)
+  [1m[35m (4.7ms)[0m  ALTER TABLE `gemgento_saved_credit_cards` ADD `is_in_use` tinyint(1) DEFAULT 0
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20141121162052')
+  [1m[36m (0.8ms)[0m  [1mCOMMIT[0m
+Migrating to AddCouponCodesAndGiftvoucherCodesToGemgentoQuote (20141204151855)
+  [1m[35m (3.1ms)[0m  ALTER TABLE `gemgento_quotes` ADD `coupon_codes` text
+  [1m[36m (7.5ms)[0m  [1mALTER TABLE `gemgento_quotes` ADD `gift_card_codes` text[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20141204151855')[0m
+  [1m[35m (0.5ms)[0m  COMMIT
+Migrating to CreateGemgentoWishlistItems (20150128151227)
+  [1m[36m (2.2ms)[0m  [1mCREATE TABLE `gemgento_wishlist_items` (`id` int(11) auto_increment PRIMARY KEY, `product_id` int(11), `user_id` int(11), `created_at` datetime, `updated_at` datetime) ENGINE=InnoDB[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20150128151227')[0m
+  [1m[35m (0.6ms)[0m  COMMIT
+Migrating to CreateGemgentoBundleOption (20150223161345)
+  [1m[36m (1.7ms)[0m  [1mCREATE TABLE `gemgento_bundle_options` (`id` int(11) auto_increment PRIMARY KEY, `product_id` int(11), `magento_id` int(11), `name` varchar(255), `input_type` int(11), `is_required` tinyint(1) DEFAULT 1, `position` int(11), `created_at` datetime, `updated_at` datetime,  INDEX `index_gemgento_bundle_options_on_product_id`  (`product_id`) ) ENGINE=InnoDB[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20150223161345')[0m
+  [1m[35m (0.2ms)[0m  COMMIT
+Migrating to CreateGemgentoBundleItem (20150223161532)
+  [1m[36m (2.1ms)[0m  [1mCREATE TABLE `gemgento_bundle_items` (`id` int(11) auto_increment PRIMARY KEY, `bundle_option_id` int(11), `product_id` int(11), `magento_id` int(11), `price_type` int(11), `price_value` float, `default_quantity` float, `is_user_defined_quantity` tinyint(1) DEFAULT 1, `position` int(11), `is_default` tinyint(1), `created_at` datetime, `updated_at` datetime,  INDEX `index_gemgento_bundle_items_on_bundle_option_id`  (`bundle_option_id`) ,  INDEX `index_gemgento_bundle_items_on_product_id`  (`product_id`) ) ENGINE=InnoDB[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20150223161532')[0m
+  [1m[35m (0.4ms)[0m  COMMIT
+Migrating to CreateGemgentoLineItemOptions (20150302154059)
+  [1m[36m (3.1ms)[0m  [1mCREATE TABLE `gemgento_line_item_options` (`id` int(11) auto_increment PRIMARY KEY, `line_item_id` int(11), `bundle_item_id` int(11), `quantity` float,  INDEX `index_gemgento_line_item_options_on_line_item_id`  (`line_item_id`) ,  INDEX `index_gemgento_line_item_options_on_bundle_item_id`  (`bundle_item_id`) ) ENGINE=InnoDB[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20150302154059')[0m
+  [1m[35m (1.3ms)[0m  COMMIT
+Migrating to CreateGemgentoPriceTier (20150616203244)
+  [1m[36m (2.4ms)[0m  [1mCREATE TABLE `gemgento_price_tiers` (`id` int(11) auto_increment PRIMARY KEY, `product_id` int(11), `store_id` int(11), `user_group_id` int(11), `quantity` float, `price` float,  INDEX `index_gemgento_price_tiers_on_product_id`  (`product_id`) ,  INDEX `index_gemgento_price_tiers_on_store_id`  (`store_id`) ,  INDEX `index_gemgento_price_tiers_on_user_group_id`  (`user_group_id`) ) ENGINE=InnoDB[0m
+  [1m[35m (0.1ms)[0m  BEGIN
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `schema_migrations` (`version`) VALUES ('20150616203244')[0m
+  [1m[35m (0.7ms)[0m  COMMIT
+Migrating to ConvertFloatToDecimalOnGemgentoPriceTiers (20150623204331)
+  [1m[36m (2.9ms)[0m  [1mALTER TABLE `gemgento_price_tiers` CHANGE `price` `price` decimal(5,2) DEFAULT NULL[0m
+  [1m[35m (4.2ms)[0m  ALTER TABLE `gemgento_price_tiers` CHANGE `quantity` `quantity` decimal(5,2) DEFAULT NULL
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35mSQL (0.2ms)[0m  INSERT INTO `schema_migrations` (`version`) VALUES ('20150623204331')
+  [1m[36m (1.2ms)[0m  [1mCOMMIT[0m
+  [1m[35mActiveRecord::SchemaMigration Load (0.2ms)[0m  SELECT `schema_migrations`.* FROM `schema_migrations`
+  [1m[36m (0.2ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'active_admin_comments'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `active_admin_comments`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'admin_users'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `admin_users`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_addresses'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_addresses`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_api_jobs'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_api_jobs`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_asset_files'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_asset_files`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_asset_types'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_asset_types`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_assets'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_assets`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_assets_asset_types'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_assets_asset_types`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_attribute_set_attributes'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_attribute_set_attributes`
+  [1m[36m (0.2ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_bundle_items'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_bundle_items`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_bundle_options'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_bundle_options`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_categories'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_categories`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_categories_stores'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_categories_stores`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_configurable_attributes'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_configurable_attributes`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_configurable_simple_relations'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_configurable_simple_relations`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_countries'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_countries`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_gift_messages'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_gift_messages`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_image_imports'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_image_imports`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_inventories'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_inventories`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_inventory_imports'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_inventory_imports`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_line_item_options'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_line_item_options`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_line_items'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_line_items`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_magento_responses'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_magento_responses`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_order_statuses'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_order_statuses`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_orders'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_orders`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_orders_recurring_profiles'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_orders_recurring_profiles`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_payments'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_payments`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_price_rules'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_price_rules`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_price_rules_stores'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_price_rules_stores`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_price_rules_user_groups'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_price_rules_user_groups`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_price_tiers'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_price_tiers`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_product_attribute_options'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_product_attribute_options`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_product_attribute_sets'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_product_attribute_sets`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_product_attribute_values'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_product_attribute_values`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_product_attributes'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_product_attributes`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_product_categories'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_product_categories`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_product_imports'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_product_imports`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_product_imports_configurable_attributes'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_product_imports_configurable_attributes`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_products'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_products`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_products_tags'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_products_tags`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_quotes'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_quotes`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_recurring_profiles'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_recurring_profiles`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_regions'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_regions`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_relation_types'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_relation_types`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_relations'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_relations`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_saved_credit_cards'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_saved_credit_cards`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_sessions'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_sessions`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_shipment_comments'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_shipment_comments`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_shipment_items'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_shipment_items`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_shipment_tracks'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_shipment_tracks`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_shipments'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_shipments`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_shopify_adapters'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_shopify_adapters`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_stock_notifications'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_stock_notifications`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_store_tags'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_store_tags`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_stores'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_stores`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_stores_products'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_stores_products`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_stores_users'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_stores_users`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_subscribers'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_subscribers`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_syncs'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_syncs`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_tags'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_tags`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_user_groups'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_user_groups`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_users'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_users`
+  [1m[36m (0.1ms)[0m  [1mSELECT fk.referenced_table_name as 'to_table'
+      ,fk.referenced_column_name as 'primary_key'
+      ,fk.column_name as 'column'
+      ,fk.constraint_name as 'name'
+FROM information_schema.key_column_usage fk
+WHERE fk.referenced_column_name is not null
+  AND fk.table_schema = 'gemgento_test'
+  AND fk.table_name = 'gemgento_wishlist_items'
+[0m
+  [1m[35m (0.1ms)[0m  SHOW CREATE TABLE `gemgento_wishlist_items`
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.2ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `gemgento_product_attribute_sets` (`name`, `created_at`, `updated_at`) VALUES ('default attribute set', '2015-06-29 17:50:11', '2015-06-29 17:50:11')[0m
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36mGemgento::Store Load (0.2ms)[0m  [1mSELECT  `gemgento_stores`.* FROM `gemgento_stores` WHERE (`gemgento_stores`.`code` != 'admin')  ORDER BY `gemgento_stores`.`id` ASC LIMIT 1[0m
+  [1m[35mGemgento::ProductAttribute Load (0.2ms)[0m  SELECT  `gemgento_product_attributes`.* FROM `gemgento_product_attributes` WHERE `gemgento_product_attributes`.`deleted_at` IS NULL AND `gemgento_product_attributes`.`code` = 'visiblity=' LIMIT 1
+  [1m[36m (1.7ms)[0m  [1mROLLBACK[0m
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO `gemgento_product_attribute_sets` (`name`, `created_at`, `updated_at`) VALUES ('default attribute set', '2015-06-29 17:50:37', '2015-06-29 17:50:37')[0m
+  [1m[35m (0.0ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mGemgento::Product Exists (0.2ms)[0m  SELECT  1 AS one FROM `gemgento_products` WHERE (`gemgento_products`.`sku` = BINARY '157077775-6' AND `gemgento_products`.`deleted_at` IS NULL) LIMIT 1
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `gemgento_products` (`magento_type`, `sku`, `product_attribute_set_id`, `sync_needed`, `created_at`, `updated_at`) VALUES ('simple', '157077775-6', '2', 0, '2015-06-29 17:50:37', '2015-06-29 17:50:37')[0m
+  [1m[35m (0.5ms)[0m  SELECT `gemgento_categories`.`id` FROM `gemgento_categories` INNER JOIN `gemgento_product_categories` ON `gemgento_categories`.`id` = `gemgento_product_categories`.`category_id` WHERE `gemgento_categories`.`deleted_at` IS NULL AND `gemgento_product_categories`.`product_id` = 1  ORDER BY `gemgento_categories`.`position` ASC, `gemgento_product_categories`.`category_id` ASC, `gemgento_product_categories`.`position` ASC, `gemgento_product_categories`.`product_id` ASC, `gemgento_product_categories`.`id` ASC
+  [1m[36mSQL (0.3ms)[0m  [1mUPDATE `gemgento_products` INNER JOIN `gemgento_configurable_simple_relations` ON `gemgento_products`.`id` = `gemgento_configurable_simple_relations`.`configurable_product_id` SET `gemgento_products`.`updated_at` = '2015-06-29 17:50:37' WHERE `gemgento_configurable_simple_relations`.`simple_product_id` = 1[0m
+  [1m[35m (0.3ms)[0m  SELECT DISTINCT `gemgento_products`.`id` FROM `gemgento_products` INNER JOIN `gemgento_configurable_simple_relations` ON `gemgento_products`.`id` = `gemgento_configurable_simple_relations`.`configurable_product_id` WHERE `gemgento_configurable_simple_relations`.`simple_product_id` = 1
+  [1m[36m (0.2ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.3ms)[0m  [1mINSERT INTO `gemgento_stores` (`code`, `name`, `created_at`, `updated_at`) VALUES ('default', 'Default Store', '2015-06-29 17:50:37', '2015-06-29 17:50:37')[0m
+Mysql2::Error: Field 'magento_id' doesn't have a default value: INSERT INTO `gemgento_stores` (`code`, `name`, `created_at`, `updated_at`) VALUES ('default', 'Default Store', '2015-06-29 17:50:37', '2015-06-29 17:50:37')
+  [1m[35m (0.1ms)[0m  ROLLBACK TO SAVEPOINT active_record_1
+  [1m[36m (2.5ms)[0m  [1mROLLBACK[0m
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `gemgento_product_attribute_sets` (`name`, `created_at`, `updated_at`) VALUES ('default attribute set', '2015-06-29 17:51:12', '2015-06-29 17:51:12')[0m
+  [1m[35m (0.0ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mGemgento::Product Exists (0.2ms)[0m  SELECT  1 AS one FROM `gemgento_products` WHERE (`gemgento_products`.`sku` = BINARY '893535677-8' AND `gemgento_products`.`deleted_at` IS NULL) LIMIT 1
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `gemgento_products` (`magento_type`, `sku`, `product_attribute_set_id`, `sync_needed`, `created_at`, `updated_at`) VALUES ('simple', '893535677-8', '3', 0, '2015-06-29 17:51:12', '2015-06-29 17:51:12')[0m
+  [1m[35m (0.2ms)[0m  SELECT `gemgento_categories`.`id` FROM `gemgento_categories` INNER JOIN `gemgento_product_categories` ON `gemgento_categories`.`id` = `gemgento_product_categories`.`category_id` WHERE `gemgento_categories`.`deleted_at` IS NULL AND `gemgento_product_categories`.`product_id` = 2  ORDER BY `gemgento_categories`.`position` ASC, `gemgento_product_categories`.`category_id` ASC, `gemgento_product_categories`.`position` ASC, `gemgento_product_categories`.`product_id` ASC, `gemgento_product_categories`.`id` ASC
+  [1m[36mSQL (0.3ms)[0m  [1mUPDATE `gemgento_products` INNER JOIN `gemgento_configurable_simple_relations` ON `gemgento_products`.`id` = `gemgento_configurable_simple_relations`.`configurable_product_id` SET `gemgento_products`.`updated_at` = '2015-06-29 17:51:12' WHERE `gemgento_configurable_simple_relations`.`simple_product_id` = 2[0m
+  [1m[35m (0.2ms)[0m  SELECT DISTINCT `gemgento_products`.`id` FROM `gemgento_products` INNER JOIN `gemgento_configurable_simple_relations` ON `gemgento_products`.`id` = `gemgento_configurable_simple_relations`.`configurable_product_id` WHERE `gemgento_configurable_simple_relations`.`simple_product_id` = 2
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO `gemgento_stores` (`code`, `name`, `magento_id`, `created_at`, `updated_at`) VALUES ('default', 'Default Store', 1, '2015-06-29 17:51:12', '2015-06-29 17:51:12')[0m
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `gemgento_price_tiers` (`product_id`, `store_id`, `quantity`, `price`) VALUES (2, 2, 10.0, 10.0)
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (2.8ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO `gemgento_product_attribute_sets` (`name`, `created_at`, `updated_at`) VALUES ('default attribute set', '2015-06-29 17:52:04', '2015-06-29 17:52:04')[0m
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mGemgento::Product Exists (0.2ms)[0m  SELECT  1 AS one FROM `gemgento_products` WHERE (`gemgento_products`.`sku` = BINARY '279063244-8' AND `gemgento_products`.`deleted_at` IS NULL) LIMIT 1
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `gemgento_products` (`magento_type`, `sku`, `product_attribute_set_id`, `sync_needed`, `created_at`, `updated_at`) VALUES ('simple', '279063244-8', '4', 0, '2015-06-29 17:52:04', '2015-06-29 17:52:04')[0m
+  [1m[35m (0.4ms)[0m  SELECT `gemgento_categories`.`id` FROM `gemgento_categories` INNER JOIN `gemgento_product_categories` ON `gemgento_categories`.`id` = `gemgento_product_categories`.`category_id` WHERE `gemgento_categories`.`deleted_at` IS NULL AND `gemgento_product_categories`.`product_id` = 3  ORDER BY `gemgento_categories`.`position` ASC, `gemgento_product_categories`.`category_id` ASC, `gemgento_product_categories`.`position` ASC, `gemgento_product_categories`.`product_id` ASC, `gemgento_product_categories`.`id` ASC
+  [1m[36mSQL (0.1ms)[0m  [1mUPDATE `gemgento_products` INNER JOIN `gemgento_configurable_simple_relations` ON `gemgento_products`.`id` = `gemgento_configurable_simple_relations`.`configurable_product_id` SET `gemgento_products`.`updated_at` = '2015-06-29 17:52:04' WHERE `gemgento_configurable_simple_relations`.`simple_product_id` = 3[0m
+  [1m[35m (0.2ms)[0m  SELECT DISTINCT `gemgento_products`.`id` FROM `gemgento_products` INNER JOIN `gemgento_configurable_simple_relations` ON `gemgento_products`.`id` = `gemgento_configurable_simple_relations`.`configurable_product_id` WHERE `gemgento_configurable_simple_relations`.`simple_product_id` = 3
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `gemgento_stores` (`code`, `name`, `magento_id`, `created_at`, `updated_at`) VALUES ('default', 'Default Store', 1, '2015-06-29 17:52:04', '2015-06-29 17:52:04')[0m
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `gemgento_price_tiers` (`product_id`, `store_id`, `quantity`, `price`) VALUES (3, 3, 10.0, 10.0)
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (4.1ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.2ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (1.2ms)[0m  [1mINSERT INTO `gemgento_product_attribute_sets` (`name`, `created_at`, `updated_at`) VALUES ('default attribute set', '2015-06-29 17:52:09', '2015-06-29 17:52:09')[0m
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.2ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mGemgento::Product Exists (0.6ms)[0m  SELECT  1 AS one FROM `gemgento_products` WHERE (`gemgento_products`.`sku` = BINARY '070016954-7' AND `gemgento_products`.`deleted_at` IS NULL) LIMIT 1
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO `gemgento_products` (`magento_type`, `sku`, `product_attribute_set_id`, `sync_needed`, `created_at`, `updated_at`) VALUES ('simple', '070016954-7', '5', 0, '2015-06-29 17:52:09', '2015-06-29 17:52:09')[0m
+  [1m[35m (0.2ms)[0m  SELECT `gemgento_categories`.`id` FROM `gemgento_categories` INNER JOIN `gemgento_product_categories` ON `gemgento_categories`.`id` = `gemgento_product_categories`.`category_id` WHERE `gemgento_categories`.`deleted_at` IS NULL AND `gemgento_product_categories`.`product_id` = 4  ORDER BY `gemgento_categories`.`position` ASC, `gemgento_product_categories`.`category_id` ASC, `gemgento_product_categories`.`position` ASC, `gemgento_product_categories`.`product_id` ASC, `gemgento_product_categories`.`id` ASC
+  [1m[36mSQL (0.2ms)[0m  [1mUPDATE `gemgento_products` INNER JOIN `gemgento_configurable_simple_relations` ON `gemgento_products`.`id` = `gemgento_configurable_simple_relations`.`configurable_product_id` SET `gemgento_products`.`updated_at` = '2015-06-29 17:52:09' WHERE `gemgento_configurable_simple_relations`.`simple_product_id` = 4[0m
+  [1m[35m (0.1ms)[0m  SELECT DISTINCT `gemgento_products`.`id` FROM `gemgento_products` INNER JOIN `gemgento_configurable_simple_relations` ON `gemgento_products`.`id` = `gemgento_configurable_simple_relations`.`configurable_product_id` WHERE `gemgento_configurable_simple_relations`.`simple_product_id` = 4
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `gemgento_stores` (`code`, `name`, `magento_id`, `created_at`, `updated_at`) VALUES ('default', 'Default Store', 1, '2015-06-29 17:52:09', '2015-06-29 17:52:09')[0m
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `gemgento_price_tiers` (`product_id`, `store_id`, `quantity`, `price`) VALUES (4, 4, 10.0, 10.0)
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.9ms)[0m  ROLLBACK
+  [1m[36m (0.1ms)[0m  [1mBEGIN[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.2ms)[0m  [1mINSERT INTO `gemgento_product_attribute_sets` (`name`, `created_at`, `updated_at`) VALUES ('default attribute set', '2015-06-29 17:52:20', '2015-06-29 17:52:20')[0m
+  [1m[35m (0.0ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mGemgento::Product Exists (0.2ms)[0m  SELECT  1 AS one FROM `gemgento_products` WHERE (`gemgento_products`.`sku` = BINARY '319122891-8' AND `gemgento_products`.`deleted_at` IS NULL) LIMIT 1
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `gemgento_products` (`magento_type`, `sku`, `product_attribute_set_id`, `sync_needed`, `created_at`, `updated_at`) VALUES ('simple', '319122891-8', '6', 0, '2015-06-29 17:52:20', '2015-06-29 17:52:20')[0m
+  [1m[35m (0.2ms)[0m  SELECT `gemgento_categories`.`id` FROM `gemgento_categories` INNER JOIN `gemgento_product_categories` ON `gemgento_categories`.`id` = `gemgento_product_categories`.`category_id` WHERE `gemgento_categories`.`deleted_at` IS NULL AND `gemgento_product_categories`.`product_id` = 5  ORDER BY `gemgento_categories`.`position` ASC, `gemgento_product_categories`.`category_id` ASC, `gemgento_product_categories`.`position` ASC, `gemgento_product_categories`.`product_id` ASC, `gemgento_product_categories`.`id` ASC
+  [1m[36mSQL (0.2ms)[0m  [1mUPDATE `gemgento_products` INNER JOIN `gemgento_configurable_simple_relations` ON `gemgento_products`.`id` = `gemgento_configurable_simple_relations`.`configurable_product_id` SET `gemgento_products`.`updated_at` = '2015-06-29 17:52:20' WHERE `gemgento_configurable_simple_relations`.`simple_product_id` = 5[0m
+  [1m[35m (0.1ms)[0m  SELECT DISTINCT `gemgento_products`.`id` FROM `gemgento_products` INNER JOIN `gemgento_configurable_simple_relations` ON `gemgento_products`.`id` = `gemgento_configurable_simple_relations`.`configurable_product_id` WHERE `gemgento_configurable_simple_relations`.`simple_product_id` = 5
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `gemgento_stores` (`code`, `name`, `magento_id`, `created_at`, `updated_at`) VALUES ('default', 'Default Store', 1, '2015-06-29 17:52:20', '2015-06-29 17:52:20')[0m
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.1ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.1ms)[0m  INSERT INTO `gemgento_price_tiers` (`product_id`, `store_id`, `quantity`, `price`) VALUES (5, 5, 10.0, 10.0)
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (0.1ms)[0m  SAVEPOINT active_record_1
+  [1m[36mSQL (0.1ms)[0m  [1mINSERT INTO `gemgento_user_groups` (`code`, `created_at`, `updated_at`) VALUES ('General', '2015-06-29 17:52:20', '2015-06-29 17:52:20')[0m
+  [1m[35m (0.1ms)[0m  RELEASE SAVEPOINT active_record_1
+  [1m[36m (0.0ms)[0m  [1mSAVEPOINT active_record_1[0m
+  [1m[35mSQL (0.1ms)[0m  UPDATE `gemgento_price_tiers` SET `user_group_id` = 1 WHERE `gemgento_price_tiers`.`id` = 4
+  [1m[36m (0.1ms)[0m  [1mRELEASE SAVEPOINT active_record_1[0m
+  [1m[35m (2.6ms)[0m  ROLLBACK
