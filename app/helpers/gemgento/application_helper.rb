@@ -21,11 +21,6 @@ module Gemgento
       return @current_quote
     end
 
-    def create_new_quote
-      session.delete :quote
-      @current_quote = Quote.current(current_store, nil, current_user)
-    end
-
     def current_category
       @current_category ||= Category.root
     end
@@ -34,8 +29,12 @@ module Gemgento
       raise ActiveRecord::RecordNotFound
     end
 
+    # Determine if a given category is the current category or a child.
+    #
+    # @param c [Gemgento::Category]\
+    # @return [Boolean]
     def nav_category_is_active(c)
-      return (@curent_category == c or @current_category.children.include?(c)) ? true : false
+      @curent_category == c or @current_category.children.include?(c)
     end
 
     def set_layout(html_layout = nil, pjax_layout = false)
@@ -77,5 +76,24 @@ module Gemgento
 
       return asset
     end
+
+    # Get the product price for the given session
+    #
+    # @param product [Gemgento::Product]
+    # @param quantity [Float]
+    # @return [BigDecimal]
+    def product_price(product, quantity = 1.0)
+      product.price(current_user, current_store, quantity)
+    end
+
+    # Determine if a product is on sale in the given session.
+    #
+    # @param product [Gemgento::Product]
+    # @param quantity [Float]
+    # @return [Boolean]
+    def product_on_sale?(product, quantity = 1.0)
+      product.magento_type != 'giftvoucher' && product.on_sale?(current_user, current_store, quantity)
+    end
+
   end
 end

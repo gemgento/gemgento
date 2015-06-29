@@ -45,7 +45,7 @@ module Gemgento
       elsif self.options[:custom_price]
         self.options[:custom_price].to_d
       else
-        product.price(itemizable.user, itemizable.store).to_d
+        product.price(itemizable.user, itemizable.store, self.qty_ordered).to_d
       end
 
     end

@@ -1,6 +1,6 @@
 RSpec.describe Gemgento::PriceTier, type: :model do
 
-  describe 'is_valid?' do
+  describe '#is_valid?' do
 
     let(:price_tier) { FactoryGirl.build(:gemgento_price_tier, quantity: 10, price: 10) }
 
@@ -18,7 +18,7 @@ RSpec.describe Gemgento::PriceTier, type: :model do
 
   end
 
-  describe 'calculate_price' do
+  describe '#calculate_price' do
 
     let(:product) { FactoryGirl.create(:gemgento_product_with_attributes) }
     let!(:price_tier_1) { FactoryGirl.create(:gemgento_price_tier, quantity: 10, price: 10, product: product, store: Gemgento::Store.current) }

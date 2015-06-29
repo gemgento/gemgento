@@ -295,18 +295,20 @@ module Gemgento
     #
     # @param user [User]
     # @param store [Store]
+    # @param quantity [Float]
     # @return Float
-    def price(user = nil, store = nil)
-      Gemgento::Price(self, user, store).calculate
+    def price(user = nil, store = nil, quantity = 1.0)
+      Gemgento::Price.new(self, user, store, quantity).calculate
     end
 
     # Determine if product is on sale.
     #
     # @param user [User]
     # @param store [Store]
+    # @param quantity [Float]
     # @return Boolean
-    def on_sale?(user = nil, store = nil)
-      return self.attribute_value('price', store).to_f != self.price(user, store)
+    def on_sale?(user = nil, store = nil, quantity = 1.0)
+      return self.attribute_value('price', store).to_f != self.price(user, store, quantity)
     end
 
     # Get the original, non sale, price for a product.

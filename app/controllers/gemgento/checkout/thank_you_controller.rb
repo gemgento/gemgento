@@ -10,7 +10,10 @@ module Gemgento
 
     def show
       @order = @quote.order
-      create_new_quote
+
+      # create a new quote
+      session.delete :quote
+      @current_quote = Quote.current(current_store, nil, current_user)
 
       respond_with @order
     end
