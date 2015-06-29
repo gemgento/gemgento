@@ -6,7 +6,9 @@ FactoryGirl.define do
     status true
 
     after(:create) do |product|
-      product.stores << Gemgento::Store.find_or_create_by!(code: 'Default', name: 'Default Store View', magento_id: 1)
+      store = Gemgento::Store.find_or_initialize_by(magento_id: 1)
+      store.update!(code: 'Default', name: 'Default Store View')
+      product.stores << store
     end
 
     factory :gemgento_product_with_attributes do

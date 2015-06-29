@@ -23,7 +23,7 @@ module Gemgento
       price = product.attribute_value('price', store).to_f
       user_group = user.nil? ? UserGroup.find_by(magento_id: 0) : user.user_group
 
-      product.price_tiers.where(store: store).each do |price_tier|
+      product.price_tiers.where(store: store).where('quantity <= ?', quantity).each do |price_tier|
         next unless price_tier.is_valid? quantity, user_group
         price = price_tier.price if price_tier.price < price
       end
