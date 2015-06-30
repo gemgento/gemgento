@@ -1,3 +1,5 @@
+require 'rails_helper'
+
 RSpec.describe Gemgento::PriceTier, type: :model do
 
   describe '#is_valid?' do

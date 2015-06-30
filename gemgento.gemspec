@@ -39,6 +39,6 @@ Gem::Specification.new do |gem|
   # testing
   gem.add_development_dependency 'rspec-rails'
   gem.add_development_dependency 'factory_girl_rails'
-  gem.add_development_dependency 'faker'
+  gem.add_development_dependency 'faker', '~> 1.4.3'
   gem.test_files = Dir['spec/**/*']
 end
