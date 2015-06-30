@@ -14,6 +14,7 @@ module Gemgento
       return gift_price if product.magento_type == 'giftvoucher'
 
       prices = []
+      prices << product.original_price(store)
       prices << product.attribute_value('special_price', store).to_f if has_special?
       prices << Gemgento::PriceRule.calculate_price(product, user, store)
       prices << Gemgento::PriceTier.calculate_price(product, quantity, user, store)

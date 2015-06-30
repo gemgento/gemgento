@@ -14,7 +14,7 @@ module Gemgento
     # @param quantity [Float]
     # @param user_group [Gemgento::UserGroup]
     def is_valid?(quantity, user_group)
-      return quantity >= self.quantity && user_group == self.user_group
+      return quantity >= self.quantity && (self.user_group.nil? || user_group == self.user_group)
     end
 
     # @param product [Gemgento::Product]
