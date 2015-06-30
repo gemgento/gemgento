@@ -3,9 +3,9 @@ module Gemgento
 
     attr_accessor :product, :store, :user, :quantity
 
-    def initialize(product, user, store, quantity = 1.0)
+    def initialize(product, user, store = nil, quantity = 1.0)
       @product = product
-      @store = store
+      @store = store || Gemgento::Store.current
       @user = user
       @quantity = quantity
     end
