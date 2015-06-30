@@ -2,9 +2,9 @@ module Gemgento
 
   # @author Gemgento LLC
   class Address < ActiveRecord::Base
-    belongs_to :addressable, polymorphic: true, class_name: 'Address'
-    belongs_to :country, class_name: 'Country'
-    belongs_to :region, class_name: 'Region'
+    belongs_to :addressable, polymorphic: true, class_name: 'Gemgento::Address'
+    belongs_to :country, class_name: 'Gemgento::Country'
+    belongs_to :region, class_name: 'Gemgento::Region'
 
     has_one :shopify_adapter, class_name: 'Adapter::ShopifyAdapter', as: :gemgento_model
 
