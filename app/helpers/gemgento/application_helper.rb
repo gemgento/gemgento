@@ -84,7 +84,7 @@ module Gemgento
     # @return [BigDecimal]
     def product_price(product, quantity = 1.0)
       user_group = current_user ? current_user.user_group : nil
-      product.price(current_user, user_group, quantity)
+      product.price(user_group, current_store, quantity)
     end
 
     # Determine if a product is on sale in the given session.
