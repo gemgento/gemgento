@@ -431,7 +431,7 @@ module Gemgento
 
       Store.all.each do |store|
         UserGroup.all.each do |user_group|
-          if self.has_special?(store, user_group)
+          if Price.new(self, user_group, store)
             date =  self.attribute_value('special_to_date', store)
           else
             date =  PriceRule.first_to_expire(self, user_group, store)
