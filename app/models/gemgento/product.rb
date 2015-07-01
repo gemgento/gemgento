@@ -293,22 +293,22 @@ module Gemgento
 
     # Get the product price.
     #
-    # @param user [User]
+    # @param user_group [Gemgento::UserGroup]
     # @param store [Store]
     # @param quantity [Float]
     # @return Float
-    def price(user = nil, store = nil, quantity = 1.0)
-      Gemgento::Price.new(self, user, store, quantity).calculate
+    def price(user_group = nil, store = nil, quantity = 1.0)
+      Gemgento::Price.new(self, user_group, store, quantity).calculate
     end
 
     # Determine if product is on sale.
     #
-    # @param user [User]
+    # @param user_group [Gemgento::UserGroup]
     # @param store [Store]
     # @param quantity [Float]
     # @return Boolean
-    def on_sale?(user = nil, store = nil, quantity = 1.0)
-      return self.attribute_value('price', store).to_f != self.price(user, store, quantity)
+    def on_sale?(user_group = nil, store = nil, quantity = 1.0)
+      return self.attribute_value('price', store).to_f != self.price(user_group, store, quantity)
     end
 
     # Get the original, non sale, price for a product.
@@ -431,7 +431,7 @@ module Gemgento
 
       Store.all.each do |store|
         UserGroup.all.each do |user_group|
-          if self.has_special?(store)
+          if self.has_special?(store, user_group)
             date =  self.attribute_value('special_to_date', store)
           else
             date =  PriceRule.first_to_expire(self, user_group, store)

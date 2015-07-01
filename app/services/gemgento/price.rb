@@ -1,12 +1,16 @@
 module Gemgento
   class Price
 
-    attr_accessor :product, :store, :user, :quantity
+    attr_accessor :product, :store, :user_group, :quantity
 
-    def initialize(product, user, store = nil, quantity = 1.0)
+    # @param product [Gemgento::Product]
+    # @param user_group [Gemgento::UserGroup]
+    # @param store [Gemgento::Store]
+    # @param quantity [Float]
+    def initialize(product, user_group = nil, store = nil, quantity = 1.0)
       @product = product
       @store = store || Gemgento::Store.current
-      @user = user
+      @user_group = user_group
       @quantity = quantity
     end
 
@@ -16,8 +20,8 @@ module Gemgento
       prices = []
       prices << product.original_price(store)
       prices << product.attribute_value('special_price', store).to_f if has_special?
-      prices << Gemgento::PriceRule.calculate_price(product, user, store)
-      prices << Gemgento::PriceTier.calculate_price(product, quantity, user, store)
+      prices << Gemgento::PriceRule.calculate_price(product, user_group, store)
+      prices << Gemgento::PriceTier.calculate_price(product, quantity, user_group, store)
 
       return prices.min
     end
