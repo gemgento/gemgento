@@ -23,7 +23,6 @@ module Gemgento
 
     attr_accessor :subscribe
 
-    after_find :set_subscribe
     before_validation :manage_subscribe
 
     before_create :magento_create, if: -> { magento_id.nil? }
