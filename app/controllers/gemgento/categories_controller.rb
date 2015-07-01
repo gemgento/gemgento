@@ -8,11 +8,7 @@ module Gemgento
 
     def show
       @current_category = Gemgento::Category.active.find_by('id = ? OR url_key = ?', params[:id], params[:id])
-      @seasonal_categories = Gemgento::Category.where(url_key: %w[accessories denim ready-to-wear victoria-victoria-beckham])
       @products = current_category.products.active.catalog_visible.page(params[:page]).per(params[:per])
     end
   end
 end
-
-
-
