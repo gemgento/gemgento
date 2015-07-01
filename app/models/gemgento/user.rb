@@ -107,8 +107,8 @@ module Gemgento
       return result
     end
 
-    def set_subscribe
-      self.subscribe = self.is_subscriber?
+    def subscribe
+      @subscribe ||= self.is_subscriber?
     end
 
     def manage_subscribe
