@@ -3,9 +3,9 @@ require 'rails_helper'
 RSpec.describe Gemgento::Price do
 
   before(:each) do
-    @user = FactoryGirl.create(:gemgento_user)
+    @user_group = FactoryGirl.create(:gemgento_user_group)
     @product = FactoryGirl.create(:gemgento_product_with_attributes)
-    @price = Gemgento::Price.new(@product, @user)
+    @price = Gemgento::Price.new(@product, @user_group)
   end
 
   describe '#has_special?' do

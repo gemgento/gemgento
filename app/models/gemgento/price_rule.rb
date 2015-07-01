@@ -15,13 +15,13 @@ module Gemgento
     # Calculate a product price based on PriceRules.
     #
     # @param product [Gemgento::Product]
-    # @param user [Gemgento::User]
+    # @param user_group [Gemgento::UserGroup]
     # @param store [Gemgento::Store]
     # @return [Float]
-    def self.calculate_price(product, user = nil, store = nil)
-      store = Store.current if store.nil?
+    def self.calculate_price(product, user_group = nil, store = nil)
+      store ||= Store.current
       price = product.attribute_value('price', store).to_f
-      user_group = user.nil? ? UserGroup.find_by(magento_id: 0) : user.user_group
+      user_group ||= UserGroup.find_by(magento_id: 0)
 
       PriceRule.active.each do |price_rule|
         if price_rule.is_valid?(product, user_group, store)

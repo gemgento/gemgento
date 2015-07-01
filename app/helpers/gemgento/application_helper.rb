@@ -83,7 +83,8 @@ module Gemgento
     # @param quantity [Float]
     # @return [BigDecimal]
     def product_price(product, quantity = 1.0)
-      product.price(current_user, current_store, quantity)
+      user_group = current_user ? current_user.user_group : nil
+      product.price(user_group, current_store, quantity)
     end
 
     # Determine if a product is on sale in the given session.
@@ -92,7 +93,8 @@ module Gemgento
     # @param quantity [Float]
     # @return [Boolean]
     def product_on_sale?(product, quantity = 1.0)
-      product.magento_type != 'giftvoucher' && product.on_sale?(current_user, current_store, quantity)
+      user_group = current_user ? current_user.user_group : nil
+      product.magento_type != 'giftvoucher' && product.on_sale?(user_group, current_store, quantity)
     end
 
   end
