@@ -1,3 +1,5 @@
+#= require active_admin/base
+
 $ ->
 
   # style select tags
