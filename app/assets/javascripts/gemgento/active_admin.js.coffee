@@ -1,6 +1,6 @@
-#= require active_admin/base
+$ ->
 
-$(document).ready ->
+  # style select tags
   $('select').wrap("<div class='styled_select'></div>")
 
   if $('body').hasClass('logged_out') && $('#login h2').text() != 'Forgot your password?'
@@ -22,7 +22,7 @@ $(document).ready ->
     $('#login a').css 'text-align', 'center'
     $('#login a').css 'width', '100%'
 
-jQuery ->
+
   if $('body').hasClass('admin_product_positions')
     $('#feed-blocks-admin').sortable()
     $('#feed-blocks-admin').disableSelection()
