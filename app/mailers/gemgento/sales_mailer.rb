@@ -3,7 +3,7 @@ module Gemgento
     default from: 'sales@gemgento.com'
 
     def order_email(recipients, from, order_source)
-      @order = Gemgento::Order.find_by(magento_id: order_source[:entity_id])
+      @order = Gemgento::Order.find_or_fetch(order_source[:increment_id])
       @order_source = order_source
 
       mail(
@@ -16,7 +16,7 @@ module Gemgento
     end
 
     def invoice_email(recipients, from, order_source, invoice_source)
-      @order = Gemgento::Order.find_by(magento_id: order_source[:entity_id])
+      @order = Gemgento::Order.find_or_fetch(order_source[:increment_id])
       @order_source = order_source
       @invoice_source = invoice_source
 
@@ -30,7 +30,7 @@ module Gemgento
     end
 
     def shipment_email(recipients, from, order_source, shipment_source)
-      @order = Gemgento::Order.find_by(magento_id: order_source[:entity_id])
+      @order = Gemgento::Order.find_or_fetch(order_source[:increment_id])
       @order_source = order_source
       @shipment_source = shipment_source
 
@@ -44,7 +44,7 @@ module Gemgento
     end
 
     def credit_memo_email(recipients, from, order_source, credit_memo_source)
-      @order = Gemgento::Order.find_by(magento_id: order_source[:entity_id])
+      @order = Gemgento::Order.find_or_fetch(order_source[:increment_id])
       @order_source = order_source
       @credit_memo_source = credit_memo_source
 
