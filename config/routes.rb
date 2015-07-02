@@ -95,7 +95,7 @@ Gemgento::Engine.routes.draw do
     resources :user_groups, only: [:update, :destroy]
 
     # - Emails - #
-    resources :emails, only: :new
+    resources :emails, only: :create
 
     namespace :email do
       namespace :sales do
