@@ -64,6 +64,7 @@ module Gemgento
 
         sync_address(data[:shipping_address], @order.shipping_address)
         sync_address(data[:billing_address], @order.billing_address)
+        sync_payment(data[:payment]) if data[:payment]
 
         unless data[:items].nil?
           data[:items].each do |item|
@@ -184,6 +185,26 @@ module Gemgento
         end
 
         line_item
+      end
+
+      def sync_payment(source)
+        payment = Gemgento::Payment.find_or_initialize_by(magento_id: source[:parent_id])
+        payment.payable = @order
+        payment.amount_ordered = source[:amount_ordered]
+        payment.shipping_amount = source[:shipping_amount]
+        payment.base_amount_ordered = source[:base_amount_ordered]
+        payment.base_shipping_amount = source[:base_shipping_amount]
+        payment.method = source[:method]
+        payment.po_number = source[:po_number]
+        payment.cc_type = source[:cc_type]
+        payment.cc_number_enc = source[:cc_number_enc]
+        payment.cc_last4 = source[:cc_last4]
+        payment.cc_owner = source[:cc_owner]
+        payment.cc_exp_month = source[:cc_exp_month]
+        payment.cc_exp_year = source[:cc_exp_year]
+        payment.cc_ss_start_month = source[:cc_ss_start_month]
+        payment.cc_ss_start_year = source[:cc_ss_start_year]
+        payment.save
       end
 
     end
