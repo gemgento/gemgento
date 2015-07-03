@@ -62,8 +62,8 @@ module Gemgento
         @order.quote = Gemgento::Quote.find_by(magento_id: data[:quote_id])
         @order.save
 
-        sync_address(data[:shipping_address], @order.shipping_address)
-        sync_address(data[:billing_address], @order.billing_address)
+        sync_address(data[:shipping_address], @order.shipping_address) if data[:shipping_address]
+        sync_address(data[:billing_address], @order.billing_address) if data[:billing_address]
         sync_payment(data[:payment]) if data[:payment]
 
         unless data[:items].nil?
