@@ -117,5 +117,22 @@ module Gemgento
       LineItem.set_callback(:destroy, :before, :destroy_magento_quote_item)
     end
 
+
+    def self.serialized_attr_accessor(*args)
+      args.each do |method_name|
+        eval "
+        def #{method_name}
+          (self.options || {})[:#{method_name}]
+        end
+        def #{method_name}=(value)
+          self.options ||= {}
+          self.options[:#{method_name}] = value
+        end
+        attr_accessor :#{method_name}
+             "
+      end
+    end
+
+
   end
 end
