@@ -128,7 +128,6 @@ module Gemgento
           self.options ||= {}
           self.options[:#{method_name}] = value
         end
-        attr_accessor :#{method_name}
              "
       end
     end
