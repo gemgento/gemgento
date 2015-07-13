@@ -16,7 +16,7 @@ module Gemgento
     # @return [Hash]
     def self.client_config
       config = {
-        wsdl: "#{Config[:magento][:url]}/index.php/api/v#{Config[:magento][:api_version]}_#{Config[:magento][:api_type]}/index/wsdl/1",
+        wsdl: wsdl_url,
         log: Config[:magento][:debug],
         raise_errors: false,
         open_timeout: 300,
@@ -28,6 +28,16 @@ module Gemgento
       end
 
       return config
+    end
+
+    # URL of the WSDL definition.  Created from settings in /config/gemgento_config.yml.
+    #
+    # @return [String]
+    def self.wsdl_url
+      url = Gemgento::Config[:magento][:url].gsub(/\/$/, '') # ensure there is no trailing slash
+      url += "/index.php/api/v#{Gemgento::Config[:magento][:api_version]}_#{Gemgento::Config[:magento][:api_type]}/index/wsdl/1"
+
+      return url
     end
 
     # Make an API call to Magento and get the response
