@@ -8,18 +8,18 @@ module Gemgento
 
     belongs_to :user_group
 
-    has_many :addresses, as: :addressable, class_name: 'Address'
-    has_many :recurring_profiles, class_name: 'RecurringProfile'
-    has_many :saved_credit_cards, class_name: 'SavedCreditCard', dependent: :destroy
-    has_many :wishlist_items
-    has_many :products, through: :wishlist_items
-
-    has_many :orders, class_name: 'Order'
-    accepts_nested_attributes_for :orders
+    has_many :addresses, as: :addressable, class_name: 'Gemgento::Address'
+    has_many :recurring_profiles, class_name: 'Gemgento::RecurringProfile'
+    has_many :saved_credit_cards, class_name: 'Gemgento::SavedCreditCard', dependent: :destroy
+    has_many :wishlist_items, class_name: 'Gemgento::WishlistItem'
+    has_many :orders, class_name: 'Gemgento::Order'
+    has_many :products, through: :wishlist_items, class_name: 'Gemgento::Product'
 
     has_one :shopify_adapter, class_name: 'Adapter::ShopifyAdapter', as: :gemgento_model
 
     has_and_belongs_to_many :stores, join_table: 'gemgento_stores_users', class_name: 'Store'
+
+    accepts_nested_attributes_for :orders
 
     attr_accessor :subscribe
 
