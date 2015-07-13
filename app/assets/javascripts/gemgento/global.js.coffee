@@ -1,14 +1,11 @@
 window.App ||= {}
 
-App.remoteSubmission = ($form, onCompleteCallBack) ->
+App.remoteSubmission = ($form) ->
   $.ajax
     url: $form.attr('action')
     type: $form.attr('method')
     data: $form.serialize()
     dataType: 'json'
-    complete: (result) ->
-      onCompleteCallBack(result)
-  return
 
 
 App.updateRegions = ($countrySelector, $regionSelector, $regionWrapper) ->
