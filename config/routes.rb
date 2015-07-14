@@ -105,8 +105,8 @@ Gemgento::Engine.routes.draw do
   end
 
   # - Gemgento Resources - #
-  resources :products, only: [:index, :show]
-  resources :categories, :orders, :subscribers
+  resources :products, :categories, only: [:index, :show]
+  resources :orders, :subscribers
   resources :countries, :regions, only: [:index, :show]
   resource :search, only: [:show], controller: 'gemgento/search'
   resources :stock_notifications, only: :create

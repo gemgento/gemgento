@@ -454,7 +454,7 @@ module Gemgento
     #
     # @return [Gemgento::Category]
     def current_category
-      (self.categories.active.navigation & Gemgento::Category.active.navigation.bottom_level).first
+      @current_category ||= (self.categories.active.navigation & Gemgento::Category.active.navigation.bottom_level).first
     end
 
     private
