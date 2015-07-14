@@ -450,6 +450,13 @@ module Gemgento
       "#{self.id}-#{self.url_key}"
     end
 
+    # Determine the current category of a product based on the active navigation categories related to the product.
+    #
+    # @return [Gemgento::Category]
+    def current_category
+      (self.categories.active.navigation & Gemgento::Category.active.navigation.bottom_level).first
+    end
+
     private
 
     # Create an attribute option in Magento.
