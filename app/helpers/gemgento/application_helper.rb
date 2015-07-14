@@ -53,10 +53,6 @@ module Gemgento
       end
     end
 
-    def product_path(product)
-      "/products/#{product.url_key}"
-    end
-
     def json_options
       @json_options ||= {
           include_products: params[:include_products] ||= false,

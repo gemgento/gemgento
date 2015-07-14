@@ -446,6 +446,10 @@ module Gemgento
       self.save
     end
 
+    def to_param
+      "#{self.id}-#{self.url_key}"
+    end
+
     private
 
     # Create an attribute option in Magento.
