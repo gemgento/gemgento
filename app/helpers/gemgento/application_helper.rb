@@ -103,5 +103,23 @@ module Gemgento
       product.magento_type != 'giftvoucher' && product.on_sale?(user_group, current_store, quantity)
     end
 
+    # Get a breadcrumb trail from root to current category, not including root.
+    #
+    # @param category [Gemgento::Category]
+    # @param separator [String]
+    # @param link_options [Hash] options hash for link_to
+    def breadcrumbs(category, separator = '/', link_options = {})
+      breadcrumbs = ''
+      trail = category.heirarchy
+      trail << category
+
+      trail.each do |parent|
+        breadcrumbs += " #{separator} " unless breadcrumbs.blank? # don't add separator to first link
+        breadcrumbs += link_to(parent.name, category_path(parent), link_options)
+      end
+
+      return breadcrumbs
+    end
+
   end
 end

@@ -76,6 +76,21 @@ module Gemgento
       end
     end
 
+    # Ordered list from root to self, excluding self.
+    #
+    # @return [Array(Gemgento::Category)]
+    def hierarchy
+      parents = []
+      parent = self.parent
+
+      while parent && !parent.parent_id.nil?
+        parents << parent
+        parent = parent.parent
+      end
+
+      return parents.reverse
+    end
+
     # Get the option value and any subsequent child values as a path.
     #
     # @param category [Gemgento::Category]
