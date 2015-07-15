@@ -22,7 +22,17 @@ module Gemgento
     end
 
     def current_category
-      @current_category ||= Category.root
+      @current_category ||= begin
+        if @category
+          @category
+
+        elsif @product
+          @product.current_category
+
+        else
+          Gemgento::Category.root
+        end
+      end
     end
 
     def not_found
