@@ -6,6 +6,8 @@ module Gemgento
 
     attr_accessor :cc_number, :cc_cid, :save_card, :payment_id
 
+    before_save :set_cc_last4, unless: -> { cc_number.blank? }
+
     validates :method, :payable, presence: true
 
     REDIRECTING_PAYMENT_METHODS = {
@@ -23,6 +25,13 @@ module Gemgento
       else
         return false
       end
+    end
+
+    # Set cc_last4 to the last 4 numbers of cc_number.
+    #
+    # @return [void]
+    def set_cc_last4
+      self.cc_last4 = cc_number[-4..-1]
     end
 
   end
