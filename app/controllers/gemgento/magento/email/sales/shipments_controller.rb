@@ -9,7 +9,8 @@ module Gemgento
                 params[:data][:recipients],
                 params[:data][:sender],
                 params[:data][:order],
-                params[:data][:shipment]
+                params[:data][:shipment],
+                params[:data][:tracks]
             ).deliver
             render nothing: true
           end

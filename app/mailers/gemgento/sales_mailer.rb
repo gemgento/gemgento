@@ -29,10 +29,11 @@ module Gemgento
       ).deliver
     end
 
-    def shipment_email(recipients, from, order_source, shipment_source)
+    def shipment_email(recipients, from, order_source, shipment_source, tracks)
       @order = Gemgento::Order.find_or_fetch(order_source[:increment_id])
       @order_source = order_source
       @shipment_source = shipment_source
+      @tracks = tracks
 
       mail(
           to: recipients[:to],
