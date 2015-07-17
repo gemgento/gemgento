@@ -16,7 +16,7 @@ module Gemgento
     end
 
     def current_category_products
-      @current_category_product_ids ||= @product.current_category.products.active.catalog_visible.to_a
+      @current_category_product_ids ||= @current_category.products.active.catalog_visible.to_a
     end
 
   end
