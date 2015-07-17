@@ -4,7 +4,8 @@ module Gemgento
     respond_to :json, :html
 
     def show
-      @product = Product.find(params[:id])
+      @product = Gemgento::Product.find(params[:id])
+      @current_category = @product.current_category(session[:category_id])
     end
 
   end
