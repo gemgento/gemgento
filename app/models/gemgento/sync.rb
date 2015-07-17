@@ -5,18 +5,18 @@ module Gemgento
     scope :active, -> { where(is_complete: false) }
 
     def self.locations
-      API::SOAP::Directory::Country.fetch_all
-      API::SOAP::Directory::Region.fetch_all
+      Gemgento::API::SOAP::Directory::Country.fetch_all
+      Gemgento::API::SOAP::Directory::Region.fetch_all
     end
 
     def self.stores
-      API::SOAP::Miscellaneous::Store.fetch_all
+      Gemgento::API::SOAP::Miscellaneous::Store.fetch_all
     end
 
     def self.categories
       current = create_current('categories')
 
-      API::SOAP::Catalog::Category.fetch_all
+      Gemgento::API::SOAP::Catalog::Category.fetch_all
 
       current.complete
     end
@@ -24,9 +24,9 @@ module Gemgento
     def self.attributes
       current = create_current('attributes')
 
-      API::SOAP::Catalog::ProductAttributeSet.fetch_all
-      API::SOAP::Catalog::ProductAttribute.fetch_all
-      API::SOAP::Catalog::ProductAttributeMedia.fetch_all_media_types
+      Gemgento::API::SOAP::Catalog::ProductAttributeSet.fetch_all
+      Gemgento::API::SOAP::Catalog::ProductAttribute.fetch_all
+      Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch_all_media_types
 
       current.complete
     end
@@ -36,15 +36,15 @@ module Gemgento
       last_updated = last_updated.created_at.to_s(:db) unless last_updated.nil?
       current = create_current('products')
 
-      API::SOAP::Catalog::Product.fetch_all last_updated
-      API::SOAP::Catalog::Category.set_product_categories
+      Gemgento::API::SOAP::Catalog::Product.fetch_all last_updated
+      Gemgento::API::SOAP::Catalog::Category.set_product_categories
 
       current.complete
     end
 
     def self.inventory
       current = create_current('inventory')
-      API::SOAP::CatalogInventory::StockItem.fetch_all
+      Gemgento::API::SOAP::CatalogInventory::StockItem.fetch_all
       current.complete
     end
 
@@ -53,8 +53,8 @@ module Gemgento
       last_updated = last_updated.created_at.to_s(:db) unless last_updated.nil?
       current = create_current('customers')
 
-      API::SOAP::Customer::Customer.fetch_all_customer_groups
-      API::SOAP::Customer::Customer.fetch_all last_updated
+      Gemgento::API::SOAP::Customer::Customer.fetch_all_customer_groups
+      Gemgento::API::SOAP::Customer::Customer.fetch_all last_updated
 
       current.complete
     end
@@ -64,7 +64,7 @@ module Gemgento
       last_updated = last_updated.created_at.to_s(:db) unless last_updated.nil?
       current = create_current('orders')
 
-      API::SOAP::Sales::Order.fetch_all last_updated
+      Gemgento::API::SOAP::Sales::Order.fetch_all last_updated
 
       current.complete
     end
@@ -72,19 +72,19 @@ module Gemgento
     def self.everything
       current = create_current('everything')
 
-      API::SOAP::Directory::Country.fetch_all
-      API::SOAP::Directory::Region.fetch_all
-      API::SOAP::Miscellaneous::Store.fetch_all
-      API::SOAP::Catalog::Category.fetch_all
-      API::SOAP::Catalog::ProductAttributeSet.fetch_all
-      API::SOAP::Catalog::ProductAttribute.fetch_all
-      API::SOAP::Catalog::ProductAttributeMedia.fetch_all_media_types
-      API::SOAP::Catalog::Product.fetch_all
-      API::SOAP::Catalog::Category.set_product_categories
-      API::SOAP::CatalogInventory::StockItem.fetch_all
-      API::SOAP::Customer::Customer.fetch_all_customer_groups
-      API::SOAP::Customer::Customer.fetch_all
-      API::SOAP::Sales::Order.fetch_all
+      Gemgento::API::SOAP::Directory::Country.fetch_all
+      Gemgento::API::SOAP::Directory::Region.fetch_all
+      Gemgento::API::SOAP::Miscellaneous::Store.fetch_all
+      Gemgento::API::SOAP::Catalog::Category.fetch_all
+      Gemgento::API::SOAP::Catalog::ProductAttributeSet.fetch_all
+      Gemgento::API::SOAP::Catalog::ProductAttribute.fetch_all
+      Gemgento::API::SOAP::Catalog::ProductAttributeMedia.fetch_all_media_types
+      Gemgento::API::SOAP::Catalog::Product.fetch_all
+      Gemgento::API::SOAP::Catalog::Category.set_product_categories
+      Gemgento::API::SOAP::CatalogInventory::StockItem.fetch_all
+      Gemgento::API::SOAP::Customer::Customer.fetch_all_customer_groups
+      Gemgento::API::SOAP::Customer::Customer.fetch_all
+      Gemgento::API::SOAP::Sales::Order.fetch_all
 
       current.complete
     end
