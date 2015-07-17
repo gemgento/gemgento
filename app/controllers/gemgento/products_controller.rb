@@ -5,7 +5,7 @@ module Gemgento
 
     def show
       @product = Gemgento::Product.find(params[:id])
-      @current_category = @product.current_category(session[:category_id])
+      @current_category = @product.current_category(session[:category])
     end
 
   end
