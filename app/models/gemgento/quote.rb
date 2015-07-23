@@ -483,6 +483,16 @@ module Gemgento
           end
         end
 
+        # if subtotal is not zero and total is zero, we need to calculate total to ensure it should be zero.
+        # Magento may not have calculated total because of missing addresses, shipping methods, etc.
+        if totals[:total].zero? && !totals[:subtotal].zero?
+          totals[:total] += totals[:subtotal]
+          totals[:total] += totals[:shipping]
+          totals[:total] += totals[:tax]
+          totals[:total] -= totals[:gift_card]
+          totals[:total] -= totals[:discounts].values.sum
+        end
+
         # nominal shipping isn't calculated correctly, so we can set it based on known selected values
         if !totals[:nominal].has_key?(:shipping) && totals[:nominal].has_key?(:subtotal) && self.shipping_address
           if totals[:shipping] && totals[:shipping] > 0
