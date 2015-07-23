@@ -17,9 +17,18 @@ module Gemgento
             response = list(product, store)
 
             if response.success?
+              assets_to_keep = []
+
               response.body[:result][:item].each do |product_attribute_media|
-                sync_magento_to_local(product_attribute_media, product, store)
+                if asset = sync_magento_to_local(product_attribute_media, product, store)
+                  assets_to_keep << asset.id
+                end
               end
+
+              # destroy any assets that were not in the media gallery for each store
+              ::Gemgento::Asset.skip_callback(:destroy, :before, :delete_magento)
+              product.assets.where(store: store).where.not(id: assets_to_keep).destroy_all
+              ::Gemgento::Asset.set_callback(:destroy, :before, :delete_magento)
             end
           end
 
@@ -117,6 +126,7 @@ module Gemgento
           private
 
           # Save Magento product attribute set to local
+          # @return [Gemgento::Asset]
           def self.sync_magento_to_local(source, product, store)
             return false unless ::Gemgento::AssetFile.valid_url(source[:url])
 
@@ -135,6 +145,8 @@ module Gemgento
             asset_type_codes = source[:types][:item]
             asset_type_codes = [::Gemgento::MagentoApi.enforce_savon_string(asset_type_codes)] unless asset_type_codes.is_a? Array
             asset.set_types_by_codes(asset_type_codes)
+
+            return asset
           end
 
           def self.sync_magento_media_type_to_local(source, product_attribute_set)

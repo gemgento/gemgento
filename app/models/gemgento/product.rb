@@ -451,10 +451,17 @@ module Gemgento
     end
 
     # Determine the current category of a product based on the active navigation categories related to the product.
+    # A preferred category id can be specified, if this category is not found in the products navigation categories,
+    # then the lowest level navigation category is returned.
     #
+    # @param category_id [Integer] id of a preferred category to return
     # @return [Gemgento::Category]
-    def current_category
-      @current_category ||= (self.categories.active.navigation & Gemgento::Category.active.navigation.bottom_level).first
+    def current_category(category_id = nil)
+      @current_category ||= begin
+        self.categories.active.navigation.find(category_id)
+      rescue
+        (self.categories.active.navigation & Gemgento::Category.active.navigation.bottom_level).first
+      end
     end
 
     private
