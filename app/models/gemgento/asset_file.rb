@@ -13,7 +13,7 @@ module Gemgento
 
     validates_attachment_content_type :file, content_type: /\Aimage\/.*\Z/
 
-    # Check that a url is valid.
+    # Check that a url is valid.  Assumes url is pointing to Magento installation.
     #
     # @param url [String]
     # @return [Boolean]
@@ -31,6 +31,22 @@ module Gemgento
       end
 
       return res.code == '200'
+    end
+
+    # Get file from Magento.
+    #
+    # @param url [String]
+    # @return [TempFile]
+    def self.from_url(url)
+      if Gemgento::Config[:magento][:auth_username].blank?
+        open(url)
+      else
+        open(url, http_basic_authentication: [
+                    Gemgento::Config[:magento][:auth_username],
+                    Gemgento::Config[:magento][:auth_password]
+                ]
+        )
+      end
     end
 
   end

@@ -121,7 +121,7 @@ module Gemgento
                 asset.label = source[:label]
                 asset.product = product
                 asset.sync_needed = false
-                asset.set_file(URI.parse(url))
+                asset.set_file Gemgento::AssetFile.from_url(url)
                 asset.file = file
                 asset.store = store
                 asset.save
