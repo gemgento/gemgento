@@ -26,6 +26,7 @@ module Gemgento
       end
 
       res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+        http.use_ssl = uri.port == 443
         http.request(req)
       end
 
