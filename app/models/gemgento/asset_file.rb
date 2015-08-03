@@ -18,10 +18,16 @@ module Gemgento
     # @param url [String]
     # @return [Boolean]
     def self.valid_url(url)
-      url = URI.parse(url)
-      req = Net::HTTP.new(url.host, url.port)
-      req.use_ssl = (url.port == 443)
-      res = req.request_head(url.path)
+      uri = URI.parse(url)
+      req = Net::HTTP::Get.new(uri)
+
+      unless Gemgento::Config[:magento][:auth_username].blank?
+        req.basic_auth Gemgento::Config[:magento][:auth_username], Gemgento::Config[:magento][:auth_password]
+      end
+
+      res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+        http.request(req)
+      end
 
       return res.code == '200'
     end
