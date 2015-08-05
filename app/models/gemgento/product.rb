@@ -464,6 +464,20 @@ module Gemgento
       end
     end
 
+    # Check if the product is configurable.
+    #
+    # @return [Boolean]
+    def configurable?
+      magento_type == 'configurable'
+    end
+
+    # Check if the product is simple.
+    #
+    # @return [Boolean]
+    def simple?
+      magento_type == 'simple'
+    end
+
     private
 
     # Create an attribute option in Magento.
