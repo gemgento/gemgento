@@ -12,7 +12,7 @@ module Gemgento
           bcc: recipients[:bcc],
           from: from,
           subject: order_email_subject
-      ).deliver
+      )
     end
 
     def invoice_email(recipients, from, order_source, invoice_source)
@@ -26,7 +26,7 @@ module Gemgento
           bcc: recipients[:bcc],
           from: from,
           subject: invoice_email_subject
-      ).deliver
+      )
     end
 
     def shipment_email(recipients, from, order_source, shipment_source, tracks)
@@ -41,7 +41,7 @@ module Gemgento
           bcc: recipients[:bcc],
           from: from,
           subject: shipment_email_subject
-      ).deliver
+      )
     end
 
     def credit_memo_email(recipients, from, order_source, credit_memo_source)
@@ -55,7 +55,7 @@ module Gemgento
           bcc: recipients[:bcc],
           from: from,
           subject: credit_memo_email_subject
-      ).deliver
+      )
     end
 
     def order_email_subject
