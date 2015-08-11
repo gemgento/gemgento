@@ -317,7 +317,7 @@ module Gemgento
     end
 
     def after_convert_success
-
+      push_gift_message_comment unless self.gift_message.blank?
     end
 
     def after_convert_fail
