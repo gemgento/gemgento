@@ -9,7 +9,7 @@ module Gemgento::CategoriesHelper
     options = []
 
     @current_category.children.active.each do |cat|
-      filters = collection_filters.select{ |f| (f[:attribute].is_a?(Array) ? f[:attribute].first[:code] : f[:attribute].code) != attribute.to_s }
+      filters = filters.select{ |f| (f[:attribute].is_a?(Array) ? f[:attribute].first[:code] : f[:attribute].code) != attribute.to_s }
       products = Gemgento::Product.active.catalog_visible
                      .joins(:product_categories)
                      .where('gemgento_product_categories.category_id = ?', cat.id)
@@ -19,6 +19,17 @@ module Gemgento::CategoriesHelper
     end
 
     options.uniq.reject(&:blank?).sort
+  end
+
+  # Get an array of all the active filters.
+  #
+  # @return [Array(Hash(:attribute, :value, :operand))]
+  def filters
+    @filters ||= begin
+      filters = []
+      filters << { attribute: Gemgento::ProductAttribute.find_by!(code: 'color'), value: params[:color] } unless params[:color].blank?
+      filters
+    end
   end
 
   # URL that includes the attribute, or attributes.  This will remove certain existing attributes if they are not relevant.
