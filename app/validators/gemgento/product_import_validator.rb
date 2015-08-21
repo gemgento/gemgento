@@ -117,14 +117,12 @@ module Gemgento
 
             if category.nil?
               errors << category_url_key unless errors.include? category_url_key
-              puts 'error on this category url key'+category_url_key
             else
               parent = category
             end
           end
         end
       end
-      puts 'phil: '+errors.inspect
       unless errors.empty? || errors[0] == ""
         error = '<b>The following category url key(s) could not be found:</b><br /><ul><li>'
         error += errors.join('</li><li>')
