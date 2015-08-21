@@ -90,7 +90,7 @@ module Gemgento
     end
 
     def payment_after_redirect_url
-      case @quote.payment.method
+      case enu
         when 'paypal_express'
           "#{Gemgento::Config[:magento][:url]}/paypal/express/start?quote_id=#{@quote.magento_id}&store_id=#{@quote.store.magento_id}#{("&customer_id=#{@quote.user.magento_id}" if @quote.user)}"
         else

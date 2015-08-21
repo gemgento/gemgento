@@ -70,8 +70,14 @@ module Gemgento::Adapter::Shopify
       product.set_attribute_value('compare_at_price', variant.compare_at_price)
       product.set_attribute_value('fulfillment_service', variant.fulfillment_service)
       product.set_attribute_value('weight', variant.grams)
-      product.set_attribute_value('price', variant.price)
+      product.set_attribute_value('price', variant.price)      
+      #product.set_attribute_value('size', variant.size)
 
+      if base_product.published_at.blank?
+        product.set_attribute_value('status', 'enabled')
+      else
+        product.set_attribute_value('status', 'disabled')
+      end
       if is_catalog_visible # catalog visible simple products are not part of a configurable
         product.set_attribute_value('name', base_product.title)
       else
@@ -79,20 +85,20 @@ module Gemgento::Adapter::Shopify
       end
 
       product = set_option_values(product, base_product, variant)
-      product = set_categories(product, base_product.id)
+      #product = set_categories(product, base_product.id)
 
       product.sync_needed = true
       product.save
 
       Gemgento::Adapter::ShopifyAdapter.create_association(product, variant) if product.shopify_adapter.nil?
 
-      begin
-        product = create_assets(product, base_product.image, base_product.images)
-      rescue => e
-        Rails.logger.warn "Unable to create assets, will ignore: #{e}"
-      end
+      # begin
+      #   product = create_assets(product, base_product.image, base_product.images)
+      # rescue => e
+      #   Rails.logger.warn "Unable to create assets, will ignore: #{e}"
+      # end
 
-      create_tags(product, base_product.tags)
+      # create_tags(product, base_product.tags)
       create_inventory(product, variant)
 
       return product
@@ -108,34 +114,40 @@ module Gemgento::Adapter::Shopify
 
       product.set_attribute_value('barcode', simple_products.first.barcode)
       product.set_attribute_value('compare_at_price', simple_products.first.compare_at_price)
-      product.set_attribute_value('fulfillment_service', simple_products.first.fulfillment_service)
+      product.set_attribute_value('fulfillment_service', simple_products.first.fulfillment_service)      
       product.set_attribute_value('weight', simple_products.first.weight)
       product.set_attribute_value('price', simple_products.first.price)
       product.set_attribute_value('name', base_product.title)
-      product.set_attribute_value('description', base_product.body_html)
-
-      simple_products.uniq.each do |simple_product|
-        simple_product.configurable_products << product unless simple_product.configurable_products.include? product
+      if base_product.published_at.blank?
+        product.set_attribute_value('status', 'enabled')
+      else
+        product.set_attribute_value('status', 'disabled')
       end
 
       product.sync_needed = false
       product.save
 
       product = set_configurable_attributes(product, base_product, base_product.variants.first)
-      product = set_categories(product, base_product.id)
+      #product = set_categories(product, base_product.id)
+
+      simple_products.uniq.each do |simple_product|
+        simple_product.configurable_products << product unless simple_product.configurable_products.include? product
+        simple_product.sync_needed
+        simple_product.save
+      end
 
       product.sync_needed = true
       product.save
 
       Gemgento::Adapter::ShopifyAdapter.create_association(product, base_product) if product.shopify_adapter.nil?
 
-      begin
-        product = create_assets(product, base_product.image, base_product.images)
-      rescue => e
-        Rails.logger.warn "Unable to create assets, will ignore: #{e}"
-      end
+      # begin
+      #   product = create_assets(product, base_product.image, base_product.images)
+      # rescue => e
+      #   Rails.logger.warn "Unable to create assets, will ignore: #{e}"
+      # end
 
-      create_tags(product, base_product.tags)
+      # create_tags(product, base_product.tags)
 
       return product
     end
@@ -165,9 +177,13 @@ module Gemgento::Adapter::Shopify
 
       product.set_attribute_value('url_key', base_product.handle)
       product.set_attribute_value('name', base_product.title)
+      product.set_attribute_value('description', base_product.body_html)
       product.set_attribute_value('vendor', base_product.vendor)
+      product.set_attribute_value('udropship_vendor', base_product.vendor)
       product.set_attribute_value('meta-keywords', base_product.tags)
       product.stores = Gemgento::Store.all
+
+      puts 'PRODUCT ID: '+product.id.to_s+ '  DESCRIPTION: '+product.description
 
       return product
     end
@@ -183,9 +199,10 @@ module Gemgento::Adapter::Shopify
         if key.to_s.include? 'option'
           code = get_option_attribute_code(base_product, key)
           next if code.nil?
-
+          Rails.logger.warn  'ATTRIBUTE CODE: '+code
           value = 'N/A' if value.blank?
           product.set_attribute_value(code, value)
+          Rails.logger.warn  'ATTRIBUTE VALUE: '+value
         end
       end
 
