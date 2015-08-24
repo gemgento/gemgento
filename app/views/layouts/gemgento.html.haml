@@ -7,16 +7,16 @@
     = javascript_include_tag 'gemgento/default-views/application'
     = csrf_meta_tags
     %body
-      #body-holder
-        = render partial: 'layouts/header'
-        #content-holder= yield
-        = render partial: 'layouts/footer'
+      = render partial: 'layouts/header'
+      %main
+        = yield
+      = render partial: 'layouts/footer'
 
-        :javascript
-          jQuery(function() {
-            window.$this = new (App.#{controller_path.split(/\/|_/).map(&:capitalize).join('')} || App.Base)();
+      :javascript
+        jQuery(function() {
+          window.$this = new (App.#{controller_path.split(/\/|_/).map(&:capitalize).join('')} || App.Base)();
 
-            if (typeof $this.#{action_name} === 'function') {
-              return $this.#{action_name}.call();
-            }
-          });
+          if (typeof $this.#{action_name} === 'function') {
+            return $this.#{action_name}.call();
+          }
+        });
