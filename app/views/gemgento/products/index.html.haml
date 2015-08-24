@@ -1,22 +1,19 @@
-.sidebar-wrapper
-  %h5 SHOP
-  Categories
-  %ul 
-  - @categories.each do |cat|
-    %li
-      = link_to cat.name, category_path(cat)
-
-
-.page-wrapper
-  .products-wrapper
-    %h3 products
+%header
+  %h5 Categories
+  %nav
+    %ul 
+      - @categories.each do |cat|
+        %li
+          = link_to cat.name, category_path(cat)
+          
+%article
+  %section
     - @products.each do |p|
-      .product
+      %figure
         - if p.assets.first
           = link_to (image_tag p.assets.first.url), product_path(p)
         - else
           = link_to (image_tag 'http://placekitten.com/g/500/500'), product_path(p)
-        .product-info
-          = p.name
-          .price
-            = "$ #{p.original_price.to_i}"
+        %figcaption
+          %span= p.name
+          %span= "$ #{p.original_price.to_i}"

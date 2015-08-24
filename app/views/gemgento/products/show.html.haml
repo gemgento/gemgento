@@ -1,15 +1,16 @@
-.pages-holder
-  .pages-holder-col30
+%article
+  
+  %figure
     = image_tag @product.assets.first.asset_file.file.url(:default_index)
-  .pages-holder-col70
-    .product-header
-      %h1= @product.name
-      .price
-        - if @product.on_sale?
-          %h2.original= number_to_currency(@product.original_price)
-        %h2= number_to_currency(@product.price)
+  
+  %header
+    %h1= @product.name
+    .price
+      - if @product.on_sale?
+        %h2= number_to_currency(@product.original_price)
+      %h2= number_to_currency(@product.price)
 
-    .product-content  
+    %section  
       %p= @product.description
 
       = form_for current_quote, url: gemgento.cart_url, method: 'patch', html: { id: 'add_to_cart' } do |f|
@@ -17,26 +18,28 @@
 
 
         - if @product.magento_type == 'configurable'
+          
           - default_product_id = @product.simple_products.first.id
+          
           %input{type: 'hidden', name: 'product_id', value: default_product_id}
-          .configurable-attributes
-            - @product.configurable_attribute_order.each do |code, values|
-              .product-attribute
-                %label SELECT COLOR
-                = select_tag code, options_for_select(values)
+          
+          - @product.configurable_attribute_order.each do |code, values|
+            .form-group
+              %label SELECT COLOR
+              = select_tag code, options_for_select(values)
 
-            - @product.configurable_attribute_order.each do |code, values|
-              .product-attribute
-                %label SELECT COLOR
-                = select_tag code, options_for_select(values)
+          - @product.configurable_attribute_order.each do |code, values|
+            .form-group
+              %label SELECT COLOR
+              = select_tag code, options_for_select(values)
+        
         - else
           %input{type: 'hidden', name: 'product_id', value: @product.id}
 
-        .quantity.product-attribute
+        .form-group
           %label QUANTITY
           = select_tag 'quantity', options_for_select(1..10)
 
-        .footer
+        .from-group
           = f.submit 'ADD TO BAG'
 
-  .clear

@@ -1,4 +1,5 @@
-.categories-nav
-  - @categories.each do |category|
-    .category
-      = link_to category.name, category_path(category)  
+%nav
+  %ul
+    - @categories.each do |category|
+      .li
+        = link_to category.name, category_path(category)  
