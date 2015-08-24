@@ -27,11 +27,6 @@
             .form-group
               %label SELECT COLOR
               = select_tag code, options_for_select(values)
-
-          - @product.configurable_attribute_order.each do |code, values|
-            .form-group
-              %label SELECT COLOR
-              = select_tag code, options_for_select(values)
         
         - else
           %input{type: 'hidden', name: 'product_id', value: @product.id}
