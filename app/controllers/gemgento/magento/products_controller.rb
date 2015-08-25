@@ -23,6 +23,10 @@ module Gemgento
             set_attribute_values_from_magento(data[:additional_attributes], @product)
           end
 
+          if data[:configurable_attribute_ids]
+            @product.configurable_attributes = Gemgento::ProductAttribute.where(magento_id: data[:configurable_attribute_ids])
+          end
+
           set_associated_products(data[:simple_product_ids], data[:configurable_product_ids], @product)
           set_bundle_options(data[:bundle_options], @product) if data[:bundle_options]
           set_tier_prices(data[:tier_price], @product) if data[:tier_price]
