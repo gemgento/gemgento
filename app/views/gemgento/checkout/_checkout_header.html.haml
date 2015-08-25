@@ -1,9 +1,8 @@
-%h1.checkout
-  CHECKOUT
-  .checkout-steps
-    %ul
-      %li{class: ("active" if params[:controller] == "gemgento/checkout/login")} 1 SIGN IN
-      %li{class: ("active" if params[:controller] == "gemgento/checkout/address")} 2 BILLING & SHIPPING ADDRESS
-      %li{class: ("active" if params[:controller] == "gemgento/checkout/shipping")} 3 SHIPPING METHOD
-      %li{class: ("active" if params[:controller] == "gemgento/checkout/payment")} 4 PAYMENT
-      %li{class: ("active" if params[:controller] == "gemgento/checkout/confirm")} 5 ORDER CONFIRMATION
+%h2.text-center Checkout
+%nav.text-center
+  %ol.list-inline
+    %li{class: ("active" if params[:controller] == "gemgento/checkout/login")} Sign In
+    %li{class: ("active" if params[:controller] == "gemgento/checkout/address")} Billing & Shipping Address
+    %li{class: ("active" if params[:controller] == "gemgento/checkout/shipping")} Shipping Method
+    %li{class: ("active" if params[:controller] == "gemgento/checkout/payment")} Payment
+    %li{class: ("active" if params[:controller] == "gemgento/checkout/confirm")} Order Confirmation

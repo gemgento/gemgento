@@ -1,43 +1,49 @@
-.pages-holder
-  .pages-header
-    = render 'gemgento/checkout/checkout_header'
-  .pages-content
-    .form
-      .form-group
-        .form-left
-          = flash[:error]
-          .field
-            %h2 ALREADY HAVE AN ACCOUNT
-          = form_tag gemgento.checkout_login_path, method: 'patch' do
-            = hidden_field_tag :activity, 'login_user'         
-            .field
-              %label{for: 'email'} E-mail address
-              = text_field_tag 'email', nil
+%section.container
 
-            .field
-              %label{for: 'password'} Password
-              = password_field_tag 'password', nil
+  %section.row
+    .col-sm-12
+      = render 'gemgento/checkout/checkout_header'
 
-            .field
-              .form-left
-                = link_to 'FORGOT PASSWORD', new_user_password_path
-              .form-left
-                = submit_tag 'LOGIN'
+  %section.row
+    .col-sm-6
 
-        .form-left
-          .field
-            %h2 GUEST CHECKOUT
-          = form_tag gemgento.checkout_login_path, method: 'patch' do      
-            = hidden_field_tag :activity, 'login_guest'
-            .field
-              %label{for: 'email'} E-mail address
-              = text_field_tag 'email'
+      = flash[:error]
 
-            .field
-              .form-left
-                = link_to 'CREATE AN ACCOUNT', new_user_registration_path
+      = form_for @quote, url: checkout_sign_in_path, method: :post do |f|
 
-              .form-left
-                = submit_tag 'CONTINUE'
+        = hidden_field_tag :activity, 'login_user'
 
-        .clear
+        .form-group
+          %legend Already have an account?
+
+        .form-group
+          = f.label :customer_email, 'Email'
+          = text_field_tag 'email', nil, class: "form-control"
+
+        .form-group
+          = f.label :password
+          = password_field_tag 'password', nil, class: "form-control"
+
+        .form-group
+          = link_to 'Forgot Password', new_user_password_path
+
+        .form-group
+          = submit_tag 'Sign In', class: "btn"
+
+    .col-sm-6
+      = form_for @quote, url: checkout_guest_path, method: :post do |f|
+
+        = hidden_field_tag :activity, 'login_guest'
+
+        .form-group
+          %legend Guest checkout
+
+        .form-group
+          = f.label :customer_email
+          = f.text_field :customer_email, class: "form-control"
+
+        .form-group
+          = link_to 'Create an account', new_user_registration_path
+
+        .form-group
+          = submit_tag 'Continue', class: "btn"
