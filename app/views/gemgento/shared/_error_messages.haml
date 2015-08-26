@@ -1,0 +1,7 @@
+- unless model.nil? 
+  - if model.errors.any?
+    .col-md-12.text-center.errors
+      %p There were problems with the following fields
+      %ul
+        - model.errors.full_messages.each do |msg|
+          %li= msg

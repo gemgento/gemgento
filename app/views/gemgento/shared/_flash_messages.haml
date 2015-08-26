@@ -1,0 +1,4 @@
+- flash.each do |type, message|
+  - if message
+    .col-md-12{ class: "flash flash-#{type}" }
+      %p= message

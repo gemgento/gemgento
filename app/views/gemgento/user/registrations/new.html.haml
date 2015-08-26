@@ -1,31 +1,28 @@
-.pages-holder
-  .pages-header
-    Sign up
-  .pages-content
-    .form
-      .form-group
-        .form-left
-          = flash[:error]
-          = devise_error_messages!
-          .field
-            %h2 Enter your credentials
-          = form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f|
-            .field
-              %label{for: 'email'} E-mail address
-              = f.email_field :email, autofocus: true
+%section.container
 
-            .field
-              %label{for: 'password'} Password
-              = f.password_field :password
+  %section.row
+    .col-sm-6.col-sm-offset-3
 
-            .field
-              %label{for: 'password_confirmation'} Password confirmation
-              = f.password_field :password_confirmation
+      = render 'gemgento/shared/flash_messages'
+      = devise_error_messages!
 
-            .field
-              .form-left
-                = link_to 'Cancel', '/'
-              .form-left
-                = submit_tag 'Sign up'
+      %legend
+        Enter your credentials to sign up
 
-        .clear
+      = form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f|
+
+        .form-group
+          %label{for: 'email'} E-mail address
+          = f.email_field :email, autofocus: true, class: "form-control"
+
+        .form-group
+          %label{for: 'password'} Password
+          = f.password_field :password, class: "form-control"
+
+        .form-group
+          %label{for: 'password_confirmation'} Password confirmation
+          = f.password_field :password_confirmation, class: "form-control"
+
+        .form-group
+          = link_to 'Cancel', '/'
+          = submit_tag 'Sign up', class: "btn"
