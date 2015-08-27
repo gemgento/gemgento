@@ -1,0 +1,69 @@
+= form_for [:user, @saved_credit_card] do |f|
+  .col-sm-6
+    %legend Card Billing Address
+    = f.fields_for :address do |address|
+      .form-group
+        .row
+          .col-sm-6
+            = address.label :first_name, 'first name'
+            = address.text_field :first_name, class: 'form-control'
+
+          .col-sm-6
+            = address.label :last_name, 'last name'
+            = address.text_field :last_name, class: 'form-control'
+
+      .form-group
+        = address.label :address1, 'address 1'
+        = address.text_field :address1, class: 'form-control'
+
+      .form-group
+        = address.label :address2, 'address 2'
+        = address.text_field :address2, class: 'form-control'
+
+      .form-group
+        = address.label :phone, 'phone number'
+        = address.text_field :telephone, class: 'form-control'
+
+      .form-group
+        = address.label :city, 'city'
+        = address.text_field :city, class: 'form-control'
+
+      .form-group
+        = address.label :country
+        = address.collection_select 'country_id', Gemgento::Country.all, :id, :name, {}, class: 'form-control'
+
+      .form-group
+        .row
+          .col-sm-6
+            - regions = Gemgento::Region.where(country: @saved_credit_card.address.country)
+            = address.label 'region_id', 'state'
+            = address.collection_select 'region_id', regions, :id, :name, {}, class: 'form-control'
+          .col-sm-6
+            = address.label :zip
+            = address.text_field :postcode, class: 'form-control'
+
+  .col-sm-6
+    %legend Card Details
+    .form-group
+      = f.label :card_type
+      = f.select(:cc_type, [%w[Visa 1], ['American Express', 2], %w[MasterCard 3], %w[Visa Electron 122]], {}, {:class => 'form-control'})
+
+    .form-group
+      = f.label :cc_number, 'card number'
+      = f.text_field :cc_number, class: 'form-control'
+
+    .form-group
+      .row
+        .col-sm-4
+          = f.label :exp_month, 'expiration month'
+          = f.select :exp_month, (1..12), {}, {:class => 'form-control'}
+        .col-sm-4
+          = f.label :exp_year, 'expiration year'
+          = f.select :exp_year, ((Time.now.year)..(Time.now.year + 10)), {}, {:class => 'form-control'}
+        .col-sm-4
+          = f.label :cc_cid, 'CVV Code'
+          = f.text_field 'cc_cid', class: 'form-control'
+
+    .form-group
+      = f.submit 'SAVE CARD', class: 'btn btn-lg'
+      = link_to 'cancel', gemgento.user_saved_credit_cards_path, class: ''

@@ -1,0 +1,25 @@
+%section.container
+
+  .row
+    .col-sm-12
+      = render 'gemgento/user/shared/user_header'
+      = render 'gemgento/shared/flash_messages'
+
+  .row
+    .col-sm-12
+      %h2 Saved payment methods
+
+  .row
+    .col-sm-12
+      - unless @saved_credit_cards.empty?
+        - @saved_credit_cards.each_with_index do |card, i|
+
+          %p #{card.address.first_name} #{card.address.last_name}
+          %p #{card_types[card.cc_type] || ''}  #{card.cc_number.gsub("X", "*")}
+          %p #{link_to 'delete', user_saved_credit_card_path(card), confirm: 'Are you sure?', method: :delete, class: ""}
+
+        %p #{link_to 'Add New Credit Card', new_user_saved_credit_card_path, class: ""}
+
+      - else
+        %p You do not have any saved credit cards.
+        %p #{link_to 'Add New Credit Card', new_user_saved_credit_card_path, class: ""}

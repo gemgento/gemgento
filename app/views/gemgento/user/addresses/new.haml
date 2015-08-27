@@ -1,0 +1,11 @@
+%section.container
+  .row
+    .col-sm-12
+      = render partial: "gemgento/user/shared/user_header"
+      = render partial: "gemgento/shared/error_messages", locals: { model: @address}
+  .row
+    .col-sm-12
+
+      %h3 New Address
+
+      = render partial: 'form', locals: {address: @address}

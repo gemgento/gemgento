@@ -1,69 +1,60 @@
-.pages-holder
-  .pages-header
-    = render 'gemgento/checkout/checkout_header'
+%section.container
+  %section.row
+    .col-sm-12
+      = render 'gemgento/checkout/checkout_header'
 
-  .pages-content
+  %section.row
     = form_for @quote, url: checkout_confirm_path, html: { id: 'checkout_confirm_method' } do |form|
-      .form-group
-        .form-left.text
-          .form-left
-            = @quote.shipping_address.first_name + " " + @shipping_address.last_name
-            %br
-            = @quote.customer_email
-            %br
-            = @quote.shipping_address.telephone
-            %br
-            = @quote.shipping_address.address1
-            %br
-            = @quote.shipping_address.address2
-            %br
-            = "#{@quote.shipping_address.region.name}, " if @quote.shipping_address.region
-            = "#{@quote.shipping_address.city} #{@quote.shipping_address.postcode}"
-            %br
-            = "#{@quote.shipping_address.country.name}" if @quote.shipping_address.country
-
-          .form-left
-            = @quote.billing_address.first_name + " " + @quote.billing_address.last_name
-            %br
-            = @quote.customer_email
-            %br
-            = @quote.billing_address.telephone
-            %br
-            = @quote.billing_address.address1
-            %br
-            = @quote.billing_address.address2
-            %br
-            = "#{@quote.billing_address.region.name}, " if @quote.billing_address.region
-            = "#{@quote.billing_address.city} #{@quote.billing_address.postcode}"
-            %br
-            = "#{@quote.billing_address.country.name}" if @quote.billing_address.country
-
-        .form-left.text
-          .form-left
-            = "#{@shipping_method[:method_title]}"
-            %br
-            = "$#{@shipping_method[:price]}"
-          .form-left
-            = "#{number_to_currency(@quote.totals[:grand_total])}"
-            %br
-            - if @quote.payment
-              = "#{@quote.payment.cc_type}"
-              %br
-              = "card ending #{@quote.payment.cc_last4}"
-
-        .clear
+      .col-sm-3
+        .form-group
+          %legend Shipping Address
+          = @quote.shipping_address.first_name
+          /= @quote.shipping_address.first_name + " " + @shipping_address.last_name
+          %br
+          = @quote.customer_email
+          %br
+          = @quote.shipping_address.telephone
+          %br
+          = @quote.shipping_address.address1
+          %br
+          = @quote.shipping_address.address2
+          %br
+          = "#{@quote.shipping_address.region.name}, " if @quote.shipping_address.region
+          = "#{@quote.shipping_address.city} #{@quote.shipping_address.postcode}"
+          %br
+          = "#{@quote.shipping_address.country.name}" if @quote.shipping_address.country
 
 
-      .form-group
-        .form-left
-          &nbsp;
-        .form-left
-          .field
-            .form-left
-              &nbsp;
-            .form-left
-              = submit_tag 'CONTINUE'
+      .col-sm-3
+        .form-group
+          %legend Billing address
+          = @quote.billing_address.first_name + " " + @quote.billing_address.last_name
+          %br
+          = @quote.customer_email
+          %br
+          = @quote.billing_address.telephone
+          %br
+          = @quote.billing_address.address1
+          %br
+          = @quote.billing_address.address2
+          %br
+          = "#{@quote.billing_address.region.name}, " if @quote.billing_address.region
+          = "#{@quote.billing_address.city} #{@quote.billing_address.postcode}"
+          %br
+          = "#{@quote.billing_address.country.name}" if @quote.billing_address.country
 
-        .clear
+      .col-sm-3
+        .form-group
+          %legend Shipping method
+          = "#{@shipping_method[:method_title]}"
+          = "$#{@shipping_method[:price]}"
 
-        
+        .form-group
+          %legend Payment info
+          - if @quote.payment
+            = "#{@quote.payment.cc_type}"
+          %br
+          Credit Card **** **** **** #{@quote.payment.cc_last4}
+
+        .form-group
+          = submit_tag 'CONTINUE'

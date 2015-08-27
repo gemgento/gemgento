@@ -1,112 +1,88 @@
-.pages-holder
-  .pages-header
-    = render 'gemgento/checkout/checkout_header'
-    
-  .pages-content
-    = form_for current_quote, url: checkout_address_path, html: { id: 'address_form' } do |form|
+- @quote.shipping_address.country = Gemgento::Country.find_by(iso2_code: 'us') if @quote.shipping_address.country.nil?
+- @quote.billing_address.country = Gemgento::Country.find_by(iso2_code: 'us') if @quote.billing_address.country.nil?
 
-      .form-header
-        .right
-          = check_box_tag :same_as_billing, "1", (params[:same_as_billing] == "1")
-          Shipping address is the same as billing address
-        .clear
+%section.container
 
-      = form.fields_for :billing_address do |billing|
-        .form-group#billing_address
-          .form-left
-            .field
-              = billing.label :first_name
-              = billing.text_field 'first_name'
-            .field
-              = billing.label :last_name
-              = billing.text_field 'last_name'
-            .field
-              = billing.label :telephone
-              = billing.text_field 'telephone'
-            .field
-              = billing.label :email
-              = text_field_tag 'email'
-            .field
-              = billing.label :country
-              = billing.collection_select 'country_id', Gemgento::Country.all, :id, :name, {}
-              :javascript
-                updateRegions.init('order_billing_address_attributes')
+  %section.row
+    .col-sm-12
+      = render 'gemgento/checkout/checkout_header'
 
-          .form-left
-            .field
-              .field
-                = billing.label :address1
-                = billing.text_field 'address1'
-              .field
-                = billing.label :address2
-                = billing.text_field 'address2'
-              .field
-                = billing.label :city
-                = billing.text_field 'city'
-              .field
-                = billing.label :state
-                - if country = current_quote.billing_address.country
-                  - regions = Gemgento::Region.where(country: country)
-                - else 
-                  - regions = []
-                = billing.collection_select 'region_id', regions, :id, :name, {}
-              .field
-                = billing.label :postcode
-                = billing.text_field 'postcode'
+  %section.row
+    = render partial: 'gemgento/shared/error_messages', locals: { model: @quote }
+    = form_for @quote, url: checkout_address_path, html: { id: 'checkout-addresses-form' } do |form|
 
-      = form.fields_for :shipping_address do |shipping|
-        .form-group#shipping_address
-          .form-left
-            .field
-              = shipping.label :first_name
-              = shipping.text_field 'first_name'
-            .field
-              = shipping.label :last_name
-              = shipping.text_field 'last_name'
-            .field
-              = shipping.label :telephone
-              = shipping.text_field 'telephone'
-            .field
-              = shipping.label :email
-              = text_field_tag 'email'
-            .field
-              = shipping.label :country
-              = shipping.collection_select 'country_id', Gemgento::Country.all, :id, :name, {}
-
-              :javascript
-                updateRegions.init('order_shipping_address_attributes')
-
-          .form-left
-            .field
-              .field
-                = shipping.label :address1
-                = shipping.text_field 'address1'
-              .field
-                = shipping.label :address2
-                = shipping.text_field 'address2'
-              .field
-                = shipping.label :city
-                = shipping.text_field 'city'
-              .field
-                = shipping.label :state
-                - if country = current_quote.shipping_address.country
-                  - regions = Gemgento::Region.where(country: country)
-                - else 
-                  - regions = []
-                = shipping.collection_select 'region_id', regions, :id, :name, {}
-
-              .field
-                = shipping.label :postalcode
-                = shipping.text_field 'postcode'
-          .clear
+      .col-sm-5.col-sm-offset-1#billing_address
 
         .form-group
-          .form-left
-            &nbsp;
-          .form-left
-            .field
-              .form-left
-                &nbsp;
-              .form-left
-                = submit_tag 'CONTINUE'
-          .clear
+          %legend Billing Address
+
+        .form-group
+          = check_box_tag :same_as_billing, "1", (params[:same_as_billing] == "1")
+          %label Shipping address is the same as billing address
+
+        = form.fields_for :billing_address do |billing|
+          .form-group
+            = billing.label :first_name
+            = billing.text_field :first_name, placeholder: 'First name', class: 'form-control'
+          .form-group
+            = billing.label :last_name
+            = billing.text_field :last_name, placeholder: 'Last name', class: 'form-control'
+          .form-group
+            = billing.label :address1
+            = billing.text_field :address1, placeholder: 'Address 1', class: 'form-control'
+          .form-group
+            = billing.label :address2
+            = billing.text_field :address2, placeholder: 'Address 2', class: 'form-control'
+          .form-group
+            = billing.label :city
+            = billing.text_field :city, placeholer: 'City', class: 'form-control'
+          .form-group
+            = billing.label :country
+            = billing.collection_select :country_id, Gemgento::Country.all, :id, :name, {}, class: 'form-control'
+          .form-group
+            = billing.label :region_id, billing.object.country.iso2_code == 'US' ? 'State' : 'Region'
+            = billing.collection_select :region_id, billing.object.country.regions, :id, :name, {}, class: 'region-selector form-control'
+          .form-group
+            = billing.label :postcode, billing.object.country.iso2_code == 'US' ? 'ZIP' : 'Post Code'
+            = billing.text_field :postcode, class: 'form-control'
+          .form-group
+            = billing.label :telephone, 'Phone'
+            = billing.text_field :telephone, class: 'form-control'
+
+      .col-sm-5.col-sm-offset-1#shipping_address
+
+        .form-group
+          %legend Shipping Addess
+
+        = form.fields_for :shipping_address do |shipping|
+          .form-group
+            = shipping.label :first_name
+            = shipping.text_field :first_name, class: 'form-control'
+          .form-group
+            = shipping.label :last_name
+            = shipping.text_field :last_name, class: 'form-control'
+          .form-group
+            = shipping.label :address1
+            = shipping.text_field :address1, class: 'form-control'
+          .form-group
+            = shipping.label :address2
+            = shipping.text_field :address2, class: 'form-control'
+          .form-group
+            = shipping.label :city
+            = shipping.text_field :city, class: 'form-control'
+          .form-group
+            = shipping.label :country_id, 'Country'
+            = shipping.collection_select :country_id, Gemgento::Country.all, :id, :name, {}, class: 'form-control'
+          .form-group
+            = shipping.label :region_id, shipping.object.country.iso2_code == 'US' ? 'State' : 'Region'
+            = shipping.collection_select :region_id, shipping.object.country.regions, :id, :name, {}, class: 'region-selector form-control'
+          .form-group
+            = shipping.label :postcode, shipping.object.country.iso2_code == 'US' ? 'ZIP' : 'Post Code'
+            = shipping.text_field :postcode, class: 'form-control'
+          .form-group
+            = shipping.label :telephone, 'Phone'
+            = shipping.text_field :telephone, class: 'form-control'
+
+      .col-sm-12.text-center
+        .form-group
+          = submit_tag 'continue' , class: "btn btn-lg"

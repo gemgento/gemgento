@@ -1,0 +1,87 @@
+%section.container
+  .row
+    .col-sm-12
+      = render 'gemgento/user/shared/user_header'
+
+  .row
+    .col-sm-6
+      %section
+        %h3.account-heading-secondary Shipping Address
+        %p= @order.shipping_address.address1
+        %p= @order.shipping_address.address2
+        %p= @order.shipping_address.city
+        %p= @order.shipping_address.telephone
+
+      %section
+        %h3.account-heading-secondary Shipping Method
+        - if @order.shipping_method == "flatrate_flatrate"
+          %p Flat Rate $50
+        - if @order.shipping_method == "freeshipping_freeshipping"
+          %p Free Shipping
+
+      %section
+        %h2 Payment
+
+      %section
+        %h3.account-heading-secondary Billing Address
+        %p= @order.billing_address.address1
+        %p= @order.billing_address.address2
+        %p= @order.billing_address.city
+        %pp= @order.billing_address.telephone
+
+      %section
+        %h3.account-heading-secondary Payment Info
+        %p #{@order.payment.cc_type}
+        - if "#{@order.payment.cc_type}" == 'VI'
+          %p Visa
+        - if "#{@order.payment.cc_type}" == '2'
+          %p American Express
+        - if "#{@order.payment.cc_type}" == '3'
+          %p Mastercard
+        - if "#{@order.payment.cc_type}" == '122'
+          %p Visa Electron
+        %p=@order.payment.cc_owner
+        %p **** **** **** #{@order.payment.cc_last4}
+        %p EXP. #{@order.payment.cc_exp_month} / #{@order.payment.cc_exp_year}
+
+    .col-sm-6.checkout-summary-cart
+      %section
+        %section
+          %h2.account-heading-secondaryOrder Order Overview
+        - for line_item in @order.line_items
+          - p = line_item.product.configurable_products.first
+          %section.row.cart-item
+            %figure
+              =link_to p do
+                %img.img-responsive.pull-left{:src => p.assets.first.image.url(:thumb)}
+            .cart-item-meta
+              %h4= line_item.product.name.titlecase
+              %p= truncate("#{line_item.product.short_description}", length: 50)
+
+              %span.pull-left
+                %p
+                  Size: #{line_item.product.size}
+              %span.pull-right
+                %p
+                  Qty: #{number_with_precision(line_item.qty_ordered.to_i, precision: 0)}
+              .clear
+      %section.order-totals
+        %span.pull-left
+          %p SUBTOTAL
+        %span.pull-right
+          %p= number_to_currency(@order.subtotal)
+        .clear
+        %span.pull-left
+          %p SHIPPING
+        %span.pull-right
+          %p= number_to_currency(@order.shipping_amount)
+        .clear
+        %span.pull-left
+          %p TAX
+        %spa.pull-right
+          /%p= "#{number_to_currency(@order.totals[:tax])}"
+        .clear
+        %span.pull-left
+          %p TOTAL
+        %span.pull-right
+          %p= number_to_currency(@order.subtotal)

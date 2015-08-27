@@ -1,0 +1,13 @@
+%section.container
+
+  .row
+    .col-sm-12
+      = render 'gemgento/user/shared/user_header'
+      = render 'gemgento/shared/flash_messages'
+      = render partial: "gemgento/shared/error_messages", locals: { model: @saved_credit_card }
+
+  .row
+    .col-sm-12
+      %h2 Add New Card
+      .row
+        = render 'form'

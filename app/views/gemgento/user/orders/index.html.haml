@@ -1,0 +1,29 @@
+%section.container
+  .row
+    .col-sm-12
+      = render 'gemgento/user/shared/user_header'
+
+  - unless @orders.empty?
+    .row
+      .col-sm-2 Order Date
+      .col-sm-2 Order #
+      .col-sm-3 Sent to
+      .col-sm-5 Status
+    - @orders.each_with_index do |order, index|
+      .row
+        .col-sm-2
+          %p= (order.placed_at.nil? ? order.created_at : order.placed_at).strftime('%F')
+        .col-sm-2
+          %p= order.increment_id
+        .col-sm-2
+          %span.order-address
+            %p= order.shipping_address.address1+'...'
+        .col-sm-2
+          %p= order.status
+        .col-sm-2
+          %p #{link_to 'Order Details', user_order_path(order)}
+
+  - else
+    .col-sm-12
+      %p You haven't placed any orders yet
+      %p #{link_to 'Start Shopping', '/'}

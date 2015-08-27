@@ -1,0 +1,52 @@
+%section.container
+  %section.row
+    .col-sm-12
+      = render partial: 'gemgento/shared/flash_messages'
+      = render 'gemgento/checkout/checkout_header'
+      = render partial: 'gemgento/shared/error_messages', locals: { model: @quote }
+
+  %section.row
+    .col-sm-12
+      = form_for @quote, url: checkout_shipping_payment_path, html: { id: 'checkout_shipping_method' } do |f|
+
+        .form-group.text-center
+          %legend Select Shipping Method
+
+          - @shipping_methods.sort_by{ |value| value[:price] }.each do |shipping_method|
+            .clearfix
+              = f.radio_button :shipping_method, shipping_method[:code]
+              = f.label :shipping_method, "#{shipping_method[:carrier_title]} #{shipping_method[:method_title]} - #{number_to_currency(shipping_method[:price])}"
+
+
+        %section.row
+          .col-sm-6.col-sm-offset-3
+            %legend Payment Method
+
+            = f.fields_for :payment do |payment|
+              = payment.hidden_field :method, value: 'authnetcim'
+
+              .form-group
+                = payment.label :cc_owner, 'Name on Card'
+                = payment.text_field 'cc_owner', class: 'form-control'
+
+              .form-group
+                = payment.label :cc_number, 'Card Number'
+                = payment.text_field 'cc_number', class: 'form-control', placeholder: '**** **** **** ****'
+
+              .form-group
+                = payment.label :cc_type, 'Card Type'
+                -# Here we manually list card types accepted by store, can we do this dynamically?
+                = payment.select :cc_type, options_for_select([%w[Visa VI], ['American Express', 2], %w[MasterCard 3], ['Visa Electron', 122]]), {}, class: 'form-control select-list'
+
+              .form-group
+                = payment.label :cc_exp_month, 'Exp. month'
+                = payment.select 'cc_exp_month', (1..12), {}, class: 'form-control select-list'
+                = payment.label :cc_exp_year, 'Exp. year'
+                = payment.select 'cc_exp_year', ((Time.now.year)..(Time.now.year + 10)), {}, class: 'form-control select-list'
+
+              .form-group
+                = payment.label :cc_id, 'CVV code'
+                = payment.text_field 'cc_cid', maxlength: 4, class: 'form-control', placeholder: '***'
+
+              .form-group.text-center
+                = f.submit 'continue', class: 'btn btn-lg'

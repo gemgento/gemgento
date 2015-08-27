@@ -1,0 +1,39 @@
+- address.country = Gemgento::Country.find_by(iso2_code: 'us') if address.country.nil?
+
+= form_for [:user, address] do |f|
+  .col-md-5
+    .form-group
+      = f.label :first_name, "first name"
+      = f.text_field :first_name, class: 'form-control'
+    .form-group
+      = f.label :last_name, "last name"
+      = f.text_field :last_name, class: 'form-control'
+    .form-group
+      = f.label :address1, "address 1"
+      = f.text_field :address1, class: 'form-control'
+    .form-group
+      = f.label :address2, "address 2"
+      = f.text_field :address2, class: 'form-control'
+    .form-group
+      = f.label :city, "city"
+      = f.text_field :city, class: 'form-control'
+    .form-group
+      = f.label 'country_id', 'country'
+      = f.collection_select :country_id, Gemgento::Country.all, :id, :name, {}, class: 'form-control'
+    .form-group
+      - regions = []
+      - if country = address.country
+        - regions = Gemgento::Region.where(country: country)
+    .form-group
+      = f.label 'region_id', 'state'
+      = f.collection_select 'region_id', regions, :id, :name, {}, class: 'region-selector', class: 'form-control'
+    .form-group
+      = f.label :zip, "zip"
+      = f.text_field :postcode, class: 'form-control'
+    .form-group
+      = f.label :phone, "phone"
+      = f.text_field :telephone, class: 'form-control'
+    .form-group
+      = link_to 'cancel', "/user/addresses", class: "cancel fancylink"
+    .form-group
+      = f.submit 'save', class: 'submit btn'

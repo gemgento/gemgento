@@ -1,1 +1,32 @@
-%p test
+%section.container
+  .row
+    .col-sm-12
+      = render 'gemgento/user/shared/user_header'
+      = render 'gemgento/shared/flash_messages'
+
+  .row
+    .col-sm-12
+      - unless @addresses.blank?
+        %ol
+          - @addresses.each_with_index do |address, i|
+            %li
+              %address
+                #{address.first_name}
+                %br
+                #{address.last_name}
+                %br
+                #{address.address1}
+                %br
+                #{address.city}
+                %br
+                #{address.region.code}
+                %br
+                #{address.postcode}
+                %p #{link_to 'delete', user_address_path(address), confirm: 'Are you sure?', method: :delete, class: ""}
+
+
+        %p #{link_to 'Add Another Address', new_user_address_path}
+
+      - else
+      
+        %p You have no saved addresses
