@@ -1,0 +1,37 @@
+%section.container
+  .row
+    .col-sm-12
+      = render 'gemgento/user/shared/user_header'
+
+%section.container
+  .col-sm-6.col-sm-offset-3
+    = form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f|
+
+      %legend Password
+
+      .form-group
+        = f.label :email
+        = f.email_field :email, autofocus: true, class: "form-control"
+
+      .form-group
+        -if devise_mapping.confirmable? && resource.pending_reconfirmation?
+          Currently waiting confirmation for: #{resource.unconfirmed_email}
+
+      .form-group
+        = f.label :password, "New password"
+        = f.password_field :password, autocomplete: "off", class: "form-control", placeholder: "********"
+
+      .form-group
+        = f.label :password_confirmation , "New password Confirmation"
+        = f.password_field :password_confirmation, autocomplete: "off", class: "form-control", placeholder: "********"
+
+      .form-group
+        = f.label :current_password , "Current Password"
+        = f.password_field :current_password, autocomplete: "off", class: "form-control", placeholder: "********"
+
+      .form-group
+        = f.submit "Update", class: "btn"
+
+      .form-group
+        %legend Cancel my account
+        = button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete, class: "btn"
