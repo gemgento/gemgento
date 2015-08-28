@@ -1,5 +1,7 @@
-%section
-  - @products.each do |product|
-    = render partial: 'product_tile', locals: { product: product }
-  
-  = paginate @products
+= paginate @products
+%section.container
+  .row
+    - @products.each do |product|
+      = render partial: 'product_tile', locals: { product: product }
+
+= paginate @products

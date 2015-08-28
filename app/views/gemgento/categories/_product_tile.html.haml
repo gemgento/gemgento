@@ -1,14 +1,11 @@
 - cache(product) do
- %section
-    = link_to product_path(product) do
-
-      %figure
-        - asset = Gemgento::Asset.find_by_code(product, 'image')
-        - unless asset.nil?
-          = image_tag asset.image.url(:default_index), data: { size: asset.asset_file.file.image_size }
-
-      %section
-        %section
-          = link_to product.name, "/products/#{product.url_key}"
-        %section
-          = number_to_currency(product.price)
+ %col-sm-4
+  = link_to product_path(product) do
+    %figure
+      - asset = Gemgento::Asset.find_by_code(product, 'image')
+      - unless asset.nil?
+        = image_tag asset.image.url(:default_index), data: { size: asset.asset_file.file.image_size }
+      %figcaption
+        %h2= product.name
+        = link_to product.name, "/products/#{product.url_key}"
+        = number_to_currency(product.price)
