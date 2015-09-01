@@ -1,25 +1,17 @@
-.pages-holder
-  .pages-header
-    Sign in
-  .pages-content
-    .form
-      .form-group
-        .form-left
-          = flash[:error]
-          = devise_error_messages!
-          .field
-            %h2 Enter your credentials
-          = form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f|   
-            .field
-              %label{for: 'email'} E-mail address
-              = f.email_field :email, :autofocus => true
-
-            .field
-              %label{for: 'password'} Password
-              = f.password_field :password, :autofocus => true
-
-            .field
-              .form-left
-                = submit_tag 'Sign in'
-
-        .clear
+%h2 Sign in
+= form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f|
+  %div
+    = f.label :email
+    %br/
+    = f.email_field :email, :autofocus => true
+  %div
+    = f.label :password
+    %br/
+    = f.password_field :password
+  - if devise_mapping.rememberable?
+    %div
+      = f.check_box :remember_me
+      = f.label :remember_me
+  %div= f.submit "Sign in"
+  
+= render "devise/shared/links"

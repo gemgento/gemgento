@@ -1,11 +1,11 @@
 %header
   %h5 Categories
   %nav
-    %ul 
+    %ul
       - @categories.each do |cat|
         %li
           = link_to cat.name, category_path(cat)
-          
+
 %article
   %section
     - @products.each do |p|
