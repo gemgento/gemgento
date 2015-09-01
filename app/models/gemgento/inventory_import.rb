@@ -20,7 +20,7 @@ module Gemgento
     #
     # @return [Boolean]
     def self.is_active?
-      InventoryImport.where(is_active: true).count > 0
+      Gemgento::InventoryImport.where(is_active: true).count > 0
     end
 
     # Import all inventories from the spreadsheet.
@@ -36,15 +36,16 @@ module Gemgento
       end
 
       @headers = get_headers
-      @stores = Store.all
+      @stores = Gemgento::Store.all
 
       1.upto @worksheet.last_row_index do |index|
-        puts "Working on row #{index}"
+
+        Rails.logger.debug "Working on row #{index}"
         @row = @worksheet.row(index)
         sku = @row[@headers.index('sku').to_i].to_s.strip
         next if sku.blank?
 
-        @product = Product.not_deleted.find_by(sku: sku)
+        @product = Gemgento::Product.not_deleted.find_by(sku: sku)
         next if @product.magento_type == 'configurable'
 
         set_inventory
@@ -77,7 +78,7 @@ module Gemgento
     # @return [Void]
     def set_inventory
       @stores.each do |store|
-        inventory = Inventory.find_or_initialize_by(product: @product, store: store)
+        inventory = @product.inventories.find_or_initialize_by(store: store)
 
         @headers.each_with_index do |attribute, index|
           next if attribute == 'sku'
@@ -87,6 +88,9 @@ module Gemgento
         inventory.sync_needed = true
         inventory.save
       end
+    rescue ActiveRecord::RecordNotUnique
+      # when Magento pushes inventory data back, it will create missing inventory rows
+      set_inventory
     end
 
   end
