@@ -2,15 +2,15 @@
   .row
     - if @products.empty?
 
-      %h2 No products available in this Category
+      .col-sm-12
+        %h2 No products available in this category
 
     - @products.each do |product|
-      %col-sm-4
-        %figure
-          %figcaption
-            %h2
-              = link_to product.name, "/products/#{product.id}"
-            - if current_user && current_user.products.include?(product)
-              = link_to 'Remove From Wishlist', "/user/wishlist/#{product.id}", method: :delete
-            - else
-              = link_to 'Add To Wishlist', "/user/wishlist/#{product.id}", method: :post
+      %figure.col-sm-4
+        %figcaption
+          %h2
+            = link_to product.name, "/products/#{product.id}"
+          - if current_user && current_user.products.include?(product)
+            = link_to 'Remove From Wishlist', "/user/wishlist/#{product.id}", method: :delete
+          - else
+            = link_to 'Add To Wishlist', "/user/wishlist/#{product.id}", method: :post
