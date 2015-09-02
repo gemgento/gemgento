@@ -10,6 +10,7 @@ module Gemgento
     # 1 - allow qty below 0
     # 2 - allow qty below 0 and notify customer
     validates :backorders, inclusion: 0..2
+    validates :product, uniqueness: { scope: :store }
 
     after_save :touch_product
     before_save :sync_local_to_magento, if: -> { sync_needed? }
