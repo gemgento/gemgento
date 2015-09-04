@@ -25,7 +25,9 @@ module Gemgento
         req.basic_auth Gemgento::Config[:magento][:auth_username], Gemgento::Config[:magento][:auth_password]
       end
 
-      res = Net::HTTP.start(uri.hostname, uri.port) do |http|
+      http = Net::HTTP.new(uri.hostname, uri.port)
+      http.use_ssl = uri.port == 443
+      res = http.start  do |http|
         http.use_ssl = uri.port == 443
         http.request(req)
       end
