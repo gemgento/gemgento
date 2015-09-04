@@ -1,13 +1,17 @@
 %section.container
-  %code This is 'gemgento/user/registration_session/new.haml'
+
+  %small
+    %code This is 'gemgento/user/registration_session/new.haml'
   %br
-  %code A combined login/register page that handles all these routes: '/user/login', '/user/sign_up', '/user/sign_in'
+  %small
+    %code A combined login/register page that handles all these routes: '/user/login', '/user/sign_up', '/user/sign_in'
   %br
   %br
-  %br
-%section.container
+
+
+  %section.container
   .row
-    .col-sm-6
+    .col-sm-5.col-sm-offset-1
 
       = render partial: 'gemgento/shared/error_messages', locals: { model: @new_user}
       = render partial: 'gemgento/shared/error_messages', locals: { model:@existing_user }
@@ -16,8 +20,9 @@
 
         = hidden_field_tag :activity, 'sign_in'
 
-        %legend Sign In
-        %p Already registerd? Sign in here
+        .form-group
+          %legend Sign In
+          %p Already registerd? Sign in here
 
         .form-group
           = f.label :email, "Email address"
@@ -34,13 +39,14 @@
           = link_to 'Forgot Your Password?', new_user_password_path
 
 
-    .col-sm-6
+    .col-sm-5
       = form_for(@new_user, url: user_login_path, html: { method: :post })  do |f|
 
         = hidden_field_tag :activity, 'register'
 
-        %legend New Users Sign Up
-        %p Enter your credentials to sign up
+        .form-group
+          %legend New Users Sign Up
+          %p Enter your credentials to sign up
 
         .form-group
           = f.label :email, "Email address"
