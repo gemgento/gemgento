@@ -163,7 +163,7 @@ module Gemgento
           types = []
 
           unless self.image_types[position].nil?
-            types = AssetType.where('product_attribute_set_id = ? AND code IN (?)', @product.product_attribute_set.id, self.image_types[position])
+            types = Gemgento::AssetType.where(product_attribute_set:  @product.product_attribute_set, code: self.image_types[position])
           end
 
           unless types.is_a? Array
