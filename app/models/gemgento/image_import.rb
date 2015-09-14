@@ -98,7 +98,7 @@ module Gemgento
     #
     # @return [Array]
     def image_types_raw
-      self.image_types.join("\n") unless self.image_types.nil?
+      self.image_types.map { |t| t.join(', ') }.join("\n") unless self.image_types.nil?
     end
 
     # Set the image_types array from a value string.
@@ -107,7 +107,7 @@ module Gemgento
     # @return [Void]
     def image_types_raw=(values)
       self.image_types = []
-      self.image_types = values.gsub("\r", '').split("\n")
+      self.image_types = values.gsub("\r", '').split("\n").map { |t| t.split(',').collect(&:strip) }
     end
 
     # Set the image_path. A trailing '/' is added if it's missing from the supplied value.
@@ -163,7 +163,7 @@ module Gemgento
           types = []
 
           unless self.image_types[position].nil?
-            types = AssetType.where('product_attribute_set_id = ? AND code IN (?)', @product.product_attribute_set.id, self.image_types[position].split(',').map(&:strip))
+            types = AssetType.where('product_attribute_set_id = ? AND code IN (?)', @product.product_attribute_set.id, self.image_types[position])
           end
 
           unless types.is_a? Array
@@ -173,7 +173,7 @@ module Gemgento
           create_image(file_name, types, position, label)
         end
       end
-      
+
       # clear the cache
       Rails.cache.clear
     end
