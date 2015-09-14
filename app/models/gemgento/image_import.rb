@@ -201,7 +201,10 @@ module Gemgento
       asset.save
 
       asset.sync_needed = true
-      asset.save
+
+      unless asset.save
+        self.import_errors << "Error creating image in Magento. SKU: #{@product.sku}, ERROR: #{asset.errors[:base]}"
+      end
     end
   end
 end
