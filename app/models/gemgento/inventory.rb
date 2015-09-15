@@ -15,6 +15,8 @@ module Gemgento
     after_save :touch_product
     before_save :sync_local_to_magento, if: -> { sync_needed? }
 
+    attr_accessor :use_config_manage_stock
+
     # Push the inventory data to Magento.
     #
     # @return [Boolean] true if the inventory data was successfully pushed to Magento

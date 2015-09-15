@@ -6,6 +6,7 @@ module Gemgento
   # @author Gemgento LLC
   class ProductImport < ActiveRecord::Base
     include ActiveModel::Validations
+
     belongs_to :product_attribute_set
     belongs_to :root_category, foreign_key: 'root_category_id', class_name: 'Category'
     belongs_to :store
@@ -155,7 +156,8 @@ module Gemgento
         self.import_errors << "ERROR - row #{@index} - COULD NOT CREATE MAGENTO PRODUCT'"
         self.import_errors << product.errors.full_messages.join(', ')
       else
-        create_images(product) if self.include_images
+        create_images(product) if self.include_images?
+        set_default_config_inventories(product) if self.set_default_inventory_values?
       end
 
       return product
@@ -364,6 +366,21 @@ module Gemgento
         asset_copy.sync_needed = true
         asset_copy.save
       end
+    end
+
+    # @param product [Gemgento::Product]
+    # @return [void]
+    def set_default_config_inventories(product)
+      puts 'HERE'
+      inventory = product.inventories.find_or_initialize_by(store: self.store)
+      inventory.use_config_manage_stock = true
+      inventory.use_config_backorders = true
+      inventory.use_config_min_qty = true
+      inventory.sync_needed = true
+      inventory.save
+    rescue ActiveRecord::RecordNotUnique
+      # when Magento pushes inventory data back, it will create missing inventory rows
+      set_default_config_inventories(product)
     end
 
   end

@@ -70,7 +70,7 @@ module Gemgento
                 qty: inventory.quantity.to_s,
                 'is_in_stock' => inventory.is_in_stock ? 1 : 0,
                 'manage_stock' => inventory.manage_stock ? 1 : 0,
-                'use_config_manage_stock' => 0,
+                'use_config_manage_stock' => inventory.use_config_manage_stock ? 1 : 0,
                 backorders: inventory.backorders,
                 'use_config_backorders' => inventory.use_config_backorders ? 1 : 0,
                 'min_qty' => inventory.min_qty,

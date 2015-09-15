@@ -40,6 +40,7 @@ if defined?(ActiveAdmin)
                   as: :select,
                   include_blank: false,
                   collection:  { 'Not Visible' => 1, 'Catalog' => 2, 'Search' => 3, 'Catalog, Search' => 4 }
+          f.input :set_default_inventory_values
           f.input :include_images
           f.input :image_path
           f.input :image_file_extensions_raw, as: :string, label: 'Image File Extensions', hint: 'Enter expected image file extensions. Separate extensions with a comma.  E.g. .jpg, .png, .gif'
@@ -86,7 +87,8 @@ if defined?(ActiveAdmin)
                   :image_file_extensions_raw,
                   :image_labels,
                   :image_labels_raw,
-                  :image_types_raw
+                  :image_types_raw,
+                  :set_default_inventory_values
               ])
         end
       end
