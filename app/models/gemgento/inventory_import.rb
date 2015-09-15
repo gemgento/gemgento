@@ -86,7 +86,10 @@ module Gemgento
         end
 
         inventory.sync_needed = true
-        inventory.save
+
+        unless inventory.save
+          self.import_errors << "SKU: #{@product.sku}, ERROR: #{inventory.errors[:base]}"
+        end
       end
     rescue ActiveRecord::RecordNotUnique
       # when Magento pushes inventory data back, it will create missing inventory rows
