@@ -371,7 +371,6 @@ module Gemgento
     # @param product [Gemgento::Product]
     # @return [void]
     def set_default_config_inventories(product)
-      puts 'HERE'
       inventory = product.inventories.find_or_initialize_by(store: self.store)
       inventory.use_config_manage_stock = true
       inventory.use_config_backorders = true
