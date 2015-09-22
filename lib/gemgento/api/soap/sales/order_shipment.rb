@@ -31,7 +31,7 @@ module Gemgento
           def self.create(shipment)
             message = {
                 order_increment_id: shipment.order.increment_id,
-                email: shipment.email,
+                email: shipment.email ? 1 : 0,
                 comment: shipment.comment,
                 include_comment: shipment.include_comment
             }
