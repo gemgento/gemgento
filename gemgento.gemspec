@@ -17,7 +17,7 @@ Gem::Specification.new do |gem|
   gem.test_files = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ['lib']
 
-  gem.add_dependency 'activeadmin', '1.0.0.pre1'
+  gem.add_dependency 'activeadmin', '>= 1.0.0.pre1'
   gem.add_dependency 'jbuilder', '>= 2.1.3'
   gem.add_dependency 'coffee-rails', '>= 4.0.0'
   gem.add_dependency 'devise', '>= 3.2.2'
