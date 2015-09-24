@@ -489,7 +489,7 @@ module Gemgento
           totals[:total] += totals[:subtotal]
           totals[:total] += totals[:shipping]
           totals[:total] += totals[:tax]
-          totals[:total] -= totals[:gift_card]
+          totals[:total] -= totals[:gift_card].abs
           totals[:total] -= totals[:discounts].values.sum
         end
 
