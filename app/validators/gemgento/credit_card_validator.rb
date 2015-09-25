@@ -11,8 +11,9 @@ module Gemgento
     # Based on http://rosettacode.org/wiki/Luhn_test_of_credit_card_numbers#Ruby
     def card_number
       s1 = s2 = 0
+      cc_number = @record.cc_number.gsub(/\D/, '') # remove all white space
 
-      @record.cc_number.to_s.reverse.chars.each_slice(2) do |odd, even|
+      cc_number.to_s.reverse.chars.each_slice(2) do |odd, even|
         s1 += odd.to_i
 
         double = even.to_i * 2
