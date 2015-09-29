@@ -36,3 +36,7 @@ $ ->
 
     $('#category-select, #store-select').change ->
       window.location = window.location.href.split('?')[0] + '?category_id=' + $('#category-select').val() + '&store_id=' + $('#store-select').val()
+
+  if window.location.href.split('?')[1] != undefined
+    currentCategory = Number(window.location.href.split('?')[1].split('&')[0].split("=")[1])
+    $('#category-select').find("option[value=" + Number(window.location.href.split('?')[1].split('&')[0].split("=")[1]) + "]").attr('selected', true)
