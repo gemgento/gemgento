@@ -20,7 +20,7 @@ module Gemgento
           def self.fetch(user)
             response = list(user.magento_id)
 
-            if response.success?
+            if response.success? && response.body[:result][:item]
               response.body[:result][:item].each do |address|
                 sync_magento_to_local(address, user)
               end
