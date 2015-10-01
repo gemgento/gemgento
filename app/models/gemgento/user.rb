@@ -4,8 +4,6 @@ module Gemgento
   class User < ActiveRecord::Base
     devise :database_authenticatable, :registerable, :recoverable, :rememberable, :trackable, :validatable
 
-    validates :magento_id, uniqueness: true, allow_nil: true
-
     belongs_to :user_group
 
     has_many :addresses, as: :addressable, class_name: 'Gemgento::Address'
@@ -29,6 +27,9 @@ module Gemgento
     after_save :magento_update, if: -> { sync_needed? }
 
     default_scope -> { where(deleted_at: nil) }
+
+    validates :magento_id, uniqueness: true, allow_nil: true
+    validates :user_group, presence: true
 
     def self.index
       if User.all.size == 0
