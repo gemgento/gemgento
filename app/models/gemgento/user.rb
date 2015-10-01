@@ -39,6 +39,12 @@ module Gemgento
     end
 
     def self.is_valid_login(email, password)
+
+      # If no customer with email is known, double check Magento
+      if !Gemgento::User.exists?(email: email) && customer = Gemgento::Magento::Customer.find_by(email: email)
+        Gemgento::API::SOAP::Customer::Customer.fetch(customer[:customer_id])
+      end
+
       user = User.find_by(email: email)
 
       if user.nil? || !user.is_valid_password(password)
