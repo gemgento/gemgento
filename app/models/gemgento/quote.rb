@@ -488,7 +488,7 @@ module Gemgento
         if totals[:total].zero? && !totals[:subtotal].zero?
           totals[:total] += totals[:subtotal]
           totals[:total] += totals[:shipping]
-          totals[:total] += totals[:tax].to_f
+          totals[:total] += totals[:tax]
           totals[:total] -= totals[:gift_card].abs
           totals[:total] -= totals[:discounts].values.inject(0, :+).abs
           totals[:total] = totals[:total].round(2) # fix loss of float precision
