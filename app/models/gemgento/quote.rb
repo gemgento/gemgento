@@ -374,6 +374,17 @@ module Gemgento
       order.update(gift_message: self.gift_message)
     end
 
+    # Determine if a shipping method is required for the Quote.
+    #
+    # @return [Boolean]
+    def shipping_method_required?
+      self.line_items.collect do |li|
+        return true if li.product.magento_type != 'giftvoucher'
+      end
+
+      return false
+    end
+
     private
 
     # Create the quote in Magento.  Used as a before_create callback.
