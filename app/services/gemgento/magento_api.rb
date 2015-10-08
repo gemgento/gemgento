@@ -61,6 +61,7 @@ module Gemgento
       end
 
       response = @client.call(function, message: message)
+      log_call(function, message, response)
 
       if response.success?
         magento_response.success = true
@@ -93,6 +94,17 @@ module Gemgento
       magento_response.body_overflow = replace_empty_strings(magento_response.body_overflow) unless magento_response.body_overflow.nil?
 
       return magento_response
+    end
+
+    def self.log_call(function, message, response)
+      logger = Logger.new('log/magento_api.log')
+
+      if response.success? && Gemgento::Config[:magento][:debug]
+        # puts response.locals.options.message
+        logger.info "SUCCESS - Function: #{function} - Message: #{message} - Response: #{response.body}"
+      else
+        logger.error "FAIL - Function: #{function} - Message: #{message} - Response: #{response.body}"
+      end
     end
 
     # Fill in missing empty strings.  Empty strings are represented by { :'@xsi:type' => 'xsd:string' }.
