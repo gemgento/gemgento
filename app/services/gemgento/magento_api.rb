@@ -101,8 +101,8 @@ module Gemgento
 
       if response.success? && Gemgento::Config[:magento][:debug]
         # puts response.locals.options.message
-        logger.info "SUCCESS - Function: #{function} - Message: #{message} - Response: #{response.body}"
-      else
+        logger.debug "SUCCESS - Function: #{function} - Message: #{message} - Response: #{response.body}"
+      elsif !response.success?
         logger.error "FAIL - Function: #{function} - Message: #{message} - Response: #{response.body}"
       end
     end
