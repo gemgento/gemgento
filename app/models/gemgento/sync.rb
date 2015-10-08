@@ -17,6 +17,7 @@ module Gemgento
       current = create_current('categories')
 
       Gemgento::API::SOAP::Catalog::Category.fetch_all
+      Gemgento::API::SOAP::Catalog::Category.set_product_categories
 
       current.complete
     end
