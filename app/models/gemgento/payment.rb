@@ -34,5 +34,12 @@ module Gemgento
       self.cc_last4 = cc_number[-4..-1]
     end
 
+    def is_new_credit_card_payment?
+      payable_type == 'Gemgento::Quote' &&
+          payable.converted_at.nil? &&
+          !is_redirecting_payment_method? &&
+          method != 'free' && payment_id.nil?
+    end
+
   end
 end
