@@ -22,6 +22,7 @@ module Gemgento
 
     validates :customer_email, format: /@/, allow_nil: true
     validates :status, presence: true
+    validates :increment_id, :magento_id, uniqueness: true
 
     after_save :mark_quote_converted, if: -> { quote && quote.converted_at.nil? && !state.blank? }
 
