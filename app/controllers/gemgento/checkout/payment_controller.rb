@@ -56,8 +56,6 @@ module Gemgento
 
       respond_to do |format|
         if @quote.save
-          @quote.gift_card_codes.each { |code| @quote.apply_coupon(code) }
-
           format.html { redirect_to checkout_confirm_path }
           format.json { render json: { result: true, order: @quote, totals: @quote.totals } }
         else
