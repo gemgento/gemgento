@@ -9,7 +9,7 @@ class AddUniqueIndexesToGemgentoOrders < ActiveRecord::Migration
     if direction == :up
       # remove duplicates
       %w[increment_id magento_id].each do |col|
-        grouped = Gemgento::Order.all.group_by{ |model| [model.attributes[col]] }
+        grouped = Gemgento::Order.all.order(created_at: :desc).group_by{ |model| [model.attributes[col]] }
         grouped.values.each do |duplicates|
           next if duplicates.size == 1
           original = duplicates.shift # or pop for last one
