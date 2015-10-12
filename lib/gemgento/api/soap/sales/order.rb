@@ -184,8 +184,6 @@ module Gemgento
 
             order.reload
 
-            return order
-
           rescue ActiveRecord::RecordInvalid => e
 
             if (tries -= 1).zero?
@@ -203,6 +201,9 @@ module Gemgento
               Rails.logger.debug 'Could not save order, retrying'
              retry
             end
+
+          else
+            return order
           end
 
           def self.sync_magento_address_to_local(source, order, address = nil)
