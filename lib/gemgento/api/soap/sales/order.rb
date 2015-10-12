@@ -96,8 +96,9 @@ module Gemgento
           # Save Magento order to local
           def self.sync_magento_to_local(source)
             return nil if Store.find_by(magento_id: source[:store_id]).nil?
+            tries ||= 2
 
-            order = ::Gemgento::Order.where(increment_id: source[:increment_id]).first_or_initialize
+            order = ::Gemgento::Order.find_or_initialize_by(increment_id: source[:increment_id])
             order.magento_id = source[:order_id]
             order.user = User.find_by(magento_id: source[:customer_id])
             order.tax_amount = source[:tax_amount]
@@ -152,7 +153,7 @@ module Gemgento
             order.increment_id = source[:increment_id]
             order.placed_at = source[:created_at]
             order.store = Store.find_by(magento_id: source[:store_id])
-            order.save
+            order.save!
 
             sync_magento_address_to_local(source[:shipping_address], order, order.shipping_address) unless source[:shipping_address][:address_id].nil?
             sync_magento_address_to_local(source[:billing_address], order, order.billing_address) unless source[:billing_address][:address_id].nil?
@@ -162,7 +163,7 @@ module Gemgento
             unless source[:gift_message_id].nil?
               gift_message = API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
               order.gift_message = gift_message
-              order.save
+              order.save!
             end
 
             order.line_items.destroy_all
@@ -182,7 +183,26 @@ module Gemgento
             end
 
             order.reload
+
             return order
+
+          rescue ActiveRecord::RecordInvalid => e
+
+            if (tries -= 1).zero?
+              raise e
+            else
+              Rails.logger.debug 'Could not save order, retrying'
+              retry
+            end
+
+          rescue ActiveRecord::RecordNotUnique => e
+
+            if (tries -= 1).zero?
+              raise e
+            else
+              Rails.logger.debug 'Could not save order, retrying'
+             retry
+            end
           end
 
           def self.sync_magento_address_to_local(source, order, address = nil)
@@ -206,7 +226,7 @@ module Gemgento
             address.is_billing = (source[:address_type] == 'billing')
             address.is_shipping = (source[:address_type] == 'shipping')
             address.sync_needed = false
-            address.save validate: false
+            address.save! validate: false
 
             return address
           end
@@ -231,7 +251,7 @@ module Gemgento
             payment.cc_exp_year = source[:cc_exp_year]
             payment.cc_ss_start_month = source[:cc_ss_start_month]
             payment.cc_ss_start_year = source[:cc_ss_start_year]
-            payment.save validate: false
+            payment.save! validate: false
 
             payment
           end
@@ -244,7 +264,7 @@ module Gemgento
             order_status.is_customer_notified = source[:is_customer_notified].to_i
             order_status.comment = source[:comment]
             order_status.created_at = source[:created_at]
-            order_status.save
+            order_status.save!
 
             order_status
           end
@@ -303,12 +323,12 @@ module Gemgento
             line_item.weee_tax_row_disposition = source[:weee_tax_row_disposition]
             line_item.base_weee_tax_disposition = source[:base_weee_tax_disposition]
             line_item.base_weee_tax_row_disposition = source[:base_weee_tax_row_disposition]
-            line_item.save
+            line_item.save!
 
             unless source[:gift_message_id].nil?
               gift_message = API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
               line_item.gift_message = gift_message
-              line_item.save
+              line_item.save!
             end
 
             line_item
