@@ -33,11 +33,11 @@ module Gemgento
                 order_increment_id: shipment.order.increment_id,
                 email: shipment.email ? 1 : 0,
                 comment: shipment.comment,
-                include_comment: shipment.include_comment
+                include_comment: shipment.include_comment ? 1 : 0
             }
 
             if shipment.shipment_items.any?
-              message[:items_qty] = {item: compose_items_qty(shipment.shipment_items)}
+              message[:items_qty] = { item: compose_items_qty(shipment.shipment_items) }
             end
 
             response = MagentoApi.create_call(:sales_order_shipment_create, message)
