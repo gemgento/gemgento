@@ -9,10 +9,10 @@ module Gemgento
 
       respond_to do |format|
         if result == true
-          format.html { redirect_to cart_path, notice: 'The coupon was successfully applied.' }
+          format.html { redirect_to :back, notice: 'The coupon was successfully applied.' }
           format.json { render json: { result: true, order: @quote, totals: @quote.totals } }
         else
-          format.html { redirect_to cart_path, alert: @quote.errors[:base].to_sentence }
+          format.html { redirect_to :back, alert: @quote.errors[:base].to_sentence }
           format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
         end
       end
@@ -23,10 +23,10 @@ module Gemgento
 
       respond_to do |format|
         if result == true
-          format.html { redirect_to cart_path, notice: 'The coupons have been removed.' }
+          format.html { redirect_to :back, notice: 'The coupons have been removed.' }
           format.json { render json: { result: true, order: @quote, totals: @quote.totals } }
         else
-          format.html { redirect_to cart_path, alert: @quote.errors[:base].to_sentence }
+          format.html { redirect_to :back, alert: @quote.errors[:base].to_sentence }
           format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
         end
       end
