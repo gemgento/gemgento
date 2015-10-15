@@ -131,7 +131,7 @@ module Gemgento
       response = API::SOAP::GiftCard.quote_remove(self.magento_id, code, self.store.magento_id)
 
       if response.success?
-        self.gift_card_codes = self.gift_card_codes.delete code
+        self.gift_card_codes.delete code
         save
         return true
       else
