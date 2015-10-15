@@ -19,13 +19,12 @@ module Gemgento
     after_find :explode_street_address
     before_validation :strip_whitespace, :implode_street_address
 
-    before_create :create_magento_address, if: -> { addressable_type == 'Gemgento::User' && magento_id.nil? }
-    before_update :update_magento_address, if: -> { addressable_type == 'Gemgento::User' && !magento_id.nil? && sync_needed? }
-    before_destroy :destroy_magento_address, if: -> { addressable_type == 'Gemgento::User' && !magento_id.nil? }
+    before_create :create_magento_address, if: -> { is_addressable_user? && magento_id.nil? }
+    before_update :update_magento_address, if: -> { is_addressable_user? && !magento_id.nil? && sync_needed? }
+    before_destroy :destroy_magento_address, if: -> { is_addressable_user? && !magento_id.nil? }
 
-    after_save :enforce_single_default, if: -> { addressable_type == 'Gemgento::User' }
-
-    after_commit :copy_from_quote_to_user, if: -> { addressable_type == 'Gemgento::Quote' && copy_to_user.to_bool }
+    after_save :enforce_single_default, if: -> { is_addressable_user? }
+    after_save :copy_from_addressable_to_user, if: -> { copy_to_user && addressable && addressable.try(:user) }
 
     default_scope -> { order(is_billing: :desc, is_shipping: :desc, updated_at: :desc) }
 
@@ -61,15 +60,17 @@ module Gemgento
       end
     end
 
-    # Duplicate address from quote to user.
+    # Duplicate address from addressable user to user.
     #
-    # @return [Void] the newly created Address.
-    def copy_from_quote_to_user
+    # @return [Gemgento::Address] the newly created Address.
+    def copy_from_addressable_to_user
       address = duplicate
       address.addressable = addressable.user
       address.is_billing = self.is_billing
       address.is_shipping = self.is_shipping
       address.save
+
+      return address
     end
 
     # Set the street attribute.  Override required to explode the street into address lines.
@@ -78,10 +79,14 @@ module Gemgento
       explode_street_address
     end
 
+    def is_addressable_user?
+      addressable && addressable.is_a?(Gemgento::User)
+    end
+
     # Duplicate an address.  Different from dup because it avoids unique magento attributes and includes
     # country and region associations.
     #
-    # @return [Address] newly duplicated address
+    # @return [Gemgento::Address] newly duplicated address
     def duplicate
       address = self.dup
       address.region = self.region
