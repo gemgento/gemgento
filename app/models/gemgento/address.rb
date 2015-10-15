@@ -24,7 +24,8 @@ module Gemgento
     before_destroy :destroy_magento_address, if: -> { addressable_type == 'Gemgento::User' && !magento_id.nil? }
 
     after_save :enforce_single_default, if: -> { addressable_type == 'Gemgento::User' }
-    after_save :copy_from_quote_to_user, if: -> { addressable_type == 'Gemgento::Quote' && copy_to_user.to_bool }
+
+    after_commit :copy_from_quote_to_user, if: -> { addressable_type == 'Gemgento::Quote' && copy_to_user.to_bool }
 
     default_scope -> { order(is_billing: :desc, is_shipping: :desc, updated_at: :desc) }
 
