@@ -98,7 +98,7 @@ module Gemgento
             return nil if Store.find_by(magento_id: source[:store_id]).nil?
             tries ||= 2
 
-            order = ::Gemgento::Order.find_or_initialize_by(increment_id: source[:increment_id])
+            order ||= ::Gemgento::Order.find_or_initialize_by(increment_id: source[:increment_id])
             order.magento_id = source[:order_id]
             order.user = User.find_by(magento_id: source[:customer_id])
             order.tax_amount = source[:tax_amount]
@@ -150,7 +150,6 @@ module Gemgento
             order.customer_note_notify = source[:customer_note_notify]
             order.customer_is_guest = source[:customer_is_guest]
             order.email_sent = source[:email_sent]
-            order.increment_id = source[:increment_id]
             order.placed_at = source[:created_at]
             order.store = Store.find_by(magento_id: source[:store_id])
             order.save!
@@ -184,22 +183,24 @@ module Gemgento
 
             order.reload
 
+          # These rescues ensure that the order sync is threadsafe.  Duplicates can happen during the quote conversion
+          # process; Magento pushes order email, while quote is fetching new order.
           rescue ActiveRecord::RecordInvalid => e
 
-            if (tries -= 1).zero?
-              raise e
-            else
+            if order = ::Gemgento::Order.find_by(increment_id: source[:increment_id]) && !(tries -= 1).zero?
               Rails.logger.debug 'Could not save order, retrying'
               retry
+            else
+              raise e
             end
 
           rescue ActiveRecord::RecordNotUnique => e
 
-            if (tries -= 1).zero?
-              raise e
-            else
+            if order = ::Gemgento::Order.find_by(increment_id: source[:increment_id]) && !(tries -= 1).zero?
               Rails.logger.debug 'Could not save order, retrying'
-             retry
+              retry
+            else
+              raise e
             end
 
           else
