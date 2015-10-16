@@ -187,7 +187,7 @@ module Gemgento
           # process; Magento pushes order email, while quote is fetching new order.
           rescue ActiveRecord::RecordInvalid => e
 
-            if order = ::Gemgento::Order.find_by(increment_id: source[:increment_id]) && !(tries -= 1).zero?
+            if !(tries -= 1).zero? && order = ::Gemgento::Order.find_by(increment_id: source[:increment_id])
               Rails.logger.debug 'Could not save order, retrying'
               retry
             else
@@ -196,7 +196,7 @@ module Gemgento
 
           rescue ActiveRecord::RecordNotUnique => e
 
-            if order = ::Gemgento::Order.find_by(increment_id: source[:increment_id]) && !(tries -= 1).zero?
+            if !(tries -= 1).zero? && order = ::Gemgento::Order.find_by(increment_id: source[:increment_id])
               Rails.logger.debug 'Could not save order, retrying'
               retry
             else
