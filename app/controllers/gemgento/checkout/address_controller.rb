@@ -46,18 +46,18 @@ module Gemgento
 
     def build_billing_address
       billing_address = current_user.default_billing_address if user_signed_in?
-      billing_address = billing_address.nil? ? Address.new : billing_address.clone
+      billing_address = billing_address.nil? ? Address.new : billing_address.duplicate
       billing_address.is_billing = true
       billing_address.is_shipping = false
-      @quote.build_billing_address(billing_address.duplicate.attributes.reject{ |key| key == :id })
+      @quote.build_billing_address(billing_address.attributes.reject{ |key| key == 'id' })
     end
 
     def build_shipping_address
       shipping_address = current_user.default_shipping_address if user_signed_in?
-      shipping_address = shipping_address.nil? ? Address.new : shipping_address.clone
+      shipping_address = shipping_address.nil? ? Address.new : shipping_address.duplicate
       shipping_address.is_shipping = true
       shipping_address.is_billing = false
-      @quote.build_shipping_address(shipping_address.duplicate.attributes.reject{ |key| key == :id })
+      @quote.build_shipping_address(shipping_address.attributes.reject{ |key| key == 'id' })
     end
 
   end
