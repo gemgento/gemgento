@@ -27,7 +27,6 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'paperclip', '>= 4.0.0'
   gem.add_dependency 'paperclip-meta', '>= 1.1.0'
   gem.add_dependency 'rails', '>= 4.1'
-  gem.add_dependency 'responders', '>= 0.9'
   gem.add_dependency 'sass-rails', '>= 4.0.0'
   gem.add_dependency 'savon', '~> 2.2.0'
   gem.add_dependency 'shopify_api', '~> 3.2.4'
