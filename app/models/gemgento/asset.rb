@@ -31,7 +31,7 @@ module Gemgento
       raise 'Asset does not have an associated product.' if self.product.nil?
       raise 'Asset does not have an associated store.' if self.store.nil?
 
-      new_file = file.is_a?(URI) ? file.open : file
+      new_file = file.is_a?(URI) ? file.open(http_basic_authentication: [Gemgento::Config[:magento][:auth_username], Gemgento::Config[:magento][:auth_password]]) : file
 
       matching_file = nil
       matching_asset = nil
