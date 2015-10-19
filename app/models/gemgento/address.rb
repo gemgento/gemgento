@@ -42,24 +42,6 @@ module Gemgento
       return result
     end
 
-    # Save order addresses to user address book.  Any new address will be default.
-    #
-    # @param order [Order] the order to save addresses from
-    # @param save_billing [Boolean] true to save the billing address
-    # @param save_shipping [Boolean] true to save the shipping address
-    # @param shipping_same_as_billing [Boolean] true if the shipping and billing addresses are the same
-    def self.save_from_order(order, save_billing, save_shipping, shipping_same_as_billing)
-      if save_billing && shipping_same_as_billing
-        Address.copy_to_address_book(order.billing_address, order.user, true, true)
-      elsif save_billing && !shipping_same_as_billing
-        Address.copy_to_address_book(order.billing_address, order.user, true, false)
-      end
-
-      if save_shipping && !shipping_same_as_billing
-        Address.copy_to_address_book(order.shipping_address, order.user, false, true)
-      end
-    end
-
     # Duplicate address from addressable user to user.
     #
     # @return [Gemgento::Address] the newly created Address.
