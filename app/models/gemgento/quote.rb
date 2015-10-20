@@ -416,6 +416,7 @@ module Gemgento
     #
     # @return [Void]
     def copy_billing_address_to_shipping_address
+      Rails.logger.debug 'Copying billing address to shipping address'
       self.build_shipping_address if self.shipping_address.nil?
       self.shipping_address.attributes = self.billing_address.duplicate.attributes.reject{ |k| k == 'id' }.merge(
           {
@@ -427,12 +428,14 @@ module Gemgento
               is_billing: false
           }
       )
+      self.shipping_address.addressable = self
     end
 
     # Duplicate the shipping address to use as billing address.
     #
     # @return [Void]
     def copy_shipping_address_to_billing_address
+      Rails.logger.debug 'Copying shipping address to billing address'
       self.build_billing_address if self.billing_address.nil?
       self.billing_address.attributes = self.shipping_address.duplicate.attributes.reject{ |k| k == 'id' }.merge(
           {
@@ -444,6 +447,7 @@ module Gemgento
               is_billing: true
           }
       )
+      self.billing_address.addressable = self
     end
 
     # Set quote totals based on Magento API call.
