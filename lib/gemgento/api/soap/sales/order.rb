@@ -94,6 +94,8 @@ module Gemgento
           private
 
           # Save Magento order to local
+          #
+          # @return [::Gemgento::Order]
           def self.sync_magento_to_local(source)
             return nil if Store.find_by(magento_id: source[:store_id]).nil?
 
