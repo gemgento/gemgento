@@ -9,7 +9,7 @@ module Gemgento
     has_many :line_items, as: :itemizable, dependent: :destroy
     has_many :products, through: :line_items
 
-    has_one :order
+    has_one :order, class_name: '::Gemgento::Order'
     has_one :payment, as: :payable, dependent: :destroy
     has_one :billing_address, -> { where is_billing: true }, class_name: 'Address', as: :addressable, dependent: :destroy
     has_one :shipping_address, -> { where is_shipping: true }, class_name: 'Address', as: :addressable, dependent: :destroy
@@ -303,7 +303,7 @@ module Gemgento
     # @param increment_id [Integer]
     # @return [Void]
     def mark_converted!(increment_id)
-      self.order = Gemgento::API::SOAP::Sales::Order.fetch(increment_id)
+      Gemgento::API::SOAP::Sales::Order.fetch(increment_id)
       self.converted_at = Time.now
       self.save
       self.reload
