@@ -303,12 +303,15 @@ module Gemgento
     # @param increment_id [Integer]
     # @return [Void]
     def mark_converted!(increment_id)
-      self.order = API::SOAP::Sales::Order.fetch(increment_id) #grab all the new order information
+      Gemgento::API::SOAP::Sales::Order.fetch(increment_id) # grab all the new order information
       self.converted_at = Time.now
       self.save
+      self.reload
 
-      HeartBeat.perform_async if Rails.env.production?
-      API::SOAP::Authnetcim::Payment.fetch(self.user) if self.user && Config[:extensions]['authorize-net-cim-payment-module']
+      if self.user && Config[:extensions]['authorize-net-cim-payment-module']
+        Gemgento::API::SOAP::Authnetcim::Payment.fetch(self.user)
+      end
+
       after_convert_success
     end
 

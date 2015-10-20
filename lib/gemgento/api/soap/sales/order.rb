@@ -96,7 +96,6 @@ module Gemgento
           # Save Magento order to local
           def self.sync_magento_to_local(source)
             return nil if Store.find_by(magento_id: source[:store_id]).nil?
-            tries ||= 2
 
             order ||= ::Gemgento::Order.find_or_initialize_by(increment_id: source[:increment_id])
             order.magento_id = source[:order_id]
@@ -144,7 +143,7 @@ module Gemgento
             order.customer_email = source[:customer_email]
             order.customer_firstname = source[:customer_firstname]
             order.customer_lastname = source[:customer_lastname]
-            order.quote = Quote.find_by(magento_id: source[:quote_id])
+            order.quote = Gemgento::Quote.find_by(magento_id: source[:quote_id])
             order.is_virtual = source[:is_virtual]
             order.user_group = UserGroup.where(magento_id: source[:customer_group_id]).first
             order.customer_note_notify = source[:customer_note_notify]
@@ -152,7 +151,7 @@ module Gemgento
             order.email_sent = source[:email_sent]
             order.placed_at = source[:created_at]
             order.store = Store.find_by(magento_id: source[:store_id])
-            order.save!
+            order.save! validate: false
 
             sync_magento_address_to_local(source[:shipping_address], order, order.shipping_address) unless source[:shipping_address][:address_id].nil?
             sync_magento_address_to_local(source[:billing_address], order, order.billing_address) unless source[:billing_address][:address_id].nil?
@@ -162,7 +161,7 @@ module Gemgento
             unless source[:gift_message_id].nil?
               gift_message = API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
               order.gift_message = gift_message
-              order.save!
+              order.save! validate: false
             end
 
             order.line_items.destroy_all
@@ -182,29 +181,10 @@ module Gemgento
             end
 
             order.reload
-
-          # These rescues ensure that the order sync is threadsafe.  Duplicates can happen during the quote conversion
-          # process; Magento pushes order email, while quote is fetching new order.
-          rescue ActiveRecord::RecordInvalid => e
-
-            if !(tries -= 1).zero? && order = ::Gemgento::Order.find_by(increment_id: source[:increment_id])
-              Rails.logger.debug 'Could not save order, retrying'
-              retry
-            else
-              raise e
-            end
+            return order
 
           rescue ActiveRecord::RecordNotUnique => e
-
-            if !(tries -= 1).zero? && order = ::Gemgento::Order.find_by(increment_id: source[:increment_id])
-              Rails.logger.debug 'Could not save order, retrying'
-              retry
-            else
-              raise e
-            end
-
-          else
-            return order
+            return ::Gemgento::Order.find_by(increment_id: source[:increment_id])
           end
 
           def self.sync_magento_address_to_local(source, order, address = nil)
