@@ -24,7 +24,7 @@ module Gemgento
     before_destroy :destroy_magento_address, if: -> { is_addressable_user? && !magento_id.nil? }
 
     after_save :enforce_single_default, if: -> { is_addressable_user? }
-    after_save :copy_from_addressable_to_user, if: -> { copy_to_user && addressable && addressable.try(:user) }
+    after_save :copy_from_addressable_to_user, if: -> { copy_to_user && !addressable.nil? && addressable.try(:user) }
 
     default_scope -> { order(is_billing: :desc, is_shipping: :desc, updated_at: :desc) }
 
@@ -62,7 +62,7 @@ module Gemgento
     end
 
     def is_addressable_user?
-      addressable && addressable.is_a?(Gemgento::User)
+      !addressable.nil? && addressable.is_a?(Gemgento::User)
     end
 
     # Duplicate an address.  Different from dup because it avoids unique magento attributes and includes
