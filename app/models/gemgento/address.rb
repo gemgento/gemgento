@@ -14,14 +14,14 @@ module Gemgento
     validates_uniqueness_of :addressable_id,
                             scope: [:addressable_type, :street, :city, :country, :region, :postcode, :telephone],
                             message: 'address is not unique',
-                            if: -> { addressable_type == 'Gemgento::User' }
+                            if: -> { is_addressable_user? }
 
     after_find :explode_street_address
     before_validation :strip_whitespace, :implode_street_address
 
-    before_create :create_magento_address, if: -> { is_addressable_user? && magento_id.nil? }
-    before_update :update_magento_address, if: -> { is_addressable_user? && !magento_id.nil? && sync_needed? }
-    before_destroy :destroy_magento_address, if: -> { is_addressable_user? && !magento_id.nil? }
+    before_create :create_magento_address, if: -> { sync_needed? && magento_id.nil?  && is_addressable_user? }
+    before_update :update_magento_address, if: -> { sync_needed? && !magento_id.nil? && is_addressable_user? }
+    before_destroy :destroy_magento_address, if: -> { !magento_id.nil? && is_addressable_user?  }
 
     after_save :enforce_single_default, if: -> { is_addressable_user? }
     after_save :copy_from_addressable_to_user, if: -> { copy_to_user.to_bool && !addressable.nil? && addressable.try(:user) }
@@ -47,9 +47,10 @@ module Gemgento
     # @return [Gemgento::Address] the newly created Address.
     def copy_from_addressable_to_user
       address = duplicate
-      address.addressable = addressable.user
+      address.addressable = self.addressable.user
       address.is_billing = self.is_billing
       address.is_shipping = self.is_shipping
+      address.sync_needed = true
       address.save
 
       return address
@@ -73,12 +74,12 @@ module Gemgento
       address = self.dup
       address.region = self.region
       address.country = self.country
+      address.magento_id = nil
       address.addressable = nil
       address.is_billing = false
       address.is_shipping = false
       address.increment_id = nil
       address.sync_needed = false
-      address.magento_id = nil
 
       return address
     end
