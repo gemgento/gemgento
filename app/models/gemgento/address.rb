@@ -10,21 +10,21 @@ module Gemgento
 
     attr_accessor :address1, :address2, :address3, :copy_to_user
 
-    validates :region, presence: true, if: -> { !country.nil? && !country.regions.empty? }
+    validates :region, presence: true, if: Proc.new { |address| !address.country.nil? && address.country.regions.any? }
     validates_uniqueness_of :addressable_id,
                             scope: [:addressable_type, :street, :city, :country, :region, :postcode, :telephone],
                             message: 'address is not unique',
-                            if: -> { is_addressable_user? }
+                            if: :is_addressable_user?
 
     after_find :explode_street_address
     before_validation :strip_whitespace, :implode_street_address
 
-    before_create :create_magento_address, if: -> { sync_needed? && magento_id.nil?  && is_addressable_user? }
-    before_update :update_magento_address, if: -> { sync_needed? && !magento_id.nil? && is_addressable_user? }
-    before_destroy :destroy_magento_address, if: -> { !magento_id.nil? && is_addressable_user?  }
+    before_create :create_magento_address, if: :create_magento_address?
+    before_update :update_magento_address, if: :update_magento_address?
+    before_destroy :destroy_magento_address, if: :update_magento_address?
 
-    after_save :enforce_single_default, if: -> { is_addressable_user? }
-    after_save :copy_from_addressable_to_user, if: -> { copy_to_user.to_bool && !addressable.nil? && addressable.try(:user) }
+    after_save :enforce_single_default, if: :is_addressable_user?
+    after_save :copy_from_addressable_to_user, if: :copy_from_addressable_to_user?
 
     default_scope -> { order(is_billing: :desc, is_shipping: :desc, updated_at: :desc) }
 
@@ -56,14 +56,15 @@ module Gemgento
       return address
     end
 
+    # @return [Boolean]
+    def copy_from_addressable_to_user?
+      self.copy_to_user.to_bool && self.addressable.try(:user).is_a?(Gemgento::User)
+    end
+
     # Set the street attribute.  Override required to explode the street into address lines.
     def street=(value)
       super
       explode_street_address
-    end
-
-    def is_addressable_user?
-      !addressable.nil? && addressable.is_a?(Gemgento::User)
     end
 
     # Duplicate an address.  Different from dup because it avoids unique magento attributes and includes
@@ -82,6 +83,10 @@ module Gemgento
       address.sync_needed = false
 
       return address
+    end
+
+    def is_addressable_user?
+      self.addressable.is_a?(Gemgento::User)
     end
 
     private
@@ -135,6 +140,11 @@ module Gemgento
       end
     end
 
+    # @return [Boolean]
+    def create_magento_address?
+      self.magento_id.nil? && self.is_addressable_user?
+    end
+
     # Update associated address in Magento.
     #
     # @return [Boolean]
@@ -146,6 +156,11 @@ module Gemgento
         errors.add(:base, response.body[:faultstring])
         return false
       end
+    end
+
+    # @return [Boolean]
+    def update_magento_address?
+      !self.magento_id.nil? && self.is_addressable_user?
     end
 
     # Destroy the address in Magento.  This is the before destroy callback.
