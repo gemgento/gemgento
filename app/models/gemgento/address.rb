@@ -130,7 +130,10 @@ module Gemgento
     #
     # @return [Boolean]
     def create_magento_address
+      return true unless self.create_magento_address?
+
       response = API::SOAP::Customer::Address.create(self)
+
       if response.success?
         self.magento_id = response.body[:result]
         return true
@@ -149,7 +152,10 @@ module Gemgento
     #
     # @return [Boolean]
     def update_magento_address
+      return true unless self.update_magento_address?
+
       response = API::SOAP::Customer::Address.update(self)
+
       if response.success?
         return true
       else
@@ -167,6 +173,8 @@ module Gemgento
     #
     # @return [void]
     def destroy_magento_address
+      return true unless self.update_magento_address?
+
       response = API::SOAP::Customer::Address.delete(self.magento_id)
 
       if response.success?
