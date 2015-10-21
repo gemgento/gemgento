@@ -89,6 +89,20 @@ module Gemgento
       self.addressable.is_a?(Gemgento::User)
     end
 
+    # Check if a Magento address can be created.
+    #
+    # @return [Boolean]
+    def create_magento_address?
+      self.magento_id.nil? && self.is_addressable_user?
+    end
+
+    # Check if a Magento address can be updated.
+    #
+    # @return [Boolean]
+    def update_magento_address?
+      !self.magento_id.nil? && self.is_addressable_user?
+    end
+
     private
 
     # Strip attributes where leading/trailing whitespace could pose problems.
@@ -143,11 +157,6 @@ module Gemgento
       end
     end
 
-    # @return [Boolean]
-    def create_magento_address?
-      self.magento_id.nil? && self.is_addressable_user?
-    end
-
     # Update associated address in Magento.
     #
     # @return [Boolean]
@@ -162,11 +171,6 @@ module Gemgento
         errors.add(:base, response.body[:faultstring])
         return false
       end
-    end
-
-    # @return [Boolean]
-    def update_magento_address?
-      !self.magento_id.nil? && self.is_addressable_user?
     end
 
     # Destroy the address in Magento.  This is the before destroy callback.
