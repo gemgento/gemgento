@@ -3,12 +3,16 @@ module Gemgento
     module SOAP
       class GiftCard
 
+        def self.check(code)
+          MagentoApi.create_call(:giftcard_check, code: code)
+        end
+
         def self.create(data)
-          MagentoApi.create_call(:giftcard_create, {data: data})
+          MagentoApi.create_call(:giftcard_create, data: data)
         end
 
         def self.update(code, data)
-          MagentoApi.create_call(:giftcard_update, {code: code, data: data})
+          MagentoApi.create_call(:giftcard_update, code: code, data: data)
         end
 
         def self.quote_add(quote_id, code, store_id)
