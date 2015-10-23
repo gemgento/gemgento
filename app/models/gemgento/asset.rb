@@ -28,11 +28,6 @@ module Gemgento
     # @param file [File, TempFile] a file to be associated with the Asset
     # @return [void]
     def set_file(file)
-      raise 'Asset does not have an associated product.' if self.product.nil?
-      raise 'Asset does not have an associated store.' if self.store.nil?
-
-      new_file = file.is_a?(URI) ? file.open(http_basic_authentication: [Gemgento::Config[:magento][:auth_username], Gemgento::Config[:magento][:auth_password]]) : file
-
       matching_file = nil
       matching_asset = nil
 
@@ -40,7 +35,7 @@ module Gemgento
         next if asset.asset_file.nil?
         next if asset.store == self.store && asset.id != self.id # don't compare AssetFiles from the same store unless it's the same Asset
 
-        if File.exist?(asset.asset_file.file.path(:original)) && FileUtils.compare_file(asset.asset_file.file.path(:original), new_file)
+        if File.exist?(asset.asset_file.file.path(:original)) && FileUtils.compare_file(asset.asset_file.file.path(:original), file)
           matching_file = asset.asset_file
           matching_asset = asset
           break

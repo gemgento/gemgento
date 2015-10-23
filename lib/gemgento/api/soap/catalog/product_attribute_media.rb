@@ -138,7 +138,7 @@ module Gemgento
             asset.product = product
             asset.sync_needed = false
             asset.store = store
-            asset.set_file(URI.parse(source[:url]))
+            asset.set_file ::Gemgento::AssetFile.from_url(source[:url])
             asset.save
 
             # assign AssetTypes
