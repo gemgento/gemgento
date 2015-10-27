@@ -8,7 +8,7 @@ module Gemgento
     has_many :assets, dependent: :destroy
     has_many :bundle_items, class_name: 'Gemgento::Bundle::Item', dependent: :destroy
     has_many :bundle_options, class_name: 'Gemgento::Bundle::Option', dependent: :destroy
-    has_many :categories, through: :product_categories, class_name: 'Gemgento::Category'
+    has_many :categories, -> { uniq }, through: :product_categories, class_name: 'Gemgento::Category'
     has_many :inventories, class_name: 'Gemgento::Inventory'
     has_many :line_items, class_name: 'Gemgento::LineItem'
     has_many :price_tiers, class_name: 'Gemgento::PriceTier'
