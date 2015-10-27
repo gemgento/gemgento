@@ -15,7 +15,7 @@ module Gemgento
     has_many :product_attribute_values, class_name: 'Gemgento::ProductAttributeValue', dependent: :destroy
     has_many :product_attributes, through: :product_attribute_values, class_name: 'Gemgento::ProductAttribute'
     has_many :product_attribute_options, through: :product_attribute_values, class_name: 'Gemgento::ProductAttributeOption'
-    has_many :product_categories, -> { distinct }, dependent: :destroy
+    has_many :product_categories, class_name: '::Gemgento::ProductCategory', dependent: :destroy
     has_many :relations, as: :relatable, class_name: 'Relation', dependent: :destroy
     has_many :shipment_items
     has_many :wishlist_items
