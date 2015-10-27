@@ -459,9 +459,9 @@ module Gemgento
     # @return [Gemgento::Category]
     def current_category(category_id = nil, store = nil)
       @current_category ||= begin
-        self.categories(store).active.navigation.find(category_id)
+        self.categories(store || Gemgento::Store.current).active.navigation.find(category_id)
       rescue ActiveRecord::RecordNotFound
-        self.categories(store).active.navigation.bottom_level.first!
+        self.categories(store || Gemgento::Store.current).active.navigation.bottom_level.first!
       end
     end
 
