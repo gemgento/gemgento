@@ -455,12 +455,13 @@ module Gemgento
     # then the lowest level navigation category is returned.
     #
     # @param category_id [Integer] id of a preferred category to return
+    # @param store [Gemgento::Store]
     # @return [Gemgento::Category]
-    def current_category(category_id = nil)
+    def current_category(category_id = nil, store = nil)
       @current_category ||= begin
-        self.categories.active.navigation.find(category_id)
-      rescue
-        (self.categories.active.navigation & Gemgento::Category.active.navigation.bottom_level).first
+        self.categories(store).active.navigation.find(category_id)
+      rescue ActiveRecord::RecordNotFound
+        self.categories(store).active.navigation.bottom_level.first!
       end
     end
 
@@ -476,6 +477,15 @@ module Gemgento
     # @return [Boolean]
     def simple?
       magento_type == 'simple'
+    end
+
+    # Categories related to the product.
+    #
+    # @param store [Gemgento::Store]
+    # @return []
+    def categories(store = nil)
+      store ||= Gemgento::Store.current
+      Gemgento::Category.where(id: self.product_categories.where(store: store).pluck(:category_id))
     end
 
     private

@@ -164,15 +164,13 @@ module Gemgento
     # @param store [Store, nil]
     # @return [ActiveRecord::Associations::CollectionProxy(Product)]
     def products(store = nil)
-      if store.nil?
-        return super
-      else
-        return Product.joins(:product_categories).where(
-            'gemgento_product_categories.store_id = ? AND gemgento_product_categories.category_id = ?',
-            store.id,
-            self.id
-        ).order('gemgento_product_categories.position ASC')
-      end
+      return super if store.nil?
+
+      Product.joins(:product_categories).where(
+          'gemgento_product_categories.store_id = ? AND gemgento_product_categories.category_id = ?',
+          store.id,
+          self.id
+      ).order('gemgento_product_categories.position ASC')
     end
 
     private
