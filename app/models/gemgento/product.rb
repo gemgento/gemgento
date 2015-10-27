@@ -484,7 +484,7 @@ module Gemgento
     # @param store [Gemgento::Store]
     # @return []
     def categories(store = nil)
-      store ||= Gemgento::Store.current
+      return super if store.nil?
       Gemgento::Category.where(id: self.product_categories.where(store: store).pluck(:category_id))
     end
 
