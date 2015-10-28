@@ -100,10 +100,9 @@ module Gemgento
       logger = Logger.new('log/magento_api.log')
 
       if response.success? && Gemgento::Config[:magento][:debug]
-        # puts response.locals.options.message
-        logger.debug "SUCCESS - Function: #{function} - Message: #{message} - Response: #{response.body}"
+        logger.debug "SUCCESS - Function: #{function} - Message: #{sanitize_message message} - Response: #{response.body}"
       elsif !response.success?
-        logger.error "FAIL - Function: #{function} - Message: #{message} - Response: #{response.body}"
+        logger.error "FAIL - Function: #{function} - Message: #{sanitize_message message} - Response: #{response.body}"
       end
     end
 
@@ -146,5 +145,27 @@ module Gemgento
         [subject]
       end
     end
+
+    def self.sanitize_message(message)
+      sanitized_keys = %w[cc_number cc_cid cc_exp_year cc_exp_month]
+
+      if message.is_a?(Hash)
+        message.each do |key, val|
+          if sanitized_keys.include? key.to_s
+            message[key] = '*' * val.size
+          else
+            message[key] = sanitize_message(val)
+          end
+        end
+
+      elsif message.is_a?(Array)
+        message.each_with_index do |val, i|
+          message[i] = sanitize_message(val)
+        end
+      end
+
+      return message
+    end
+
   end
 end
