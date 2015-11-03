@@ -151,6 +151,8 @@ module Gemgento
 
       if message.is_a?(Hash)
         message.each do |key, val|
+          next if val.nil?
+
           if sanitized_keys.include? key.to_s
             message[key] = '*' * val.size
           else
