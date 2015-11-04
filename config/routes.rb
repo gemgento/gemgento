@@ -4,8 +4,6 @@ Gemgento::Engine.routes.draw do
   devise_for :admin_users, ActiveAdmin::Devise.config
   ActiveAdmin.routes(self)
 
-  mount_devise_token_auth_for 'Gemgento::ApiUser', at: 'api/v1/auth'
-
   get '/error/:action', :controller => "errors"
 
   get '/addresses/region_options', to: 'addresses#region_options'
@@ -120,4 +118,14 @@ Gemgento::Engine.routes.draw do
   get '/gemgento/contact',        to: 'pages#contact'
   get '/gemgento/terms-of-use',   to: 'pages#terms_of_use', as: 'terms_of_use'
   get '/gemgento/return-policy',  to: 'pages#return_policy', as: 'return_policy'
+
+  namespace :api, defaults: { format: 'json' } do
+    namespace :v1, defaults: { page: { number: 1, size: 20 } } do
+      resources :categories, only: [:index, :show] do
+        resources :products, only: :index
+      end
+
+      resources :products, only: [:index, :show]
+    end
+  end
 end
