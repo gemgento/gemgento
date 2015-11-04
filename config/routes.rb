@@ -4,6 +4,8 @@ Gemgento::Engine.routes.draw do
   devise_for :admin_users, ActiveAdmin::Devise.config
   ActiveAdmin.routes(self)
 
+  mount_devise_token_auth_for 'Gemgento::ApiUser', at: 'api/v1/auth'
+
   get '/error/:action', :controller => "errors"
 
   get '/addresses/region_options', to: 'addresses#region_options'
