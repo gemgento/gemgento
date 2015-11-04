@@ -3,7 +3,7 @@ module Gemgento
     include ::Gemgento::Api::V1::Base
 
     def index
-      @categories = Category.all.page(params[:page][:number]).per(params[:page][:size])
+      @categories = Category.all.page(@page[:number]).per(@page[:size])
     end
 
     def show

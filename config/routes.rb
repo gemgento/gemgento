@@ -120,7 +120,7 @@ Gemgento::Engine.routes.draw do
   get '/gemgento/return-policy',  to: 'pages#return_policy', as: 'return_policy'
 
   namespace :api, defaults: { format: 'json' } do
-    namespace :v1, defaults: { page: { number: 1, size: 20 } } do
+    namespace :v1 do
       resources :categories, only: [:index, :show] do
         resources :products, only: :index
       end

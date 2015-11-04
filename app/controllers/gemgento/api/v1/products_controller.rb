@@ -9,7 +9,7 @@ module Gemgento
         @products = Gemgento::Product.all
       end
 
-      @products = @products.page(params[:page][:number]).per(20 || params[:page][:size])
+      @products = @products.page(@page[:number]).per(@page[:size])
     end
 
     def show
