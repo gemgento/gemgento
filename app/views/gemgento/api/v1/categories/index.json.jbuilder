@@ -1,4 +1,5 @@
 json.meta do
+  json.store current_store.id
   json.total_pages @categories.total_pages
 end
 

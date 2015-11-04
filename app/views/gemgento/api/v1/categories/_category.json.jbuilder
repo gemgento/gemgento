@@ -26,7 +26,7 @@ json.relationships do
     end
   end
 
-  if category.products.any?
+  if category.products(current_store).any?
     json.products do
       json.data do
         json.array! category.products do |product|
