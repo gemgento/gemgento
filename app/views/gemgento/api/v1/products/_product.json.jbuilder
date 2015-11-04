@@ -8,6 +8,8 @@ json.attributes do
     %w[tier_price group_price].include? code
     json.set! code.to_sym, product.attribute_value(code)
   end
+
+  json.configurable_attribute_order product.configurable_attribute_order(current_store)
 end
 
 json.relationships do
@@ -38,6 +40,24 @@ json.relationships do
       json.array! product.assets.where(store: current_store) do |asset|
         json.type 'assets'
         json.id asset.id
+      end
+    end
+  end
+
+  if product.configurable_products.any?
+    json.configurable_products do
+      json.array! product.configurable_products do |configurable_product|
+        json.type 'products'
+        json.id configurable_product.id
+      end
+    end
+  end
+
+  if product.simple_products.any?
+    json.simple_products do
+      json.array! product.simple_products do |simple_product|
+        json.type 'products'
+        json.id simple_product.id
       end
     end
   end
