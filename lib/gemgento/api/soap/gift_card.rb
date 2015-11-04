@@ -7,6 +7,10 @@ module Gemgento
           MagentoApi.create_call(:giftcard_check, code: code)
         end
 
+        def self.history(code)
+          MagentoApi.create_call(:giftcard_history, code: code)
+        end
+
         def self.create(data)
           MagentoApi.create_call(:giftcard_create, data: data)
         end
