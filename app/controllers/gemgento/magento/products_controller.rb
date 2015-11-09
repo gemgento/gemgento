@@ -155,6 +155,8 @@ module Gemgento
       end
 
       def set_bundle_options(bundle_options_data, product)
+        bundle_option_ids = []
+
         bundle_options_data.each do |bundle_option_data|
           bundle_option = product.bundle_options.find_or_initialize_by(magento_id: bundle_option_data[:id])
           bundle_option.is_required = bundle_option_data[:required].to_i == 1 ? true : false
@@ -165,21 +167,33 @@ module Gemgento
           bundle_option.input_type = Gemgento::Bundle::Option.input_types[bundle_option_data[:type].to_sym]
 
           bundle_option.save
+          bundle_option_ids << bundle_option.id
 
-          unless bundle_option_data[:selections].nil?
-            bundle_option_data[:selections].each do |selection|
-              bundle_item = bundle_option.items.find_or_initialize_by(magento_id: selection[:id])
-              bundle_item.product = Gemgento::Product.find_by(magento_id: selection[:product_id])
-              bundle_item.price_type = selection[:price_type].to_i
-              bundle_item.price_value = selection[:price_value].to_f
-              bundle_item.default_quantity = selection[:qty].to_f
-              bundle_item.is_user_defined_quantity = selection[:can_change_qty].to_i == 1
-              bundle_item.position = selection[:position]
-              bundle_item.is_default = selection[:is_default].to_i == 1
-              bundle_item.save
-            end
+          set_bundle_items(bundle_option, bundle_option_data[:selections])
+        end
+
+        product.bundle_options.where.not(id: bundle_option_ids).destroy_all
+      end
+
+      def set_bundle_items(bundle_option, selections)
+        bundle_item_ids = []
+
+        unless selections.nil?
+          selections.each do |selection|
+            bundle_item = bundle_option.items.find_or_initialize_by(magento_id: selection[:id])
+            bundle_item.product = Gemgento::Product.find_by(magento_id: selection[:product_id])
+            bundle_item.price_type = selection[:price_type].to_i
+            bundle_item.price_value = selection[:price_value].to_f
+            bundle_item.default_quantity = selection[:qty].to_f
+            bundle_item.is_user_defined_quantity = selection[:can_change_qty].to_i == 1
+            bundle_item.position = selection[:position]
+            bundle_item.is_default = selection[:is_default].to_i == 1
+            bundle_item.save
+            bundle_item_ids << bundle_item.id
           end
         end
+
+        bundle_option.items.where.not(id: bundle_item_ids).destroy_all
       end
 
       def get_url_and_file(source)
