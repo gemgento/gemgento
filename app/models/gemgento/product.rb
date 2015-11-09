@@ -101,12 +101,12 @@ module Gemgento
     # @param store [Gemgento::Store]
     # @return [String, Boolean, nil]
     def attribute_value(code, store = nil)
-      store = Store.current if store.nil?
-      product_attribute_value = self.product_attribute_values.select { |value| !value.product_attribute.nil? && value.product_attribute.code == code.to_s && value.store_id == store.id }.first
+      store = Gemgento::Store.current if store.nil?
+      product_attribute_value = self.attribute_values.select { |value| !value.product_attribute.nil? && value.product_attribute.code == code.to_s && value.store_id == store.id }.first
 
       ## if the attribute is not currently associated with the product, check if it exists
       if product_attribute_value.nil?
-        product_attribute = ProductAttribute.find_by(code: code)
+        product_attribute = Gemgento::ProductAttribute.find_by(code: code)
 
         if product_attribute.nil? # throw an error if the code is not recognized
           raise "Unknown product attribute code - #{code}"
@@ -130,6 +130,10 @@ module Gemgento
       end
 
       return value
+    end
+
+    def attribute_values
+      @attribute_values ||= self.product_attribute_values.joins(:product_attribute).includes(:product_attribute)
     end
 
     # Attempts to return attribute_value before error.
