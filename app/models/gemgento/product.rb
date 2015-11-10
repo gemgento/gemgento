@@ -52,7 +52,7 @@ module Gemgento
 
     before_save :create_magento_product, if: -> { sync_needed? && magento_id.nil? }
     before_save :update_magento_product, if: -> { sync_needed? && !magento_id.nil? }
-    after_save :touch_categories, :touch_configurables
+    after_save :touch_categories, :touch_configurables, :touch_bundle_items
 
     before_destroy :delete_associations
 
@@ -578,6 +578,10 @@ module Gemgento
     def touch_configurables
       self.configurable_products.update_all(updated_at: Time.now) if self.changed?
       TouchProduct.perform_async(self.configurable_products.pluck(:id)) if self.changed?
+    end
+
+    def touch_bundle_items
+      TouchWorker.perform_async(Gemgento::Bundle::Item, self.bundle_items.pluck(:id))
     end
 
     def to_ary
