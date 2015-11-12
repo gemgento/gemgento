@@ -11,11 +11,13 @@ module Gemgento
     has_many :categories, -> { uniq }, through: :product_categories, class_name: 'Gemgento::Category'
     has_many :inventories, class_name: 'Gemgento::Inventory'
     has_many :line_items, class_name: 'Gemgento::LineItem'
+    has_many :orders, through: :line_items, source: :itemizable, source_type: 'Gemgento::Order', class_name: 'Gemgento::Order'
     has_many :price_tiers, class_name: 'Gemgento::PriceTier'
     has_many :product_attribute_values, class_name: 'Gemgento::ProductAttributeValue', dependent: :destroy
     has_many :product_attributes, through: :product_attribute_values, class_name: 'Gemgento::ProductAttribute'
     has_many :product_attribute_options, through: :product_attribute_values, class_name: 'Gemgento::ProductAttributeOption'
     has_many :product_categories, class_name: '::Gemgento::ProductCategory', dependent: :destroy
+    has_many :quotes, through: :line_items, source: :itemizable, source_type: 'Gemgento::Quote', class_name: 'Gemgento::Quote'
     has_many :relations, as: :relatable, class_name: 'Relation', dependent: :destroy
     has_many :shipment_items
     has_many :wishlist_items
