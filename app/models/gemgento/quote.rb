@@ -9,7 +9,7 @@ module Gemgento
     has_many :line_items, as: :itemizable, dependent: :destroy
     has_many :products, through: :line_items
 
-    has_one :order
+    has_one :order, class_name: '::Gemgento::Order'
     has_one :payment, as: :payable, dependent: :destroy
     has_one :billing_address, -> { where is_billing: true }, class_name: 'Address', as: :addressable, dependent: :destroy
     has_one :shipping_address, -> { where is_shipping: true }, class_name: 'Address', as: :addressable, dependent: :destroy
@@ -131,7 +131,7 @@ module Gemgento
       response = API::SOAP::GiftCard.quote_remove(self.magento_id, code, self.store.magento_id)
 
       if response.success?
-        self.gift_card_codes = self.gift_card_codes.delete code
+        self.gift_card_codes.delete code
         save
         return true
       else
@@ -305,12 +305,15 @@ module Gemgento
     # @param increment_id [Integer]
     # @return [Void]
     def mark_converted!(increment_id)
-      self.order = API::SOAP::Sales::Order.fetch(increment_id) #grab all the new order information
+      Gemgento::API::SOAP::Sales::Order.fetch(increment_id)
       self.converted_at = Time.now
       self.save
+      self.reload
 
-      HeartBeat.perform_async if Rails.env.production?
-      API::SOAP::Authnetcim::Payment.fetch(self.user) if self.user && Config[:extensions]['authorize-net-cim-payment-module']
+      if self.user && Config[:extensions]['authorize-net-cim-payment-module']
+        Gemgento::API::SOAP::Authnetcim::Payment.fetch(self.user)
+      end
+
       after_convert_success
     end
 
@@ -394,6 +397,17 @@ module Gemgento
       end
     end
 
+    # Determine if a shipping method is required for the Quote.
+    #
+    # @return [Boolean]
+    def shipping_method_required?
+      self.line_items.collect do |li|
+        return true if li.product.magento_type != 'giftvoucher'
+      end
+
+      return false
+    end
+
     private
 
     # Create the quote in Magento.  Used as a before_create callback.
@@ -422,8 +436,9 @@ module Gemgento
     #
     # @return [Void]
     def copy_billing_address_to_shipping_address
+      Rails.logger.debug 'Copying billing address to shipping address'
       self.build_shipping_address if self.shipping_address.nil?
-      self.shipping_address.attributes = self.billing_address.attributes.reject{ |k| k == :id }.merge(
+      self.shipping_address.attributes = self.billing_address.duplicate.attributes.reject{ |k| k == 'id' }.merge(
           {
               id: self.shipping_address ? self.shipping_address.id : nil,
               address1: self.billing_address.address1,
@@ -433,14 +448,16 @@ module Gemgento
               is_billing: false
           }
       )
+      self.shipping_address.addressable = self
     end
 
     # Duplicate the shipping address to use as billing address.
     #
     # @return [Void]
     def copy_shipping_address_to_billing_address
+      Rails.logger.debug 'Copying shipping address to billing address'
       self.build_billing_address if self.billing_address.nil?
-      self.billing_address.attributes = self.shipping_address.attributes.reject{ |k| k == :id }.merge(
+      self.billing_address.attributes = self.shipping_address.duplicate.attributes.reject{ |k| k == 'id' }.merge(
           {
               id: self.billing_address ? self.billing_address.id : nil,
               address1: self.shipping_address.address1,
@@ -450,6 +467,7 @@ module Gemgento
               is_billing: true
           }
       )
+      self.billing_address.addressable = self
     end
 
     # Set quote totals based on Magento API call.
@@ -499,7 +517,7 @@ module Gemgento
             end
           else
             code = total[:title][10..-2]
-            totals[:discounts][code.to_sym] = total[:amount]
+            totals[:discounts][code.to_sym] = total[:amount].to_f
           end
         end
 
@@ -509,8 +527,9 @@ module Gemgento
           totals[:total] += totals[:subtotal]
           totals[:total] += totals[:shipping]
           totals[:total] += totals[:tax]
-          totals[:total] -= totals[:gift_card]
-          totals[:total] -= totals[:discounts].values.sum
+          totals[:total] -= totals[:gift_card].abs
+          totals[:total] -= totals[:discounts].values.inject(0, :+).abs
+          totals[:total] = totals[:total].round(2) # fix loss of float precision
         end
 
         # nominal shipping isn't calculated correctly, so we can set it based on known selected values

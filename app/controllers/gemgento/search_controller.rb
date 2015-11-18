@@ -4,11 +4,11 @@ module Gemgento
     respond_to :json, :html
 
     def index
-      @results = Search.products(params[:query])
+      @results = Gemgento::Search.products(params[:query]).active
 
       respond_to do |format|
         format.html
-        format.json {render json: @results}
+        format.json { render json: @results }
       end
     end
 

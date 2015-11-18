@@ -2,13 +2,13 @@ module Gemgento
 
   # @author Gemgento LLC
   class Category < ActiveRecord::Base
-    has_many :product_categories
+    has_many :product_categories, class_name: '::Gemgento::ProductCategory', dependent: :destroy
     has_many :products, -> { distinct }, through: :product_categories
-    has_many :children, foreign_key: 'parent_id', class_name: 'Category'
+    has_many :children, foreign_key: 'parent_id', class_name: '::Gemgento::Category'
 
     has_one :shopify_adapter, class_name: 'Adapter::ShopifyAdapter', as: :gemgento_model
 
-    belongs_to :parent, foreign_key: 'parent_id', class_name: 'Category'
+    belongs_to :parent, foreign_key: 'parent_id', class_name: '::Gemgento::Category'
 
     has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_categories_stores', class_name: 'Store'
 
@@ -164,15 +164,13 @@ module Gemgento
     # @param store [Store, nil]
     # @return [ActiveRecord::Associations::CollectionProxy(Product)]
     def products(store = nil)
-      if store.nil?
-        return super
-      else
-        return Product.joins(:product_categories).where(
-            'gemgento_product_categories.store_id = ? AND gemgento_product_categories.category_id = ?',
-            store.id,
-            self.id
-        ).order('gemgento_product_categories.position ASC')
-      end
+      return super if store.nil?
+
+      Product.joins(:product_categories).where(
+          'gemgento_product_categories.store_id = ? AND gemgento_product_categories.category_id = ?',
+          store.id,
+          self.id
+      ).order('gemgento_product_categories.position ASC')
     end
 
     private

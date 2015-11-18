@@ -8,14 +8,16 @@ module Gemgento
     has_many :assets, dependent: :destroy
     has_many :bundle_items, class_name: 'Gemgento::Bundle::Item', dependent: :destroy
     has_many :bundle_options, class_name: 'Gemgento::Bundle::Option', dependent: :destroy
-    has_many :categories, through: :product_categories, class_name: 'Gemgento::Category'
+    has_many :categories, -> { uniq }, through: :product_categories, class_name: 'Gemgento::Category'
     has_many :inventories, class_name: 'Gemgento::Inventory'
     has_many :line_items, class_name: 'Gemgento::LineItem'
+    has_many :orders, through: :line_items, source: :itemizable, source_type: 'Gemgento::Order', class_name: 'Gemgento::Order'
     has_many :price_tiers, class_name: 'Gemgento::PriceTier'
     has_many :product_attribute_values, class_name: 'Gemgento::ProductAttributeValue', dependent: :destroy
     has_many :product_attributes, through: :product_attribute_values, class_name: 'Gemgento::ProductAttribute'
     has_many :product_attribute_options, through: :product_attribute_values, class_name: 'Gemgento::ProductAttributeOption'
-    has_many :product_categories, -> { distinct }, dependent: :destroy
+    has_many :product_categories, class_name: '::Gemgento::ProductCategory', dependent: :destroy
+    has_many :quotes, through: :line_items, source: :itemizable, source_type: 'Gemgento::Quote', class_name: 'Gemgento::Quote'
     has_many :relations, as: :relatable, class_name: 'Relation', dependent: :destroy
     has_many :shipment_items
     has_many :wishlist_items
@@ -52,7 +54,7 @@ module Gemgento
 
     before_save :create_magento_product, if: -> { sync_needed? && magento_id.nil? }
     before_save :update_magento_product, if: -> { sync_needed? && !magento_id.nil? }
-    after_save :touch_categories, :touch_configurables
+    after_save :touch_categories, :touch_configurables, :touch_bundle_items
 
     before_destroy :delete_associations
 
@@ -101,12 +103,12 @@ module Gemgento
     # @param store [Gemgento::Store]
     # @return [String, Boolean, nil]
     def attribute_value(code, store = nil)
-      store = Store.current if store.nil?
-      product_attribute_value = self.product_attribute_values.select { |value| !value.product_attribute.nil? && value.product_attribute.code == code.to_s && value.store_id == store.id }.first
+      store = Gemgento::Store.current if store.nil?
+      product_attribute_value = self.attribute_values.select { |value| !value.product_attribute.nil? && value.product_attribute.code == code.to_s && value.store_id == store.id }.first
 
       ## if the attribute is not currently associated with the product, check if it exists
       if product_attribute_value.nil?
-        product_attribute = ProductAttribute.find_by(code: code)
+        product_attribute = Gemgento::ProductAttribute.find_by(code: code)
 
         if product_attribute.nil? # throw an error if the code is not recognized
           raise "Unknown product attribute code - #{code}"
@@ -130,6 +132,10 @@ module Gemgento
       end
 
       return value
+    end
+
+    def attribute_values
+      @attribute_values ||= self.product_attribute_values.joins(:product_attribute).includes(:product_attribute)
     end
 
     # Attempts to return attribute_value before error.
@@ -455,12 +461,13 @@ module Gemgento
     # then the lowest level navigation category is returned.
     #
     # @param category_id [Integer] id of a preferred category to return
+    # @param store [Gemgento::Store]
     # @return [Gemgento::Category]
-    def current_category(category_id = nil)
+    def current_category(category_id = nil, store = nil)
       @current_category ||= begin
-        self.categories.active.navigation.find(category_id)
-      rescue
-        (self.categories.active.navigation & Gemgento::Category.active.navigation.bottom_level).first
+        self.categories(store || Gemgento::Store.current).active.navigation.find(category_id)
+      rescue ActiveRecord::RecordNotFound
+        self.categories(store || Gemgento::Store.current).active.navigation.bottom_level.first!
       end
     end
 
@@ -476,6 +483,15 @@ module Gemgento
     # @return [Boolean]
     def simple?
       magento_type == 'simple'
+    end
+
+    # Categories related to the product.
+    #
+    # @param store [Gemgento::Store]
+    # @return []
+    def categories(store = nil)
+      return super if store.nil?
+      Gemgento::Category.where(id: self.product_categories.where(store: store).pluck(:category_id))
     end
 
     private
@@ -564,6 +580,10 @@ module Gemgento
     def touch_configurables
       self.configurable_products.update_all(updated_at: Time.now) if self.changed?
       TouchProduct.perform_async(self.configurable_products.pluck(:id)) if self.changed?
+    end
+
+    def touch_bundle_items
+      TouchWorker.perform_async(Gemgento::Bundle::Item, self.bundle_items.pluck(:id))
     end
 
     def to_ary

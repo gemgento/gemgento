@@ -89,11 +89,13 @@ module Gemgento
     def validate_image_types
       errors = []
 
-      @record.image_types.each do |image_type|
-        next if image_type.blank?
+      @record.image_types.each do |types|
+        next if types.empty?
 
-        asset_type = Gemgento::AssetType.find_by(code: image_type)
-        errors << image_type if asset_type.nil?
+        types.each do |type|
+          asset_type = Gemgento::AssetType.find_by(code: type)
+          errors << type if asset_type.nil?
+        end
       end
 
       unless errors.empty?

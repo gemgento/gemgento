@@ -17,6 +17,7 @@ module Gemgento
       current = create_current('categories')
 
       Gemgento::API::SOAP::Catalog::Category.fetch_all
+      Gemgento::API::SOAP::Catalog::Category.set_product_categories
 
       current.complete
     end
@@ -54,7 +55,7 @@ module Gemgento
       current = create_current('customers')
 
       Gemgento::API::SOAP::Customer::Customer.fetch_all_customer_groups
-      Gemgento::API::SOAP::Customer::Customer.fetch_all last_updated
+      Gemgento::API::SOAP::Customer::Customer.fetch_all(last_updated_filter(last_updated))
 
       current.complete
     end
@@ -114,6 +115,20 @@ module Gemgento
       current.is_complete = false
       current.save
       current
+    end
+
+    def self.last_updated_filter(last_updated)
+      {
+          'complex_filter' => {
+              item: [
+                key: 'updated_at',
+                value: {
+                    key: 'gt',
+                    value: last_updated
+                }
+            ]
+          }
+      }
     end
   end
 end

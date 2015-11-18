@@ -61,6 +61,7 @@ module Gemgento
       end
 
       response = @client.call(function, message: message)
+      log_call(function, message, response)
 
       if response.success?
         magento_response.success = true
@@ -93,6 +94,16 @@ module Gemgento
       magento_response.body_overflow = replace_empty_strings(magento_response.body_overflow) unless magento_response.body_overflow.nil?
 
       return magento_response
+    end
+
+    def self.log_call(function, message, response)
+      logger = Logger.new('log/magento_api.log')
+
+      if response.success? && Gemgento::Config[:magento][:debug]
+        logger.debug "SUCCESS - Function: #{function} - Message: #{sanitize_message message} - Response: #{response.body}"
+      elsif !response.success?
+        logger.error "FAIL - Function: #{function} - Message: #{sanitize_message message} - Response: #{response.body}"
+      end
     end
 
     # Fill in missing empty strings.  Empty strings are represented by { :'@xsi:type' => 'xsd:string' }.
@@ -134,5 +145,29 @@ module Gemgento
         [subject]
       end
     end
+
+    def self.sanitize_message(message)
+      sanitized_keys = %w[cc_number cc_cid cc_exp_year cc_exp_month]
+
+      if message.is_a?(Hash)
+        message.each do |key, val|
+          next if val.nil?
+
+          if sanitized_keys.include? key.to_s
+            message[key] = '*' * val.size
+          else
+            message[key] = sanitize_message(val)
+          end
+        end
+
+      elsif message.is_a?(Array)
+        message.each_with_index do |val, i|
+          message[i] = sanitize_message(val)
+        end
+      end
+
+      return message
+    end
+
   end
 end

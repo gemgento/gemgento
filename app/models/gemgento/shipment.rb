@@ -23,10 +23,6 @@ module Gemgento
       return result
     end
 
-    def email
-      @email || 0
-    end
-
     def push_to_magento
       increment_id = API::SOAP::Sales::OrderShipment.create(self)
 

@@ -1,7 +1,16 @@
-= paginate @products
 %section.container
   .row
-    - @products.each do |product|
-      = render partial: 'product_tile', locals: { product: product }
+    - if @products.empty?
 
-= paginate @products
+      .col-sm-12
+        %h2 No products available in this category
+
+    - @products.each do |product|
+      %figure.col-sm-4
+        %figcaption
+          %h2
+            = link_to product.name, "/products/#{product.id}"
+          - if current_user && current_user.products.include?(product)
+            = link_to 'Remove From Wishlist', "/user/wishlist/#{product.id}", method: :delete
+          - else
+            = link_to 'Add To Wishlist', "/user/wishlist/#{product.id}", method: :post

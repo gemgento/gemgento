@@ -12,7 +12,7 @@ module Gemgento
     end
 
     def new
-      @address = Address.new
+      @address = Gemgento::Address.new
     end
 
     def edit
@@ -21,8 +21,9 @@ module Gemgento
     end
 
     def create
-      @address = Address.new(address_params)
+      @address = Gemgento::Address.new(address_params)
       @address.addressable = current_user
+      @address.sync_needed = true
 
       respond_to do |format|
 
@@ -60,7 +61,7 @@ module Gemgento
           format.html { redirect_to user_addresses_path, notice: 'The address has been deleted from your address book.' }
           format.json { render json: { result: true } }
         else
-          format.html { render 'index' }
+          format.html { redirect_to user_addresses_path, alert: 'The address could not be destroyed.' }
           format.json { render json: { result: false, errors: @address.errors.full_messages } }
         end
       end

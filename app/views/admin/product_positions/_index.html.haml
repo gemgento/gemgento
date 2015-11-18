@@ -1,6 +1,6 @@
 = form_tag admin_product_positions_update_path, id: 'product-positions-form' do
   = select_tag 'store_id', options_for_select(Gemgento::Store.all.collect { |s| [ s.name, s.id ] }.unshift(['All Stores', nil]), params[:store_id]), id: 'store-select'
-  = select_tag 'category_id', grouped_options_for_select(Gemgento::Category.grouped_options, @category.id), id: 'category-select'
+  = select_tag 'category_id', options_for_select(Gemgento::Category.active.map { |c| [c.tree_path, c.id] }.sort), id: 'category-select'
   = hidden_field_tag 'products', ''
 
   #feed-blocks-wrapper-admin
@@ -11,4 +11,4 @@
         - unless image.nil?
           = content_tag_for :li, p, data: { 'product-id' => p.id } do
             .feed-block-admin.ui-state-default
-              = image_tag p.assets.first.image.url()
+              = image_tag p.assets.first.image.url(:small)

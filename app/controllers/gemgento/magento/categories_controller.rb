@@ -72,10 +72,10 @@ module Gemgento
             Product.where(magento_id: product_ids).each do |product|
               pairing = ProductCategory.find_or_initialize_by(category: category, product: product, store: store)
               item = products.select { |p| p[:product_id].to_i == product.magento_id }.first
-              pairing.position = item[:position].nil? ? 1 : item[:position][0]
+              pairing.position = item[:position].is_a?(Array) ? item[:position].first : item[:position]
               pairing.store = store
               pairing.sync_needed = false
-              pairing.save
+              pairing.save!
 
               product_category_ids << pairing.id
             end

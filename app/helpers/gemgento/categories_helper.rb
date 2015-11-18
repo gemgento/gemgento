@@ -17,4 +17,23 @@ module Gemgento::CategoriesHelper
     options.uniq.reject(&:blank?).sort
   end
 
+  # Cache key values for categories#show fragment cache.
+  #
+  # @return [Array]
+  def cache_key
+    cache_key = [@current_category]
+    cache_key << user_signed_in? ? current_user.user_group : nil
+    cache_key << @products.maximum(:cache_expires_at) if @products
+    cache_key += query_params_cache_keys
+
+    return cache_key
+  end
+
+  # Cache key values from query string.
+  #
+  # @return [Array(String)]
+  def query_params_cache_keys
+    [params[:page]]
+  end
+
 end

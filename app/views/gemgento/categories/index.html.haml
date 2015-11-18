@@ -1,5 +1,10 @@
-%nav
+%section.container
   %ul
-    - @categories.each do |category|
-      .li
-        = link_to category.name, category_path(category)  
+    - @categories.each do |cat|
+      %li
+      = link_to cat.name, "/categories/#{cat.url_key}"
+      - if cat.children.any?
+        %ul
+          - cat.children.each do |child|
+            %li
+              = link_to child.name, "/categories/#{child.url_key}"

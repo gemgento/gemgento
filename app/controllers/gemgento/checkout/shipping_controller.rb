@@ -2,6 +2,8 @@ module Gemgento
   class Checkout::ShippingController < CheckoutController
     respond_to :json, :html
 
+    before_action :redirect_to_payment_step, unless: -> { @quote.shipping_method_required? }
+
     def show
       initialize_shipping_variables
 
@@ -18,7 +20,7 @@ module Gemgento
       respond_to do |format|
         if @quote.update(quote_params)
           format.html { redirect_to checkout_payment_path }
-          format.json { render json: { result: true, order: @quote, totals: @quote.totals } }
+          format.json { render json: { result: true, quote: @quote, totals: @quote.totals } }
         else
           initialize_shipping_variables
           format.html { render action: :show }
@@ -31,6 +33,13 @@ module Gemgento
 
     def quote_params
       params.require(:quote).permit(:shipping_method)
+    end
+
+    def redirect_to_payment_step
+      respond_to do |format|
+        format.html { redirect_to checkout_payment_path }
+        format.json { render json: { quote: @quote, shipping_methods: [], totals: @quote.totals } }
+      end
     end
 
   end

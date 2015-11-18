@@ -28,11 +28,6 @@ module Gemgento
     # @param file [File, TempFile] a file to be associated with the Asset
     # @return [void]
     def set_file(file)
-      raise 'Asset does not have an associated product.' if self.product.nil?
-      raise 'Asset does not have an associated store.' if self.store.nil?
-
-      new_file = file.is_a?(URI) ? file.open : file
-
       matching_file = nil
       matching_asset = nil
 
@@ -40,7 +35,7 @@ module Gemgento
         next if asset.asset_file.nil?
         next if asset.store == self.store && asset.id != self.id # don't compare AssetFiles from the same store unless it's the same Asset
 
-        if File.exist?(asset.asset_file.file.path(:original)) && FileUtils.compare_file(asset.asset_file.file.path(:original), new_file)
+        if File.exist?(asset.asset_file.file.path(:original)) && FileUtils.compare_file(asset.asset_file.file.path(:original), file)
           matching_file = asset.asset_file
           matching_asset = asset
           break
@@ -111,11 +106,11 @@ module Gemgento
     # @param store [Integer, nil]
     # @return [Asset, nil]
     def self.find_by_code(product, code, store = nil)
-      store = Store.current if store.nil?
-      asset_type = AssetType.find_by(code: code, product_attribute_set_id: product.product_attribute_set_id)
-      raise "Unknown AssetType code for given product's ProductAttributeSet" if asset_type.nil?
-
-      return asset_type.assets.find_by(product_id: product.id, store_id: store.id)
+      product.assets
+          .joins(:asset_types)
+          .where(store: store || Gemgento::Store.current)
+          .where(gemgento_asset_types: { code: code, product_attribute_set_id: product.product_attribute_set_id })
+          .first
     end
 
     def as_json(options = {})

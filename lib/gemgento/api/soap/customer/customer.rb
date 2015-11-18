@@ -14,8 +14,8 @@ module Gemgento
             end
           end
 
-          def self.fetch_all(last_updated = nil)
-            response = list(last_updated)
+          def self.fetch_all(filters = {})
+            response = list(filters)
 
             if response.success?
               response.body_overflow[:store_view].each do |store_view|
@@ -55,23 +55,13 @@ module Gemgento
 
           # Get a list of customers from Magento.
           #
-          # @param last_updated [String] db formatted datetime string.
+          # @param filters [Hash]
           # @return [Gemgento::MagentoResponse]
-          def self.list(last_updated = nil)
-            if last_updated.nil?
+          def self.list(filters = {})
+            if filters.empty?
               message = {}
             else
-              message = {
-                  'filters' => {
-                      'complex_filter' => {item: [
-                          key: 'updated_at',
-                          value: {
-                              key: 'gt',
-                              value: last_updated
-                          }
-                      ]}
-                  }
-              }
+              message = { filters: filters }
             end
 
             response = MagentoApi.create_call(:customer_customer_list, message)
