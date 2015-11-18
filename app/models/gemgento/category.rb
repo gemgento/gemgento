@@ -221,7 +221,7 @@ module Gemgento
     end
 
     def touch_parent
-      Gemgento::TouchCategory.perform_async(self.parent_id)
+      ::Gemgento::TouchCategory.perform_async(self.parent_id)
     end
 
   end
