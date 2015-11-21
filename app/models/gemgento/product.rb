@@ -60,7 +60,7 @@ module Gemgento
 
     validates :sku, uniqueness: { scope: :deleted_at }
 
-    attr_accessor :configurable_attribute_ordering
+    attr_accessor :configurable_attribute_ordering, :attribute_values
 
     # Set an attribute value.
     #
@@ -92,6 +92,7 @@ module Gemgento
         product_attribute_value.save
 
         self.product_attribute_values << product_attribute_value unless self.product_attribute_values.include?(product_attribute_value)
+        self.attribute_values = nil # reload cached attributes values
 
         return true
       end
