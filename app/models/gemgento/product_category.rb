@@ -24,7 +24,7 @@ module Gemgento
     def touch_category
       category_ids = [self.category_id]
       category_ids += self.product.categories.pluck(:id) if self.product
-      TouchCategory.perform_async(category_ids)
+      ::Gemgento::TouchCategory.perform_async(category_ids)
     end
 
     def update_magento_category_product

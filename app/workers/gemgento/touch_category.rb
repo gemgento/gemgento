@@ -4,13 +4,10 @@ module Gemgento
     sidekiq_options backtrace: true
 
     def perform(category_ids)
-      Gemgento::Category.skip_callback(:save, :before, :create_magento_category)
-      Gemgento::Category.skip_callback(:save, :before, :update_magento_category)
-
-      Gemgento::Category.where(id: category_ids).each{ |c| c.update(updated_at: Time.now) }
-
-      Gemgento::Category.set_callback(:save, :before, :create_magento_category)
-      Gemgento::Category.set_callback(:save, :before, :update_magento_category)
+      Gemgento::Category.where(id: category_ids).each do |category|
+        related_category_ids = category.ancestors.map(&:id) + category.descendents.map(&:id)
+        Gemgento::Category.where(id: related_category_ids).update_all(updated_at: category.updated_at)
+      end
     end
   end
 end

@@ -572,7 +572,7 @@ module Gemgento
     #
     # @return [Void]
     def touch_categories
-      TouchCategory.perform_async(self.categories.pluck(:id)) if self.changed?
+      ::Gemgento::TouchCategory.perform_async(self.categories.pluck(:id)) if self.changed?
     end
 
     # Touch associated configurable products.
