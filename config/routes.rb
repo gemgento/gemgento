@@ -4,6 +4,11 @@ Gemgento::Engine.routes.draw do
   devise_for :admin_users, ActiveAdmin::Devise.config
   ActiveAdmin.routes(self)
 
+  require 'sidekiq/web'
+  authenticate :admin_user do
+    mount Sidekiq::Web, at: '/sidekiq'
+  end
+
   get '/error/:action', :controller => "errors"
 
   get '/addresses/region_options', to: 'addresses#region_options'

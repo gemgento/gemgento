@@ -34,6 +34,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'spreadsheet', '~> 0.8.5'
   gem.add_dependency 'state_machine', '>= 1.2.0'
   gem.add_dependency 'picturefill', '>= 0.1.3'
+  gem.add_dependency 'sinatra', '~> 1.4.6' # sidekiq web
 
   # testing
   gem.add_development_dependency 'rspec-rails'
