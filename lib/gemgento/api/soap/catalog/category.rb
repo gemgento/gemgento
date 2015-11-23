@@ -208,8 +208,7 @@ module Gemgento
           # @param store [Gemgento::Store]
           # @return [Void]
           def self.sync_magento_to_local(subject, store)
-            category = ::Gemgento::Category.where(magento_id: subject[:category_id]).first_or_initialize
-            category.magento_id = subject[:category_id]
+            category = ::Gemgento::Category.find_or_initialize_by(magento_id: subject[:category_id])
             category.name = subject[:name]
             category.url_key = subject[:url_key]
             category.parent = ::Gemgento::Category.find_by(magento_id: subject[:parent_id])
