@@ -4,9 +4,9 @@ module Gemgento
 
     def index
       if params[:category_id]
-        @products = Gemgento::Category.find(params[:category_id]).products(current_store)
+        @products = Gemgento::Category.find(params[:category_id]).products(current_store).active.catalog_visible
       else
-        @products = current_store.products.order(:id)
+        @products = current_store.products.order(:id).active.catalog_visible
       end
 
       @products = @products.page(@page[:number]).per(@page[:size])
