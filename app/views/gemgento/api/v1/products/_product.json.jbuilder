@@ -2,11 +2,10 @@ json.type 'products'
 json.id product.id
 
 json.attributes do
-  json.extract! product, :created_at, :updated_at, :deleted_at, :magento_id, :magento_type, :sku, :visibility, :status
+  json.extract! product, :created_at, :updated_at, :deleted_at, :magento_id, :magento_type, :sku, :visibility
 
   product.product_attribute_set.product_attributes.pluck(:code).each do |code|
-    # skip attribute codes that are already on the model
-    next if (product.attributes.keys.map(&:to_s) + %w[tier_price group_price]).include? code
+    %w[tier_price group_price].include? code
     json.set! code.to_sym, product.attribute_value(code)
   end
 
@@ -41,6 +40,7 @@ json.relationships do
       json.array! product.assets.where(store: current_store) do |asset|
         json.type 'assets'
         json.id asset.id
+        json.url asset.image.url(:medium)
       end
     end
   end
