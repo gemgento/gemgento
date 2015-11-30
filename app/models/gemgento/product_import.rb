@@ -201,7 +201,7 @@ module Gemgento
           end
 
           if value.nil?
-            self.import << "ERROR: row #{@index} - Unknown attribute value '#{@row[@headers.index(attribute_code).to_i].to_s.strip}' for code '#{attribute_code}'"
+            self.import_errors << "ERROR: row #{@index} - Unknown attribute value '#{@row[@headers.index(attribute_code).to_i].to_s.strip}' for code '#{attribute_code}'"
           else
             product.set_attribute_value(product_attribute.code, value, self.store)
           end
