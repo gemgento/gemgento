@@ -64,9 +64,10 @@ module Gemgento
         end
       end
 
-      ProductImport.skip_callback(:commit, :after, :process) do
-        self.save validate: false
-      end
+
+      ProductImport.skip_callback(:commit, :after, :process)
+      self.save validate: false
+      ProductImport.set_callback(:commit, :after, :process)
 
       complete_sync_buffer(sync_buffer)
     end
@@ -184,7 +185,7 @@ module Gemgento
         if product_attribute = ProductAttribute.find_by(code: attribute_code) # try to load attribute associated with column header
 
           if product_attribute.frontend_input == 'select'
-            label = @row[@headers.index(attribute_code).to_i].to_s.strip.gsub('.0', '')
+            label = @row[@headers.index(attribute_code).to_i].to_s.strip
             label = label.gsub('.0', '') if label.end_with? '.0'
             attribute_option = ProductAttributeOption.find_by(product_attribute_id: product_attribute.id, label: label, store: self.store)
 
@@ -192,13 +193,20 @@ module Gemgento
               attribute_option = create_attribute_option(product_attribute, label)
             end
 
-            value = attribute_option.value
+            value = attribute_option.nil? ? nil : attribute_option.value
+
           else # attribute value may have to be associated with an attribute option id
             value = @row[@headers.index(attribute_code).to_i].to_s.strip
             value = value.gsub('.0', '') if value.end_with? '.0'
           end
 
-          product.set_attribute_value(product_attribute.code, value, self.store)
+          if value.nil?
+            self.import << "ERROR: row #{@index} - Unknown attribute value '#{@row[@headers.index(attribute_code).to_i].to_s.strip}' for code '#{attribute_code}'"
+          else
+            product.set_attribute_value(product_attribute.code, value, self.store)
+          end
+
+
         else
           self.import_errors << "ERROR - row #{@index} - Unknown attribute code, '#{attribute_code}'"
         end
@@ -210,13 +218,13 @@ module Gemgento
     end
 
     def create_attribute_option(product_attribute, option_label)
-      attribute_option = ProductAttributeOption.new
+      attribute_option = Gemgento::ProductAttributeOption.new
       attribute_option.product_attribute = product_attribute
       attribute_option.label = option_label
       attribute_option.store = self.store
       attribute_option.sync_local_to_magento
 
-      return ProductAttributeOption.find_by(product_attribute: product_attribute, label: option_label, store: self.store)
+      return Gemgento::ProductAttributeOption.find_by(product_attribute: product_attribute, label: option_label, store: self.store)
     end
 
     def set_default_attribute_values(product)
