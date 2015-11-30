@@ -282,6 +282,8 @@ module Gemgento
     #
     # @return [Boolean]
     def convert(remote_ip = nil)
+      return false unless items_in_stock?
+
       before_convert
       response = API::SOAP::Checkout::Cart.order(self, self.payment, remote_ip)
 
@@ -375,6 +377,24 @@ module Gemgento
     def push_gift_message_comment
       API::SOAP::Sales::Order.add_comment(self.order.increment_id, self.order.status, "Gemgento Gift Message: #{self.gift_message}")
       order.update(gift_message: self.gift_message)
+    end
+
+    def items_in_stock?
+      self.line_items.each do |line_item|
+        self.equalize_qty_ordered(line_item) unless line_item.product.in_stock?(line_item.qty_ordered, self.store)
+      end
+    end
+
+    def equalize_qty_ordered(line_item)
+      inventory = line_item.product.inventories.find_by(store: self.store)
+
+      if inventory.quantity > 0
+        line_item.update(qty_ordered: inventory.quantity)
+        errors.add(:base, "available quantity of #{line_item.product.attribute_value('name', self.store)} has been reduced to reflect inventory updates")
+      else
+        line_item.destroy
+        errors.add(:base, "#{line_item.product.attribute_value('name', self.store)} is no longer available and has been removed from your cart")
+      end
     end
 
     # Determine if a shipping method is required for the Quote.

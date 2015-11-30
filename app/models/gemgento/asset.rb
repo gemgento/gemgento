@@ -106,11 +106,11 @@ module Gemgento
     # @param store [Integer, nil]
     # @return [Asset, nil]
     def self.find_by_code(product, code, store = nil)
-      store = Store.current if store.nil?
-      asset_type = AssetType.find_by(code: code, product_attribute_set_id: product.product_attribute_set_id)
-      raise "Unknown AssetType code for given product's ProductAttributeSet" if asset_type.nil?
-
-      return asset_type.assets.find_by(product_id: product.id, store_id: store.id)
+      product.assets
+          .joins(:asset_types)
+          .where(store: store || Gemgento::Store.current)
+          .where(gemgento_asset_types: { code: code, product_attribute_set_id: product.product_attribute_set_id })
+          .first
     end
 
     def as_json(options = {})

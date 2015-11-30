@@ -25,10 +25,12 @@ module Gemgento
     validates_attachment_content_type :image, content_type: /\Aimage\/.*\Z/
 
     after_save :enforce_positioning, if: :position_changed?
-    after_save :touch_parent, if: -> { changed? && !parent.nil? }
+    after_save :touch_category, if: -> { changed? }
 
-    before_save :create_magento_category, if: -> { magento_id.nil? }
-    before_save :update_magento_category, if: -> { sync_needed? && !magento_id.nil? }
+    before_save :create_magento_category, if: Proc.new { |category| category.sync_needed? && category.magento_id.nil? }
+    before_save :update_magento_category, if: Proc.new { |category| category.sync_needed? && !category.magento_id.nil? }
+
+    attr_accessor :sync_needed
 
     # Create a string representation of the path from the root to the Category.
     #
@@ -44,6 +46,10 @@ module Gemgento
       end
 
       return path
+    end
+
+    def sync_needed?
+      self.sync_needed.to_bool
     end
 
     # Create an options array for use in an HTML select input.  Categories are grouped under top level scoped
@@ -173,6 +179,11 @@ module Gemgento
       ).order('gemgento_product_categories.position ASC')
     end
 
+
+    def touch_category
+      ::Gemgento::TouchCategory.perform_async(self.id)
+    end
+
     private
 
     # Create an associated Category in Magento.
@@ -218,10 +229,6 @@ module Gemgento
 
       self.sync_needed = false
       return true
-    end
-
-    def touch_parent
-      Gemgento::TouchCategory.perform_async(self.parent_id)
     end
 
   end
