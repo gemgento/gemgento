@@ -30,29 +30,26 @@ module Gemgento
     after_commit :process
 
     def process
-      # create a fake sync record, so products are not synced during the import
-      sync_buffer = Sync.new
-      sync_buffer.subject = 'products'
-      sync_buffer.is_complete = false
-      sync_buffer.save
+      Rails.logger.info 'Starting to process product import'
 
-      if self.spreadsheet.url =~ URI::regexp
-        @worksheet = Spreadsheet.open(open(self.spreadsheet.url)).worksheet(0)
-      else
-        @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
-      end
+      sync_buffer = create_sync_buffer
 
+      @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
       @headers = get_headers
       @index = 0
+
       associated_simple_products = []
+
       self.import_errors = []
       self.count_created = 0
       self.count_updated = 0
 
       1.upto @worksheet.last_row_index do |index|
         @index = index
-        puts "Working on row #{@index}"
         @row = @worksheet.row(@index)
+
+        Rails.logger.info "Working on row #{@index}"
+        Rails.logger.debug @row
 
         next if @row[@headers.index('sku').to_i].to_s.strip.blank? # skip blank skus
 
@@ -67,13 +64,29 @@ module Gemgento
         end
       end
 
-      ProductImport.skip_callback(:commit, :after, :process)
-      self.save validate: false
+      ProductImport.skip_callback(:commit, :after, :process) do
+        self.save validate: false
+      end
 
+      complete_sync_buffer(sync_buffer)
+    end
+
+    # Create a fake sync record, so products are not synced during the import.
+    #
+    # @return [Gemgento::Sync]
+    def create_sync_buffer
+      sync_buffer = Sync.new
+      sync_buffer.subject = 'products'
+      sync_buffer.is_complete = false
+      sync_buffer.save
+    end
+
+    # @param sync_buffer [Gemgento::Sync]
+    # @return [Void]
+    def complete_sync_buffer(sync_buffer)
       sync_buffer.is_complete = true
       sync_buffer.created_at = Time.now
       sync_buffer.save
-      ProductImport.set_callback(:commit, :after, :process)
     end
 
     def image_labels_raw
