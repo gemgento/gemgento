@@ -336,6 +336,7 @@ module Gemgento
       result['shipping_address'] = self.shipping_address
       result['billing_address'] = self.billing_address
       result['payment'] = self.payment
+      result['totals'] = self.totals
       return result
     end
 
