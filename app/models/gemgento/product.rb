@@ -59,6 +59,7 @@ module Gemgento
     before_destroy :delete_associations
 
     validates :sku, uniqueness: { scope: :deleted_at }
+    validates :magento_id, uniqueness: true
 
     attr_accessor :configurable_attribute_ordering, :attribute_values, :sync_needed
 
