@@ -60,7 +60,11 @@ module Gemgento
 
     validates :sku, uniqueness: { scope: :deleted_at }
 
-    attr_accessor :configurable_attribute_ordering, :attribute_values
+    attr_accessor :configurable_attribute_ordering, :attribute_values, :sync_needed
+
+    def sync_needed?
+      self.sync_needed.to_bool
+    end
 
     # Set an attribute value.
     #
