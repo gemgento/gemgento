@@ -211,7 +211,7 @@ module Gemgento
             Gemgento::Product.skip_callback(:save, :after, :touch_categories)
             Gemgento::Product.skip_callback(:save, :after, :touch_configurables)
 
-            product = Gemgento::Product.where(magento_id: subject[:product_id]).not_deleted.first_or_initialize
+            product = Gemgento::Product.find_or_initialize_by(magento_id: subject[:product_id])
             product.magento_id = subject[:product_id]
             product.magento_type = subject[:type]
             product.sku = subject[:sku]
