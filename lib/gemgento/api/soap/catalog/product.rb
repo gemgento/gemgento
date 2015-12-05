@@ -218,7 +218,7 @@ module Gemgento
             product.sync_needed = false
             product.product_attribute_set = Gemgento::ProductAttributeSet.where(magento_id: subject[:set]).first
             product.stores << store unless product.stores.include? store
-            product.save
+            product.save!
 
             product.set_attribute_value('name', subject[:name], store)
             product.set_attribute_value('description', subject[:description], store)
