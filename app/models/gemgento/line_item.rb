@@ -7,9 +7,6 @@ module Gemgento
 
     has_many :bundle_options, class_name: 'Gemgento::LineItemOption', foreign_key: :line_item_id
 
-    validates :itemizable, :product, presence: true
-    validates_with InventoryValidator, if: -> { itemizable_type == 'Gemgento::Quote' }
-
     before_save :push_magento_quote_item, if: -> { itemizable_type == 'Gemgento::Quote' && !async.to_bool }
 
     after_save :push_magento_quote_item_async, if: -> { itemizable_type == 'Gemgento::Quote' && async.to_bool }
@@ -23,6 +20,10 @@ module Gemgento
     attr_accessor :async, :destroy_quote_after_rollback
 
     accepts_nested_attributes_for :bundle_options
+
+    validates :itemizable, :product, presence: true
+    validates :magento_id, uniqueness: { scope: :itemizable_type }, allow_nil: true
+    validates_with InventoryValidator, if: -> { itemizable_type == 'Gemgento::Quote' }
 
     # JSON representation of the LineItem.
     #

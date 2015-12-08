@@ -211,14 +211,13 @@ module Gemgento
             Gemgento::Product.skip_callback(:save, :after, :touch_categories)
             Gemgento::Product.skip_callback(:save, :after, :touch_configurables)
 
-            product = Gemgento::Product.where(magento_id: subject[:product_id]).not_deleted.first_or_initialize
-            product.magento_id = subject[:product_id]
+            product = Gemgento::Product.find_or_initialize_by(magento_id: subject[:product_id])
             product.magento_type = subject[:type]
             product.sku = subject[:sku]
             product.sync_needed = false
-            product.product_attribute_set = Gemgento::ProductAttributeSet.where(magento_id: subject[:set]).first
+            product.product_attribute_set = Gemgento::ProductAttributeSet.find(magento_id: subject[:set])
             product.stores << store unless product.stores.include? store
-            product.save
+            product.save!
 
             product.set_attribute_value('name', subject[:name], store)
             product.set_attribute_value('description', subject[:description], store)
