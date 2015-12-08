@@ -315,7 +315,10 @@ module Gemgento
               line_item.save!
             end
 
-            line_item
+            return line_item
+
+          rescue ActiveRecord::RecordNotUnique => e
+            return ::Gemgento::LineItem.find_by(itemizable: order, magento_id: source[:item_id])
           end
         end
       end
