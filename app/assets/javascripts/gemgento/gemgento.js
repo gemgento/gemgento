@@ -1,1 +1,1 @@
-//= require_tree gemgento
+//= require_tree ./
