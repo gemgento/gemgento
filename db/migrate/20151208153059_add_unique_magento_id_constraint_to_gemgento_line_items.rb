@@ -1,6 +1,6 @@
 class AddUniqueMagentoIdConstraintToGemgentoLineItems < ActiveRecord::Migration
   def change
-    add_index :gemgento_line_items, [:magento_id, :itemizable_type]
+    add_index :gemgento_line_items, [:magento_id, :itemizable_type], unique: true
   end
 
   def migrate(direction)
