@@ -1,8 +1,8 @@
 %nav
-  %ul
-    %li #{link_to 'User Home', user_home_path}
-    %li #{link_to 'Addresses', user_addresses_path}
-    %li #{link_to 'Orders', user_orders_path}
-    %li #{link_to 'Wishlist', user_wishlist_items_path}
-    %li #{link_to 'Saved Credit Cards', user_saved_credit_cards_path}
-    %li #{link_to 'Update My Password', edit_user_registration_path}
+  %ul.list-inline
+    %li= link_to 'User Home', user_home_path
+    %li= link_to 'Addresses', user_addresses_path
+    %li= link_to 'Orders', user_orders_path
+    %li= link_to 'Wishlist', user_wishlist_items_path
+    %li= link_to 'Saved Credit Cards', user_saved_credit_cards_path
+    %li= link_to 'Update My Password', edit_user_registration_path
