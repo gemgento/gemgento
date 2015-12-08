@@ -13,8 +13,10 @@
   .row
     .col-sm-5.col-sm-offset-1
 
+
+      = render partial: 'gemgento/shared/flash_messages'
       = render partial: 'gemgento/shared/error_messages', locals: { model: @new_user}
-      = render partial: 'gemgento/shared/error_messages', locals: { model:@existing_user }
+      = render partial: 'gemgento/shared/error_messages', locals: { model: @existing_user }
 
       = form_for(@existing_user, url: user_login_path, html: { method: :post }) do |f|
 

@@ -14,7 +14,9 @@ class App.GemgentoCheckoutAddress extends App.Base
       toggleAddress()
 
   toggleAddress = ->
-    if $('#same_as_billing').is(':checked')
+    checkbox = $('#quote_same_as_billing')
+    if checkbox.is(':checked') or checkbox.val() == "1"
+      checkbox.prop(":checked")
       $('#shipping_address').hide()
     else
       $('#shipping_address').show()
