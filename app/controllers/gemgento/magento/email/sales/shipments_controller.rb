@@ -5,13 +5,16 @@ module Gemgento
         class ShipmentsController < Gemgento::Magento::BaseController
 
           def create
+            order = Gemgento::API::SOAP::Sales::Order.fetch(params[:data][:order][:increment_id])
+            shipment = Gemgento::Magento::Shipment.find(params[:data][:shipment][:increment_id]).import
+
             Gemgento::SalesMailer.shipment_email(
                 params[:data][:recipients],
                 params[:data][:sender],
-                params[:data][:order],
-                params[:data][:shipment],
-                params[:data][:tracks]
+                order,
+                shipment
             ).deliver
+
             render nothing: true
           end
 
