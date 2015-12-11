@@ -1,5 +1,5 @@
 module Gemgento
-  class Magento::ShipmentItem
+  class Magento::ShipmentItemAdapter
 
     attr_accessor :source
 
@@ -8,7 +8,7 @@ module Gemgento
       @source = source
     end
 
-    # @return [Gemgento::ShipmentItem]
+    # @return [Gemgento::ShipmentItemAdapter]
     def import
       shipment_item = self.shipment.shipment_items.find_or_initialize_by(magento_id: self.source[:item_id])
       shipment_item.line_item = self.order.line_items.find_by!(magento_id: self.source[:order_item_id])

@@ -1,4 +1,4 @@
-class Gemgento::Magento::Customer
+class Gemgento::Magento::CustomerAdapter
 
   def self.find_by(attributes)
     response = Gemgento::API::SOAP::Customer::Customer.list filters(attributes)

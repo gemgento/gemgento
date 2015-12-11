@@ -1,5 +1,5 @@
 module Gemgento
-  class Magento::Shipment
+  class Magento::ShipmentAdapter
 
     attr_accessor :source, :order, :shipment
 
@@ -41,7 +41,7 @@ module Gemgento
       shipment.save!
 
       self.source[:items].each do |item|
-        Gemgento::Magento::ShipmentItem.new(item).import
+        Gemgento::Magento::ShipmentItemAdapter.new(item).import
       end
 
       shipment.shipment_items
@@ -49,7 +49,7 @@ module Gemgento
           .destroy_all
 
       self.source[:tracks].each do |track|
-        Gemgento::Magento::ShipmentTrack.new(track).import
+        Gemgento::Magento::ShipmentTrackAdapter.new(track).import
       end
 
       shipment.shipment_tracks

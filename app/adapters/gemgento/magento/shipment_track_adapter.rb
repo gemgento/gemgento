@@ -1,5 +1,5 @@
 module Gemgento
-  class Magento::ShipmentTrack
+  class Magento::ShipmentTrackAdapter
 
     attr_accessor :source
 
@@ -7,7 +7,7 @@ module Gemgento
       @source = source
     end
 
-    # @return [Gemgento::ShipmentTrack]
+    # @return [Gemgento::ShipmentTrackAdapter]
     def import
       shipment_track = self.shipment.shipment_tracks.find_or_initialize_by(magento_id: self.source[:track_id])
       shipment_track.carrier_code = self.source[:carrier_code]
