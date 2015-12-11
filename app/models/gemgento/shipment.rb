@@ -2,7 +2,7 @@ module Gemgento
 
   # @author Gemgento LLC
   class Shipment < ActiveRecord::Base
-    belongs_to :order
+    belongs_to :order, class_name: 'Gemgento::Order'
 
     has_many :shipment_comments
     has_many :shipment_items
