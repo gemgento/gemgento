@@ -5,9 +5,9 @@ module Gemgento
     belongs_to :shipment
     belongs_to :order
 
-    before_create :push_to_magento
+    attr_accessor :sync_needed
 
-    private
+    before_create :push_to_magento, if: :sync_needed
 
     def push_to_magento
       return API::SOAP::Sales::OrderShipment.add_track(self)
