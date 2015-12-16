@@ -5,32 +5,30 @@ module Gemgento
       def update
         data = params[:data]
 
-        @product = Gemgento::Product.not_deleted.where('id = ? OR magento_id = ?', params[:id], data[:product_id]).first_or_initialize
+        @product = Gemgento::Product.find_or_initialize_by(magento_id: data[:product_id])
 
-        if @product.new_record? || !@product.magento_id.nil?
-          @product.magento_id = data[:product_id]
-          @product.magento_type = data[:type]
-          @product.sku = data[:sku]
-          @product.sync_needed = false
-          @product.product_attribute_set = ProductAttributeSet.where(magento_id: data[:set]).first
-          @product.magento_type = data[:type]
-          @product.save
+        @product.magento_id = data[:product_id]
+        @product.magento_type = data[:type]
+        @product.sku = data[:sku]
+        @product.sync_needed = false
+        @product.product_attribute_set = ProductAttributeSet.where(magento_id: data[:set]).first
+        @product.magento_type = data[:type]
+        @product.save
 
-          set_stores(data[:stores], @product) unless data[:stores].nil?
+        set_stores(data[:stores], @product) unless data[:stores].nil?
 
-          unless data[:additional_attributes].nil?
-            set_assets(data[:additional_attributes], @product)
-            set_attribute_values_from_magento(data[:additional_attributes], @product)
-          end
-
-          if data[:configurable_attribute_ids]
-            @product.configurable_attributes = Gemgento::ProductAttribute.where(magento_id: data[:configurable_attribute_ids])
-          end
-
-          set_associated_products(data[:simple_product_ids], data[:configurable_product_ids], @product)
-          set_bundle_options(data[:bundle_options], @product) if data[:bundle_options]
-          set_tier_prices(data[:tier_price], @product) if data[:tier_price]
+        unless data[:additional_attributes].nil?
+          set_assets(data[:additional_attributes], @product)
+          set_attribute_values_from_magento(data[:additional_attributes], @product)
         end
+
+        if data[:configurable_attribute_ids]
+          @product.configurable_attributes = Gemgento::ProductAttribute.where(magento_id: data[:configurable_attribute_ids])
+        end
+
+        set_associated_products(data[:simple_product_ids], data[:configurable_product_ids], @product)
+        set_bundle_options(data[:bundle_options], @product) if data[:bundle_options]
+        set_tier_prices(data[:tier_price], @product) if data[:tier_price]
 
         render nothing: true
       end
@@ -106,6 +104,7 @@ module Gemgento
         assets_to_keep = []
 
         magento_source_assets.each do |store_id, source_assets| # cycle through media galleries for each
+          next if source_assets.nil?
 
           if !source_assets[:media_gallery].nil? && !source_assets[:media_gallery][:images].nil?
             store = Store.find_by(magento_id: store_id)

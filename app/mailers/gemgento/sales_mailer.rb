@@ -29,11 +29,13 @@ module Gemgento
       )
     end
 
-    def shipment_email(recipients, from, order_source, shipment_source, tracks)
-      @order = Gemgento::API::SOAP::Sales::Order.fetch(order_source[:increment_id])
-      @order_source = order_source
-      @shipment_source = shipment_source
-      @tracks = tracks
+    # @param recipients [Hash(Array(String))]
+    # @param from [Array(String), String]
+    # @param order [Gemgento::Order]
+    # @param shipment [Gemgento::Shipment]
+    def shipment_email(recipients, from, order, shipment)
+      @order = order
+      @shipment = shipment
 
       mail(
           to: recipients[:to],

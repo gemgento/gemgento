@@ -1,17 +1,29 @@
-%h2 Sign in
-= form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f|
-  %div
-    = f.label :email
-    %br/
-    = f.email_field :email, :autofocus => true
-  %div
-    = f.label :password
-    %br/
-    = f.password_field :password
-  - if devise_mapping.rememberable?
-    %div
-      = f.check_box :remember_me
-      = f.label :remember_me
-  %div= f.submit "Sign in"
-  
-= render "devise/shared/links"
+.container.text-center
+  .row
+    .col-sm-6.col-sm-offset-3
+
+      = render partial: 'gemgento/shared/flash_messages'
+      = render partial: 'gemgento/shared/error_messages', locals: { model: @new_user}
+      = render partial: 'gemgento/shared/error_messages', locals: { model: @existing_user }
+
+      = form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f|
+        %fieldset
+          %legend Sign In
+          .form-group
+            = f.label :email
+            = f.email_field :email, :autofocus => true, class: "form-control"
+
+          .form-group
+            = f.label :password
+            = f.password_field :password, class: "form-control"
+
+          - if devise_mapping.rememberable?
+            .form-group
+              = f.check_box :remember_me
+              = f.label :remember_me
+
+          .form-group
+            = f.submit "Sign in", class: "btn btn-primary"
+
+          .form-group
+            = render "devise/shared/links"

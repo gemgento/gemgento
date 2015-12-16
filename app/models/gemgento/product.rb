@@ -94,7 +94,7 @@ module Gemgento
         product_attribute_value.product_attribute = product_attribute
         product_attribute_value.value = value
         product_attribute_value.store = store
-        product_attribute_value.save
+        product_attribute_value.save!
 
         self.product_attribute_values << product_attribute_value unless self.product_attribute_values.include?(product_attribute_value)
         self.attribute_values = nil # reload cached attributes values

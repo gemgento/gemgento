@@ -14,10 +14,10 @@
       .col-sm-5.col-sm-offset-1#billing_address
 
         .form-group
-          %legend Billing Address
+          %legend Billing Address XX
 
         .form-group
-          = check_box_tag :same_as_billing, "1", (params[:same_as_billing] == "1")
+          = form.check_box :same_as_billing
           %label Shipping address is the same as billing address
 
         = form.fields_for :billing_address do |billing|

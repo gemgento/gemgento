@@ -37,7 +37,7 @@ module Gemgento
     end
 
     def mini_bag
-      render partial: 'shared/mini_bag'
+      render partial: 'gemgento/shared/mini_bag'
     end
 
     private

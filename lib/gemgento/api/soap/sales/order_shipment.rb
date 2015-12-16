@@ -67,16 +67,7 @@ module Gemgento
           end
 
           def self.info(shipment_increment_id)
-            message = {
-                shipment_increment_id: shipment_increment_id,
-            }
-            response = MagentoApi.create_call(:sales_order_shipment_info, message)
-
-            if response.success?
-              return response.body[:result]
-            else
-              return nil
-            end
+            MagentoApi.create_call(:sales_order_shipment_info, shipment_increment_id: shipment_increment_id)
           end
 
           def self.list

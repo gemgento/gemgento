@@ -1,0 +1,36 @@
+- if current_quote.line_items.empty?
+
+  %p YOUR CART IS EMPTY
+
+- else
+
+  = link_to 'Cart', '/cart'
+
+  - current_quote.line_items.order('gemgento_line_items.created_at DESC').each do |line_item|
+
+    %li
+      = link_to product_path(line_item.product) do
+
+        %h4= line_item.product.name
+
+        - if line_item.product.magento_type == 'giftvoucher'
+
+          = number_to_currency line_item.options[:amount], precision: 0
+
+        - else
+
+          - if product_on_sale? line_item.product
+
+            = number_to_currency product_price(line_item.product), precision: 0
+
+            %br
+
+            = number_to_currency line_item.product.original_price, precision: 0
+
+          - else
+
+            = number_to_currency product_price(line_item.product), precision: 0
+
+        QTY: #{line_item.qty_ordered.to_i}
+
+    = link_to 'Cart', '/cart', class: "btn btn-primary"

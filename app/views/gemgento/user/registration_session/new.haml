@@ -1,20 +1,20 @@
 %section.container
 
-  %small
+  %pre
     %code This is 'gemgento/user/registration_session/new.haml'
-  %br
-  %small
+    %br
     %code A combined login/register page that handles all these routes: '/user/login', '/user/sign_up', '/user/sign_in'
-  %br
-  %br
+
 
 
   %section.container
   .row
     .col-sm-5.col-sm-offset-1
 
+
+      = render partial: 'gemgento/shared/flash_messages'
       = render partial: 'gemgento/shared/error_messages', locals: { model: @new_user}
-      = render partial: 'gemgento/shared/error_messages', locals: { model:@existing_user }
+      = render partial: 'gemgento/shared/error_messages', locals: { model: @existing_user }
 
       = form_for(@existing_user, url: user_login_path, html: { method: :post }) do |f|
 
