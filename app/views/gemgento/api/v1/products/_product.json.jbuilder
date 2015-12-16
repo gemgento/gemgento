@@ -1,4 +1,4 @@
-json.cache! product, expires_at: product.cache_expires_at do
+json.cache! [product, current_store], expires_at: product.cache_expires_at do
   json.type 'products'
   json.id product.id
 

@@ -1,4 +1,4 @@
-json.cache! category do
+json.cache! [category, current_store] do
   json.type 'categories'
   json.id category.id
 

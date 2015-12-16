@@ -131,6 +131,7 @@ Gemgento::Engine.routes.draw do
       end
 
       resources :products, only: [:index, :show]
+      resources :search, only: :index, controller: 'search'
     end
   end
 end
