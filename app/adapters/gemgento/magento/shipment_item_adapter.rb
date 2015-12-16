@@ -1,16 +1,19 @@
 module Gemgento
   class Magento::ShipmentItemAdapter
 
-    attr_accessor :source
+    attr_accessor :source, :shipment
 
     # @param source [Hash]
-    def initialize(source)
+    # @param shipment [Gemgento::Shipment]
+    def initialize(source, shipment = nil)
       @source = source
+      @shipment = shipment
     end
 
     # @return [Gemgento::ShipmentItemAdapter]
     def import
-      shipment_item = self.shipment.shipment_items.find_or_initialize_by(magento_id: self.source[:item_id])
+      shipment_item = Gemgento::ShipmentItem.find_or_initialize_by(magento_id: self.source[:item_id])
+      shipment_item.shipment = self.shipment
       shipment_item.line_item = self.order.line_items.find_by!(magento_id: self.source[:order_item_id])
       shipment_item.sku = self.source[:sku]
       shipment_item.name = self.source[:name]

@@ -40,19 +40,25 @@ module Gemgento
       shipment.increment_id = self.source[:increment_id]
       shipment.save!
 
+      # import shipment items
       self.source[:items].each do |item|
-        Gemgento::Magento::ShipmentItemAdapter.new(item).import
+        Gemgento::Magento::ShipmentItemAdapter.new(item, shipment).import
       end
 
-      shipment.shipment_items
+      # remove any shipment items not referenced in most recent items list
+      Gemgento::ShipmentItem
+          .where(shipment: shipment)
           .where.not(magento_id: self.source[:items].map { |i| i[:item_id] })
           .destroy_all
 
+      # import tracks
       self.source[:tracks].each do |track|
-        Gemgento::Magento::ShipmentTrackAdapter.new(track).import
+        Gemgento::Magento::ShipmentTrackAdapter.new(track, shipment).import
       end
 
-      shipment.shipment_tracks
+      # remove any tracks not referenced in most recent tracks list
+      Gemgento::ShipmentTrack
+          .where(shipment: shipment)
           .where.not(magento_id: self.source[:tracks].map { |t| t[:track_id] })
           .destroy_all
 
