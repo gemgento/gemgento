@@ -104,6 +104,7 @@ module Gemgento
         assets_to_keep = []
 
         magento_source_assets.each do |store_id, source_assets| # cycle through media galleries for each
+          next if source_assets.nil?
 
           if !source_assets[:media_gallery].nil? && !source_assets[:media_gallery][:images].nil?
             store = Store.find_by(magento_id: store_id)
