@@ -99,7 +99,9 @@ module Gemgento
           def self.sync_magento_to_local(source)
             return nil if ::Gemgento::Store.find_by(magento_id: source[:store_id]).nil?
 
-            order ||= ::Gemgento::Order.find_or_initialize_by(increment_id: source[:increment_id])
+            retry_count = 0
+
+            order = ::Gemgento::Order.find_or_initialize_by(increment_id: source[:increment_id])
             order.magento_id = source[:order_id]
             order.user = ::Gemgento::User.find_by(magento_id: source[:customer_id])
             order.tax_amount = source[:tax_amount]
@@ -185,8 +187,12 @@ module Gemgento
             order.reload
             return order
 
+          # try one more time to create the record, duplicate record errors are common with threads
+          rescue ActiveRecord::RecordInvalid => e
+            (retry_count += 1) <= 1 ? retry : raise(e)
+
           rescue ActiveRecord::RecordNotUnique => e
-            return ::Gemgento::Order.find_by(increment_id: source[:increment_id])
+            (retry_count += 1) <= 1 ? retry : raise(e)
           end
 
           def self.sync_magento_address_to_local(source, order, address = nil)
@@ -254,9 +260,10 @@ module Gemgento
           end
 
           def self.sync_magento_line_item_to_local(source, order)
+            retry_count = 0
+
             line_item = ::Gemgento::LineItem.find_or_initialize_by(magento_id: source[:item_id])
             line_item.itemizable = order
-            line_item.magento_id = source[:item_id]
             line_item.quote_item_id = source[:quote_item_id]
             line_item.product = ::Gemgento::Product.find_by(magento_id: source[:product_id])
             line_item.product_type = source[:product_type]
@@ -317,8 +324,13 @@ module Gemgento
 
             return line_item
 
+          # try one more time to create the record, duplicate record errors are common with threads
+          rescue ActiveRecord::RecordInvalid => e
+            (retry_count += 1) <= 1 ? retry : raise(e)
+
           rescue ActiveRecord::RecordNotUnique => e
-            return ::Gemgento::LineItem.find_by(itemizable: order, magento_id: source[:item_id])
+            (retry_count += 1) <= 1 ? retry : raise(e)
+
           end
         end
       end
