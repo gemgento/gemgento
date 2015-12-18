@@ -57,6 +57,8 @@ module Gemgento
 
       def set_attribute_values_from_magento(magento_attribute_values, product)
         magento_attribute_values.each do |store_id, attribute_values|
+          next if attribute_values.nil?
+
           store = Store.find_by(magento_id: store_id)
 
           attribute_values.each do |code, value|
