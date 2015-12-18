@@ -16,6 +16,9 @@ module Gemgento
           format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
         end
       end
+
+    rescue ActionController::RedirectBackError
+      redirect_to cart_path
     end
 
     def destroy
@@ -30,6 +33,9 @@ module Gemgento
           format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
         end
       end
+
+    rescue ActionController::RedirectBackError
+      redirect_to cart_path
     end
 
   end
