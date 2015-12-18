@@ -99,7 +99,7 @@ module Gemgento
           def self.sync_magento_to_local(source)
             return nil if ::Gemgento::Store.find_by(magento_id: source[:store_id]).nil?
 
-            retry_count = 0
+            retry_count ||= 0
 
             order = ::Gemgento::Order.find_or_initialize_by(increment_id: source[:increment_id])
             order.magento_id = source[:order_id]
@@ -260,7 +260,7 @@ module Gemgento
           end
 
           def self.sync_magento_line_item_to_local(source, order)
-            retry_count = 0
+            retry_count ||= 0
 
             line_item = ::Gemgento::LineItem.find_or_initialize_by(magento_id: source[:item_id])
             line_item.itemizable = order
