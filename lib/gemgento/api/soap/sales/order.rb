@@ -262,7 +262,7 @@ module Gemgento
           def self.sync_magento_line_item_to_local(source, order)
             retry_count ||= 0
 
-            line_item = ::Gemgento::LineItem.find_or_initialize_by(magento_id: source[:item_id])
+            line_item = ::Gemgento::LineItem.find_or_initialize_by(itemizable_type: 'Gemgento::Order', magento_id: source[:item_id])
             line_item.itemizable = order
             line_item.quote_item_id = source[:quote_item_id]
             line_item.product = ::Gemgento::Product.find_by(magento_id: source[:product_id])
