@@ -19,7 +19,7 @@ module Gemgento
         respond @line_item.save
       else # update the appropriate line_item if it is
         @line_item = @quote.line_items.find_by(product: product)
-        params[:line_item][:qty_ordered] = params[:line_item][:qty_ordered].to_d + @line_item.qty_ordered # increase existing qty by requested qty
+        params[:line_item][:qty_ordered] = params[:line_item][:qty_ordered].to_f + @line_item.qty_ordered # increase existing qty by requested qty
         respond @line_item.update(line_item_params)
       end
     end
