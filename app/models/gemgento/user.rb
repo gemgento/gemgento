@@ -31,12 +31,8 @@ module Gemgento
     validates :magento_id, uniqueness: true, allow_nil: true
     validates :user_group, presence: true
 
-    def self.index
-      if User.all.size == 0
-        API::SOAP::Customer::Customer.fetch_all
-      end
-
-      User.all
+    def name
+      "#{self.first_name} #{self.last_name}".strip
     end
 
     def self.is_valid_login(email, password)
