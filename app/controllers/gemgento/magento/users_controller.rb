@@ -3,19 +3,17 @@ module Gemgento
     class UsersController < Gemgento::Magento::BaseController
 
       def update
-        @user = User.find_or_initialize_by(magento_id: params[:id])
-
+        retry_count ||= 0
         data = params[:data]
 
-        @user.magento_id = params[:id]
+        @user = Gemgento::User.find_or_initialize_by(magento_id: params[:id])
         @user.increment_id = data[:increment_id]
-
         @user.created_in = data[:created_in]
         @user.email = data[:email]
         @user.first_name = data[:firstname]
         @user.middle_name = data[:middlename]
         @user.last_name = data[:lastname]
-        @user.user_group = UserGroup.where(magento_id: data[:group_id]).first
+        @user.user_group = Gemgento::UserGroup.find_by!(magento_id: data[:group_id])
         @user.prefix = data[:prefix]
         @user.suffix = data[:suffix]
         @user.dob = data[:dob]
@@ -32,17 +30,25 @@ module Gemgento
         @user.save validate: false
 
         if data[:store_id].to_i > 0
-          store = Store.find_by(magento_id: data[:store_id])
+          store = Gemgento::Store.find_by(magento_id: data[:store_id])
         elsif !data[:website_id].nil?
-          store = Store.find_by(website_id: data[:website_id])
+          store = Gemgento::Store.find_by(website_id: data[:website_id])
         else
-          store = Store.current
+          store = Gemgento::Store.current
         end
 
         @user.stores << store unless @user.stores.include?(store)
-        API::SOAP::Authnetcim::Payment.fetch(@user) if Config[:extensions]['authorize-net-cim-payment-module']
+
+        Gemgento::API::SOAP::Authnetcim::Payment.fetch(@user) if Config[:extensions]['authorize-net-cim-payment-module']
 
         render nothing: true
+
+      # try one more time to create the record, duplicate record errors are common with threads
+      rescue ActiveRecord::RecordInvalid => e
+        (retry_count += 1) <= 1 ? retry : raise(e)
+
+      rescue ActiveRecord::RecordNotUnique => e
+        (retry_count += 1) <= 1 ? retry : raise(e)
       end
 
       def destroy
