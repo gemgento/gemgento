@@ -12,7 +12,7 @@ module Gemgento
 
       respond_to do |format|
         if @wishlist_item.save
-          format.html { redirect_to user_wishlist_items_path, notice: "Item sucessfully added to wishlist."}
+          format.html { redirect_to user_wishlist_items_path, notice: "Item sucessfully added to wishlist." }
           format.json { render json: { result: true, wishlist_item: @wishlist_item } }
         else
           format.html { redirect_to user_wishlist_items_path }
@@ -26,11 +26,11 @@ module Gemgento
 
       respond_to do |format|
         if @wishlist_item.destroy
-          format.html {redirect_to user_wishlist_items_path , notice: "Wishlist item removed."}
-          format.json{ render json: { result: true } }
+          format.html { redirect_to user_wishlist_items_path , notice: "Wishlist item removed." }
+          format.json { render json: { result: true } }
         else
           format.html { render user_wishlist_items_path, alert: 'Unable to remove item from wishlist' }
-          format.json{ render json: { result: false, errors: @wishlist_item.errors.full_messages } }
+          format.json { render json: { result: false, errors: @wishlist_item.errors.full_messages } }
         end
       end
     end
