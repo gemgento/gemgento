@@ -8,7 +8,7 @@ module Gemgento
     end
 
     def create
-      @wishlist_item = current_user.wishlist_items.create(wishlist_item_params)
+      @wishlist_item = current_user.wishlist_items.new(wishlist_item_params)
 
       respond_to do |format|
         if @wishlist_item.save
@@ -22,10 +22,10 @@ module Gemgento
     end
 
     def destroy
-      @wishlist_item = WishlistItem.find_by(user_id: current_user.id, product_id: params[:id])
+      @wishlist_item = current_user.wishlist_items.find(params[:id])
 
       respond_to do |format|
-        if @wishlist_item.destroy!
+        if @wishlist_item.destroy
           format.html {redirect_to user_wishlist_items_path , notice: "Wishlist item removed."}
           format.json{ render json: { result: true } }
         else
