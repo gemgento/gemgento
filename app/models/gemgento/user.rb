@@ -26,6 +26,8 @@ module Gemgento
     before_create :magento_create, if: -> { magento_id.nil? }
     after_save :magento_update, if: -> { sync_needed? }
 
+    attr_accessor :sync_needed
+
     default_scope -> { where(deleted_at: nil) }
 
     validates :magento_id, uniqueness: true, allow_nil: true
