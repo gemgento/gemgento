@@ -20,13 +20,13 @@ module Gemgento
         @user.taxvat = data[:taxvat]
         @user.confirmation = data[:confirmation]
         @user.gender = data[:gender]
-        @user.sync_needed = false
 
         if @user.magento_password != data[:password_hash]
           @user.encrypted_password = ''
           @user.magento_password = data[:password_hash]
         end
 
+        @user.sync_needed = false
         @user.save validate: false
 
         if data[:store_id].to_i > 0

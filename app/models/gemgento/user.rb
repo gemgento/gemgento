@@ -24,7 +24,7 @@ module Gemgento
     before_validation :manage_subscribe
 
     before_create :magento_create, if: -> { magento_id.nil? }
-    after_save :magento_update, if: -> { sync_needed? }
+    after_save :magento_update, if: Proc.new { |u| u.sync_needed }
 
     attr_accessor :sync_needed
 
@@ -67,8 +67,10 @@ module Gemgento
         encrypted_password += ':' + salt
 
         if self.magento_password == encrypted_password
+          self.magento_password = nil
           self.password = password
           self.password_confirmation = password
+          self.sync_needed = false
           self.save
 
           return true
@@ -100,8 +102,11 @@ module Gemgento
     end
 
     def password_confirmation=(value)
-      self[:magento_password] = value
       @password_confirmation = value
+
+      # password changes must be pushed to magento, so that
+      # magento customer updates don't revert the password
+      self.sync_needed = true
     end
 
     def as_json(options = nil)
@@ -149,7 +154,6 @@ module Gemgento
         end
       end
 
-      self.sync_needed = false
       return true
     end
 

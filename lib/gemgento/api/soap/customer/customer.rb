@@ -179,8 +179,8 @@ module Gemgento
                 gender: customer.gender.nil? ? nil : customer.gender
             }
 
-            if !customer.magento_password.nil? && !customer.magento_password.include?(':')
-              customer_data[:password] = customer.magento_password # pass plain text password, magento needs to encrypt it (stupid magento)
+            if !customer.password_confirmation.blank?
+              customer_data[:password] = customer.password_confirmation
             end
 
             customer_data
