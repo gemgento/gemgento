@@ -86,11 +86,11 @@ module Gemgento
     end
 
     def after_sign_in_path
-      edit_user_registration_path
+      session[:return_to] || edit_user_registration_path
     end
 
-    def after_register_path
-      edit_user_registration_path
+    def after_sign_in_path
+      session[:return_to] || edit_user_registration_path
     end
 
     def require_no_authentication

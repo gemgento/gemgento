@@ -1,6 +1,8 @@
 module Gemgento
   class User::WishlistItemsController < User::BaseController
-    before_filter :authenticate_user!
+    prepend_before_action :set_return_to
+
+    before_action :authenticate_user!
 
     def index
       @wishlist_items = current_user.wishlist_items
@@ -36,6 +38,15 @@ module Gemgento
     end
 
     private
+
+    def set_return_to
+      if user_signed_in?
+        session.delete(:return_to)
+      elsif params[:wishlist_item]
+        return_params = { wishlist_item: params[:wishlist_item] }.to_query
+        session[:return_to] = "#{request.fullpath}/add?#{return_params}"
+      end
+    end
 
     def wishlist_item_params
       params.require(:wishlist_item).permit(:product_id)
