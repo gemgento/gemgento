@@ -34,7 +34,7 @@ ActiveAdmin.register_page 'Product Positions' do
           product_category = Gemgento::ProductCategory.find_or_initialize_by(category_id: @category.id, product_id: id, store_id: store.id)
           product_category.position = index
           product_category.sync_needed = false
-          product_category.save
+          product_category.save!
         end
 
         Gemgento::API::SOAP::Catalog::Category.update_product_positions(@category, store)
