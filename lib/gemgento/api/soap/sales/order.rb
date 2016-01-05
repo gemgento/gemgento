@@ -126,13 +126,17 @@ module Gemgento
               order.save! validate: false
             end
 
-            order.line_items.destroy_all
+            # import line items
             unless source[:items][:item].nil?
               source[:items][:item] = [source[:items][:item]] unless source[:items][:item].is_a? Array
               source[:items][:item].each do |item|
                 sync_magento_line_item_to_local(item, order)
               end
             end
+
+            # remove unused line items
+            known_ids = source[:items][:item].map { |i| i[:item_id] }
+            Gemgento::LineItem.where(itemizable: order).where.not(magento_id: known_ids).destroy_all
 
             if !source[:status_history][:item].nil?
               source[:status_history][:item] = [source[:status_history][:item]] unless source[:status_history][:item].is_a? Array
@@ -205,7 +209,7 @@ module Gemgento
           end
 
           def self.sync_magento_order_status_to_local(source, order)
-            order_status = ::Gemgento::OrderStatus.where(order_id: order.id, status: source[:status], comment: source[:comment]).first_or_initialize
+            order_status = ::Gemgento::OrderStatus.find_or_initialize_by(order_id: order.id, status: source[:status], comment: source[:comment])
             order_status.order = order
             order_status.status = source[:status]
             order_status.is_active = source[:is_active]
@@ -218,8 +222,6 @@ module Gemgento
           end
 
           def self.sync_magento_line_item_to_local(source, order)
-            retry_count ||= 0
-
             line_item = ::Gemgento::LineItem.find_or_initialize_by(itemizable_type: 'Gemgento::Order', magento_id: source[:item_id])
             line_item.itemizable = order
             line_item.product = ::Gemgento::Product.find_by(magento_id: source[:product_id])
@@ -229,23 +231,15 @@ module Gemgento
               line_item.assign_attributes k => v
             end
 
-            line_item.save!
+            line_item.save
 
             unless source[:gift_message_id].nil?
               gift_message = ::Gemgento::API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
               line_item.gift_message = gift_message
-              line_item.save!
+              line_item.save
             end
 
             return line_item
-
-          # try one more time to create the record, duplicate record errors are common with threads
-          rescue ActiveRecord::RecordInvalid => e
-            (retry_count += 1) <= 1 ? retry : raise(e)
-
-          rescue ActiveRecord::RecordNotUnique => e
-            (retry_count += 1) <= 1 ? retry : raise(e)
-
           end
         end
       end
