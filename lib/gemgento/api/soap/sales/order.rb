@@ -104,57 +104,15 @@ module Gemgento
             order = ::Gemgento::Order.find_or_initialize_by(increment_id: source[:increment_id])
             order.magento_id = source[:order_id]
             order.user = ::Gemgento::User.find_by(magento_id: source[:customer_id])
-            order.tax_amount = source[:tax_amount]
-            order.shipping_amount = source[:shipping_amount]
-            order.discount_amount = source[:discount_amount]
-            order.subtotal = source[:subtotal]
-            order.grand_total = source[:grand_total]
-            order.total_paid = source[:total_paid]
-            order.total_refunded = source[:total_refunded]
-            order.total_qty_ordered = source[:total_qty_ordered]
-            order.total_canceled = source[:total_canceled]
-            order.total_invoiced = source[:total_invoiced]
-            order.total_online_refunded = source[:total_online_refunded]
-            order.total_offline_refunded = source[:total_offline_refunded]
-            order.base_tax_amount = source[:base_tax_amount]
-            order.base_shipping_amount = source[:base_shipping_amount]
-            order.base_discount_amount = source[:base_discount_amount]
-            order.base_subtotal = source[:base_subtotal]
-            order.base_grand_total = source[:base_grand_total]
-            order.base_total_paid = source[:base_total_paid]
-            order.base_total_refunded = source[:base_total_refunded]
-            order.base_total_qty_ordered = source[:base_total_qty_ordered]
-            order.base_total_canceled = source[:base_total_canceled]
-            order.base_total_invoiced = source[:base_total_invoiced]
-            order.base_total_online_refunded = source[:base_total_online_refunded]
-            order.base_total_offline_refunded = source[:base_total_offline_refunded]
-            order.store_to_base_rate = source[:store_to_base_rate]
-            order.store_to_order_rate = source[:store_to_order_rate]
-            order.base_to_global_rate = source[:base_to_global_rate]
-            order.base_to_order_rate = source[:base_to_order_rate]
-            order.weight = source[:weight]
-            order.store_name = source[:store_name]
-            order.remote_ip = source[:remote_ip]
-            order.status = source[:status]
-            order.state = source[:state]
-            order.applied_rule_ids = source[:applied_rule_ids]
-            order.global_currency_code = source[:global_currency_code]
-            order.base_currency_code = source[:base_currency_code]
-            order.store_currency_code = source[:store_currency_code]
-            order.order_currency_code = source[:order_currency_code]
-            order.shipping_method = source[:shipping_method]
-            order.shipping_description = source[:shipping_description]
-            order.customer_email = source[:customer_email]
-            order.customer_firstname = source[:customer_firstname]
-            order.customer_lastname = source[:customer_lastname]
             order.quote = ::Gemgento::Quote.find_by(magento_id: source[:quote_id])
-            order.is_virtual = source[:is_virtual]
             order.user_group = ::Gemgento::UserGroup.where(magento_id: source[:customer_group_id]).first
-            order.customer_note_notify = source[:customer_note_notify]
-            order.customer_is_guest = source[:customer_is_guest]
-            order.email_sent = source[:email_sent]
-            order.placed_at = source[:created_at]
             order.store = ::Gemgento::Store.find_by(magento_id: source[:store_id])
+
+            source.each do |k, v|
+              next if [:store_id, :quote_id].include?(k) || !Gemgento::Order.column_names.include?(k.to_s)
+              order.assign_attributes k => v
+            end
+
             order.save! validate: false
 
             sync_magento_address_to_local(source[:shipping_address], order, order.shipping_address) unless source[:shipping_address][:address_id].nil?
@@ -264,56 +222,13 @@ module Gemgento
 
             line_item = ::Gemgento::LineItem.find_or_initialize_by(itemizable_type: 'Gemgento::Order', magento_id: source[:item_id])
             line_item.itemizable = order
-            line_item.quote_item_id = source[:quote_item_id]
             line_item.product = ::Gemgento::Product.find_by(magento_id: source[:product_id])
-            line_item.product_type = source[:product_type]
-            line_item.product_options = source[:product_options]
-            line_item.weight = source[:weight]
-            line_item.is_virtual = source[:is_virtual]
-            line_item.sku = source[:sku]
-            line_item.name = source[:name]
-            line_item.applied_rule_ids = source[:applied_rule_ids]
-            line_item.free_shipping = source[:free_shipping]
-            line_item.is_qty_decimal = source[:is_qty_decimal]
-            line_item.no_discount = source[:no_discount]
-            line_item.qty_canceled = source[:qty_canceled]
-            line_item.qty_invoiced = source[:qty_invoiced]
-            line_item.qty_ordered = source[:qty_ordered]
-            line_item.qty_refunded = source[:qty_refunded]
-            line_item.qty_shipped = source[:qty_shipped]
-            line_item.cost = source[:cost]
-            line_item.price = source[:price]
-            line_item.base_price = source[:base_price]
-            line_item.original_price = source[:original_price]
-            line_item.base_original_price = source[:base_original_price]
-            line_item.tax_percent = source[:tax_percent]
-            line_item.tax_amount = source[:tax_amount]
-            line_item.base_tax_amount = source[:base_tax_amount]
-            line_item.tax_invoiced = source[:tax_invoiced]
-            line_item.base_tax_invoiced = source[:base_tax_invoiced]
-            line_item.discount_percent = source[:discount_percent]
-            line_item.discount_amount = source[:discount_amount]
-            line_item.base_discount_amount = source[:base_discount_amount]
-            line_item.discount_invoiced = source[:discount_invoiced]
-            line_item.base_discount_invoiced = source[:base_discount_invoiced]
-            line_item.amount_refunded = source[:amount_refunded]
-            line_item.base_amount_refunded = source[:base_amount_refunded]
-            line_item.row_total = source[:row_total]
-            line_item.base_row_total = source[:base_row_total]
-            line_item.row_invoiced = source[:row_invoiced]
-            line_item.base_row_invoiced = source[:base_row_invoiced]
-            line_item.row_weight = source[:row_weight]
-            line_item.base_tax_before_discount = source[:base_tax_before_discount]
-            line_item.tax_before_discount = source[:tax_before_discount]
-            line_item.weee_tax_applied = source[:weee_tax_applied]
-            line_item.weee_tax_applied_amount = source[:weee_tax_applied_amount]
-            line_item.weee_tax_applied_row_amount = source[:weee_tax_applied_row_amount]
-            line_item.base_weee_tax_applied_amount = source[:base_weee_tax_applied_amount]
-            line_item.base_weee_tax_applied_row_amount = source[:base_weee_tax_applied_row_amount]
-            line_item.weee_tax_disposition = source[:weee_tax_disposition]
-            line_item.weee_tax_row_disposition = source[:weee_tax_row_disposition]
-            line_item.base_weee_tax_disposition = source[:base_weee_tax_disposition]
-            line_item.base_weee_tax_row_disposition = source[:base_weee_tax_row_disposition]
+
+            source.each do |k, v|
+              next if [:product_id].include?(k) || !Gemgento::LineItem.column_names.include?(k.to_s)
+              line_item.assign_attributes k => v
+            end
+
             line_item.save!
 
             unless source[:gift_message_id].nil?
