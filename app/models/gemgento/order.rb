@@ -48,5 +48,9 @@ module Gemgento
       Gemgento::Order.find_by(increment_id: increment_id) || Gemgento::API::SOAP::Sales::Order.fetch(increment_id)
     end
 
+    def placed_at
+      super || self.created_at
+    end
+
   end
 end
