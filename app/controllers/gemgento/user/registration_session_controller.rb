@@ -89,7 +89,7 @@ module Gemgento
       session[:return_to] || edit_user_registration_path
     end
 
-    def after_sign_in_path
+    def after_register_path
       session[:return_to] || edit_user_registration_path
     end
 
