@@ -37,7 +37,7 @@ module Gemgento
         else
           initialize_payment_variables
           format.html { render action: :show }
-          format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
+          format.json { render json: { result: false, errors: @quote.errors }, status: 422 }
         end
       end
     end
@@ -61,7 +61,7 @@ module Gemgento
         else
           initialize_payment_variables
           format.html { render action: :show }
-          format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
+          format.json { render json: { result: false, errors: @quote.errors }, status: 422 }
         end
       end
     end
