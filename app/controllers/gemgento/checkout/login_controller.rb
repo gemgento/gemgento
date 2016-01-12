@@ -23,7 +23,7 @@ module Gemgento
 
           if @quote.save
             sign_in(:user, @user)
-            format.html { redirect_to checkout_address_path }
+            format.html { redirect_to after_checkout_login_path }
             format.json { render json: { result: true } }
           else # problem saving order
             format.html { render 'show' }
@@ -54,7 +54,7 @@ module Gemgento
 
           if @quote.save
             sign_in(:user, @user)
-            format.html { redirect_to checkout_address_path }
+            format.html { redirect_to after_checkout_login_path }
             format.json { render json: { result: true } }
           else
             format.html { render 'show' }
@@ -76,7 +76,7 @@ module Gemgento
       respond_to do  |format|
 
         if @quote.update(quote_params)
-          format.html { redirect_to checkout_address_path }
+          format.html { redirect_to after_checkout_login_path }
           format.json { render json: { result: true } }
         else # problem saving order
           format.html { render 'show' }
@@ -95,7 +95,7 @@ module Gemgento
 
         respond_to do |format|
           if @quote.save
-            format.html { redirect_to checkout_address_path }
+            format.html { redirect_to after_checkout_login_path }
             format.json { render json: { result: true, user: @user, quote: @quote } }
 
           else
@@ -112,6 +112,10 @@ module Gemgento
 
     def quote_params
       params.require(:quote).permit(:customer_email, :subscribe)
+    end
+
+    def after_checkout_login_path
+      checkout_address_path
     end
 
   end

@@ -58,6 +58,24 @@ module Gemgento
       end
     end
 
+    def build_billing_address
+      billing_address = current_user.default_billing_address if user_signed_in?
+      billing_address = billing_address.nil? ? Address.new : billing_address.duplicate
+      billing_address.is_billing = true
+      billing_address.is_shipping = false
+      billing_address.country = Gemgento::Country.find_by(iso2_code: 'us') unless billing_address.country.present?
+      @quote.build_billing_address(billing_address.attributes.reject{ |key| key == 'id' })
+    end
+
+    def build_shipping_address
+      shipping_address = current_user.default_shipping_address if user_signed_in?
+      shipping_address = shipping_address.nil? ? Address.new : shipping_address.duplicate
+      shipping_address.is_shipping = true
+      shipping_address.is_billing = false
+      shipping_address.country = Gemgento::Country.find_by(iso2_code: 'us') unless shipping_address.country.present?
+      @quote.build_shipping_address(shipping_address.attributes.reject{ |key| key == 'id' })
+    end
+
     def get_magento_shipping_method
       if cookies[:shipping_methods].nil?
         shipping_methods = @quote.shipping_methods
