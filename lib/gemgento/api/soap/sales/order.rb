@@ -216,7 +216,7 @@ module Gemgento
             order_status.is_customer_notified = source[:is_customer_notified].to_i
             order_status.comment = source[:comment]
             order_status.created_at = source[:created_at]
-            order_status.save!
+            order_status.save
 
             order_status
           end
