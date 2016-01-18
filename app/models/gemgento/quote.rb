@@ -235,6 +235,8 @@ module Gemgento
         end
       end
 
+      shipping_methods.uniq! { |sm| sm[:code] }
+
       return 0.0
     end
 
