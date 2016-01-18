@@ -27,7 +27,7 @@ module Gemgento
             format.json { render json: { result: true } }
           else # problem saving order
             format.html { render 'show' }
-            format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
+            format.json { render json: { result: false, errors: @quote.errors }, status: 422 }
           end
 
         else # failed login attempt
@@ -58,12 +58,12 @@ module Gemgento
             format.json { render json: { result: true } }
           else
             format.html { render 'show' }
-            format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
+            format.json { render json: { result: false, errors: @quote.errors }, status: 422 }
           end
 
         else # couldn't create user
           format.html { render 'show' }
-          format.json { render json: { result: false, errors: @user.errors.full_messages }, status: 422 }
+          format.json { render json: { result: false, errors: @user.errors }, status: 422 }
         end
       end
     end
@@ -80,7 +80,7 @@ module Gemgento
           format.json { render json: { result: true } }
         else # problem saving order
           format.html { render 'show' }
-          format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
+          format.json { render json: { result: false, errors: @quote.errors }, status: 422 }
         end
       end
     end

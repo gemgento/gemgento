@@ -31,7 +31,7 @@ module Gemgento
         else
           @shipping_method = get_magento_shipping_method
           format.html { render 'show' }
-          format.json { render json: { result: false, errors: @quote.errors.full_messages }, status: 422 }
+          format.json { render json: { result: false, errors: @quote.errors }, status: 422 }
         end
       end
 
