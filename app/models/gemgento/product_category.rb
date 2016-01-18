@@ -15,6 +15,8 @@ module Gemgento
     after_save :touch_product, :touch_category, if: -> { changed? }
     after_destroy :touch_category, :touch_product
 
+    attr_accessor :sync_needed
+
     private
 
     def touch_product
