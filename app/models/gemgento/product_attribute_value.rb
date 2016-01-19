@@ -16,15 +16,11 @@ module Gemgento
                foreign_key: 'value',
                primary_key: 'value'
 
+    touch :product, after_touch: :touch_associations
+
     default_scope -> { includes(:product_attribute) }
 
-    after_save :touch_product
-
-    private
-
-    def touch_product
-      affects_cache_expiration = %w[special_from_date special_to_date special_price].include?(self.product_attribute.code)
-      TouchProduct.perform_async([self.product.id], affects_cache_expiration) if self.changed?
-    end
+    validates :product, :product_attribute, :store, presence: true
+    validates :product_attribute, uniqueness: { scope: [:product, :store] }
   end
 end

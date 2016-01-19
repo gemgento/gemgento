@@ -10,13 +10,13 @@ module Gemgento
 
     has_and_belongs_to_many :asset_types, join_table: 'gemgento_assets_asset_types'
 
+    touch :product
+
     validates :asset_file, :product_id, :store_id, presence: true
     validates_uniqueness_of :product_id, scope: [:asset_file_id, :store_id, :file]
 
     before_save :create_magento_product_attribute_media, if: -> { sync_needed? && file.blank? }
     before_save :update_magento_product_attribute_media, if: -> { sync_needed? && !file.blank? }
-
-    after_save :touch_product
 
     before_destroy :delete_magento, :destroy_file
 
@@ -179,14 +179,6 @@ module Gemgento
       if !self.asset_file.nil? && self.asset_file.assets.where('gemgento_assets.id != ?', self.id).empty?
         self.asset_file.destroy
       end
-    end
-
-    # Set product updated_at to now if the Asset has been changed.  This happens asynchronously using Sidekiq and is
-    # necessary for cache invalidation.  It is called as the after save callback.
-    #
-    # @return [void]
-    def touch_product
-      TouchProduct.perform_async([self.product.id]) if self.changed?
     end
 
   end

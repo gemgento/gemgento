@@ -5,6 +5,8 @@ module Gemgento
     belongs_to :product
     belongs_to :store
 
+    touch :product
+
     # Inventory.backorder may have one of the following values:
     # 0 - no backorders
     # 1 - allow qty below 0
@@ -12,7 +14,6 @@ module Gemgento
     validates :backorders, inclusion: 0..2
     validates :product, uniqueness: { scope: :store }
 
-    after_save :touch_product
     before_save :sync_local_to_magento, if: -> { sync_needed? }
 
     attr_accessor :use_config_manage_stock
@@ -39,13 +40,6 @@ module Gemgento
     end
 
     private
-
-    # Touch the associated product when updated.
-    #
-    # @return [Void]
-    def touch_product
-      TouchProduct.perform_async([self.product.id]) if self.changed?
-    end
 
     # Push local inventory changes to magento.
     #

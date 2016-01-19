@@ -5,9 +5,9 @@ module Gemgento
     belongs_to :product, class_name: 'Gemgento::Product'
     belongs_to :user_group, class_name: 'Gemgento::UserGroup'
 
-    validates :store, :product, :quantity, :price, presence: true
+    touch :product
 
-    after_save :touch_product, if: -> { changed? }
+    validates :store, :product, :quantity, :price, presence: true
 
     # Check if PriceTier is valid for the given quantity and user.
     #
@@ -31,12 +31,6 @@ module Gemgento
       end
 
       return price
-    end
-
-    private
-
-    def touch_product
-      TouchProduct.perform_async(self.product.id, true)
     end
 
   end

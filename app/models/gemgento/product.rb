@@ -50,11 +50,14 @@ module Gemgento
     scope :not_deleted, -> { where(deleted_at: nil) }
     scope :active, -> { where(deleted_at: nil, status: true) }
 
+    touch :categories
+    touch :configurable_products
+    touch :bundle_items
+
     after_find :manage_cache_expires_at
 
     before_save :create_magento_product, if: -> { sync_needed? && magento_id.nil? }
     before_save :update_magento_product, if: -> { sync_needed? && !magento_id.nil? }
-    after_save :touch_categories, :touch_configurables, :touch_bundle_items
 
     before_destroy :delete_associations
 
@@ -570,25 +573,6 @@ module Gemgento
     # @return [Void]
     def delete_associations
       self.configurable_attributes.destroy_all
-    end
-
-    # Touch all associated categories.
-    #
-    # @return [Void]
-    def touch_categories
-      ::Gemgento::TouchCategory.perform_async(self.categories.pluck(:id)) if self.changed?
-    end
-
-    # Touch associated configurable products.
-    #
-    # @return [Void]
-    def touch_configurables
-      self.configurable_products.update_all(updated_at: Time.now) if self.changed?
-      TouchProduct.perform_async(self.configurable_products.pluck(:id)) if self.changed?
-    end
-
-    def touch_bundle_items
-      TouchWorker.perform_async(Gemgento::Bundle::Item, self.bundle_items.pluck(:id))
     end
 
     def to_ary

@@ -12,6 +12,8 @@ module Gemgento
 
     has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_categories_stores', class_name: 'Store'
 
+    touch :parent
+
     has_attached_file :image
 
     default_scope -> { where(deleted_at: nil).order(:position) }
@@ -25,7 +27,6 @@ module Gemgento
     validates_attachment_content_type :image, content_type: /\Aimage\/.*\Z/
 
     after_save :enforce_positioning, if: :position_changed?
-    after_save :touch_category, if: -> { changed? }
 
     before_save :create_magento_category, if: Proc.new { |category| category.sync_needed? && category.magento_id.nil? }
     before_save :update_magento_category, if: Proc.new { |category| category.sync_needed? && !category.magento_id.nil? }
@@ -177,11 +178,6 @@ module Gemgento
           store.id,
           self.id
       ).order('gemgento_product_categories.position ASC')
-    end
-
-
-    def touch_category
-      ::Gemgento::TouchCategory.perform_async(self.id)
     end
 
     private

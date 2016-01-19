@@ -12,6 +12,7 @@ require 'open-uri'
 require 'sidekiq'
 require 'state_machine'
 require 'jbuilder'
+require 'active_touch'
 require 'gemgento/version'
 require 'gemgento/engine'
 

@@ -6,6 +6,9 @@ module Gemgento
     belongs_to :category
     belongs_to :store
 
+    touch :product
+    touch :category
+
     validates :product, :category, :store, presence: true
     validates :product, uniqueness: { scope: [:category, :store] }
 
@@ -16,18 +19,6 @@ module Gemgento
     after_destroy :touch_category, :touch_product
 
     attr_accessor :sync_needed
-
-    private
-
-    def touch_product
-      TouchProduct.perform_async([self.product.id]) if self.product
-    end
-
-    def touch_category
-      category_ids = [self.category_id]
-      category_ids += self.product.categories.pluck(:id) if self.product
-      ::Gemgento::TouchCategory.perform_async(category_ids)
-    end
 
     def update_magento_category_product
       response = API::SOAP::Catalog::Category.update_product(self)
