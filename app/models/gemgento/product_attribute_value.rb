@@ -2,6 +2,8 @@ module Gemgento
 
   # @author Gemgento LLC
   class ProductAttributeValue < ActiveRecord::Base
+    include Gemgento::ProductTouches
+
     belongs_to :product
     belongs_to :product_attribute
     belongs_to :store
@@ -15,8 +17,6 @@ module Gemgento
                },
                foreign_key: 'value',
                primary_key: 'value'
-
-    touch :product, after_touch: :touch_associations
 
     default_scope -> { includes(:product_attribute) }
 

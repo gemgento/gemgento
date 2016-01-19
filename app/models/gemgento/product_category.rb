@@ -2,11 +2,12 @@ module Gemgento
 
   # @author Gemgento LLC
   class ProductCategory < ActiveRecord::Base
+    include Gemgento::ProductTouches
+
     belongs_to :product
     belongs_to :category
     belongs_to :store
 
-    touch :product
     touch :category
 
     validates :product, :category, :store, presence: true
@@ -15,8 +16,6 @@ module Gemgento
     default_scope -> { order(:category_id, :position, :product_id, :id) }
 
     before_save :update_magento_category_product, if: -> { sync_needed }
-    after_save :touch_product, :touch_category, if: -> { changed? }
-    after_destroy :touch_category, :touch_product
 
     attr_accessor :sync_needed
 

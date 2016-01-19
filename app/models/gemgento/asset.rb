@@ -4,13 +4,13 @@ module Gemgento
 
   # @author Gemgento LLC
   class Asset < ActiveRecord::Base
-    belongs_to :product
-    belongs_to :store
-    belongs_to :asset_file
+    include Gemgento::ProductTouches
+
+    belongs_to :product, class_name: 'Gemgento::Product'
+    belongs_to :store, class_name: 'Gemgento::Store'
+    belongs_to :asset_file, class_name: 'Gemgento::AssetFile'
 
     has_and_belongs_to_many :asset_types, join_table: 'gemgento_assets_asset_types'
-
-    touch :product
 
     validates :asset_file, :product_id, :store_id, presence: true
     validates_uniqueness_of :product_id, scope: [:asset_file_id, :store_id, :file]

@@ -208,9 +208,6 @@ module Gemgento
           private
 
           def self.sync_magento_to_local(subject, store)
-            Gemgento::Product.skip_callback(:save, :after, :touch_categories)
-            Gemgento::Product.skip_callback(:save, :after, :touch_configurables)
-
             product = Gemgento::Product.find_or_initialize_by(magento_id: subject[:product_id])
             product.magento_type = subject[:type]
             product.sku = subject[:sku]
@@ -245,9 +242,6 @@ module Gemgento
             set_associated_products(subject[:simple_product_ids], subject[:configurable_product_ids], product)
             set_bundle_options(subject[:bundle_options][:item], product) if subject[:bundle_options] && subject[:bundle_options][:item]
             set_tier_prices(subject[:tier_price][:item], product, store) if subject[:tier_price] && subject[:tier_price][:item]
-
-            Gemgento::Product.set_callback(:save, :after, :touch_categories)
-            Gemgento::Product.set_callback(:save, :after, :touch_configurables)
 
             return product
           end

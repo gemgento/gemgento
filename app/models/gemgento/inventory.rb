@@ -2,10 +2,10 @@ module Gemgento
 
   # @author Gemgento LLC
   class Inventory < ActiveRecord::Base
-    belongs_to :product
-    belongs_to :store
+    include Gemgento::ProductTouches
 
-    touch :product
+    belongs_to :product, class_name: 'Gemgento::Product'
+    belongs_to :store, class_name: 'Gemgento::Store'
 
     # Inventory.backorder may have one of the following values:
     # 0 - no backorders

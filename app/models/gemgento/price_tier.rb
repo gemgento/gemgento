@@ -1,11 +1,10 @@
 module Gemgento
   class PriceTier < ActiveRecord::Base
+    include Gemgento::ProductTouches
 
     belongs_to :store, class_name: 'Gemgento::Store'
     belongs_to :product, class_name: 'Gemgento::Product'
     belongs_to :user_group, class_name: 'Gemgento::UserGroup'
-
-    touch :product
 
     validates :store, :product, :quantity, :price, presence: true
 
