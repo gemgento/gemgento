@@ -1,6 +1,6 @@
 class Gemgento2 < ActiveRecord::Migration
-  def change
 
+  def change
     create_table "active_admin_comments", force: :cascade do |t|
       t.string   "namespace",     limit: 255
       t.text     "body",          limit: 65535
@@ -957,6 +957,13 @@ class Gemgento2 < ActiveRecord::Migration
       t.datetime "created_at"
       t.datetime "updated_at"
     end
+  end
 
+  def migrate(direction)
+    if direction == :up
+      super unless ActiveRecord::Base.connection.table_exists?('gemgento_stores')
+    else
+      super
+    end
   end
 end
