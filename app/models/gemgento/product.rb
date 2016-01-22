@@ -62,6 +62,7 @@ module Gemgento
     before_destroy :delete_associations
 
     validates :sku, uniqueness: { scope: :deleted_at }
+    validates :magento_id, uniqueness: true
 
     attr_accessor :configurable_attribute_ordering, :attribute_values, :sync_needed
 
@@ -367,7 +368,7 @@ module Gemgento
           where(is_configurable: true, frontend_input: 'select', scope: 'global')
 
       configurable_attributes.each do |attribute|
-        order[attribute.code] = {}
+        order[attribute.code] = []
 
         simple_products = simple_products.sort_by do |simple_product|
           if o = simple_product.product_attribute_options.find_by(product_attribute: attribute, store: store)
@@ -377,10 +378,16 @@ module Gemgento
           end
         end
 
+        mapping = {}
         simple_products.each do |simple_product|
           value = simple_product.attribute_value(attribute.code, store)
-          order[attribute.code][value] = [] if order[attribute.code][value].nil?
-          order[attribute.code][value] << simple_product.id unless order[attribute.code][value].include? simple_product.id
+          mapping[value] = [] if mapping[value].nil?
+          mapping[value] << simple_product.id unless mapping[value].include? simple_product.id
+        end
+
+        order[attribute.code] = []
+        mapping.each do |k, value|
+          order[attribute.code] << { value: k, simple_product_ids: value }
         end
       end
 

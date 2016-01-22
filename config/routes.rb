@@ -124,4 +124,15 @@ Gemgento::Engine.routes.draw do
   get '/gemgento/contact',        to: 'pages#contact'
   get '/gemgento/terms-of-use',   to: 'pages#terms_of_use', as: 'terms_of_use'
   get '/gemgento/return-policy',  to: 'pages#return_policy', as: 'return_policy'
+
+  namespace :api, defaults: { format: 'json' } do
+    namespace :v1 do
+      resources :categories, only: [:index, :show] do
+        resources :products, only: :index
+      end
+
+      resources :products, only: [:index, :show]
+      resources :search, only: :index, controller: 'search'
+    end
+  end
 end
