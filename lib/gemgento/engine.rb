@@ -48,15 +48,14 @@ module Gemgento
 
     config.active_job.queue_adapter = :sidekiq
 
-    ## BREAKING CHANGE - INCLUDE IN 2.0 ###
-    # # Append migrations direction to Application
-    # initializer :append_migrations do |app|
-    #   unless app.root.to_s.match root.to_s
-    #     config.paths['db/migrate'].expanded.each do |expanded_path|
-    #       app.config.paths['db/migrate'] << expanded_path
-    #     end
-    #   end
-    # end
+    # Append migrations direction to Application
+    initializer :append_migrations do |app|
+      unless app.root.to_s.match root.to_s
+        config.paths['db/migrate'].expanded.each do |expanded_path|
+          app.config.paths['db/migrate'] << expanded_path
+        end
+      end
+    end
 
   end
 end
