@@ -13,6 +13,7 @@ module Gemgento
         @product.sync_needed = false
         @product.product_attribute_set = ProductAttributeSet.where(magento_id: data[:set]).first
         @product.magento_type = data[:type]
+        @product.deleted_at = nil
         @product.save
 
         set_stores(data[:stores], @product) unless data[:stores].nil?
