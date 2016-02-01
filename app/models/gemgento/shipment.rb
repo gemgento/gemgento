@@ -4,9 +4,9 @@ module Gemgento
   class Shipment < ActiveRecord::Base
     belongs_to :order, class_name: 'Gemgento::Order'
 
-    has_many :shipment_comments
-    has_many :shipment_items
-    has_many :shipment_tracks
+    has_many :shipment_comments, class_name: 'Gemgento::ShipmentComment', dependent: :destroy
+    has_many :shipment_items, class_name: 'Gemgento::ShipmentItem', dependent: :destroy
+    has_many :shipment_tracks, class_name: 'Gemgento::ShipmentTrack', dependent: :destroy
 
     attr_accessor :email, :comment, :include_comment
 
