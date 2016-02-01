@@ -48,11 +48,9 @@ module Gemgento
             MagentoApi.create_call(:shopping_cart_order, message)
           end
 
-          def self.info(cart)
-            message = {
-                quote_id: cart.magento_id,
-                store_id: cart.store.magento_id
-            }
+          def self.info(quote_id, store_id = nil)
+            message = { quote_id: quote_id }
+            message[:store_id] = store_id unless store_id.nil?
             MagentoApi.create_call(:shopping_cart_info, message)
           end
 
