@@ -61,6 +61,8 @@ module Gemgento
 
     before_destroy :delete_associations
 
+    after_commit :remove_from_active_quotes, unless: Proc.new { |product| product.status && product.deleted_at.nil?  }
+
     validates :sku, uniqueness: { scope: :deleted_at }
     validates :magento_id, uniqueness: true
 
@@ -507,6 +509,15 @@ module Gemgento
     def categories(store = nil)
       return super if store.nil?
       Gemgento::Category.where(id: self.product_categories.where(store: store).pluck(:category_id))
+    end
+
+    def remove_from_active_quotes
+      self.line_items
+          .joins('INNER JOIN gemgento_quotes ON gemgento_line_items.itemizable_id = gemgento_quotes.id')
+          .joins('LEFT JOIN gemgento_orders ON gemgento_quotes.id = gemgento_orders.quote_id')
+          .where(gemgento_line_items: { itemizable_type: 'Gemgento::Quote' })
+          .where(gemgento_orders: { id: nil }).where('gemgento_quotes.created_at >= ?', 30.days.ago)
+          .destroy_all
     end
 
     private
