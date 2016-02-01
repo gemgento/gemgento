@@ -2,21 +2,21 @@ module Gemgento
 
   # @author Gemgento LLC
   class Order < ActiveRecord::Base
-    belongs_to :store, class_name: 'Store'
-    belongs_to :user, class_name: 'User'
-    belongs_to :user_group, class_name: 'UserGroup'
-    belongs_to :quote, class_name: 'Quote'
+    belongs_to :store, class_name: 'Gemgento::Store'
+    belongs_to :user, class_name: 'Gemgento::User'
+    belongs_to :user_group, class_name: 'Gemgento::UserGroup'
+    belongs_to :quote, class_name: 'Gemgento::Quote'
 
-    has_many :api_jobs, class_name: 'ApiJob', as: :source
-    has_many :line_items, as: :itemizable
-    has_many :order_statuses
-    has_many :products, through: :line_items
-    has_many :shipments
-    has_many :shipment_tracks
+    has_many :api_jobs, class_name: 'Gemgento::ApiJob', as: :source, dependent: :destroy
+    has_many :line_items, as: :itemizable, class_name: 'Gemgento::LineItem', dependent: :destroy
+    has_many :order_statuses, class_name: 'Gemgento::OrderStatus', dependent: :destroy
+    has_many :products, through: :line_items, class_name: 'Gemgento::Product'
+    has_many :shipments, class_name: 'Gemgento::Shipment', dependent: :destroy
+    has_many :shipment_tracks, class_name: 'Gemgento::ShipmentTrack', through: :shipments
 
-    has_one :payment, as: :payable
-    has_one :billing_address, -> { where is_billing: true }, class_name: 'Address', as: :addressable
-    has_one :shipping_address, -> { where is_shipping: true }, class_name: 'Address', as: :addressable
+    has_one :payment, as: :payable, class_name: 'Gemgento::Payment', dependent: :destroy
+    has_one :billing_address, -> { where is_billing: true }, class_name: 'Gemgento::Address', as: :addressable, dependent: :destroy
+    has_one :shipping_address, -> { where is_shipping: true }, class_name: 'Gemgento::Address', as: :addressable, dependent: :destroy
 
     attr_accessor :tax, :total, :push_cart_customer, :subscribe
 
