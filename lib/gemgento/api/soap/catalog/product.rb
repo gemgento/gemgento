@@ -212,7 +212,7 @@ module Gemgento
             product.magento_type = subject[:type]
             product.sku = subject[:sku]
             product.sync_needed = false
-            product.product_attribute_set = Gemgento::ProductAttributeSet.find(magento_id: subject[:set])
+            product.product_attribute_set = Gemgento::ProductAttributeSet.find_by(magento_id: subject[:set])
             product.stores << store unless product.stores.include? store
             product.save!
 
