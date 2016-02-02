@@ -13,6 +13,8 @@ module Gemgento
 
     validates_attachment_content_type :file, content_type: /\Aimage\/.*\Z/
 
+    touch :assets
+
     # Check that a url is valid.  Assumes url is pointing to Magento installation.
     #
     # @param url [String]
