@@ -31,7 +31,9 @@ ActiveAdmin.register_page 'Product Positions' do
 
       @stores.each do |store|
         params[:products].split(',').each_with_index do |id, index|
-          product_category = Gemgento::ProductCategory.find_or_initialize_by(category_id: @category.id, product_id: id, store_id: store.id)
+          product_category = Gemgento::ProductCategory.find_by(category_id: @category.id, product_id: id, store_id: store.id)
+          next if product_category.nil?
+
           product_category.position = index
           product_category.sync_needed = false
           product_category.save!
