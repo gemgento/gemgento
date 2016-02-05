@@ -99,6 +99,7 @@ module Gemgento
             format.json { render json: { result: true, user: @user, quote: @quote } }
 
           else
+            @user = User.new
             format.html { render 'show' }
             format.json { render json: { result: false, errors: @quote.errors } }
           end
