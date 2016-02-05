@@ -173,11 +173,11 @@ module Gemgento
     def products(store = nil)
       return super if store.nil?
 
-      Product.joins(:product_categories).where(
-          'gemgento_product_categories.store_id = ? AND gemgento_product_categories.category_id = ?',
-          store.id,
-          self.id
-      ).order('gemgento_product_categories.position ASC')
+      Product
+          .joins(:product_categories)
+          .where('gemgento_product_categories.store_id = ? AND gemgento_product_categories.category_id = ?', store.id, self.id)
+          .order('gemgento_product_categories.position ASC')
+          .uniq
     end
 
     private
