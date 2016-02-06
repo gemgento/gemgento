@@ -231,8 +231,6 @@ module Gemgento
               line_item.assign_attributes k => v
             end
 
-            line_item.save
-
             unless source[:gift_message_id].nil?
               gift_message = ::Gemgento::API::SOAP::EnterpriseGiftMessage::GiftMessage.sync_magento_to_local(source[:gift_message])
               line_item.gift_message = gift_message
@@ -240,6 +238,9 @@ module Gemgento
             end
 
             return line_item
+
+          rescue ActiveRecord::RecordNotUnique
+            return ::Gemgento::LineItem.find_by(itemizable_type: 'Gemgento::Order', magento_id: source[:item_id])
           end
         end
       end
