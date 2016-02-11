@@ -36,12 +36,7 @@ module Gemgento
     #
     # @return [Void]
     def process
-      if self.spreadsheet.url =~ URI::regexp
-        @worksheet = Spreadsheet.open(open(self.spreadsheet.url)).worksheet(0)
-      else
-        @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
-      end
-
+      @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
       @headers = get_headers
 
       1.upto @worksheet.last_row_index do |index|
