@@ -15,7 +15,7 @@ module Gemgento
       line_item.itemizable = self.itemizable
       line_item.product = Gemgento::Product.find_by!(magento_id: self.source[:product_id])
 
-      source.each do |k, v|
+      self.source.each do |k, v|
         next if [:product_id].include?(k) || !Gemgento::LineItem.column_names.include?(k.to_s)
         line_item.assign_attributes k => v
       end
