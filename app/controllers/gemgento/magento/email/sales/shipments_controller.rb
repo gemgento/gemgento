@@ -5,7 +5,7 @@ module Gemgento
         class ShipmentsController < Gemgento::Magento::BaseController
 
           def create
-            order = Gemgento::API::SOAP::Sales::Order.fetch(params[:data][:order][:increment_id])
+            order = Gemgento::Magento::OrderAdapter.find(params[:data][:order][:increment_id]).import
             shipment = Gemgento::Magento::ShipmentAdapter.find(params[:data][:shipment][:increment_id]).import
 
             Gemgento::SalesMailer.shipment_email(

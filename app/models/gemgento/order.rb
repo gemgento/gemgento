@@ -45,7 +45,7 @@ module Gemgento
     # @param increment_id [String]
     # @return [Gemgento::Order]
     def self.find_or_fetch(increment_id)
-      Gemgento::Order.find_by(increment_id: increment_id) || Gemgento::API::SOAP::Sales::Order.fetch(increment_id)
+      Gemgento::Order.find_by(increment_id: increment_id) || Gemgento::Magento::OrderAdapter.find(increment_id).import
     end
 
     def placed_at

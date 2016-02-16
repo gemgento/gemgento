@@ -14,7 +14,7 @@ class AddUniqueIndexesToGemgentoOrders < ActiveRecord::Migration
           next if duplicates.size == 1
           original = duplicates.shift # or pop for last one
           duplicates.each { |dup| dup.destroy }
-          Gemgento::API::SOAP::Sales::Order.fetch(original.increment_id)
+          Gemgento::Magento::OrderAdapter.find(original.increment_id).import
         end
       end
     end

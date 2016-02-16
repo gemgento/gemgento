@@ -3,7 +3,7 @@ module Gemgento
     default from: 'sales@gemgento.com'
 
     def order_email(recipients, from, order_source)
-      @order = Gemgento::API::SOAP::Sales::Order.fetch(order_source[:increment_id])
+      @order = Gemgento::Magento::OrderAdapter.find(order_source[:increment_id]).import
       @order_source = order_source
 
       mail(
@@ -16,7 +16,7 @@ module Gemgento
     end
 
     def invoice_email(recipients, from, order_source, invoice_source)
-      @order = Gemgento::API::SOAP::Sales::Order.fetch(order_source[:increment_id])
+      @order = Gemgento::Magento::OrderAdapter.find(order_source[:increment_id]).import
       @order_source = order_source
       @invoice_source = invoice_source
 
@@ -47,7 +47,7 @@ module Gemgento
     end
 
     def credit_memo_email(recipients, from, order_source, credit_memo_source)
-      @order = Gemgento::API::SOAP::Sales::Order.fetch(order_source[:increment_id])
+      @order = Gemgento::Magento::OrderAdapter.find(order_source[:increment_id]).import
       @order_source = order_source
       @credit_memo_source = credit_memo_source
 
