@@ -307,7 +307,7 @@ module Gemgento
     # @param increment_id [Integer]
     # @return [Void]
     def mark_converted!(increment_id)
-      Gemgento::API::SOAP::Sales::Order.fetch(increment_id)
+      Gemgento::Magento::OrderAdapter.find(increment_id).import
       self.converted_at = Time.now
       self.save
       self.reload
