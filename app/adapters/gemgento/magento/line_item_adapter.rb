@@ -24,7 +24,7 @@ module Gemgento
 
       return line_item
 
-    rescue ActiveRecord::RecordNotUnique
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
       if retries < 1
         retries += 1
         retry
