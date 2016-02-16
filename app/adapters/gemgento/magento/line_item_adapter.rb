@@ -20,6 +20,8 @@ module Gemgento
         line_item.assign_attributes k => v
       end
 
+      line_item.save!
+
       return line_item
 
     rescue ActiveRecord::RecordNotUnique
