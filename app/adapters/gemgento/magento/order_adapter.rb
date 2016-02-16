@@ -31,16 +31,16 @@ module Gemgento
     end
 
     def import
-      return nil if ::Gemgento::Store.find_by(magento_id: self.source[:store_id]).nil?
+      return nil if Gemgento::Store.find_by(magento_id: self.source[:store_id]).nil?
 
-      retry_count ||= 0
+      retries ||= 0
 
-      order = ::Gemgento::Order.find_or_initialize_by(increment_id: self.source[:increment_id])
+      order = Gemgento::Order.find_or_initialize_by(increment_id: self.source[:increment_id])
       order.magento_id = self.source[:order_id]
-      order.user = ::Gemgento::User.find_by(magento_id: self.source[:customer_id])
-      order.quote = ::Gemgento::Quote.find_by(magento_id: self.source[:quote_id])
-      order.user_group = ::Gemgento::UserGroup.where(magento_id: self.source[:customer_group_id]).first
-      order.store = ::Gemgento::Store.find_by(magento_id: self.source[:store_id])
+      order.user = Gemgento::User.find_by(magento_id: self.source[:customer_id])
+      order.quote = Gemgento::Quote.find_by(magento_id: self.source[:quote_id])
+      order.user_group = Gemgento::UserGroup.where(magento_id: self.source[:customer_group_id]).first
+      order.store = Gemgento::Store.find_by(magento_id: self.source[:store_id])
 
       source.each do |k, v|
         next if [:store_id, :quote_id].include?(k) || !Gemgento::Order.column_names.include?(k.to_s)
@@ -69,11 +69,17 @@ module Gemgento
       return order
 
     # try one more time to create the record, duplicate record errors are common with threads
-    rescue ActiveRecord::RecordInvalid => e
-      (retry_count += 1) <= 1 ? retry : raise(e)
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
+      if retries < 1
+        retries += 1
+        retry
 
-    rescue ActiveRecord::RecordNotUnique => e
-      (retry_count += 1) <= 1 ? retry : raise(e)
+      elsif order = Gemgento::Order.find_by(increment_id: self.source[:increment_id])
+        return order
+
+      else
+        raise
+      end
     end
 
     # Destroy all line items related to the order whose magento_id is not in the source.
