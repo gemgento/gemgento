@@ -2,21 +2,21 @@ if defined?(ActiveAdmin)
   module Gemgento
     ActiveAdmin.register ProductImport do
       menu priority: 100, parent: 'Gemgento', label: 'Product Import'
-      actions :all, except: [:destroy]
+      actions :all, except: [:destroy, :edit]
 
       index do
         column :created_at
 
-        column "Products Created" do |import|
-          import.count_created
+        column :state do |import|
+          import.state.humanize
         end
 
-        column "Products Updated" do |import|
-          import.count_updated
+        column :progress do |import|
+          number_to_percentage import.percentage_complete, precision: 0
         end
 
-        column "Errors" do |import|
-          import.import_errors.size
+        column :errors do |import|
+          import.process_errors.any? ? status_tag('yes', :ok) : status_tag('no')
         end
 
         actions
@@ -25,13 +25,24 @@ if defined?(ActiveAdmin)
       form as: :gemgento_product_import, multipart: true do |f|
         f.inputs do
           f.input :file, as: :file, label: 'Spreadsheet'
-          f.input :product_attribute_set, as: :select, :include_blank => false, collection: ProductAttributeSet.all.map { |as| [as.name, as.id] }
-          f.input :root_category, as: :select, :include_blank => false, collection: Category.all.map { |c| [c.name, c.id] }
-          f.input :store, as: :select, :include_blank => false, collection: Store.where.not(code: 'admin').map { |s| [s.name, s.id] }
-          f.input :configurable_attributes,
+          f.input :product_attribute_set_id,
+                  as: :select,
+                  include_blank: false,
+                  collection: ProductAttributeSet.all.map { |as| [as.name, as.id] }
+          f.input :root_category_id,
+                  as: :select,
+                  include_blank:
+                      false, collection: Category.all.map { |c| [c.name, c.id] }
+          f.input :store_id,
+                  as: :select,
+                  include_blank: false,
+                  collection: Store.where.not(code: 'admin').map { |s| [s.name, s.id] }
+          f.input :configurable_attribute_ids,
                   as: :check_boxes,
                   multiple: true,
-                  collection: ProductAttribute.where(is_configurable: true, scope: 'global', frontend_input: 'select').map { |pa| [pa.code, pa.id] }
+                  collection: ProductAttribute
+                                  .where(is_configurable: true, scope: 'global', frontend_input: 'select')
+                                  .map { |pa| [pa.code, pa.id] }
           f.input :simple_product_visibility,
                   as: :select,
                   include_blank: false,
@@ -55,8 +66,8 @@ if defined?(ActiveAdmin)
         attributes_table do
           row :created_at
 
-          row :file do
-            link_to import.spreadsheet.instance_read(:file_name), import.spreadsheet.url
+          row :spreadsheet do
+            link_to import.file.instance_read(:file_name), import.file.url
           end
 
           row :root_category

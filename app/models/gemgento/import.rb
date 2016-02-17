@@ -7,7 +7,7 @@ module Gemgento
     after_initialize :set_default_options,
                      :set_default_process_errors
 
-    before_create :set_total_row
+    before_create :set_total_rows
 
     validates :file, presence: :true
     validates_attachment_content_type :file, content_type: [
@@ -18,6 +18,8 @@ module Gemgento
       'application/vnd.oasis.opendocument.spreadsheet', # .ods
     ]
 
+    attr_accessor :spreadsheet
+
     serialize :options, Hash
     serialize :process_errors, Array
 
@@ -27,36 +29,29 @@ module Gemgento
 
     def set_default_options
       self.options = default_options.merge(self.options || {})
+
+      self.options.keys.each do |key|
+        self.class.send :define_method, key do |*args|
+          self.options[key.to_sym]
+        end
+
+        self.class.send :define_method, "#{key}=" do |*args|
+          self.options[key.to_sym] = args.first
+        end
+      end
     end
 
     def default_options
       {}
     end
 
-    def spreadsheet
-      @spreadsheet ||= Roo::Spreadsheet.open(self.file.path)
+    def set_total_rows
+      @spreadsheet = Roo::Spreadsheet.open(self.file.queued_for_write[:original].path).sheet(0)
+      self.total_rows = spreadsheet.last_row - spreadsheet.first_row
     end
 
-    def set_total_row
-      Rails.logger.debug spreadsheet.info
-      self.total_rows = spreadsheet.info[:rows].size
-    end
-
-    # Dynamic option value getter/setter
-    def method_missing(method, *args)
-      Rails.logger.debug "Gemgento::Import - Missing Method: #{method}"
-      Rails.logger.debug "Possible Keys: #{self.options.keys}"
-      if self.options.has_key?(method.to_sym)
-        name = method.to_s
-
-        if name.include?('=')
-          return self.options[method.to_sym] = args.first
-        else
-          return self.options[method.to_sym]
-        end
-      end
-
-      super
+    def percentage_complete
+      (current_row / total_rows) * 100
     end
 
   end
