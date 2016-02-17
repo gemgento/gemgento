@@ -1,38 +1,82 @@
-require 'spreadsheet'
-require 'open-uri'
-
 module Gemgento
 
   # @author Gemgento LLC
-  class ProductImport < ActiveRecord::Base
-    include ActiveModel::Validations
+  class ProductImport < Import
+    # TODO: test product import validator
+    # validates_with ProductImportValidator
 
-    belongs_to :product_attribute_set
-    belongs_to :root_category, foreign_key: 'root_category_id', class_name: 'Category'
-    belongs_to :store
+    def default_options
+      {
+          image_labels: [],
+          image_file_extensions: [],
+          image_types: [],
+          image_path: nil,
+          product_attribute_set_id: nil,
+          store_id: nil,
+          root_category_id: nil,
+          simple_product_visibility: 1,
+          configurable_product_visibility: 1,
+          set_default_inventory_values: false,
+          include_images: false,
+          configurable_attribute_ids: []
+      }
+    end
 
-    has_and_belongs_to_many :configurable_attributes, -> { distinct }, join_table: 'gemgento_product_imports_configurable_attributes', class_name: 'ProductAttribute'
+    def image_labels_raw
+      image_labels.join("\n")
+    end
 
-    has_attached_file :spreadsheet
+    def image_labels_raw=(values)
+      options[:image_labels] = values.gsub("\r", '').split("\n")
+    end
 
-    serialize :import_errors, Array
-    serialize :image_labels, Array
-    serialize :image_file_extensions, Array
-    serialize :image_types, Array
+    def image_file_extensions_raw
+      image_file_extensions.join(', ')
+    end
 
-    attr_accessor :image_labels_raw
-    attr_accessor :image_file_extensions_raw
-    attr_accessor :image_types_raw
+    def image_file_extensions_raw=(values)
+      options[:image_file_extensions] = values.gsub(' ', '').split(',')
+    end
 
-    do_not_validate_attachment_file_type :spreadsheet
-    validates_with ProductImportValidator
+    def image_types_raw
+      image_types.join("\n")
+    end
 
-    after_commit :process
+    def image_types_raw=(values)
+      options[:image_types] = values.gsub("\r", '').split("\n")
+    end
+
+    def product_attribute_set
+      if options[:product_attribute_set_id].nil?
+        nil
+      else
+        @product_attribute_set ||= Gemgento::ProductAttributeSet.find(options[:product_attribute_set_id])
+      end
+    end
+
+    def store
+      if options[:store_id].nil?
+        nil
+      else
+        @store ||= Gemgento::Store.find(options[:store_id])
+      end
+    end
+
+    def root_category
+      if options[:root_category_id].nil?
+        nil
+      else
+        @root_category ||= Gemgento::Category.find(options[:root_category_id])
+      end
+    end
+
+    def configurable_attributes
+      @configurable_attributes ||= Gemgento::ProductAttribute.where(is_configurable: true, id: options[:configurable_attribute_ids])
+    end
 
     def process
+      # TODO: update product import process methods
       Rails.logger.info 'Starting to process product import'
-
-      sync_buffer = create_sync_buffer
 
       @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
       @headers = get_headers
@@ -68,58 +112,6 @@ module Gemgento
       ProductImport.skip_callback(:commit, :after, :process)
       self.save validate: false
       ProductImport.set_callback(:commit, :after, :process)
-
-      complete_sync_buffer(sync_buffer)
-    end
-
-    # Create a fake sync record, so products are not synced during the import.
-    #
-    # @return [Gemgento::Sync]
-    def create_sync_buffer
-      sync_buffer = Sync.new
-      sync_buffer.subject = 'products'
-      sync_buffer.is_complete = false
-      sync_buffer.save
-    end
-
-    # @param sync_buffer [Gemgento::Sync]
-    # @return [Void]
-    def complete_sync_buffer(sync_buffer)
-      sync_buffer.is_complete = true
-      sync_buffer.created_at = Time.now
-      sync_buffer.save
-    end
-
-    def image_labels_raw
-      self.image_labels.join("\n") unless self.image_labels.nil?
-    end
-
-    def image_labels_raw=(values)
-      self.image_labels = []
-      self.image_labels = values.gsub("\r", '').split("\n")
-    end
-
-    def image_file_extensions_raw
-      self.image_file_extensions.join(', ') unless self.image_file_extensions.nil?
-    end
-
-    def image_file_extensions_raw=(values)
-      self.image_file_extensions = []
-      self.image_file_extensions = values.gsub(' ', '').split(',')
-    end
-
-    def image_types_raw
-      self.image_types.join("\n") unless self.image_types.nil?
-    end
-
-    def image_types_raw=(values)
-      self.image_types = []
-      self.image_types = values.gsub("\r", '').split("\n")
-    end
-
-    def image_path=(path)
-      path = "#{path}/" unless path[-1, 1].to_s == '/'
-      self[:image_path] = path
     end
 
     private

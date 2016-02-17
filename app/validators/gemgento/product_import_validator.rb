@@ -3,31 +3,14 @@ module Gemgento
 
     def validate(record)
       @record = record
-      open_spreadsheet
-
-      if @spreadsheet.nil?
-        @record.errors[:spreadsheet] = 'Spreadsheet is required'
+      if spreadsheet.nil?
+        @record.errors[:file] = 'Spreadsheet is required'
       else
         validate_unique_skus
         validate_required_attribute_codes
         validate_valid_attribute_codes
         validate_categories
         validate_images
-      end
-    end
-
-    def open_spreadsheet
-      if @record.spreadsheet.queued_for_write[:original].nil? || @record.spreadsheet_file_name.nil?
-        @spreadsheet = nil
-      else
-        @spreadsheet = Spreadsheet.open(open(@record.spreadsheet.queued_for_write[:original].path)).worksheet(0)
-        @headers = []
-
-        @spreadsheet.row(0).each do |h|
-          unless h.nil?
-            @headers << h.downcase.gsub(' ', '_').strip
-          end
-        end
       end
     end
 

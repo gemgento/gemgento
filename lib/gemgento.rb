@@ -13,6 +13,8 @@ require 'sidekiq'
 require 'state_machine'
 require 'jbuilder'
 require 'active_touch'
+require 'roo'
+require 'roo-xls'
 require 'gemgento/version'
 require 'gemgento/engine'
 

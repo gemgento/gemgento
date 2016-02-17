@@ -24,7 +24,7 @@ if defined?(ActiveAdmin)
 
       form as: :gemgento_product_import, multipart: true do |f|
         f.inputs do
-          f.input :spreadsheet, as: :file, label: 'Spreadsheet'
+          f.input :file, as: :file, label: 'Spreadsheet'
           f.input :product_attribute_set, as: :select, :include_blank => false, collection: ProductAttributeSet.all.map { |as| [as.name, as.id] }
           f.input :root_category, as: :select, :include_blank => false, collection: Category.all.map { |c| [c.name, c.id] }
           f.input :store, as: :select, :include_blank => false, collection: Store.where.not(code: 'admin').map { |s| [s.name, s.id] }
@@ -40,8 +40,8 @@ if defined?(ActiveAdmin)
                   as: :select,
                   include_blank: false,
                   collection:  { 'Not Visible' => 1, 'Catalog' => 2, 'Search' => 3, 'Catalog, Search' => 4 }
-          f.input :set_default_inventory_values
-          f.input :include_images
+          f.input :set_default_inventory_values, as: :boolean
+          f.input :include_images, as: :boolean
           f.input :image_path
           f.input :image_file_extensions_raw, as: :string, label: 'Image File Extensions', hint: 'Enter expected image file extensions. Separate extensions with a comma.  E.g. .jpg, .png, .gif'
           f.input :image_labels_raw, as: :text, label: 'Image Labels', hint: 'Enter image labels in order of appearance.  Separate labels with line breaks (hit enter)'
@@ -55,14 +55,14 @@ if defined?(ActiveAdmin)
         attributes_table do
           row :created_at
 
-          row :spreadsheet do
+          row :file do
             link_to import.spreadsheet.instance_read(:file_name), import.spreadsheet.url
           end
 
           row :root_category
           row :store
           row :configurable_attributes
-          row :import_errors
+          row :process_errors
         end
       end
 
@@ -74,7 +74,7 @@ if defined?(ActiveAdmin)
                   :utf8,
                   :authenticity_token,
                   :commit,
-                  :spreadsheet,
+                  :file,
                   :product_attribute_set_id,
                   :root_category_id,
                   :store_id,
