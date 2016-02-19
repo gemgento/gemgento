@@ -4,6 +4,18 @@ if defined?(ActiveAdmin)
       menu priority: 200, parent: 'Gemgento', label: 'Inventory Import'
       actions :all, except: [:destroy]
 
+      show do |import|
+        attributes_table do
+          row :created_at
+
+          row :spreadsheet do
+            link_to import.spreadsheet.instance_read(:file_name), import.spreadsheet.url
+          end
+
+          row :import_errors
+        end
+      end
+
       form as: :gemgento_inventory_import, multipart: true do |f|
         f.inputs do
           f.input :spreadsheet, as: :file, label: 'Spreadsheet'
