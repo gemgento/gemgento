@@ -70,12 +70,12 @@ module Gemgento
 
     # try one more time to create the record, duplicate record errors are common with threads
     rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
-      if retries < 1
+      if order = Gemgento::Order.find_by(increment_id: self.source[:increment_id])
+        return order
+
+      elsif retries < 3
         retries += 1
         retry
-
-      elsif order = Gemgento::Order.find_by(increment_id: self.source[:increment_id])
-        return order
 
       else
         raise
