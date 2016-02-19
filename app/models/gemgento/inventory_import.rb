@@ -80,12 +80,15 @@ module Gemgento
       @stores.each do |store|
         inventory = @product.inventories.find_or_initialize_by(store: store)
 
+        inventory.use_config_manage_stock = true
+        inventory.use_config_backorders = true
+        inventory.use_config_min_qty = true
+        inventory.sync_needed = true
+
         @headers.each_with_index do |attribute, index|
           next if attribute == 'sku'
           eval("inventory.#{attribute} = #{@row[index]}")
         end
-
-        inventory.sync_needed = true
 
         unless inventory.save
           self.import_errors << "SKU: #{@product.sku}, ERROR: #{inventory.errors[:base]}"
