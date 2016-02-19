@@ -33,9 +33,7 @@ module Gemgento
     def import
       return nil if Gemgento::Store.find_by(magento_id: self.source[:store_id]).nil?
 
-      retries ||= 0
-
-      order = Gemgento::Order.find_or_initialize_by(increment_id: self.source[:increment_id])
+      order ||= Gemgento::Order.find_or_initialize_by(increment_id: self.source[:increment_id])
       order.magento_id = self.source[:order_id]
       order.user = Gemgento::User.find_by(magento_id: self.source[:customer_id])
       order.quote = Gemgento::Quote.find_by(magento_id: self.source[:quote_id])
@@ -70,10 +68,10 @@ module Gemgento
 
     # try one more time to create the record, duplicate record errors are common with threads
     rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
-      if order = Gemgento::Order.find_by(increment_id: self.source[:increment_id])
-        return order
+      retries ||= 0
 
-      elsif retries < 3
+      if retries < 3
+        order = Gemgento::Order.find_by(increment_id: self.source[:increment_id])
         retries += 1
         retry
 
