@@ -86,7 +86,12 @@ module Gemgento
 
         @headers.each_with_index do |attribute, index|
           next unless Gemgento::Inventory.column_names.include?(attribute)
-          inventory.assign_attributes(attribute => @row[index])
+
+          value = value(@row[index], Gemgento::Inventory.columns_hash[attribute].type)
+
+          Rails.logger.debug " (#{Gemgento::Inventory.columns_hash[attribute].type}) #{attribute} = #{@row[index]}"
+
+          inventory.assign_attributes(attribute => value)
         end
 
         inventory.sync_needed = true
@@ -104,6 +109,15 @@ module Gemgento
       end
     rescue Exception => e
       self.import_errors << "SKU: #{@product.sku}, ERROR: #{e.message}"
+    end
+
+    def value(raw_value, type)
+      case type
+        when :boolean
+          return raw_value.to_bool
+        else
+          return raw_value
+      end
     end
 
   end

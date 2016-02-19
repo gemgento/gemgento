@@ -4,6 +4,18 @@ if defined?(ActiveAdmin)
       menu priority: 200, parent: 'Gemgento', label: 'Inventory Import'
       actions :all, except: [:destroy, :edit]
 
+      index do
+        column :created_at do |import|
+          import.spreadsheet_updated_at.strftime('%F')
+        end
+        column :spreadsheet do |import|
+          link_to import.spreadsheet.instance_read(:file_name), import.spreadsheet.url
+        end
+        column :is_active
+
+        actions
+      end
+
       show do |import|
         attributes_table do
           row :created_at
