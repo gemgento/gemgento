@@ -96,7 +96,8 @@ module Gemgento
         end
       end
     rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique => e
-      if ( ( retries ||= 0 ) += 1 ) <= @stores.count
+      retries ||= 0
+      if retries += 1 <= @stores.count
         retry
       else
         self.import_errors << "SKU: #{@product.sku}, ERROR: #{e.message}"

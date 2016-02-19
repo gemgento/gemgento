@@ -2,7 +2,7 @@ if defined?(ActiveAdmin)
   module Gemgento
     ActiveAdmin.register InventoryImport do
       menu priority: 200, parent: 'Gemgento', label: 'Inventory Import'
-      actions :all, except: [:destroy]
+      actions :all, except: [:destroy, :edit]
 
       show do |import|
         attributes_table do
