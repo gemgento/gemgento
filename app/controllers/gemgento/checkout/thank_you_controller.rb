@@ -11,9 +11,23 @@ module Gemgento
     def show
       @order = @quote.order
 
+      # load the new order from the quote or fetch from Magento if it's not present.
+      if @order.nil? && !session[:order_increment_id].nil?
+        begin
+          @order = Gemgento::OrderAdapter.find(session[:order_increment_id]).import
+        rescue Exception
+          if (retries ||= 0) <= 1
+            retries += 1
+            retry
+          end
+        end
+      end
+
+      session.delete :order_increment_id
+
       # create a new quote
       session.delete :quote
-      @current_quote = Quote.current(current_store, nil, current_user)
+      @current_quote = Gemgento::Quote.current(current_store, nil, current_user)
 
       respond_with @order
     end
@@ -27,6 +41,5 @@ module Gemgento
         redirect_to '/'
       end
     end
-
   end
 end
