@@ -73,7 +73,32 @@ if defined?(ActiveAdmin)
           row :root_category
           row :store
           row :configurable_attributes
-          row :process_errors
+          row :simple_product_visibility
+          row :configurable_product_visibility
+          row :set_default_inventory_values
+          row :include_images
+          row :image_path
+          row :image_file_extensions
+          row :image_labels
+          row :image_types
+        end
+
+        panel "Image Details" do
+          attributes_table_for import do
+            row :include_images
+            row :image_path
+            row :image_file_extensions
+            row :image_labels
+            row :image_types
+          end
+        end
+
+        if import.import_errors.any?
+          panel 'Process Errors' do
+            table_for import.process_errors.map { |e| { error: e } } do |error|
+              column :error
+            end
+          end
         end
       end
 

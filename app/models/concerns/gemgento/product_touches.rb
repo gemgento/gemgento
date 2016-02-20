@@ -7,7 +7,7 @@ module Gemgento
       has_many :configurable_products, through: :product, class_name: 'Gemgento::Product'
 
       touch :bundle_items
-      touch :categories
+      touch :categories, if: Proc.new { |record| record.product.present? }
       touch :configurable_products
       touch :product
 

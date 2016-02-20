@@ -355,6 +355,7 @@ module Gemgento
       else
         # add the images
         create_configurable_images(configurable_product) if include_images
+        set_default_config_inventories(configurable_product) if self.set_default_inventory_values?
       end
 
       return configurable_product

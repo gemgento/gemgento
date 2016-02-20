@@ -80,9 +80,18 @@ module Gemgento
       @stores.each do |store|
         inventory = @product.inventories.find_or_initialize_by(store: store)
 
+        inventory.use_config_manage_stock = true
+        inventory.use_config_backorders = true
+        inventory.use_config_min_qty = true
+
         @headers.each_with_index do |attribute, index|
-          next if attribute == 'sku'
-          eval("inventory.#{attribute} = #{@row[index]}")
+          next unless Gemgento::Inventory.column_names.include?(attribute)
+
+          value = value(@row[index], Gemgento::Inventory.columns_hash[attribute].type)
+
+          Rails.logger.debug " (#{Gemgento::Inventory.columns_hash[attribute].type}) #{attribute} = #{@row[index]}"
+
+          inventory.assign_attributes(attribute => value)
         end
 
         inventory.sync_needed = true
@@ -91,9 +100,24 @@ module Gemgento
           self.import_errors << "SKU: #{@product.sku}, ERROR: #{inventory.errors[:base]}"
         end
       end
-    rescue ActiveRecord::RecordNotUnique
-      # when Magento pushes inventory data back, it will create missing inventory rows
-      set_inventory
+    rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique => e
+      retries ||= 0
+      if retries += 1 <= @stores.count
+        retry
+      else
+        self.import_errors << "SKU: #{@product.sku}, ERROR: #{e.message}"
+      end
+    rescue Exception => e
+      self.import_errors << "SKU: #{@product.sku}, ERROR: #{e.message}"
+    end
+
+    def value(raw_value, type)
+      case type
+        when :boolean
+          return raw_value.to_bool
+        else
+          return raw_value
+      end
     end
 
   end
