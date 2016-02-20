@@ -2,7 +2,7 @@ if defined?(ActiveAdmin)
   module Gemgento
     ActiveAdmin.register ProductImport do
       menu priority: 100, parent: 'Gemgento', label: 'Product Import'
-      actions :all, except: [:destroy]
+      actions :all, except: [:destroy, :edit]
 
       index do
         column :created_at
@@ -62,7 +62,33 @@ if defined?(ActiveAdmin)
           row :root_category
           row :store
           row :configurable_attributes
+          row :simple_product_visibility
+          row :configurable_product_visibility
+          row :set_default_inventory_values
+          row :include_images
+          row :image_path
+          row :image_file_extensions
+          row :image_labels
+          row :image_types
           row :import_errors
+        end
+
+        panel "Image Details" do
+          attributes_table_for import do
+            row :include_images
+            row :image_path
+            row :image_file_extensions
+            row :image_labels
+            row :image_types
+          end
+        end
+
+        if import.import_errors.any?
+          panel 'Import Errors' do
+            table_for import.import_errors.map { |e| { error: e } } do |error|
+              column :error
+            end
+          end
         end
       end
 
