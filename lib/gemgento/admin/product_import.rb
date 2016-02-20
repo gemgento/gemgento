@@ -70,7 +70,6 @@ if defined?(ActiveAdmin)
           row :image_file_extensions
           row :image_labels
           row :image_types
-          row :import_errors
         end
 
         panel "Image Details" do
