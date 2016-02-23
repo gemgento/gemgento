@@ -76,14 +76,9 @@ if defined?(ActiveAdmin)
           row :simple_product_visibility
           row :configurable_product_visibility
           row :set_default_inventory_values
-          row :include_images
-          row :image_path
-          row :image_file_extensions
-          row :image_labels
-          row :image_types
         end
 
-        panel "Image Details" do
+        panel 'Image Details' do
           attributes_table_for import do
             row :include_images
             row :image_path
@@ -93,7 +88,17 @@ if defined?(ActiveAdmin)
           end
         end
 
-        if import.import_errors.any?
+        panel 'Process Details' do
+          attributes_table_for import do
+            row :state
+            row :progress do
+
+              "#{number_to_percentage(import.percentage_complete, precision: 0)} (#{import.current_row} /#{import.total_rows})"
+            end
+          end
+        end
+
+        if import.process_errors.any?
           panel 'Process Errors' do
             table_for import.process_errors.map { |e| { error: e } } do |error|
               column :error
@@ -106,7 +111,6 @@ if defined?(ActiveAdmin)
         def permitted_params
           params.permit(
               gemgento_product_import: [
-                  :configurable_attribute_ids,
                   :utf8,
                   :authenticity_token,
                   :commit,

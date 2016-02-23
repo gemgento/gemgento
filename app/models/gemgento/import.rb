@@ -9,6 +9,8 @@ module Gemgento
 
     before_create :set_total_rows
 
+    after_commit :process_later, if: Proc.new { |r| r.transaction_include_any_action?([:create]) }
+
     validates :file, presence: :true
     validates_attachment_content_type :file, content_type: [
       'application/vnd.ms-excel', # .xls
@@ -18,7 +20,7 @@ module Gemgento
       'application/vnd.oasis.opendocument.spreadsheet', # .ods
     ]
 
-    attr_accessor :spreadsheet
+    attr_accessor :spreadsheet, :header_row, :row
 
     serialize :options, Hash
     serialize :process_errors, Array
@@ -52,6 +54,39 @@ module Gemgento
 
     def percentage_complete
       (current_row / total_rows) * 100
+    end
+
+    def process
+      Rails.logger.debug "Start #{self.class}.process"
+
+      @spreadsheet = Roo::Spreadsheet.open(File.open(self.file.path)).sheet(0)
+      self.current_row = spreadsheet.first_row
+      self.header_row = self.current_row
+      Rails.logger.debug "  header_row: #{self.header_row}"
+      self.processing!
+
+      while self.current_row < self.total_rows do
+        self.current_row += 1
+
+        self.row = spreadsheet.row(self.current_row + spreadsheet.first_row)
+        Rails.logger.debug "  Working on Row #{self.current_row} - #{self.row}"
+
+        self.process_row
+        self.save!
+      end
+
+      self.complete!
+
+      Rails.logger.debug "Complete #{self.class}.process"
+
+    rescue Exception => e
+      self.process_errors << e.message
+      self.failed!
+      raise
+    end
+
+    def process_later
+      Gemgento::ImportJob.perform_later(self)
     end
 
   end

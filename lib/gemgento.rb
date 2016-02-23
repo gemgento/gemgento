@@ -15,6 +15,7 @@ require 'jbuilder'
 require 'active_touch'
 require 'roo'
 require 'roo-xls'
+require 'mime-types'
 require 'gemgento/version'
 require 'gemgento/engine'
 
