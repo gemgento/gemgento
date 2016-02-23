@@ -19,7 +19,7 @@ module Gemgento
     accepts_nested_attributes_for :payment
 
     attr_accessor :push_customer, :push_addresses, :push_shipping_method, :push_payment_method, :subscribe,
-                  :same_as_billing, :same_as_shipping, :destroy_after_rollback
+                  :same_as_billing, :same_as_shipping, :destroy_after_rollback, :order_increment_id
 
     serialize :coupon_codes, Array
     serialize :gift_card_codes, Array
@@ -290,7 +290,8 @@ module Gemgento
       response = API::SOAP::Checkout::Cart.order(self, self.payment, remote_ip)
 
       if response.success?
-        self.mark_converted!(response.body[:result])
+        self.order_increment_id = response.body[:result]
+        self.mark_converted!
         return true
 
       else
@@ -304,10 +305,21 @@ module Gemgento
     # Mark a quote as converted.  Ensures the Order data is fetched from Magento and calls
     # the after_convert_success method.
     #
-    # @param increment_id [Integer]
     # @return [Void]
-    def mark_converted!(increment_id)
-      Gemgento::Magento::OrderAdapter.find(increment_id).import
+    def mark_converted!
+      begin
+        Gemgento::Magento::OrderAdapter.find(self.order_increment_id).import
+
+        # attempt to rescue once due to race condition of Magento pushing at the same time
+        # after one retry, just move past, the quote has been converted and
+        # we can't throw an error at this point in time
+      rescue Exception
+        if (retries ||= 0) <= 1
+          retries += 1
+          retry
+        end
+      end
+
       self.converted_at = Time.now
       self.save
       self.reload

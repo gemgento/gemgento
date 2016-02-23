@@ -18,6 +18,7 @@ module Gemgento
 
       respond_to do |format|
         if @quote.convert(request.remote_ip)
+          session[:order_increment_id] = @quote.order_increment_id
           session.delete :payment_data
 
           if !@quote.payment.is_redirecting_payment_method?('confirm_after')
