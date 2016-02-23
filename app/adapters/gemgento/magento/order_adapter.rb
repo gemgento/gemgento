@@ -72,6 +72,7 @@ module Gemgento
 
       if retries < 3
         order = Gemgento::Order.find_by(increment_id: self.source[:increment_id])
+        order ||= Gemgento::Order.find_by(magento_id: self.source[:order_id])
         retries += 1
         retry
 
