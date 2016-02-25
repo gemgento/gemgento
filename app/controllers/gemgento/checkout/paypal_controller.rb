@@ -10,7 +10,8 @@ module Gemgento
 
       if session[:quote]
         @quote = Quote.find(session[:quote])
-        @quote.mark_converted!(params[:increment_id])
+        @quote.order_increment_id = params[:increment_id]
+        @quote.mark_converted!
         redirect_to checkout_thank_you_path
 
       else
