@@ -48,7 +48,6 @@ module Gemgento
     end
 
     def set_total_rows
-      @spreadsheet = Roo::Spreadsheet.open(self.file.queued_for_write[:original].path).sheet(0)
       self.total_rows = spreadsheet.last_row - spreadsheet.first_row
     end
 
@@ -56,13 +55,25 @@ module Gemgento
       (current_row / total_rows) * 100
     end
 
+    def spreadsheet
+      @spreadsheet ||= begin
+        if self.new_record?
+          Roo::Spreadsheet.open(self.file.queued_for_write[:original].path).sheet(0)
+        else
+          Roo::Spreadsheet.open(File.open(self.file.path)).sheet(0)
+        end
+      end
+    end
+
+    def header_row
+      @header_row ||= spreadsheet.row spreadsheet.first_row
+    end
+
     def process
       Rails.logger.debug "Start #{self.class}.process"
-
-      @spreadsheet = Roo::Spreadsheet.open(File.open(self.file.path)).sheet(0)
-      self.current_row = spreadsheet.first_row
-      self.header_row = self.current_row
       Rails.logger.debug "  header_row: #{self.header_row}"
+
+      self.current_row = spreadsheet.first_row
       self.processing!
 
       while self.current_row < self.total_rows do
@@ -87,6 +98,11 @@ module Gemgento
 
     def process_later
       Gemgento::ImportJob.perform_later(self)
+    end
+
+    # @return [Range]
+    def content_index_range
+      ((spreadsheet.first_row + 1)..spreadsheet.last_row)
     end
 
   end

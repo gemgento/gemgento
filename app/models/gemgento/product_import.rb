@@ -2,8 +2,7 @@ module Gemgento
 
   # @author Gemgento LLC
   class ProductImport < Import
-    # TODO: test product import validator
-    # validates_with ProductImportValidator
+    validates_with ProductImportValidator, on: :create
 
     def default_options
       {
@@ -46,6 +45,15 @@ module Gemgento
       options[:image_types] = values.gsub("\r", '').split("\n")
     end
 
+    def include_images?
+      options[:include_images].to_bool
+    end
+
+    def set_default_inventory_values?
+      options[:set_default_inventory_values].to_bool
+    end
+
+    # @return [Gemgento::ProductAttributeSet]
     def product_attribute_set
       if options[:product_attribute_set_id].nil?
         nil
@@ -359,7 +367,7 @@ module Gemgento
     #     self.import_errors << configurable_product.errors.full_messages.join(', ')
     #   else
     #     # add the images
-    #     create_configurable_images(configurable_product) if include_images
+    #     create_configurable_images(configurable_product) if include_images?
     #     set_default_config_inventories(configurable_product) if self.set_default_inventory_values?
     #   end
     #
