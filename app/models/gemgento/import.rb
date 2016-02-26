@@ -52,7 +52,7 @@ module Gemgento
     end
 
     def percentage_complete
-      total_rows.to_i.zero? ? 0 : (current_row / total_rows) * 100
+      total_rows > 0 ? ((current_row.to_f / total_rows.to_f) * 100.0) : 0.0
     end
 
     def spreadsheet
@@ -94,6 +94,7 @@ module Gemgento
       # don't raise so that we have a record of the import and don't cause stacking with retries
       self.process_errors << e.message
       self.failed!
+      Rails.logger.error e
     end
 
     def process_later

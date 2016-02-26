@@ -90,7 +90,7 @@ module Gemgento
     ### IMPORT PROCESSING ###
 
     def process_row
-      simple_products ||= []
+      self.simple_products ||= []
 
       if row[header_row.index('magento_type').to_i].to_s.strip.casecmp('simple') == 0
         process_simple_product
@@ -105,7 +105,7 @@ module Gemgento
       if simple_product.errors.any?
         self.process_errors << "Row ##{current_row}: #{simple_product.errors.full_messages.join(', ')}"
       else
-        simple_products << simple_product
+        self.simple_products << simple_product
       end
     end
 
@@ -116,7 +116,7 @@ module Gemgento
         self.process_errors << "Row ##{current_row}: #{configurable_product.errors.full_messages.join(', ')}"
       end
 
-      simple_products = []
+      self.simple_products = []
     end
 
     # Create/Update a simple product.
@@ -302,7 +302,7 @@ module Gemgento
       end
 
       # associate all simple products with the new configurable product
-      simple_products.each do |simple_product|
+      self.simple_products.each do |simple_product|
         configurable_product.simple_products << simple_product unless configurable_product.simple_products.include?(simple_product)
       end
 
