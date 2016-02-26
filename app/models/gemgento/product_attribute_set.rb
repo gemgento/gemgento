@@ -4,7 +4,8 @@ module Gemgento
   class ProductAttributeSet < ActiveRecord::Base
     has_and_belongs_to_many :product_attributes, -> { uniq },
                             :join_table => 'gemgento_attribute_set_attributes'
-    has_many :products
+    has_many :products, class_name: 'Gemgento::Product'
+    has_many :asset_types, class_name: 'Gemgento::AssetType'
 
     default_scope -> { where(deleted_at: nil) }
 

@@ -14,7 +14,7 @@ module Gemgento
       # explicit association needed to avoid mysql error with a 'double through' association
       #   "Mysql2::Error: You can't specify target table 'gemgento_categories' for update in FROM clause"
       def categories
-        self.product.categories
+        self.product.categories if self.product
       end
     end
 
