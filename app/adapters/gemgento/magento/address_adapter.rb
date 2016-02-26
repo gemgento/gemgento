@@ -9,7 +9,7 @@ module Gemgento
     end
 
     def import
-      address = Gemgento::Address.find_or_initialize_by(addressable: addressable)
+      address = Gemgento::Address.find_or_initialize_by(addressable: addressable, magento_id: self.source[:address_id])
       address.increment_id = self.source[:increment_id]
       address.city = self.source[:city]
       address.company = self.source[:company]
