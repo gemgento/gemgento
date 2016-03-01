@@ -13,11 +13,12 @@ module Gemgento
 
     validates :file, presence: :true
     validates_attachment_content_type :file, content_type: [
-      'application/vnd.ms-excel', # .xls
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', # .xlsx
-      'application/vnd.ms-excel.sheet.macroEnabled.12', # .xlsm
-      'text/csv', # .csv
-      'application/vnd.oasis.opendocument.spreadsheet', # .ods
+        'application/octet-stream', # TODO: remove this once Paperclip fixes this problem wth Chrome and FF
+        'application/vnd.ms-excel', # .xls
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', # .xlsx
+        'application/vnd.ms-excel.sheet.macroEnabled.12', # .xlsm
+        'text/csv', # .csv
+        'application/vnd.oasis.opendocument.spreadsheet', # .ods
     ]
 
     attr_accessor :spreadsheet, :header_row, :row
