@@ -107,5 +107,14 @@ module Gemgento
       ((spreadsheet.first_row + 1)..spreadsheet.last_row)
     end
 
+    def value(raw_value, type)
+      case type
+        when :boolean
+          return raw_value.to_bool
+        else
+          return raw_value
+      end
+    end
+
   end
 end

@@ -3,36 +3,24 @@ module Gemgento
 
     def validate(record)
       @record = record
-      open_spreadsheet
 
-      if @spreadsheet.nil?
-        @record.errors[:spreadsheet] = 'Spreadsheet is required'
-      else
-        validate_required_attributes
-        validate_sku
-        validate_attributes
+      begin
+        @record.spreadsheet
+      rescue Exception => e
+        Rails.logger.error e.message
+        @record.errors[:file] = 'Invalid Spreadsheet'
+        return
       end
-    end
 
-    def open_spreadsheet
-      if @record.spreadsheet.queued_for_write[:original].nil? || @record.spreadsheet_file_name.nil?
-        @spreadsheet = nil
-      else
-        @spreadsheet = Spreadsheet.open(open(@record.spreadsheet.queued_for_write[:original].path)).worksheet(0)
-        @headers = []
-
-        @spreadsheet.row(0).each do |h|
-          unless h.nil?
-            @headers << h.downcase.gsub(' ', '_').strip
-          end
-        end
-      end
+      validate_required_attributes
+      validate_sku
+      validate_attributes
     end
 
     def validate_required_attributes
       errors = []
       %w[sku quantity manage_stock is_in_stock].each do |attribute|
-        errors << attribute unless @headers.include? attribute
+        errors << attribute unless @record.header_row.include? attribute
       end
 
       unless errors.empty?
@@ -40,16 +28,16 @@ module Gemgento
         error += errors.join('</li><li>')
         error += '</li></ul>'
 
-        @record.errors[:spreadsheet] = "<div>#{error}</div>"
+        @record.errors[:file]= "<div>#{error}</div>"
       end
     end
 
     def validate_sku
       errors = []
 
-      1.upto @spreadsheet.last_row_index do |index|
-        row = @spreadsheet.row(index)
-        sku = row[@headers.index('sku').to_i].to_s.strip
+      @record.content_index_range.each do |index|
+        row = @record.spreadsheet.row(index)
+        sku = row[@record.header_row.index('sku').to_i].to_s.strip
         next if sku.blank?
 
         errors << sku unless product = Gemgento::Product.not_deleted.find_by(sku: sku)
@@ -60,14 +48,14 @@ module Gemgento
         error += errors.join('</li><li>')
         error += '</li></ul>'
 
-        @record.errors[:spreadsheet] = "<div>#{error}</div>"
+        @record.errors[:file]= "<div>#{error}</div>"
       end
     end
 
     def validate_attributes
       errors = []
 
-      @headers.each do |attribute|
+      @record.header_row.each do |attribute|
         next if attribute == 'sku'
         errors << attribute unless Gemgento::Inventory.column_names.include? attribute
       end
@@ -77,7 +65,7 @@ module Gemgento
         error += errors.join('</li><li>')
         error += '</li></ul>'
 
-        @record.errors[:spreadsheet] = "<div>#{error}</div>"
+        @record.errors[:file]= "<div>#{error}</div>"
       end
     end
 
