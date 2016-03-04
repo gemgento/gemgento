@@ -47,7 +47,8 @@ module Gemgento
     end
 
     def image_types_raw=(values)
-      options[:image_types] = values.gsub("\r", '').split("\n")
+      options[:image_types] = []
+      options[:image_types] = values.gsub("\r", '').split("\n").map { |t| t.split(',').collect(&:strip) }
     end
 
     def include_images?
@@ -92,7 +93,7 @@ module Gemgento
     def process_row
       self.simple_products ||= []
 
-      if row[header_row.index('magento_type').to_i].to_s.strip.casecmp('simple') == 0
+      if value('magento_type').casecmp('simple') == 0
         process_simple_product
       else
         process_configurable_product
@@ -123,13 +124,13 @@ module Gemgento
     #
     # @return [Gemgento::Product]
     def create_simple_product
-      sku = self.row[self.header_row.index('sku').to_i].to_s.strip
+      sku = value('sku')
 
       product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: sku)
       product.magento_type = 'simple'
       product.product_attribute_set = self.product_attribute_set
       product.stores << self.store unless product.stores.include?(self.store)
-      product.status = self.row[self.header_row.index('status').to_i].to_i
+      product.status = value('status', :boolean)
 
       unless product.magento_id
         product.sync_needed = false
@@ -158,8 +159,7 @@ module Gemgento
         next if NON_ATTRIBUTE_HEADERS.include?(attribute_code)
 
         product_attribute = product_attribute_set.product_attributes.find_by!(code: attribute_code)
-        col_index = self.header_row.index(attribute_code).to_i
-        value = self.row[col_index].to_s.strip
+        value = value(attribute_code)
         value = value.gsub('.0', '') if value.end_with? '.0'
 
         if product_attribute.frontend_input == 'select'
@@ -174,7 +174,7 @@ module Gemgento
         end
 
         if value.nil?
-          self.process_errors << "Row #{current_row}: Unknown attribute value '#{self.row[col_index].to_s.strip}' for code '#{attribute_code}'"
+          self.process_errors << "Row #{current_row}: Unknown attribute value '#{value(attribute_code)}' for code '#{attribute_code}'"
         else
           product.set_attribute_value(product_attribute.code, value, self.store)
         end
@@ -221,7 +221,7 @@ module Gemgento
     # @param product [Gemgento::Product]
     # @return [void]
     def set_categories(product)
-      categories = self.row[self.header_row.index('category').to_i].to_s.strip.split('&')
+      categories = value('category').split('&')
 
       categories.each do |category_string|
         category_string.strip!
@@ -250,7 +250,7 @@ module Gemgento
       self.image_labels.each_with_index do |label, position|
 
         self.image_file_extensions.each do |extension|
-          file_name = self.image_path + self.row[self.header_row.index('image').to_i].to_s.strip + '_' + label + extension
+          file_name = self.image_path + value('image') + '_' + label + extension
           next unless File.exist?(file_name)
 
           types = []
@@ -285,13 +285,13 @@ module Gemgento
     #
     # @return [Gemgento::Product]
     def create_configurable_product
-      sku = self.row[self.header_row.index('sku').to_i].to_s.strip
+      sku = value('sku')
 
       # set the default configurable product attributes
       configurable_product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: sku)
       configurable_product.magento_type = 'configurable'
       configurable_product.product_attribute_set = product_attribute_set
-      configurable_product.status = self.row[self.header_row.index('status').to_i].to_i
+      configurable_product.status = value('status', :boolean)
       configurable_product.stores << store unless configurable_product.stores.include?(store)
       configurable_product.sync_needed = false
       configurable_product.save

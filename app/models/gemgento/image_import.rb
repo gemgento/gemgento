@@ -4,144 +4,80 @@ require 'open-uri'
 module Gemgento
 
   # @author Gemgento LLC
-  class ImageImport < ActiveRecord::Base
-    include ActiveModel::Validations
-    belongs_to :store
-
-    has_attached_file :spreadsheet
-
-    serialize :import_errors, Array
-    serialize :image_labels, Array
-    serialize :image_file_extensions, Array
-    serialize :image_types, Array
-
-    attr_accessor :image_labels_raw
-    attr_accessor :image_file_extensions_raw
-    attr_accessor :image_types_raw
-
-    do_not_validate_attachment_file_type :spreadsheet
-    validates :image_file_extensions, :image_labels, :image_path, presence: true
+  class ImageImport < Import
+    attr_accessor :product
+    
     validates_with ImageImportValidator
 
-    after_commit :process
-
-    # Check if there are any active image imports.
-    #
-    # @return [Boolean]
-    def self.is_active?
-      ImageImport.where(is_active: true).any?
+    def default_options
+      {
+          image_labels: [],
+          image_file_extensions: [],
+          image_types: [],
+          image_path: nil,
+          store_id: nil,
+          destroy_existing: false
+      }
     end
 
-    # Import the images.
-    #
-    # @return [Void]
-    def process
-      @worksheet = Spreadsheet.open(self.spreadsheet.path).worksheet(0)
-      @headers = get_headers
-
-      1.upto @worksheet.last_row_index do |index|
-        puts "Working on row #{index}"
-        @row = @worksheet.row(index)
-        sku = @row[@headers.index('sku').to_i].to_s.strip
-        next if sku.blank?
-
-        @product = Product.not_deleted.find_by(sku: sku)
-        API::SOAP::Catalog::ProductAttributeMedia.fetch(@product, self.store) # make sure we know about all existing images
-
-        destroy_existing_assets if self.destroy_existing
-        create_images
-      end
-
-      ImageImport.skip_callback(:commit, :after, :process)
-      self.save validate: false
-      ImageImport.set_callback(:commit, :after, :process)
-    end
-
-    # Create a string from the image_labels array.
-    #
-    # @return [String]
     def image_labels_raw
-      self.image_labels.join("\n") unless self.image_labels.nil?
+      image_labels.join("\n")
     end
 
-    # Set the image_labels array from a value string.
-    #
-    # @param values [String]
-    # @return [Void]
     def image_labels_raw=(values)
-      self.image_labels = []
-      self.image_labels = values.gsub("\r", '').split("\n")
+      options[:image_labels] = values.gsub("\r", '').split("\n")
     end
 
-    # Create a string from the image_file_extensions array.
-    #
-    # @return [Array]
     def image_file_extensions_raw
-      self.image_file_extensions.join(', ') unless self.image_file_extensions.nil?
+      image_file_extensions.join(', ')
     end
 
-    # Set the image_file_extensions array from a value string.
-    #
-    # @param values [String]
-    # @return [Void]
     def image_file_extensions_raw=(values)
-      self.image_file_extensions = []
-      self.image_file_extensions = values.gsub(' ', '').split(',')
+      options[:image_file_extensions] = values.gsub(' ', '').split(',')
     end
 
-    # Create a string from the image_types array.
-    #
-    # @return [Array]
     def image_types_raw
-      self.image_types.map { |t| t.join(', ') }.join("\n") unless self.image_types.nil?
+      image_types.join("\n")
     end
 
-    # Set the image_types array from a value string.
-    #
-    # @param values [String]
-    # @return [Void]
     def image_types_raw=(values)
-      self.image_types = []
-      self.image_types = values.gsub("\r", '').split("\n").map { |t| t.split(',').collect(&:strip) }
+      options[:image_types] = []
+      options[:image_types] = values.gsub("\r", '').split("\n").map { |t| t.split(',').collect(&:strip) }
     end
 
-    # Set the image_path. A trailing '/' is added if it's missing from the supplied value.
-    #
-    # @param path [String]
-    # @return [Void]
-    def image_path=(path)
-      path = "#{path}/" unless path[-1, 1].to_s == '/'
-      self[:image_path] = path
+    def store
+      if options[:store_id].nil?
+        nil
+      else
+        @store ||= Gemgento::Store.find(options[:store_id])
+      end
     end
 
-    private
+    def destroy_existing?
+      options[:destroy_existing].to_bool
+    end
 
-    # Destroy all Assets associated with @product.
+    def process_row
+      sku = value('sku')
+      self.product = Product.not_deleted.find_by(sku: sku)
+      return if self.product.nil?
+
+      API::SOAP::Catalog::ProductAttributeMedia.fetch(self.product, store)
+      destroy_existing_assets if destroy_existing?
+      create_images
+    end
+
+    # Destroy all Assets associated with self.product.
     #
     # @return [Void]
     def destroy_existing_assets
-      @product.assets.where(store: self.store).find_each do |asset|
+      self.product.assets.where(store: store).find_each do |asset|
         begin
           asset.destroy
         rescue
           # just making sure we don't have a problem if file no longer exists
         end
       end
-    end
-
-    # Get the headers row from the spreadsheet.
-    #
-    # @return [Array(String)]
-    def get_headers
-      accepted_headers = []
-
-      @worksheet.row(0).each do |h|
-        unless h.nil?
-          accepted_headers << h.downcase.gsub(' ', '_').strip
-        end
-      end
-
-      accepted_headers
     end
 
     # Search for and create all possible images for a product.
@@ -152,13 +88,13 @@ module Gemgento
       self.image_labels.each_with_index do |label, position|
 
         self.image_file_extensions.each do |extension|
-          file_name = self.image_path + @row[@headers.index('image').to_i].to_s.strip + '_' + label + extension
+          file_name = self.image_path + value('image') + '_' + label + extension
           next unless File.exist?(file_name)
 
           types = []
 
           unless self.image_types[position].nil?
-            types = Gemgento::AssetType.where(product_attribute_set:  @product.product_attribute_set, code: self.image_types[position])
+            types = Gemgento::AssetType.where(product_attribute_set:  self.product.product_attribute_set, code: self.image_types[position])
           end
 
           unless types.is_a? Array
@@ -182,8 +118,8 @@ module Gemgento
     # @return [Void]
     def create_image(file_name, types, position, label)
       asset = Asset.new
-      asset.product = @product
-      asset.store = self.store
+      asset.product = self.product
+      asset.store = store
       asset.position = position
       asset.label = label
       asset.set_file(File.open(file_name))
@@ -198,7 +134,7 @@ module Gemgento
       asset.sync_needed = true
 
       unless asset.save
-        self.import_errors << "Error creating image in Magento. SKU: #{@product.sku}, ERROR: #{asset.errors[:base]}"
+        self.process_errors << "Row #{current_row}: #{asset.errors[:base]}"
       end
     end
   end

@@ -3,38 +3,27 @@ module Gemgento
 
     def validate(record)
       @record = record
-      open_spreadsheet
 
-      if @spreadsheet.nil?
-        @record.errors[:spreadsheet] = 'Spreadsheet is required'
-      else
-        validate_sku
-        validate_images
-        validate_image_types
+      begin
+        @record.spreadsheet
+      rescue Exception => e
+        Rails.logger.error e.message
+        @record.errors[:file] = 'Invalid Spreadsheet'
+        return
       end
-    end
 
-    def open_spreadsheet
-      if @record.spreadsheet.queued_for_write[:original].nil? || @record.spreadsheet_file_name.nil?
-        @spreadsheet = nil
-      else
-        @spreadsheet = Spreadsheet.open(open(@record.spreadsheet.queued_for_write[:original].path)).worksheet(0)
-        @headers = []
-
-        @spreadsheet.row(0).each do |h|
-          unless h.nil?
-            @headers << h.downcase.gsub(' ', '_').strip
-          end
-        end
-      end
+      @record.set_total_rows
+      validate_sku
+      validate_images
+      validate_image_types
     end
 
     def validate_sku
       errors = []
 
-      1.upto @spreadsheet.last_row_index do |index|
-        row = @spreadsheet.row(index)
-        sku = row[@headers.index('sku').to_i].to_s.strip
+      @record.content_index_range.each do |index|
+        row = @record.spreadsheet.row(index)
+        sku = row[@record.header_row.index('sku').to_i].to_s.strip
         next if sku.blank?
 
         if Gemgento::Product.unscoped.not_deleted.find_by(sku: sku).nil?
@@ -54,9 +43,9 @@ module Gemgento
     def validate_images
       errors = []
 
-      1.upto @spreadsheet.last_row_index do |index|
-        row = @spreadsheet.row(index)
-        file_name_base = row[@headers.index('image').to_i].to_s.strip
+      @record.content_index_range.each do |index|
+        row = @record.spreadsheet.row(index)
+        file_name_base = row[@record.header_row.index('image').to_i].to_s.strip
         images_found = false
 
         @record.image_labels.each do |label|

@@ -23,10 +23,10 @@ module Gemgento
         inventory.use_config_backorders = true
         inventory.use_config_min_qty = true
 
-        header_row.each_with_index do |attribute, index|
+        header_row.each do |attribute|
           next unless Gemgento::Inventory.column_names.include?(attribute)
 
-          value = value(row[index], Gemgento::Inventory.columns_hash[attribute].type)
+          value = value(attribute, Gemgento::Inventory.columns_hash[attribute].type)
           inventory.assign_attributes(attribute => value)
         end
 

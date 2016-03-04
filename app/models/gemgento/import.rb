@@ -107,12 +107,17 @@ module Gemgento
       ((spreadsheet.first_row + 1)..spreadsheet.last_row)
     end
 
-    def value(raw_value, type)
+    def value(code, type = :string)
+      index = header_row.index(code)
+      value = row[index]
+
       case type
         when :boolean
-          return raw_value.to_bool
+          return value.to_bool
+        when :string
+          return value.to_s.strip
         else
-          return raw_value
+          return value
       end
     end
 
