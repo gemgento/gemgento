@@ -36,7 +36,7 @@ module Gemgento
         error += errors.join('</li><li>')
         error += '</li></ul>'
 
-        @record.errors[:spreadsheet] = "<div>#{error}</div>"
+        @record.errors[:file] = "<div>#{error}</div>"
       end
     end
 
@@ -71,7 +71,7 @@ module Gemgento
         error += errors.join('</li><li>')
         error += '</li></ul>'
 
-        @record.errors[:spreadsheet] << "<div>#{error}</div>"
+        @record.errors[:file] << "<div>#{error}</div>"
       end
     end
 
