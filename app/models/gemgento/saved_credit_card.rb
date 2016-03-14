@@ -4,7 +4,7 @@ module Gemgento
   class SavedCreditCard < ActiveRecord::Base
     belongs_to :user
 
-    has_one :address, as: :addressable, class_name: 'Address', dependent: :destroy
+    has_one :address, as: :addressable, class_name: 'Address', dependent: :destroy, inverse_of: :addressable
 
     accepts_nested_attributes_for :address
 
