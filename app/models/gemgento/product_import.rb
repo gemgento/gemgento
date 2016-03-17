@@ -127,7 +127,7 @@ module Gemgento
       sku = value('sku')
 
       product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: sku)
-      product.set_existing_magento_id if !product.new_record? && product.magento_id.nil?
+      product.magento_id = existing_magento_id(sku)
 
       product.magento_type = 'simple'
       product.product_attribute_set = self.product_attribute_set
@@ -291,7 +291,7 @@ module Gemgento
 
       # set the default configurable product attributes
       configurable_product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: sku)
-      configurable_product.set_existing_magento_id if !configurable_product.new_record? && configurable_product.magento_id.nil?
+      configurable_product.magento_id = existing_magento_id(sku)
 
       configurable_product.magento_type = 'configurable'
       configurable_product.product_attribute_set = product_attribute_set
@@ -338,6 +338,21 @@ module Gemgento
     rescue ActiveRecord::RecordNotUnique
       # when Magento pushes inventory data back, it will create missing inventory rows
       set_default_config_inventories(product)
+    end
+
+    # Look for existing magento_id based on sku
+    #
+    # @param sku [String]
+    # @return [Integer, nil]
+    def existing_magento_id(sku)
+      magento_id = nil
+
+      if magento_product = Magento::ProductAdapter.find_by(sku: sku)
+        magento_id = magento_product[:product_id].to_i
+        magento_id = nil unless magento_id > 0
+      end
+
+      return magento_id
     end
 
   end
