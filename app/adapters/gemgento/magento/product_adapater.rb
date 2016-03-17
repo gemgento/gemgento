@@ -1,9 +1,9 @@
 module Gemgento
-  class Magento::CustomerAdapter
+  class Magento::ProductAdapter
     include MagentoAdapter
 
     def self.find_by(attributes)
-      response = Gemgento::API::SOAP::Customer::Customer.list filters(attributes)
+      response = Gemgento::API::SOAP::Catalog::Product.list filters(attributes)
 
       if response.body_overflow[:store_view].first[:item]
 

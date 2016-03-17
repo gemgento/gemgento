@@ -7,7 +7,7 @@ module Gemgento
           # Synchronize local database with Magento database
           def self.fetch_all(last_updated = nil, skip_existing = false)
             Store.all.each do |store|
-              response = list(store, last_updated)
+              response = list({}, store, last_updated)
 
               if response.success?
                 response.body_overflow[:store_view].each do |product_list|
@@ -59,12 +59,12 @@ module Gemgento
           # @param store [Gemgento::Store]
           # @param last_updated [String] db formatted date string.
           # @return [Gemgento::MagentoResponse]
-          def self.list(store = nil, last_updated = nil)
+          def self.list(filters = {}, store = nil, last_updated = nil)
             store = Store.current if store.nil?
 
-            if last_updated.nil?
-              message = {}
-            else
+            if !filters.empty?
+              message = { filters: filters }
+            elsif !last_updated.nil?
               message = {
                   store_view: store.magento_id,
                   'filters' => {
@@ -77,6 +77,8 @@ module Gemgento
                       ]}
                   }
               }
+            else
+              message = {}
             end
 
             response = MagentoApi.create_call(:catalog_product_list, message)

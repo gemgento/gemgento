@@ -127,6 +127,8 @@ module Gemgento
       sku = value('sku')
 
       product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: sku)
+      product.set_existing_magento_id if !product.new_record? && product.magento_id.nil?
+
       product.magento_type = 'simple'
       product.product_attribute_set = self.product_attribute_set
       product.stores << self.store unless product.stores.include?(self.store)
@@ -289,6 +291,8 @@ module Gemgento
 
       # set the default configurable product attributes
       configurable_product = Gemgento::Product.not_deleted.find_or_initialize_by(sku: sku)
+      configurable_product.set_existing_magento_id if !configurable_product.new_record? && configurable_product.magento_id.nil?
+
       configurable_product.magento_type = 'configurable'
       configurable_product.product_attribute_set = product_attribute_set
       configurable_product.status = value('status', :boolean)
