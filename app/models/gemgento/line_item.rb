@@ -91,6 +91,8 @@ module Gemgento
 
       if response.success?
         return true
+      elsif response.body[:faultcode].to_i == 1026 # item does not belong to quote
+        return true
       else
         handle_magento_response(response)
         return false
