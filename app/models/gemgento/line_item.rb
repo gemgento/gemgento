@@ -2,6 +2,12 @@ module Gemgento
 
   # @author Gemgento LLC
   class LineItem < ActiveRecord::Base
+    scope :refunded, -> { where.not(qty_refunded: 0) }
+
+    serialize :options, Hash
+
+    attr_accessor :async, :destroy_quote_after_rollback
+
     belongs_to :itemizable, polymorphic: true, touch: true
     belongs_to :product
 
@@ -14,10 +20,6 @@ module Gemgento
     before_destroy :destroy_magento_quote_item, if: -> { itemizable_type == 'Gemgento::Quote' }
 
     after_rollback :destroy_quote, if: -> { destroy_quote_after_rollback == true && itemizable_type == 'Gemgento::Quote' }
-
-    serialize :options, Hash
-
-    attr_accessor :async, :destroy_quote_after_rollback
 
     accepts_nested_attributes_for :bundle_options
 
