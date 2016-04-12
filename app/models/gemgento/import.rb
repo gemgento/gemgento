@@ -74,7 +74,7 @@ module Gemgento
       Rails.logger.debug "Start #{self.class}.process"
       Rails.logger.debug "  header_row: #{self.header_row}"
 
-      self.current_row = spreadsheet.first_row
+      self.current_row = 0
       self.processing!
 
       while self.current_row < self.total_rows do
