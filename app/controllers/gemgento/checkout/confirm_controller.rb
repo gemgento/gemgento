@@ -5,6 +5,7 @@ module Gemgento
     before_action :confirm_before_redirect, only: :update
 
     def show
+      @quote.payment.assign_attributes(session[:payment_data]) if @quote.payment && session[:payment_data]
       @shipping_method = get_magento_shipping_method
 
       respond_to do |format|

@@ -6,7 +6,7 @@ module Gemgento
 
     attr_accessor :cc_number, :cc_cid, :save_card, :payment_id
 
-    before_save :set_cc_last4, unless: -> { cc_number.blank? }
+    before_save :set_cc_last4, if: Proc.new { |payment| payment.cc_number.present? || payment.payment_id.present? }
 
     validates :method, :payable, presence: true
 
@@ -31,7 +31,12 @@ module Gemgento
     #
     # @return [void]
     def set_cc_last4
-      self.cc_last4 = cc_number[-4..-1]
+      if self.cc_number.present?
+        self.cc_last4 = cc_number[-4..-1]
+
+      elsif saved_cc = Gemgento::SavedCreditCard.find_by(user: self.payable.user, token: self.payment_id)
+        self.cc_last4 = saved_cc.cc_number.to_s[-4..-1]
+      end
     end
 
     def is_new_credit_card_payment?
