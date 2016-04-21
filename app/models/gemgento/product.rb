@@ -50,9 +50,9 @@ module Gemgento
     scope :not_deleted, -> { where(deleted_at: nil) }
     scope :active, -> { where(deleted_at: nil, status: true) }
 
-    touch :categories
-    touch :configurable_products
-    touch :bundle_items
+    touch :categories, after_touch: :after_touch
+    touch :configurable_products, after_touch: :after_touch
+    touch :bundle_items, after_touch: :after_touch
 
     after_find :manage_cache_expires_at
 
@@ -518,6 +518,10 @@ module Gemgento
           .where(gemgento_line_items: { itemizable_type: 'Gemgento::Quote' })
           .where(gemgento_orders: { id: nil }).where('gemgento_quotes.created_at >= ?', 30.days.ago)
           .destroy_all
+    end
+
+    def after_touch
+      # do nothing
     end
 
     private

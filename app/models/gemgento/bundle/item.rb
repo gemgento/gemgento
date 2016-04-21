@@ -8,7 +8,7 @@ module Gemgento
       belongs_to :option, class_name: 'Gemgento::Bundle::Option', foreign_key: :bundle_option_id
       belongs_to :product, class_name: 'Gemgento::Product'
 
-      touch :option
+      touch :option, after_touch: :after_touch
 
       validates :option, :product, presence: true
       validates :product, uniqueness: { scope: :product }

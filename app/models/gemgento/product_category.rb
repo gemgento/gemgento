@@ -8,7 +8,7 @@ module Gemgento
     belongs_to :category
     belongs_to :store
 
-    touch :category
+    touch :category, after_touch: :after_touch
 
     validates :product, :category, :store, presence: true
     validates :product, uniqueness: { scope: [:category, :store] }

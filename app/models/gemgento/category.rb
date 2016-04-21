@@ -12,7 +12,7 @@ module Gemgento
 
     has_and_belongs_to_many :stores, -> { distinct }, join_table: 'gemgento_categories_stores', class_name: 'Store'
 
-    touch :parent
+    touch :parent, after_touch: :after_touch
 
     has_attached_file :image
 
@@ -178,6 +178,10 @@ module Gemgento
           .where('gemgento_product_categories.store_id = ? AND gemgento_product_categories.category_id = ?', store.id, self.id)
           .order('gemgento_product_categories.position ASC')
           .uniq
+    end
+
+    def after_touch
+      # do nothing, plcaeholder
     end
 
     private
