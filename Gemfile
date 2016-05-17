@@ -1,3 +1,8 @@
 source 'https://rubygems.org'
-source 'http://gemgento:418793246231234612X645x214@gems.gemgento.com'
 gemspec
+
+group :test do
+  gem 'rspec-rails'
+  gem 'factory_girl_rails'
+  gem 'faker', '>= 1.4.3', '< 2'
+end
