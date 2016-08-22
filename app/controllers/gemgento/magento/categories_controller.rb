@@ -27,7 +27,7 @@ module Gemgento
 
         set_stores(data[:store_ids], @category)
         set_products(data[:products], @category) unless data[:products].nil?
-
+        fail
         render nothing: true
       end
 
@@ -81,6 +81,7 @@ module Gemgento
             end
 
             ProductCategory.where(store: store, category: category).where.not(id: product_category_ids).destroy_all
+            ProductCategory.where(store: store, category: category).where.not(product_id: product_ids).destroy_all
           end
         end
       end
