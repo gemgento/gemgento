@@ -68,6 +68,7 @@ module Gemgento
           else
             product_category_ids = []
             product_ids = products.map { |p| p[:product_id] }
+            ProductCategory.where(store: store, category: category).delete_all
 
             Product.where(magento_id: product_ids).each do |product|
               pairing = ProductCategory.find_or_initialize_by(category: category, product: product, store: store)
@@ -81,7 +82,6 @@ module Gemgento
             end
 
             ProductCategory.where(store: store, category: category).where.not(id: product_category_ids).destroy_all
-            ProductCategory.where(store: store, category: category).where.not(product_id: product_ids).destroy_all
           end
         end
       end
