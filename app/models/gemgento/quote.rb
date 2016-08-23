@@ -532,7 +532,9 @@ module Gemgento
             end
           else
             code = total[:title][10..-2]
-            totals[:discounts][code.to_sym] = total[:amount].to_f
+            unless code.nil?
+              totals[:discounts][code.to_sym] = total[:amount].to_f
+            end
           end
         end
 
