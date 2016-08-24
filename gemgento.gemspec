@@ -33,7 +33,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'savon', '~> 2.2.0', '< 3'
   gem.add_dependency 'shopify_api', '~> 3.2.4', '< 4'
   gem.add_dependency 'sidekiq', '>= 4.0.0', '< 5'
-  gem.add_dependency 'roo', '~> 2.1', '< 3'
+  gem.add_dependency 'roo', '= 2.3.2'
   gem.add_dependency 'roo-xls', '~> 1.0', '< 2'
   gem.add_dependency 'state_machine', '>= 1.2.0', '< 2'
   gem.add_dependency 'picturefill', '>= 0.1.3', '< 1'
