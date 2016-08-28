@@ -235,8 +235,10 @@ module Gemgento
           category = Gemgento::Category.find_by(url_key: category_url_key, parent_id: parent_id)
 
           unless category.nil?
-            Gemgento::ProductCategory.find_or_create_by!(category: category, product: product, store: self.store)
+            pc = Gemgento::ProductCategory.find_or_create_by!(category: category, product: product, store: self.store)
             parent_id = category.id
+            pc.sync_needed = true
+            pc.save
           else
             self.process_errors << "Row ##{@index}: Unknown category url key '#{category_url_key}' - skipped"
           end
