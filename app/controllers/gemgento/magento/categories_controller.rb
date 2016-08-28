@@ -27,7 +27,6 @@ module Gemgento
 
         set_stores(data[:store_ids], @category)
         set_products(data[:products], @category) unless data[:products].nil?
-        fail
         render nothing: true
       end
 
