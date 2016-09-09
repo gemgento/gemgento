@@ -140,7 +140,6 @@ module Gemgento
       end
 
       product = set_attribute_values(product)
-      set_categories(product)
 
       product.sync_needed = true
 
@@ -148,6 +147,8 @@ module Gemgento
         create_images(product) if self.include_images?
         set_default_config_inventories(product) if self.set_default_inventory_values?
       end
+
+      set_categories(product)
 
       return product
     end
@@ -229,11 +230,9 @@ module Gemgento
         category_string.strip!
         subcategories = category_string.split('>')
         parent_id = self.root_category.id
-
         subcategories.each do |category_url_key|
           category_url_key.strip!
           category = Gemgento::Category.find_by(url_key: category_url_key, parent_id: parent_id)
-
           unless category.nil?
             pc = Gemgento::ProductCategory.find_or_create_by!(category: category, product: product, store: self.store)
             parent_id = category.id
@@ -314,7 +313,6 @@ module Gemgento
 
       # set the additional configurable product details
       set_attribute_values(configurable_product)
-      set_categories(configurable_product)
 
       configurable_product.visibility = self.configurable_product_visibility.to_i
       configurable_product.sync_needed = true
@@ -324,7 +322,9 @@ module Gemgento
         create_images(configurable_product) if include_images?
         set_default_config_inventories(configurable_product) if self.set_default_inventory_values?
       end
-
+  
+      set_categories(configurable_product)
+  
       return configurable_product
     end
 

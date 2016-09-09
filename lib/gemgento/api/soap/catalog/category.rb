@@ -134,6 +134,7 @@ module Gemgento
           # @return [Void]
           def self.set_product_categories
             ::Gemgento::Category.all.each do |category|
+                ProductCategory.unscoped.where(category: category, store: store).destroy_all
 
               category.stores.each do |store|
                 response = assigned_products(category, store)
@@ -180,6 +181,19 @@ module Gemgento
             MagentoApi.create_call(:catalog_category_update_product, message)
           end
 
+          # Update ProductCategory info in Magento.
+          #
+          # @param product_category [Gemgento::ProductCategory]
+          # @return [Gemgento::MagentoResponse]
+          def self.assign_product(product_category)
+            message = {
+                category_id: product_category.category.magento_id,
+                product: product_category.product.magento_id,
+                position: product_category.position,
+                product_identifier_type: 'id'
+            }
+            MagentoApi.create_call(:catalog_category_assign_product, message)
+          end
           private
 
           # Traverse Magento category tree while synchronizing with local category tree

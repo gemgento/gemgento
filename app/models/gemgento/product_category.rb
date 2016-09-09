@@ -27,7 +27,14 @@ module Gemgento
         return true
       else
         errors.add(:base, response.body[:faultstring])
-        return false
+        
+        if response.body[:faultstring] == "Requested product is not assigned to category."
+          response = API::SOAP::Catalog::Category.assign_product(self)
+          self.sync_needed = false
+          return true
+        else
+          return false
+        end
       end
     end
   end
